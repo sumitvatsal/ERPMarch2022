@@ -1,0 +1,20 @@
+ string log = aa[0];
+            int usertype = Convert.ToInt32 ( aa[1]);
+
+
+ <div class="form-group ">
+                                <input class="form-control" id="txtSectionId" style="display:none" ng-model="txtSectionId" type="text">
+                                
+                                    <input class="form-control" id="txtSectionId" style="display:none" ng-model="txtSectionId" type="text">
+                                    <label for="Country" class="req">School<span class="requird">*</span></label>
+                                    <select class="form-control" id="ddlClass" ng-model="ddlClass" valuefield="Id" textfield="Name"  blankRowValue="-1" blankRowText="----Select----" aria-required="true"></select>
+
+                                </div>
+
+
+   var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+
+
+Student/AddStudent part 1 save dropwon 

@@ -1,0 +1,269 @@
+﻿
+
+@{
+    ViewBag.Title = "PurchaseReport";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<link href="~/css/bower_components/select2/dist/css/select2.min.css" rel="stylesheet" />
+
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="/css/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+
+<script type="text/javascript">
+
+
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(function () {
+            $("#simple").datepicker({ format: 'dd/mm/yyyy' });
+            $("#Date").datepicker({ format: 'dd/mm/yyyy' });
+            $("#txtvdate").datepicker({ dateFormat: 'dd/mm/yy' });
+            $("#txtodate").datepicker({ dateFormat: 'dd/mm/yy' });
+        });
+    });
+</script>
+
+
+
+<script type="text/javascript">
+    function printout() {
+        var printContent = document.getElementById("print").innerText;
+        window.print(printContent);
+    }
+</script>
+<section class="content">
+    <form>
+        <div class="box-body-solid">
+            <div class="row">
+                <div id="sandbox" class="form-group col-sm-2 col-md-2 col-lg-2">
+                    @*<label for="simple">Date From</label>*@
+                    <input id="simple" type="text" class="form-control" value="dd-mm-yyyy">
+                </div>
+                <div id="sandbox" class="form-group col-sm-2 col-md-2 col-lg-2">
+                    @*<label for="Date">Date To</label>*@
+                    <input id="Date" type="text" class="form-control" value="dd-mm-yyyy">
+                </div>
+                <div id="sandbox" class="form-group col-sm-2 col-md-2 col-lg-2">
+
+                    <input class="btn btn-success" id="btnSearch" type="button" value="Search">
+                    <input class="btn btn-info" id="btnSave" type="button" value="Print" onclick="printout()">
+
+                </div>
+
+
+            </div>
+        </div>
+
+    </form>
+
+    <div class="box box-solid">
+        <div class="et">
+            <div class="box-header with-border">
+                <h3 class="box-title">Purchase Report</h3>
+
+            </div>
+        </div>
+        <div class="alert alert-success alert-dismissible centerSuccess" id="divsuccesmsg" style="display:none">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <h4>
+                <i class="icon fa fa-check"></i>
+                success! <span Id="spsuccessMsg"></span>
+            </h4>
+
+        </div>
+
+        <div class="box-body" id="print">
+            <div class="row">
+                <div class="col-sm-12">
+
+                    <div class="box-body">
+                        <div class="form-group">
+
+                            <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                <thead>
+                                    <tr>
+                                        <th>Order</th>
+                                        <th>Supplier</th>
+                                        <th>Date</th>
+
+
+                                        <th>Payment</th>
+                                        <th>Purchase Detail</th>
+
+                                        <th>Method</th>
+
+
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyEmployeeLeaveRequestDetails"></tbody>
+                            </table>
+
+
+
+
+
+                            <input type="hidden" id="hdnID" />
+                            @*<input type="hidden" id="hdnStatus" />*@
+                        </div>
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<script type="text/javascript">
+    $("#btnSearch").click(function () {
+        GetCheckBoxes();
+    });
+
+
+    $(document).ready(function () {
+
+
+        GetCheckBoxes();
+    });
+
+
+</script>
+<script>
+    function GetCheckBoxes() {
+        debugger;
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        var datefrom = $("#simple").val();
+        var dateto = $("#Date").val();
+        $.ajax({
+            url: "/api/AccountsAPI/GetStockReport2",
+            type: "Post",
+            data: JSON.stringify([loginuser, typeuser, datefrom, dateto, SchoolID]),
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                $("#loader").fadeIn();
+                $("#tbodyEmployeeLeaveRequestDetails tr").remove();
+
+                var abc = data.RList;
+
+                var html2 = '';
+                $.each(data, function (index, item) {
+                    html2 += "<tr><td>" + item.ProductId + "</td><td>" + item.CustomerName + "</td><td> " + item.SaleDate + "</td><td>" + item.Total + "</td>" +
+                        "<td><table > <tr><th>Product</th><th>UnitPrice</th><th>Quantity</th><th>Discount(%)</th><th>LineTotal</th></tr>";
+
+                    $.each(item.subModList, function (index1, item1) {
+                        html2 += "<tr></td><td >" + item1.ProductName + "</td><td >" + item1.UnitPrice + "</td><td >" + item1.Quantity + "</td><td >" + item1.Discount + "</td><td >" + item1.Total + "</td></tr>";
+                    });
+                    html2 += "</table></td > <td>" + item.BankName + "</td></tr > ";
+                });
+                $(html2).appendTo('#tbodyEmployeeLeaveRequestDetails');
+                $("#loader").fadeOut();
+            }
+        });
+    }
+
+
+
+</script>
+<style type="text/css">
+    .imgIcon {
+        width: 0.5%;
+        height: 0.5%;
+    }
+
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 8px;
+            padding-bottom: 8px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+
+
+
+
+
+
+
+
+
+
+

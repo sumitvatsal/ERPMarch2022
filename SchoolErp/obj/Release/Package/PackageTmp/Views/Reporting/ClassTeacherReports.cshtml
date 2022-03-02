@@ -1,0 +1,450 @@
+﻿
+@{
+    ViewBag.Title = "ClassTeacherReports";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<section class="content">
+    <div class="box box-solid">
+
+        <div class="employee-attendance-search">
+
+            <form id="form1" name="form1">
+                <div class="box-header with-border">
+                    <h3 class="box-title"><i class="fa fa-search"></i> Class Teachers Reports </h3>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+
+
+                        <div class="col-sm-4">
+                            <div class="form-group field-empinfosearch-emp_designation_id">
+                                <label for="Country" class="req">School<span class="requird">*</span></label>
+                                <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name"></select>
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-4">
+                            <div class="form-group field-empinfosearch-emp_department_id">
+                                <label class="control-label" for="empinfosearch-emp_department_id">Class <span class="requird">*</span></label>
+                                <select class="form-control" id="ddlCourse" style="color:black;" name="ddlCourse" valuefield="Id" textfield="CourseName" blankRowValue="0" blankRowText="----Select----"></select>
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group field-empinfosearch-emp_designation_id">
+                                <label class="control-label" for="empinfosearch-emp_designation_id">Section </label>
+                                <select class="form-control" id="ddlSection" valuefield="Id" style="color:black;" textfield="SectionName" blankRowValue="0" blankRowText="----Select----"></select>
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label>Teacher</label>
+                                <select class="form-control" id="ddlClassTeacher" name="ddlClassTeacher" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" ng-model="ddlClassTeacher"></select>
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="box-footer">
+                            <input type="button" value="Search" onclick="searchClassTeacher()" class="btn btn-primary" />
+                            <a class="btn btn-default" onclick="Resetbutton()" href="#">Reset</a>&nbsp;&nbsp;&nbsp;&nbsp;
+                            @*<input type="button" id="create_pdf" value="Export Pdf" onclick="pdfExport()" class="btn btn-primary" />
+
+                            <a href="#" class="btn btn-primary" onClick="$('#example1').tableExport({ type: 'excel', escape: 'false' });">Excel Exports</a>*@
+                        </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+
+
+    <div class="row">
+        <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Class Teacher Reports</h3>
+                </div>
+                <div class="box-body">
+                    <div class="form-group">
+
+
+                        <div style="height:40px"></div>
+                        <div>
+
+
+                            <div id="divmonthlyAttendenceReport">
+                                <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                    <thead>
+                                        <tr>
+                                            <th>School</th>
+                                            <th>Class</th>
+                                            <th>Section</th>
+                                            <th>Teacher Name</th>
+                                            <th>Department</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyEmployeeLeaveRequestDetails"></tbody>
+                                </table>
+                                <script type="text/html" id="tbodyEmployeeLeaveRequestDetailsJTemplte">
+                                    {#foreach $T as Datashort}
+                                    <tr>
+                                        <td>
+                                            { $T.Datashort.School}
+                                        </td>
+                                        <td>
+                                            { $T.Datashort.Class}
+                                        </td>
+                                        <td>
+                                            { $T.Datashort.Section}
+                                        </td>
+                                        <td>
+                                            { $T.Datashort.FirstName}
+                                        </td>
+                                        <td>
+                                            { $T.Datashort.FDesig}
+                                        </td>
+                                    </tr>
+                                    {#/for}
+                                </script>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<style type="text/css">
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+                                    background-color: #e1e4e8;
+                                }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+            width: 35px;
+        }
+</style>
+<!-- DataTables -->
+<link href="~/js/PDFExcelDatatable/buttons.dataTables.min.css" rel="stylesheet" />
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+
+<script src="~/js/jsExcel/tableExport.js"></script>
+<script src="~/js/jsExcel/jquery.base64.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script>
+<script src="~/js/jsExcel/html2canvas.js"></script>
+
+<link href="~/js/PDFExcelDatatable/buttons.dataTables.min.css" rel="stylesheet" />
+
+
+<script src="~/js/PDFExcelDatatable/dataTables.buttons.min.js"></script>
+<script src="~/js/PDFExcelDatatable/jszip.min.js"></script>
+<script src="~/js/PDFExcelDatatable/pdfmake.min.js"></script>
+<script src="~/js/PDFExcelDatatable/vfs_fonts.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.html5.min.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.print.min.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.colVis.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        //callServiceMethodForDDl("", "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+        callServiceMethodForDDl("", "/api/EmployeeAPI", "getAllDepartments", "txtDepartment", false, "", "", "", "");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/ReportingAPI", "getAllClassTeacherbYSchool", "ddlClassTeacher", false, "", "", "", "");
+        //callServiceMethodForDDl("", "/api/ReportingAPI", "getAllClassTeacher", "getAllClassTeacher", false, "", "", "", "");
+
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+
+        var t = $('#example1').DataTable();
+        t.destroy();
+        callJTemplateServiceMethod(JSON.stringify([loginuser, typeuser]), "/api/ReportingAPI", "getTeacherAllocationReports",
+            "tbodyEmployeeLeaveRequestDetails", "tbodyEmployeeLeaveRequestDetailsJTemplte", true, successMsg, "", "", "");
+    })
+
+
+    $("#ddlSchoolName").change(function () {
+        var School = getControlValue("ddlSchoolName");
+        if (School != null && (School != -1) && (School != undefined)) {
+            callServiceMethodForDDl(JSON.stringify([School]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+        }
+    });
+    $("#ddlCourse").change(function () {
+        var ddlCourse = getControlValue("ddlCourse");
+        if (ddlCourse != null && (ddlCourse != 0) && (ddlCourse != undefined)) {
+            var SchoolID = sessionStorage.getItem("SchoolID");
+            callServiceMethodForDDl(JSON.stringify([ddlCourse, SchoolID]), "/api/StudentApi", "GetSectionsbyschool", "ddlSection", false, "", "", "", "");
+
+        }
+    });
+
+    function successMsg(p1, p2, p3, datas) {
+        //setTimeout(function () {
+        //    $('#example1').DataTable({
+        //        bRetrieve: true,
+        //        bDestroy: true,
+        //    })
+        //}, 1000);
+        setTimeout(function () {
+            $('#example1').DataTable({
+                "ordering": true,
+                "bInfo": true,
+                paging: true,
+                searching: true,
+                bRetrieve: true,
+                bDestroy: true,
+
+                'columnDefs': [{
+                    //"targets": -1,
+                    "orderable": false
+                }],
+                dom: 'lBfrtip',
+                buttons: [
+                    //{
+                    //    extend: 'copyHtml5',
+                    //    exportOptions: {
+                    //        columns: [0, ':visible']
+                    //    }
+                    //},
+                    {
+                        extend: 'excelHtml5',
+                        title: ' Class Teachers Reports',
+                        //orientation: 'landscape',//landscape give you more space
+                        //pageSize: 'A0',//A0 is the largest A5 smallest(A0,A1,A2,A3,legal,A4,A5,letter))
+                        //title: title,
+                        exportOptions: {
+                            columns: ':visible'
+                        }
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        exportOptions: {
+                            //columns: [0, 1, 2, 3, 5, 6]
+                            columns: ':visible'
+                        },
+                        pageSize: 'A3',//A0 is the largest A5 smallest(A0,A1,A2,A3,legal,A4,A5,letter)),
+                        title: ' Class Teachers Reports',
+                        customize: function (doc) {
+                            doc.styles.title = {
+                                color: 'white',
+                                fontSize: '20',
+                                background: '#1E90FF',
+                                alignment: 'left'
+                            }
+                        }
+                    },
+                    //'colvis'
+                ]
+            });
+        }, 1000);
+
+    }
+
+    function Resetbutton() {
+        $("#ddlCourse").val(0);
+        $("#ddlSection").val(0);
+        $("#ddlClassTeacher").val(0);
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+
+        var t = $('#example1').DataTable();
+        t.destroy();
+        callJTemplateServiceMethod(JSON.stringify([loginuser, typeuser]), "/api/ReportingAPI", "getTeacherAllocationReports",
+            "tbodyEmployeeLeaveRequestDetails", "tbodyEmployeeLeaveRequestDetailsJTemplte", true, successMsg, "", "", "");
+          
+    }
+    function searchClassTeacher() {
+        if ($("#form1").valid()) {
+            var payee = {
+                Class: getControlValue("ddlCourse"),
+                Section: getControlValue("ddlSection"),
+                FirstName: getControlValue("ddlClassTeacher"),
+                School: getControlValue("ddlSchoolName")
+            }
+            var ddl = JSON.stringify(payee)
+
+            var t = $('#example1').DataTable();
+            t.destroy();
+            callJTemplateServiceMethod(ddl, "/api/ReportingAPI", "searchClassTeacherReport",
+                "tbodyEmployeeLeaveRequestDetails", "tbodyEmployeeLeaveRequestDetailsJTemplte", true, successMsg, "", "", "");
+        }
+    }
+</script>
+
+<script type="text/javascript">
+
+
+
+    function pdfExport() {
+        $("#loader").fadeIn();
+        var pdf = new jsPDF('p', 'pt', 'a2');
+
+        source = $('#divmonthlyAttendenceReport')[0];
+        pdf.text("Class Teacher Reports", 5 + 360, 20);
+        specialElementHandlers = {
+
+            '#bypassme': function (element, renderer) {
+                return true
+            }
+        };
+        margins = {
+            top: 40,
+            bottom: 60,
+            left: 10,
+            width: 1000
+        };
+
+        pdf.fromHTML(
+            source, // HTML string or DOM elem ref.
+            margins.left, // x coord
+            margins.top, { // y coord
+                'width': "1800", // max width of content on PDF
+                'elementHandlers': specialElementHandlers
+            },
+
+            function (dispose) {
+                pdf.save('ClassTeacherReports.pdf');
+            }, margins);
+
+        $("#loader").fadeOut();
+    }
+
+</script>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                ddlCourse: {
+                    selectcheck: true
+                },
+
+
+            },
+            messages: {
+                ddlCourse: "Please Select  Class",
+                //   ddlSection: "Please Select Section"
+            }
+        })
+        jQuery.validator.addMethod('selectcheck', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+
+        jQuery.validator.addMethod('selectcheck1', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+
+
+    });
+</script>

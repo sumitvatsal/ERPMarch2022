@@ -1,0 +1,218 @@
+﻿
+@{
+    ViewBag.Title = "ShowRoot";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+
+
+<section class="content" style="margin-right:300px">
+   
+    <center>
+        <div class="row">
+
+            <div id="map-canvas" class="content-wrapper">
+
+
+
+            </div>
+
+        </div>
+    </center>
+</section>
+    <!-- Content Wrapper. Contains page content -->
+    <!-- Content Wrapper. Contains page content -->
+
+
+
+
+    <style>
+        map-canvas {
+            width: 100%;
+            height: 500px;
+            border: double;
+        }
+    </style>
+
+
+
+
+
+
+
+
+    @*<section id="map">
+
+            <input type="hidden" id="hiddenid" />
+            <input type="hidden" id="vehicleid" />
+            <input type="hidden" id="startplace" />
+            <input type="hidden" id="startplacelat" />
+            <input type="hidden" id="startplacelong" />
+            <input type="hidden" id="Endplace" />
+            <input type="hidden" id="Endplacelat" />
+            <input type="hidden" id="Endplacelong" />
+
+
+        </section>*@
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJs9f6yPQRmMsDkg7DiFtaeMjbik3kd0E&libraries=places"></script>
+   
+
+
+ <script type="text/javascript">
+     $(document).ready(function () {
+         $(document)[0].oncontextmenu = function () { return false; }
+
+         $(document).mousedown(function (e) {
+             if (e.button == 2) {
+                 alert('Sorry, this functionality is disabled!');
+                 return false;
+             } else {
+                 return true;
+             }
+         });
+         document.onkeypress = function (event) {
+
+             if (event.keyCode == 123) {
+                 alert('Sorry\nNo F12 is allowed. Be creative!');
+                 return false;
+             }
+         }
+         document.onmousedown = function (event) {
+
+             if (event.keyCode == 123) {
+                 alert('Sorry\nNo F12 is allowed. Be creative!');
+                 return false;
+             }
+         }
+         document.onkeydown = function (event) {
+
+             if (event.keyCode == 123) {
+                 alert('Sorry\nNo F12 is allowed. Be creative!');
+                 return false;
+             }
+             else if (event.ctrlKey &&
+                 (event.keyCode === 67 ||
+                     event.keyCode === 86 ||
+                     event.keyCode === 85 ||
+                     event.keyCode === 117)) {
+                 alert('Sorry\nNo CTRL+U is allowed. Be creative!');
+                 return false;
+             }
+
+         }  
+     });
+        var id = GetParameterValues('id');
+        //alert("Hello your ID is " + id);
+        function GetParameterValues(param) {
+            var url = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+            for (var i = 0; i < url.length; i++) {
+                var urlparam = url[i].split('=');
+                if (urlparam[0] == param) {
+                    return urlparam[1];
+                }
+            }
+        }
+
+        $.ajax({
+            type: "Post",
+            url: "/api/TransportApi/GetRouteDetailByID",
+            data: JSON.stringify([id]),
+            contentType: 'application/json; charset=utf-8',
+            success: function (datas) {
+                $("#hiddenid").val(datas.Id);
+                $("#vehicleid").val(datas.VehicleNumber);
+                $("#startplace").val(datas.StartPlace);
+                $("#startplacelat").val(datas.StartPlaceLatt);
+                $("#startplacelong").val(datas.StartPlaceLongt);
+                $("#Endplace").val(datas.EndPlace);
+                $("#Endplacelat").val(datas.EndPlaceLatt);
+                $("#Endplacelong").val(datas.EndPlaceLongt);
+
+                function initMap() {
+                    var pointA = new google.maps.LatLng(parseFloat(datas.StartPlaceLatt), parseFloat(datas.StartPlaceLongt)),
+                        pointB = new google.maps.LatLng(parseFloat(datas.EndPlaceLatt), parseFloat(datas.EndPlaceLongt)),
+                        myOptions = {
+                            zoom: 7,
+                            center: pointA
+                        },
+                        map = new google.maps.Map(document.getElementById('map-canvas'), myOptions),
+                        // Instantiate a directions service.
+                        directionsService = new google.maps.DirectionsService,
+                        directionsDisplay = new google.maps.DirectionsRenderer({
+                            map: map
+                        }),
+                        markerA = new google.maps.Marker({
+                            position: pointA,
+                            title: "point A",
+                            label: "A",
+                            map: map
+                        }),
+                        markerB = new google.maps.Marker({
+                            position: pointB,
+                            title: "point B",
+                            label: "B",
+                            map: map
+                        });
+
+                    // get route from A to B
+                    calculateAndDisplayRoute(directionsService, directionsDisplay, pointA, pointB);
+
+                }
+
+
+
+                function calculateAndDisplayRoute(directionsService, directionsDisplay, pointA, pointB) {
+                    directionsService.route({
+                        origin: pointA,
+                        destination: pointB,
+                        avoidTolls: true,
+                        avoidHighways: false,
+                        travelMode: google.maps.TravelMode.DRIVING
+                    }, function (response, status) {
+                        if (status == google.maps.DirectionsStatus.OK) {
+                            directionsDisplay.setDirections(response);
+                        } else {
+                            window.alert('Directions request failed due to ' + status);
+                        }
+                    });
+                }
+
+                initMap();
+
+            }
+
+
+
+        });
+
+
+    </script>
+
+
+    @*Google map*@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @* Datatable classes*@
+
+
+
+
+

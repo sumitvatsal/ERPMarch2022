@@ -1,0 +1,206 @@
+C:\Users\uswe\Desktop\WebApiProject\SchoolErp\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+C:\Users\uswe\Desktop\WebApiProject\SchoolErp\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+C:\Users\uswe\Desktop\WebApiProject\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+C:\Users\uswe\Desktop\WebApiProject\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+C:\Users\uswe\Desktop\WebApiProject\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.csprojResolveAssemblyReference.cache
+E:\Rahul\WebApiProject\SchoolErp\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+E:\Rahul\WebApiProject\SchoolErp\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+E:\Rahul\WebApiProject\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.csprojResolveAssemblyReference.cache
+E:\Rahul\WebApiProject\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+E:\Rahul\WebApiProject\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+C:\Users\Arun\Desktop\SchoolErp\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+C:\Users\Arun\Desktop\SchoolErp\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+C:\Users\Arun\Desktop\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.csprojResolveAssemblyReference.cache
+C:\Users\Arun\Desktop\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+C:\Users\Arun\Desktop\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+C:\Users\Arun\Desktop\SchoolErp29Jan2018\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+C:\Users\Arun\Desktop\SchoolErp29Jan2018\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+C:\Users\Arun\Desktop\SchoolErp29Jan2018\schoolERP_BLL\obj\Debug\schoolERP_BLL.csprojResolveAssemblyReference.cache
+C:\Users\Arun\Desktop\SchoolErp29Jan2018\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+C:\Users\Arun\Desktop\SchoolErp29Jan2018\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+F:\RahulPrjects\SchoolErp\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+F:\RahulPrjects\SchoolErp\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+F:\RahulPrjects\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+F:\RahulPrjects\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+F:\RahulPrjects\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+D:\Rahul Project\SchoolErp\SchoolErp\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+D:\Rahul Project\SchoolErp\SchoolErp\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+D:\Rahul Project\SchoolErp\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+D:\Rahul Project\SchoolErp\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+D:\Rahul Project\SchoolErp\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+D:\Rahul Project\SchoolErp\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.csprojResolveAssemblyReference.cache
+F:\RahulPrjects\SchoolErp\SchoolErp\SchoolErp\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+F:\RahulPrjects\SchoolErp\SchoolErp\SchoolErp\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+F:\RahulPrjects\SchoolErp\SchoolErp\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+F:\RahulPrjects\SchoolErp\SchoolErp\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+F:\RahulPrjects\SchoolErp\SchoolErp\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+F:\RahulPrjects\SchoolErp\SchoolErp\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.csprojResolveAssemblyReference.cache
+C:\Users\zeusadsolutions1\Desktop\SchoolErp1\SchoolErp\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+C:\Users\zeusadsolutions1\Desktop\SchoolErp1\SchoolErp\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+C:\Users\zeusadsolutions1\Desktop\SchoolErp1\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+C:\Users\zeusadsolutions1\Desktop\SchoolErp1\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+C:\Users\zeusadsolutions1\Desktop\SchoolErp1\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+C:\Users\zeusadsolutions1\Desktop\SchoolErp\SchoolErp\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+C:\Users\zeusadsolutions1\Desktop\SchoolErp\SchoolErp\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+C:\Users\zeusadsolutions1\Desktop\SchoolErp\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+C:\Users\zeusadsolutions1\Desktop\SchoolErp\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+C:\Users\zeusadsolutions1\Desktop\SchoolErp\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+D:\erp19jan\SchoolErp_19jan2019\SchoolErp\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+D:\erp19jan\SchoolErp_19jan2019\SchoolErp\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+D:\erp19jan\SchoolErp_19jan2019\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+D:\erp19jan\SchoolErp_19jan2019\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+D:\erp19jan\SchoolErp_19jan2019\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+D:\SchoolErp_19jan2019\SchoolErp\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+D:\SchoolErp_19jan2019\SchoolErp\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+D:\SchoolErp_19jan2019\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+D:\SchoolErp_19jan2019\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+D:\SchoolErp_19jan2019\SchoolErp\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+D:\SchoolErp_19jan2019\SchoolErp28mar\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+D:\SchoolErp_19jan2019\SchoolErp28mar\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+D:\SchoolErp_19jan2019\SchoolErp28mar\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+D:\SchoolErp_19jan2019\SchoolErp28mar\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+D:\SchoolErp_19jan2019\SchoolErp28mar\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+E:\erp29aprilProject\SchoolErp23april\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+E:\erp29aprilProject\SchoolErp23april\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+E:\erp29aprilProject\SchoolErp23april\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+E:\erp29aprilProject\SchoolErp23april\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+E:\erp29aprilProject\SchoolErp23april\schoolERP_BLL\obj\Debug\schoolERP_BLL.csprojResolveAssemblyReference.cache
+E:\SchoolErp14may\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+E:\SchoolErp14may\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+E:\SchoolErp14may\schoolERP_BLL\obj\Debug\schoolERP_BLL.csprojResolveAssemblyReference.cache
+E:\SchoolErp14may\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+E:\SchoolErp14may\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+D:\ERP17May2019\ERP17May2019\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+D:\ERP17May2019\ERP17May2019\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+D:\ERP17May2019\ERP17May2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+D:\ERP17May2019\ERP17May2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+D:\ERP17May2019\ERP17May2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+C:\Users\zeus\Desktop\ERP18May2019\ERP18May2019\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+C:\Users\zeus\Desktop\ERP18May2019\ERP18May2019\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+C:\Users\zeus\Desktop\ERP18May2019\ERP18May2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+C:\Users\zeus\Desktop\ERP18May2019\ERP18May2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+C:\Users\zeus\Desktop\ERP18May2019\ERP18May2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+C:\Users\zeus\Desktop\ERP18May2019\ERP23May2019\ERP18May2019\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+C:\Users\zeus\Desktop\ERP18May2019\ERP23May2019\ERP18May2019\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+C:\Users\zeus\Desktop\ERP18May2019\ERP23May2019\ERP18May2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+C:\Users\zeus\Desktop\ERP18May2019\ERP23May2019\ERP18May2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+C:\Users\zeus\Desktop\ERP18May2019\ERP23May2019\ERP18May2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+C:\Users\zeus\Desktop\ERP18May2019\ERP23May2019\ERP18May2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.csprojAssemblyReference.cache
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP18May2019\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP18May2019\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP18May2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP18May2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP18May2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP18May2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.csprojAssemblyReference.cache
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP14june2019\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP14june2019\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP14june2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP14june2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP14june2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP20july2019\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP20july2019\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP20july2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP20july2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP20july2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP21AUG2019\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP21AUG2019\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP21AUG2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP21AUG2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP21AUG2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP10SEP2019\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP10SEP2019\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP10SEP2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.csprojAssemblyReference.cache
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP10SEP2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP10SEP2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP10SEP2019\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP11Nov2019_AfterPrivateServer\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP11Nov2019_AfterPrivateServer\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP11Nov2019_AfterPrivateServer\schoolERP_BLL\obj\Debug\schoolERP_BLL.csprojAssemblyReference.cache
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP11Nov2019_AfterPrivateServer\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP11Nov2019_AfterPrivateServer\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP11Nov2019_AfterPrivateServer\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP11Nov2019_AfterPrivateServer - Copy\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP11Nov2019_AfterPrivateServer - Copy\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP11Nov2019_AfterPrivateServer - Copy\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP11Nov2019_AfterPrivateServer - Copy\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+C:\Users\zeus\Desktop\ERP18May2019\ERP24May2019\ERP11Nov2019_AfterPrivateServer - Copy\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+D:\avneesh\ERP20jan2020_AfterPrivateServe\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+D:\avneesh\ERP20jan2020_AfterPrivateServe\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+D:\avneesh\ERP20jan2020_AfterPrivateServe\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+D:\avneesh\ERP20jan2020_AfterPrivateServe\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+D:\avneesh\ERP20jan2020_AfterPrivateServe\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+F:\AVNEESHP22JAN\AVNEESH\ER\ERP20jan2020_AfterPrivateServe\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+F:\AVNEESHP22JAN\AVNEESH\ER\ERP20jan2020_AfterPrivateServe\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+F:\AVNEESHP22JAN\AVNEESH\ER\ERP20jan2020_AfterPrivateServe\schoolERP_BLL\obj\Debug\schoolERP_BLL.csprojAssemblyReference.cache
+F:\AVNEESHP22JAN\AVNEESH\ER\ERP20jan2020_AfterPrivateServe\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+F:\AVNEESHP22JAN\AVNEESH\ER\ERP20jan2020_AfterPrivateServe\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+F:\AVNEESHP22JAN\AVNEESH\ER\ERP20jan2020_AfterPrivateServe\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+F:\AVNEESHP22JAN\AVNEESH\ER\ERP20jan2020_AfterPrivateServe - Copy (2)\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+F:\AVNEESHP22JAN\AVNEESH\ER\ERP20jan2020_AfterPrivateServe - Copy (2)\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+F:\AVNEESHP22JAN\AVNEESH\ER\ERP20jan2020_AfterPrivateServe - Copy (2)\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+F:\AVNEESHP22JAN\AVNEESH\ER\ERP20jan2020_AfterPrivateServe - Copy (2)\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+F:\AVNEESHP22JAN\AVNEESH\ER\ERP20jan2020_AfterPrivateServe - Copy (2)\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+F:\AVNEESHP22JAN\AVNEESH\ER\ERP20jan2020_AfterPrivateServe - Copy (2)\schoolERP_BLL\obj\Debug\schoolERP_BLL.csprojAssemblyReference.cache
+F:\AVNEESHP22JAN\AVNEESH\ER\ERP20jan2020_AfterPrivateServeAfterSms_NewSchool\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+F:\AVNEESHP22JAN\AVNEESH\ER\ERP20jan2020_AfterPrivateServeAfterSms_NewSchool\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+F:\AVNEESHP22JAN\AVNEESH\ER\ERP20jan2020_AfterPrivateServeAfterSms_NewSchool\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+F:\AVNEESHP22JAN\AVNEESH\ER\ERP20jan2020_AfterPrivateServeAfterSms_NewSchool\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+F:\AVNEESHP22JAN\AVNEESH\ER\ERP20jan2020_AfterPrivateServeAfterSms_NewSchool\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+F:\AVNEESHP22JAN\AVNEESH\ER\ERP13March2020_AfterAdmitCard(IDCard)\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+F:\AVNEESHP22JAN\AVNEESH\ER\ERP13March2020_AfterAdmitCard(IDCard)\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+F:\AVNEESHP22JAN\AVNEESH\ER\ERP13March2020_AfterAdmitCard(IDCard)\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+F:\AVNEESHP22JAN\AVNEESH\ER\ERP13March2020_AfterAdmitCard(IDCard)\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+F:\AVNEESHP22JAN\AVNEESH\ER\ERP13March2020_AfterAdmitCard(IDCard)\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+D:\home\ERP13March2020_AfterAdmitCard(IDCard)_Home\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+D:\home\ERP13March2020_AfterAdmitCard(IDCard)_Home\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+D:\home\ERP13March2020_AfterAdmitCard(IDCard)_Home\schoolERP_BLL\obj\Debug\schoolERP_BLL.csprojAssemblyReference.cache
+D:\home\ERP13March2020_AfterAdmitCard(IDCard)_Home\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+D:\home\ERP13March2020_AfterAdmitCard(IDCard)_Home\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+E:\ERPBEFORECAM_OFFICE\ERP13March2020_AfterAdmitCard(IDCard)_Home\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+E:\ERPBEFORECAM_OFFICE\ERP13March2020_AfterAdmitCard(IDCard)_Home\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+E:\ERPBEFORECAM_OFFICE\ERP13March2020_AfterAdmitCard(IDCard)_Home\schoolERP_BLL\obj\Debug\schoolERP_BLL.csprojAssemblyReference.cache
+E:\ERPBEFORECAM_OFFICE\ERP13March2020_AfterAdmitCard(IDCard)_Home\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+E:\ERPBEFORECAM_OFFICE\ERP13March2020_AfterAdmitCard(IDCard)_Home\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+E:\ERPBEFORECAM_OFFICE\ERP13March2020_AfterAdmitCard(IDCard)_Home\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+C:\Users\zeus\Desktop\project\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+C:\Users\zeus\Desktop\project\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+C:\Users\zeus\Desktop\project\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+C:\Users\zeus\Desktop\project\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+C:\Users\zeus\Desktop\project\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+C:\Users\zeus\Desktop\project\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.csprojAssemblyReference.cache
+C:\Users\zeus\Desktop\project\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+C:\Users\zeus\Desktop\project\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+C:\Users\zeus\Desktop\project\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+C:\Users\zeus\Desktop\project\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+C:\Users\zeus\Desktop\project\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+C:\Users\zeus\Desktop\project\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.csprojAssemblyReference.cache
+D:\Priya_project\project\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+D:\Priya_project\project\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+D:\Priya_project\project\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+D:\Priya_project\project\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+D:\Priya_project\project\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+D:\Priya_project\project\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.csprojAssemblyReference.cache
+F:\Priya\New folder\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+F:\Priya\New folder\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+F:\Priya\New folder\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.csprojAssemblyReference.cache
+F:\Priya\New folder\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+F:\Priya\New folder\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+F:\Priya\New folder\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+F:\Priya\ERP\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+F:\Priya\ERP\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+F:\Priya\ERP\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.csprojAssemblyReference.cache
+F:\Priya\ERP\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+F:\Priya\ERP\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+F:\Priya\ERP\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+F:\Priya\ERPProject\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+F:\Priya\ERPProject\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+F:\Priya\ERPProject\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.AssemblyReference.cache
+F:\Priya\ERPProject\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+F:\Priya\ERPProject\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+F:\Priya\ERPProject\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb
+F:\Priya\ERPProject\New folder (2)\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\bin\Debug\schoolERP_BLL.dll
+F:\Priya\ERPProject\New folder (2)\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\bin\Debug\schoolERP_BLL.pdb
+F:\Priya\ERPProject\New folder (2)\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.AssemblyReference.cache
+F:\Priya\ERPProject\New folder (2)\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.csproj.CoreCompileInputs.cache
+F:\Priya\ERPProject\New folder (2)\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.dll
+F:\Priya\ERPProject\New folder (2)\ERPproject19nov2020\ERPproject19nov2020\ERP19NOV2020\schoolERP_BLL\obj\Debug\schoolERP_BLL.pdb

@@ -1,0 +1,262 @@
+﻿
+@{
+    ViewBag.Title = "ViewFeeStructure";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    //Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section>
+
+
+<div class="box box-solid">
+    <div class="extra-div">
+        <div class="box-header with-border">
+            <h3 class="box-title"><i class="fa fa-search"></i> Search</h3>
+            <div class="box-tools">
+                <a class="btn btn-success btn-sm" href="/Fees/FeeStructure"><i class="fa fa-plus-square"></i>Fee structure</a>
+            </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="overflow-x:scroll">
+        <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-body">
+                    <div class="form-group">
+                        <div id="divExpenseDetails">
+
+                            <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                <thead>
+                                    <tr>
+                                        <th>Academic_Year</th>
+                                        <th>Class</th>
+                                        <th>SectionName</th>
+                                        <th>CategoryName</th>
+                                        <th>FeeCategory</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyEmployeeLeaveRequestDetails"></tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <script type="text/html" id="tbodyEmployeeLeaveRequestDetailsJTemplte">
+                {#foreach $T as Datashort}
+                <tr>
+                    <td>
+                        {$T.Datashort.Academic_Year}
+                    </td>
+                    <td>
+                        {$T.Datashort.Coursename}
+                    </td>
+                    <td>
+                        { $T.Datashort.SectionName}
+                    </td>
+                    <td>
+                        { $T.Datashort.categoryName}
+                    </td>
+                    <td>
+                        { $T.Datashort.FeeCategory}
+                    </td>
+                    <td>
+                        { $T.Datashort.Amount}
+                    </td>
+
+                </tr>
+                {#/for}
+            </script>
+
+
+        </div>
+    </div>
+
+
+</div>
+</section>
+
+
+
+
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+
+
+
+
+
+<link href="~/js/PDFExcelDatatable/buttons.dataTables.min.css" rel="stylesheet" />
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/js/PDFExcelDatatable/dataTables.buttons.min.js"></script>
+<script src="~/js/PDFExcelDatatable/jszip.min.js"></script>
+<script src="~/js/PDFExcelDatatable/pdfmake.min.js"></script>
+<script src="~/js/PDFExcelDatatable/vfs_fonts.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.html5.min.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.print.min.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.colVis.min.js"></script>
+
+
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var firstDayOfMonth = function () {
+            // your special logic...
+            return 1;
+        };
+
+        var d = new Date();
+        var currMonth = d.getMonth();
+        var currYear = d.getFullYear();
+        var startDate = new Date(currYear, currMonth, firstDayOfMonth());
+        $('#txtStartDate').datepicker('setDate', startDate);
+
+
+
+        var currentTime = new Date()
+        var maxDate = new Date(currentTime.getFullYear(), currentTime.getMonth() + 1, +0)
+        $("#txtEndDate").datepicker('setDate', maxDate);
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+
+        callJTemplateServiceMethod(JSON.stringify([loginuser, typeuser]), "/api/FeesApi","ViewStructure",
+            "tbodyEmployeeLeaveRequestDetails", "tbodyEmployeeLeaveRequestDetailsJTemplte", true, successMsg, "", "", "");
+
+    })
+
+    function successMsg(p1, p2, p3, datas) {
+
+        setTimeout(function () {
+            $('#example1').DataTable({
+                'columnDefs': [{
+                    "targets": -1,
+                    "orderable": false
+                }],
+                dom: 'lBfrtip',
+                buttons: [
+                    //{
+                    //    extend: 'copyHtml5',
+                    //    exportOptions: {
+                    //        columns: [0, ':visible']
+                    //    }
+                    //},
+                    {
+                        extend: 'excelHtml5',
+                        exportOptions: {
+                            columns: ':visible'
+                        }
+                    },
+                    'colvis'
+                ]
+            });
+        }, 1000);
+
+    }
+
+ 
+    function deletePayableDetailsById_scs(p1, p2, p3, datas) {
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        location.reload();
+        callJTemplateServiceMethod(JSON.stringify([loginuser, typeuser]), "/api/AccountsAPI", "getAllPayingPaymentDetails",
+            "tbodyEmployeeLeaveRequestDetails", "tbodyEmployeeLeaveRequestDetailsJTemplte", true, successMsg, "", "", "");
+    }
+
+    function searchPaymentDetails() {
+        var payee = {
+            Name: getControlValue("txtPayeeName"),
+            PaymentDate: getControlValue("txtStartDate"),
+            PaymentMode: getControlValue("ddlPaymentMode"),
+            SchoolID: getControlValue("ddlSchoolName")
+        }
+        var ddl = JSON.stringify(payee)
+        callJTemplateServiceMethod(ddl, "/api/AccountsAPI", "searchPaymentDetails",
+            "tbodyEmployeeLeaveRequestDetails", "tbodyEmployeeLeaveRequestDetailsJTemplte", true, searchPaymentDetails_scs, "", "", "");
+        // callServiceMethod(ddl, "/api/AccountsAPI", "searchPaymentDetails", false, "", "", false, "", true, searchPaymentDetails_scs, "", "", "");
+    }
+
+
+
+</script>
+<style type="text/css">
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            /*text-align: left;
+            text-align:end;*/
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+
+
+

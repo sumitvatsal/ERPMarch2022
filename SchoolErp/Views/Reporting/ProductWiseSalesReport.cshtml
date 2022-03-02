@@ -1,0 +1,245 @@
+﻿
+@{
+    ViewBag.Title = "ProductWiseSalesReport";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<link href="~/css/bower_components/select2/dist/css/select2.min.css" rel="stylesheet" />
+
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="/css/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+
+<script type="text/javascript">
+
+
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(function () {
+            $("#simple").datepicker({ format: 'dd/mm/yyyy' });
+            $("#Date").datepicker({ format: 'dd/mm/yyyy' });
+            $("#txtvdate").datepicker({ dateFormat: 'dd/mm/yy' });
+            $("#txtodate").datepicker({ dateFormat: 'dd/mm/yy' });
+            //dateFormat: 'dd/mm/yy'
+        });
+    });
+</script>
+<script type="text/javascript">
+    function printout() {
+        /*alert('sdfgsdfgsdf');*/
+        //const element = document.getElementById("simple");	// Get element
+        //element.style.visibility = "hidden";
+        var printContent = document.getElementById("print").innerText;
+        window.print(printContent);
+    }
+</script>
+<section class="content">
+    <form>
+        <div class="box-body-solid">
+            <div class="row">
+                <div id="sandbox" class="form-group col-sm-2 col-md-2 col-lg-2">
+                    @*<label for="simple">Date From</label>*@
+                    <input id="simple" type="text" class="form-control" value="dd-mm-yyyy">
+                </div>
+                <div id="sandbox" class="form-group col-sm-2 col-md-2 col-lg-2">
+                    @*<label for="Date">Date To</label>*@
+                    <input id="Date" type="text" class="form-control" value="dd-mm-yyyy">
+                </div>
+                <div id="sandbox" class="form-group col-sm-2 col-md-2 col-lg-2">
+
+                    <input class="btn btn-success" id="btnSearch" type="button" value="Search">
+                    <input class="btn btn-info" id="btnSave" type="button" value="Print" onclick="printout()">
+
+                </div>
+                @*<div id="sandbox" class="form-group col-sm-2 col-md-2 col-lg-2">
+                        <input class="btn btn-info" id="btnSave" type="button" value="Print">
+                    </div>*@
+
+
+            </div>
+        </div>
+
+    </form>
+
+    <div class="box box-solid">
+        <div class="et">
+            <div class="box-header with-border">
+                <h3 class="box-title">Products Wise Sale Report</h3>
+
+            </div>
+        </div>
+        <div class="alert alert-success alert-dismissible centerSuccess" id="divsuccesmsg" style="display:none">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <h4>
+                <i class="icon fa fa-check"></i>
+                success! <span Id="spsuccessMsg"></span>
+            </h4>
+
+        </div>
+
+        <div class="box-body" id="print">
+            <div class="row">
+                <div class="col-sm-12">
+
+                    <div class="box-body">
+                        <div class="form-group">
+
+
+                            <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                <thead>
+                                    <tr>
+                                        <th>SaleDate</th>
+                                        <th>Products</th>
+                                        <th>InvoiceNo</th>
+                                        <th>CustomerName</th>
+                                        <th>Rate</th>
+                                        <th>Quantity</th>
+                                        <th>Discount(%)</th>
+                                        <th>Total</th>
+
+
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyEmployeeLeaveRequestDetails"></tbody>
+                            </table>
+
+                            <script type="text/html" id="tbodyEmployeeLeaveRequestDetailsJTemplte">
+                                {#foreach $T as Datashort}
+                                <tr>
+                                    <td>
+                                        { $T.Datashort.SaleDate}
+                                    </td>
+                                    <td>
+                                        { $T.Datashort.ProductName}
+                                    </td>
+                                    <td>
+                                        { $T.Datashort.ProductId}
+                                    </td>
+                                    <td>
+                                        { $T.Datashort.CustomerName}
+                                    </td>
+                                    <td>
+                                        { $T.Datashort.Rate}
+                                    </td>
+                                    <td>
+                                        { $T.Datashort.Qtyin}
+                                    </td>
+                                    <td>
+                                        { $T.Datashort.Discount}
+                                    </td>
+                                    <td>
+                                        { $T.Datashort.Total}
+                                    </td>
+                                </tr>
+                                {#/for}
+                            </script>
+                            <input type="hidden" id="hdnID" />
+                            @*<input type="hidden" id="hdnStatus" />*@
+                        </div>
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<script type="text/javascript">
+    $("#btnSearch").click(function () {
+        fillDataTable();
+    });
+    $(document).ready(function () {
+
+
+        fillDataTable();
+
+        //callServiceMethodForDDl("", "/api/StudentApi", "GetLeaveStatus", "ddlReqStatus", false, "", "", "", "");
+    });
+    function fillDataTable() {
+        debugger;
+        $("#loader").fadeIn();
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        var datefrom = $("#simple").val();
+        var dateto = $("#Date").val();
+        var SchoolID = sessionStorage.getItem("SchoolID");
+
+        var t = $('#example1').DataTable();
+        t.destroy();
+
+        callJTemplateServiceMethod(JSON.stringify([loginuser, typeuser, datefrom, dateto, SchoolID]), "/api/AccountsAPI", "GetStockReportSales",
+            "tbodyEmployeeLeaveRequestDetails", "tbodyEmployeeLeaveRequestDetailsJTemplte", true, successMsg, "", "", "");
+
+    }
+
+
+    function successMsg(p1, p2, p3, datas) {
+
+        $("#loader").fadeOut();
+
+        setTimeout(function () {
+            $('#example1').DataTable({
+
+                dom: 'lBfrtip',
+                bRetrieve: true,
+                bDestroy: true,
+                'columnDefs': [{
+                    "targets": -1,
+                    "orderable": false
+                }],
+            });
+        }, 1000);
+    }
+
+</script>
+
+
+
+
+
+
+
+
+

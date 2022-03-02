@@ -1,0 +1,569 @@
+﻿
+@{
+    ViewBag.Title = "NewCustomers";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<link href="~/css/bower_components/select2/dist/css/select2.min.css" rel="stylesheet" />
+
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.select2').select2();
+    })
+
+</script>
+<section class="content">
+    <div class="box box-solid">
+        <div class="et">
+            <div class="box-header with-border">
+                <h3 class="box-title">Inventory Manager</h3>
+
+            </div>
+        </div>
+        <div class="alert alert-success alert-dismissible centerSuccess" id="divsuccesmsg" style="display:none">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <h4>
+                <i class="icon fa fa-check"></i>
+                success! <span Id="spsuccessMsg"></span>
+            </h4>
+
+        </div>
+
+        <div class="box-body">
+            <div class="row">
+
+                <div class="content">
+
+
+
+                    <div class="row">
+                        <form role="form" id="form1" name="form1">
+                            <div class="col-sm-12">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title"> New Inventory Manager</h4>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="panel-body">
+
+                                            <div class="row">
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label class="req" for="Salarydetails_unit">Name <span class="requird">*</span> </label>
+                                                    <input class="form-control" id="txtName" name="txtName" type="text" ng-model="txtName" required />
+                                                </div>
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label class="req" for="Salarydetails_unit">Contact Name </label>
+                                                    <input class="form-control" id="txtContact" name="txtContact" type="text" ng-model="txtContact" />
+                                                </div>
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label class="req" for="Salarydetails_unit">Contact Title  </label>
+                                                    <input class="form-control" id="txtTitle" name="txtTitle" type="text" ng-model="txtTitle" />
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label for="Country" class="req">Country </label>
+                                                    <select class="form-control" style="color:black;" ng-model="ddlCountry" name="ddlCountry" onchange="getAllStatebyId(this.value)" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" id="ddlCountry"></select>
+                                                </div>
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="invisible">
+                                                        Button
+                                                    </label>
+                                                    <div>
+                                                        <a class="btn btn-success btn-sm" href="/Masters/NewCountry"><i class="fa fa-plus-square"></i></a>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label for="Country" class="req">State </label>
+                                                    <select class="form-control" style="color:black;" id="ddlState" name="ddlState" onchange="getCityByStateId(this.value)" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--"></select>
+                                                </div>
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="invisible">
+                                                        Button
+                                                    </label>
+                                                    <div>
+                                                        <a class="btn btn-success btn-sm" href="/Masters/NewState"><i class="fa fa-plus-square"></i></a>
+                                                    </div>
+                                                </div>
+
+
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label for="reg_input_currency" class="req">City </label>
+                                                    <select class="form-control" style="color:black;" id="ddlCity" name="ddlCity" ng-model="ddlCity" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--"></select>
+                                                </div>
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="invisible">
+                                                        Button
+                                                    </label>
+                                                    <div>
+                                                        <a class="btn btn-success btn-sm" href="/Masters/NewCity"><i class="fa fa-plus-square"></i></a>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label for="Country" class="req">Customer Group</label>
+                                                    <select class="form-control" id="ddlGroup" ng-model="ddlGroup" valuefield="Id" textfield="Name" @*blankRowValue="0" blankRowText="--Select--"*@></select>
+                                                </div>
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="invisible">
+                                                        Button
+                                                    </label>
+                                                    <div>
+                                                        <a class="btn btn-success btn-sm" href="/Masters/NewCity"><i class="fa fa-plus-square"></i></a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-sm-12 col-md-12 col-lg-12">
+                                                    <label class="req" for="Salarydetails_unit">Address</label>
+                                                    <textarea class="form-control" id="txtAddress"></textarea>
+                                                </div>
+
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label for="Country" class="req">Region</label>
+                                                    <select class="form-control" id="ddlRegin" ng-model="ddlRegin1" valuefield="Id" textfield="Name" @*blankRowValue="0" blankRowText="--Select--"*@></select>
+                                                </div>
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="invisible">
+                                                        Button
+                                                    </label>
+                                                    <div>
+                                                        <a class="btn btn-success btn-sm" href="/Masters/NewCity"><i class="fa fa-plus-square"></i></a>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group col-sm-3 col-md-3 col-lg-3">
+                                                    <label class="req" for="Salarydetails_unit">Postal Code </label>
+                                                    <input class="form-control" id="txtPostal" name="txtPostal" type="text" ng-model="txtPostal" />
+                                                </div>
+                                                <div class="form-group col-sm-3 col-md-3 col-lg-3">
+                                                    <label class="req" for="Salarydetails_unit">Phone </label>
+                                                    <input class="form-control" id="txtPhone" name="txtPhone" type="text" ng-model="txtPhone" />
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="form-group col-sm-6 col-md-6 col-lg-6">
+                                                    <label class="req" for="Salarydetails_unit">Website  </label>
+                                                    <input class="form-control" id="txtWebsite" name="txtWebsite" type="text" ng-model="txtWebsite" />
+                                                </div>
+
+
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="req" for="Salarydetails_unit">Fax</label>
+                                                    <input class="form-control" id="txtFax" name="txtFax" type="text" ng-model="txtFax" />
+                                                </div>
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label class="req" for="Salarydetails_unit">E-Mail  </label>
+                                                    <input class="form-control" id="txtemail" name="txtemail" type="text" ng-model="txtemail" />
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="form-group col-sm-6 col-md-6 col-lg-6">
+                                                    <label class="req" for="Salarydetails_unit">Email Address  </label>
+                                                    <input class="form-control" id="txtEmaiAddress" name="txtEmaiAddress" type="text" ng-model="txtEmaiAddress" />
+                                                </div>
+
+
+                                                <div class="form-group col-sm-6 col-md-6 col-lg-6">
+                                                    <label class="req" for="Salarydetails_unit">Previous Credit Balance<span class="requird">*</span> </label>
+                                                    <input class="form-control" id="txtBalance" value="0.00" name="txtBalance" type="text" ng-model="txtBalance"  onkeypress="return isNumber(this,event)"/>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-sm-5">
+                                                    <div class="form_sep">
+                                                        <input class="btn btn-info" id="btnSumit" type="button" value="Save">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="hdnID" />
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<script type="text/javascript">
+
+    callServiceMethodForDDl("", "/api/EmployeeAPI", "getAllCountry", "ddlCountry", false, "", "", "", "");
+
+
+
+    function getAllStatebyId(val) {
+
+
+        callServiceMethodForDDl(JSON.stringify([val]), "/api/EmployeeAPI", "getAllstatebyCountryId", "ddlState", false, "", "", "", "");
+
+    }
+
+    function getCityByStateId(val) {
+        callServiceMethodForDDl(JSON.stringify([val]), "/api/EmployeeAPI", "getCityByStateId", "ddlCity", false, "", "", "", "");
+
+    }
+</script>
+
+<script type="text/javascript">
+    debugger;
+    $(document).ready(function () {
+        setControlValue("ddlState", "0");
+        setControlValue("ddlCity", "0");
+        var ID = getQuerystring("id");
+        if (ID != null) {
+            //var customerId = localStorage.getItem("EditCustomer");
+            $.ajax({
+                type: 'Post',
+                url: '/api/AccountsAPI/CustomerList1',
+                data: JSON.stringify([ID]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    $('#hdnID').val(result[0].ID);
+                    $('#txtName').val(result[0].Name);
+                    $('#txtContact').val(result[0].ContactName);
+                    $('#txtTitle').val(result[0].ContactTitle);
+                    callServiceMethodForDDl("", "/api/EmployeeAPI", "getAllCountry", "ddlCountry", false, "", "", "", "");
+                    
+                    setTimeout(function () {
+                        setControlValue("ddlCountry", result[0].CountryID);
+                        $('#ddlCountry').val(result[0].CountryID);
+                    }, 2000);
+                    callServiceMethodForDDl(JSON.stringify([result[0].CountryID]), "/api/EmployeeAPI", "getAllstatebyCountryId", "ddlState", false, "", "", "", "");
+                    setTimeout(function () {
+                        setControlValue("ddlState", result[0].state);
+                        $('#ddlState').val(result[0].state);
+                    }, 2000);
+                    
+                    callServiceMethodForDDl(JSON.stringify([result[0].state]), "/api/EmployeeAPI", "getCityByStateId", "ddlCity", false, "", "", "", "");
+                    setTimeout(function () {
+                        setControlValue("ddlCity", result[0].city);
+                        $('#ddlCity').val(result[0].city);
+                    }, 2000);
+
+                   
+                    $('#ddlGroup').val(result[0].GroupID);
+                    $('#txtAddress').val(result[0].Address);
+                    $('#ddlRegin').val(result[0].RegionID);
+                    $('#txtPostal').val(result[0].postal);
+                    $('#txtPhone').val(result[0].phone);
+                    $('#txtWebsite').val(result[0].Website);
+                    $('#txtFax').val(result[0].fax);
+                    $('#txtemail').val(result[0].Email);
+                    $('#txtEmaiAddress').val(result[0].EmailAddress);
+                    $('#txtBalance').val(result[0].balance);
+                    $('#btnSumit')=Update;
+
+                }
+            });
+            localStorage.removeItem("EditCustomer");
+        }
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser, SchoolID]), "/api/Default", "getRegionName", "ddlRegin", false, "", "", "", "");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser, SchoolID]), "/api/Default", "getCustomerGroup", "ddlGroup", false, "", "", "", "");
+
+        setControlValue("hdnID", 0);
+        /*        setControlValue("hdnStatus", 1);*/
+        $('.dtpicker').datepicker({
+            //dateFormat: 'dd/mm/yy' ,
+            autoclose: true,
+            format: 'dd/mm/yyyy'
+        });
+
+        fillDataTable();
+
+        var ID = getQuerystring("id");
+        if (typeof (ID) != "undefined") {
+            setControlValue("hdn", ID);//
+
+            GetValues(ID);
+
+        }
+
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                txtName: "required",
+            },
+            messages: {
+                txtName: "Please Enter WareHouse Name",
+            }
+        })
+        //callServiceMethodForDDl("", "/api/StudentApi", "GetLeaveStatus", "ddlReqStatus", false, "", "", "", "");
+    });
+   
+    function successMsg(p1, p2, p3, datas) {
+
+        $("#loader").fadeOut();
+
+        setTimeout(function () {
+            $('#example1').DataTable({
+
+                dom: 'lBfrtip',
+                bRetrieve: true,
+                bDestroy: true,
+                'columnDefs': [{
+                    "targets": -1,
+                    "orderable": false
+                }],
+            });
+        }, 1000);
+    }
+
+
+    $("#btnSumit").click(function () {
+        debugger;
+        var ID = getControlValue("hdnID");
+        var Name = getControlValue("txtName");
+        var ContactName = getControlValue("txtContact")
+        var TitleName = getControlValue("txtTitle")
+        var CountryID = getControlValue("ddlCountry")
+        var StateID = getControlValue("ddlState")
+        var CityID = getControlValue("ddlCity")
+        var Customer = getControlValue("ddlGroup")
+        var Address = getControlValue("txtAddress")
+        var Region = getControlValue("ddlRegin")
+        var Postal = getControlValue("txtPostal")
+        var Phone = getControlValue("txtPhone")
+        var Website = getControlValue("txtWebsite")
+        var fax = getControlValue("txtFax")
+        var Email = getControlValue("txtemail")
+        var EmailAddress = getControlValue("txtEmaiAddress")
+        var Balance = getControlValue("txtBalance")
+        var loginuser = (sessionStorage.getItem("userId"));
+        var active = 1;
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+
+
+        Save(ID, Name, ContactName, TitleName, CountryID, StateID, CityID, Customer, Address, Region, Postal, Phone, Website, fax, Email, EmailAddress, Balance, loginuser,active,SchoolID);
+    });
+
+    function Save(ID, Name, ContactName, TitleName, CountryID, StateID, CityID, Customer, Address, Region, Postal, Phone, Website, fax, Email, EmailAddress, Balance, loginuser, active,SchoolID) {
+
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+            $.ajax({
+                url: "/api/AccountsAPI/SaveRecord",
+                type: "Post",
+                data: JSON.stringify(["NewCustomers", ID, Name, ContactName, TitleName, CountryID, StateID, CityID, Customer, Address, Region, Postal, Phone, Website, fax, Email, EmailAddress, Balance, loginuser, active, SchoolID]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    $("#loader").fadeOut();
+                    if (data == 1) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Customers Added Successfully ");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+
+                    }
+                    else if (data == 2) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Customers Updated Successfully ");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                            window.location.href = "/Business/Customers";
+                        }, 2000)
+
+                    }
+                    else if (data == -1) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Customers name already Exist");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+                    }
+                    else {
+                        alert("Some Error!!");
+                    }
+                    ResetModal();
+                    fillDataTable();
+                    //$('#myModal').modal('hide');
+
+                }
+            });
+
+        }
+    }
+
+    function Save1(ID, Name, ContactName, TitleName, CountryID, StateID, CityID, Customer, Address, Region, Postal, Phone, Website, fax, Email, EmailAddress, Balance, loginuser, active) {
+
+
+        $("#loader").fadeIn();
+        $.ajax({
+            url: "/api/AccountsAPI/SaveRecord",
+            type: "Post",
+            data: JSON.stringify(["NewCustomers", ID, Name, ContactName, TitleName, CountryID, StateID, CityID, Customer, Address, Region, Postal, Phone, Website, fax, Email, EmailAddress, Balance, loginuser, active]),
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                $("#loader").fadeOut();
+                if (data == 1) {
+                    $("#divsuccesmsg").fadeIn();
+
+                    $("#spsuccessMsg").html("NewCustomers Added Successfully ");
+                    setTimeout(function () {
+                        $("#divsuccesmsg").fadeOut();
+                        $("#spsuccessMsg").html("");
+                    }, 2000)
+
+                }
+                else if (data == 2) {
+                    $("#divsuccesmsg").fadeIn();
+
+                    $("#spsuccessMsg").html("NewCustomers Updated Successfully ");
+                    setTimeout(function () {
+                        $("#divsuccesmsg").fadeOut();
+                        $("#spsuccessMsg").html("");
+                    }, 2000)
+
+                }
+                else if (data == -1) {
+                    $("#divsuccesmsg").fadeIn();
+
+                    $("#spsuccessMsg").html("NewCustomers name already Exist");
+                    setTimeout(function () {
+                        $("#divsuccesmsg").fadeOut();
+                        $("#spsuccessMsg").html("");
+                    }, 2000)
+                }
+                else {
+                    alert("Some Error!!");
+                }
+                ResetModal();
+                fillDataTable();
+                //$('#myModal').modal('hide');
+
+            }
+        });
+
+
+    }
+
+
+    function ResetAll() {
+        setControlValue("txtName", "");
+        setControlValue("txtContact", "");
+        setControlValue("txtTitle", "");
+        setControlValue("ddlCountry", "");
+        setControlValue("ddlState", "");
+        setControlValue("ddlCity", "");
+        setControlValue("ddlGroup", "");
+        setControlValue("txtAddress", "");
+        setControlValue("ddlRegin", "");
+        setControlValue("txtPostal", "");
+        setControlValue("txtPhone", "");
+        setControlValue("txtWebsite", "");
+        setControlValue("txtFax", "");
+        setControlValue("txtemail", "");
+        setControlValue("txtEmaiAddress", "");
+        setControlValue("txtBalance", "");
+        fillDataTable();
+    }
+
+    function ResetModal() {
+        setControlValue("txtName", "");
+        setControlValue("txtContact", "");
+        setControlValue("txtTitle", "");
+        setControlValue("ddlCountry", "0");
+        setControlValue("ddlState", "");
+        setControlValue("ddlCity", "");
+        setControlValue("ddlGroup", "");
+        setControlValue("txtAddress", "");
+        $("#txtAddress").val('');
+        setControlValue("ddlRegin", "");
+        setControlValue("txtPostal", "");
+        setControlValue("txtPhone", "");
+        setControlValue("txtWebsite", "");
+        setControlValue("txtFax", "");
+        setControlValue("txtemail", "");
+        setControlValue("txtEmaiAddress", "");
+        setControlValue("txtBalance", "0.00");
+        setControlValue("hdnID", 0);
+        //setControlValue("ddlSchoolName", 0);
+    }
+
+</script>
+<script type="text/javascript">
+    function isNumber(txt, evt) {
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode == 46) {
+            //Check if the text already contains the . character
+            if (txt.value.indexOf('.') === -1) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if (charCode > 31 &&
+                (charCode < 48 || charCode > 57))
+                return false;
+        }
+        return true;
+    }
+</script>
+

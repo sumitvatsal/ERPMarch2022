@@ -1,0 +1,513 @@
+﻿
+@{
+    ViewBag.Title = "EmployeeDetailsImport";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section class="content">
+    <div class="content">
+        <div id="content">
+            <style>
+                #overlaygif {
+                    background: url("/images/loading.gif") no-repeat center;
+                    position: fixed;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    left: 0;
+                }
+
+                .panel-default > .panel-heading-custom {
+                    background: #F8F8F8;
+                    color: #black;
+                }
+
+                #customstyle:link {
+                    text-decoration: none;
+                    color: black;
+                }
+
+                #customstyle:visited {
+                    text-decoration: none;
+                    color: black;
+                }
+
+                #customstyle:active {
+                    text-decoration: none;
+                    color: black;
+                    font-weight: bold;
+                }
+
+                #customstyle:hover {
+                    text-decoration: none;
+                    font-weight: bold;
+                    color: black;
+                }
+            </style>
+
+
+            <div class="content">
+                @using (Html.BeginForm("EmployeeDetailsImport", "ImportExport", FormMethod.Post, new { enctype = "multipart/form-data", onsubmit = "return myFunction()" }))
+                {
+
+                    <div class="row">
+
+                        <div class="col-sm-12">
+
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">Employee Details Import</h4>
+                                </div>
+                                <br />
+                                <div>
+                                    @if (ViewBag.ImportStatusFlag == "success")
+                                    {
+                                        <h4 class="panel-title" style="color:green">&nbsp;&nbsp;&nbsp;@ViewBag.ImportStatus</h4>
+                                    }
+                                    else
+                                    {
+                                        <h4 class="panel-title" style="color:red">&nbsp;&nbsp;&nbsp;@ViewBag.ImportStatus</h4>
+                                    }
+
+                                </div>
+                                <div class="panel-body">
+
+                                    <div class="panel-body">
+                                        <div id="overlaygif" style="display:none;"></div>
+                                        <div class="form-group">
+                                            <label for="reg_input_name" class="req">Browse File</label>
+                                            <input type="file" id="FileUpload" name="FileUpload" class="" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-5">
+                                            <div class="form_sep">
+                                                <input class="btn btn-info" type="submit" name="yt0" value="Submit">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="progress" style="display:none;">
+                                                <div class="progress-bar progress-bar-info" style="width: 80% " id="progressbar">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="alert alert-warning warning">
+                                                <span class="icon-info22" style="color:orange"></span>
+                                                Download the excel file format from below link , mark Y for present and N for absent while filling excel sheet.
+                                                <br>
+
+                                                <p class="form-control-static">&nbsp;&nbsp;&nbsp;&nbsp;<a href="~/Export/EmployeeImportFile.xlsx">Employee Details Import</a></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-12">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+
+                                    <div class="row col-sm-12">
+                                        <div class="col-sm-3">
+                                            <div class="panel panel-white">
+                                                <div class="panel-body">
+
+                                                    <div class="box box-danger direct-chat direct-chat-danger">
+                                                        <div class="panel-heading">
+                                                            <h5 class="panel-title"> Country State And City</h5>
+                                                        </div>
+                                                        <div class="panel-body" id="divCountry" style="overflow-y: scroll;height: 400px;">
+                                                            <div class="clt">
+                                                                <ul id="divCitystateCountry"></ul>
+                                                            </div>
+                                                        </div>
+                                                        @*<script type="text/html" id="divReligonMasterJTemplte">
+                                                                {#foreach $T as Datashort}
+                                                                <div class="form-group">{ $T.Datashort.Name}</div>
+                                                                {#/for}
+                                                            </script>*@
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="panel panel-white">
+                                                <div class="panel-body">
+
+                                                    <div class="box box-danger direct-chat direct-chat-danger">
+                                                        <div class="panel-heading">
+                                                            <h5 class="panel-title"> Department</h5>
+                                                        </div>
+                                                        <div class="panel-body" id="divDepartmentMaster">
+
+
+
+                                                        </div>
+                                                        <script type="text/html" id="divDepartmentMasterJTemplte">
+                                                            {#foreach $T as Datashort}
+                                                            <div class="form-group">{ $T.Datashort.Name}</div>
+                                                            {#/for}
+                                                        </script>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="panel panel-white">
+                                                <div class="panel-body">
+
+                                                    <div class="box box-danger direct-chat direct-chat-danger">
+                                                        <div class="panel-heading">
+                                                            <h5 class="panel-title"> Designation</h5>
+                                                        </div>
+                                                        <div class="panel-body" id="divDesignationMaster">
+
+                                                        </div>
+
+                                                        <script type="text/html" id="divDesignationMasterJTemplte">
+                                                            {#foreach $T as Datashort}
+                                                            <div class="form-group">{ $T.Datashort.Name}</div>
+                                                            {#/for}
+                                                        </script>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="panel panel-white">
+                                                <div class="panel-body">
+
+                                                    <div class="box box-danger direct-chat direct-chat-danger">
+                                                        <div class="panel-heading">
+                                                            <h5 class="panel-title"> Qualfication</h5>
+                                                        </div>
+                                                        <div class="panel-body" id="divQualficationMaster">
+
+                                                        </div>
+                                                        <script type="text/html" id="divQualficationMasterJTemplte">
+                                                            {#foreach $T as Datashort}
+                                                            <div class="form-group">{ $T.Datashort.Name}</div>
+                                                            {#/for}
+                                                        </script>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-3">
+                                            <div class="panel panel-white">
+                                                <div class="panel-body">
+
+                                                    <div class="box box-danger direct-chat direct-chat-danger">
+                                                        <div class="panel-heading">
+                                                            <h5 class="panel-title"> Staff</h5>
+                                                        </div>
+                                                        <div class="panel-body" id="divStaffMaster">
+
+                                                        </div>
+                                                        <script type="text/html" id="divStaffMasterJTemplte">
+                                                            {#foreach $T as Datashort}
+                                                            <div class="form-group">{ $T.Datashort.Name}</div>
+                                                            {#/for}
+                                                        </script>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-3">
+                                            <div class="panel panel-white">
+                                                <div class="panel-body">
+
+                                                    <div class="box box-danger direct-chat direct-chat-danger">
+                                                        <div class="panel-heading">
+                                                            <h5 class="panel-title"> Gender</h5>
+                                                        </div>
+                                                        <div class="panel-body" id="divGenderMaster">
+
+                                                        </div>
+                                                        <script type="text/html" id="divGenderMasterJTemplte">
+                                                            {#foreach $T as Datashort}
+                                                            <div class="form-group">{ $T.Datashort.Name}</div>
+                                                            {#/for}
+                                                        </script>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-3">
+                                            <div class="panel panel-white">
+                                                <div class="panel-body">
+
+                                                    <div class="box box-danger direct-chat direct-chat-danger">
+                                                        <div class="panel-heading">
+                                                            <h5 class="panel-title"> Marital Status</h5>
+                                                        </div>
+                                                        <div class="panel-body" id="divMaritalStatusMaster">
+
+                                                        </div>
+                                                        <script type="text/html" id="divMaritalStatusMasterJTemplte">
+                                                            {#foreach $T as Datashort}
+                                                            <div class="form-group">{ $T.Datashort.Name}</div>
+                                                            {#/for}
+                                                        </script>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-3">
+                                            <div class="panel panel-white">
+                                                <div class="panel-body">
+
+                                                    <div class="box box-danger direct-chat direct-chat-danger">
+                                                        <div class="panel-heading">
+                                                            <h5 class="panel-title"> Religon</h5>
+                                                        </div>
+                                                        <div class="panel-body" id="divReligonMaster">
+
+                                                        </div>
+                                                        <script type="text/html" id="divReligonMasterJTemplte">
+                                                            {#foreach $T as Datashort}
+                                                            <div class="form-group">{ $T.Datashort.Name}</div>
+                                                            {#/for}
+                                                        </script>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+            </div>
+
+        </div><!-- content -->
+    </div>
+</section>
+<div class="alert alert-success centerSuccess" id="divSuccessMsg" style="display:none">
+
+</div>
+<div class="alert alert-danger centerSuccess" id="divErrorMsg" style="display:none">
+
+</div>
+<!-- DataTables -->
+<link href="~/js/PDFExcelDatatable/buttons.dataTables.min.css" rel="stylesheet" />
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+
+<script src="~/js/jsExcel/tableExport.js"></script>
+<script src="~/js/jsExcel/jquery.base64.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script>
+<script src="~/js/jsExcel/html2canvas.js"></script>
+
+
+<script src="~/js/jsExcel/base64.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+
+        var mes = getQuerystring("m");
+        if (typeof (mes) != "undefined") {
+            if (mes == "1") {
+                $("#divSuccessMsg").fadeIn();
+                $("#divSuccessMsg").html("<strong>Success!</strong>  Data Imported Successfully!");
+                setTimeout(function () {
+                    $("#divSuccessMsg").fadeOut();
+                }, 4000)
+            }
+            if (mes == "dept") {
+                $("#divErrorMsg").fadeIn();
+                $("#divErrorMsg").html("<strong>Error!</strong>  Please Check Department");
+                setTimeout(function () {
+                    $("#divErrorMsg").fadeOut();
+                }, 4000)
+            }
+
+            if (mes == "desig") {
+                $("#divErrorMsg").fadeIn();
+                $("#divErrorMsg").html("<strong>Error!</strong>  Please Check Designation");
+                setTimeout(function () {
+                    $("#divErrorMsg").fadeOut();
+                }, 4000)
+            }
+            if (mes == "qual") {
+                $("#divErrorMsg").fadeIn();
+                $("#divErrorMsg").html("<strong>Error!</strong>  Please Check Qualfication");
+                setTimeout(function () {
+                    $("#divErrorMsg").fadeOut();
+                }, 4000)
+            }
+
+            if (mes == "staf") {
+                $("#divErrorMsg").fadeIn();
+                $("#divErrorMsg").html("<strong>Error!</strong>  Please Check Staff");
+                setTimeout(function () {
+                    $("#divErrorMsg").fadeOut();
+                }, 4000)
+            }
+        }
+    })
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callJTemplateServiceMethod(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllDepartmentsBySchoolID",
+            "divDepartmentMaster", "divDepartmentMasterJTemplte", false, "", "", "", "");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callJTemplateServiceMethod(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllDesignationBySchoolID",
+            "divDesignationMaster", "divDesignationMasterJTemplte", false, "", "", "", "");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callJTemplateServiceMethod(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllQualficationbySchool",
+            "divQualficationMaster", "divQualficationMasterJTemplte", false, "", "", "", "");
+
+        callJTemplateServiceMethod("", "/api/EmployeeAPI", "getAllStaff",
+            "divStaffMaster", "divStaffMasterJTemplte", false, "", "", "", "");
+        callJTemplateServiceMethod("", "/api/EmployeeAPI", "getAllGender",
+            "divGenderMaster", "divGenderMasterJTemplte", false, "", "", "", "");
+        callJTemplateServiceMethod("", "/api/EmployeeAPI", "getAllMaritalStatus",
+            "divMaritalStatusMaster", "divMaritalStatusMasterJTemplte", false, "", "", "", "");
+        callJTemplateServiceMethod("", "/api/EmployeeAPI", "getAllReligon",
+            "divReligonMaster", "divReligonMasterJTemplte", false, "", "", "", "");
+
+
+        //callJTemplateServiceMethod("", "/api/EmployeeAPI", "getAllDepartments",
+        //    "divDepartmentMaster", "divDepartmentMasterJTemplte", false, "", "", "", "");
+        //callJTemplateServiceMethod("", "/api/EmployeeAPI", "getAllDesignation",
+        //    "divDesignationMaster", "divDesignationMasterJTemplte", false, "", "", "", "");
+        //callJTemplateServiceMethod("", "/api/EmployeeAPI", "getAllQualfication",
+        //    "divQualficationMaster", "divQualficationMasterJTemplte", false, "", "", "", "");
+        //callJTemplateServiceMethod("", "/api/EmployeeAPI", "getAllStaff",
+        //    "divStaffMaster", "divStaffMasterJTemplte", false, "", "", "", "");
+        //callJTemplateServiceMethod("", "/api/EmployeeAPI", "getAllStaff",
+        //    "divStaffMaster", "divStaffMasterJTemplte", false, "", "", "", "");
+        //callJTemplateServiceMethod("", "/api/EmployeeAPI", "getAllGender",
+        //    "divGenderMaster", "divGenderMasterJTemplte", false, "", "", "", "");
+        //callJTemplateServiceMethod("", "/api/EmployeeAPI", "getAllMaritalStatus",
+        //    "divMaritalStatusMaster", "divMaritalStatusMasterJTemplte", false, "", "", "", "");
+        //callJTemplateServiceMethod("", "/api/EmployeeAPI", "getAllReligon",
+        //    "divReligonMaster", "divReligonMasterJTemplte", false, "", "", "", "");
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            url: "/api/EmployeeAPI/getAllCountrySateCity",
+            data: "",
+            success: function (Record) {
+                var treestruc = '';
+                for (var i = 0; i < Record.length; i++) {
+                    treestruc += "<li><b><a href='#' style='color:black;' data-toggle='tooltip' data-placement='right' title='Country'>" + Record[i].Name + "</a></b><ul>";
+
+                    for (var j = 0; j < Record[i].MasteState.length; j++) {
+
+                        treestruc += "<li><a href='#' style='color:#C70039;' data-toggle='tooltip' data-placement='right' title='State'>" + Record[i].MasteState[j].Name + "</a><ul>";
+                        for (var k = 0; k < Record[i].MasteState[j].cities.length; k++) {
+                            treestruc += "<li><a href='#' data-toggle='tooltip' data-placement='right' title='City'>" + Record[i].MasteState[j].cities[k].Name + "</a></li>";
+                        }
+                        treestruc += "</ul></li>";
+
+                    }
+                    treestruc += "</ul></li>";
+
+
+
+
+                }
+                $("#divCitystateCountry").html(treestruc);
+
+            }
+        });
+    });
+</script>
+<style type="text/css">
+    .clt, .clt ul, .clt li {
+        position: relative;
+    }
+
+        .clt ul {
+            list-style: none;
+            padding-left: 32px;
+        }
+
+        .clt li::before, .clt li::after {
+            content: "";
+            position: absolute;
+            left: -12px;
+        }
+
+        .clt li::before {
+            border-top: 1px solid #000;
+            top: 9px;
+            width: 8px;
+            height: 0;
+        }
+
+        .clt li::after {
+            border-left: 1px solid #000;
+            height: 100%;
+            width: 0px;
+            top: 2px;
+        }
+
+        .clt ul > li:last-child::after {
+            height: 8px;
+        }
+</style>

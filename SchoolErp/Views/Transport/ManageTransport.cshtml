@@ -1,0 +1,244 @@
+﻿
+@{
+    ViewBag.Title = "ManageTransport";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section class="content">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Manage</h4>
+                </div>
+                <div class="panel-body">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="form-group col-sm-3">
+                                <label class="req">User Type</label>
+                                <select class="form-control" name="Transportallocation[usertypeid1]" id="Transportallocation_usertypeid1">
+                                    <option value="">Select Type</option>
+                                    <option value="Student">Student</option>
+                                    <option value="Employee">Employee</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-sm-3" id="course1" style="display: none;">
+                                <label for="reg_input" class="req">Course</label>
+                                <select class="form-control" id="ddlCourse" name="ddlCourse" valuefield="Id" textfield="CourseName" blankRowValue="-1" blankRowText="----Select----"></select>
+                            </div>
+                            <div class="form-group col-sm-3" id="batch1" style="display: none;">
+                                <label for="reg_input" class="req">Section</label>
+                                <select class="form-control" id="ddlSection" valuefield="Id" onchange="getAllStudentByClassSectionId(this.value)" textfield="SectionName" blankRowValue="-1" blankRowText="----Select----"></select>
+                            </div>
+                            <div class="form-group col-sm-3" id="student1" style="display: none;">
+                                <label for="reg_input" class="req">Student</label>
+                                <select class="form-control" id="ddlStudents" valuefield="Id" textfield="StudentName" onchange="getDesignationFromStaudnet(this.value)" blankRowValue="-1" blankRowText="----Select----">
+                                    <option value="">Please Select</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-sm-3" id="department1" style="display: none;">
+                                <label for="reg_input" class="req">Department</label>
+                                <select class="form-control" id="txtDepartment" name="txtDepartment" onchange="getAllEmployeeByDepId(this.value)" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--">  </select>
+                            </div>
+                            <div class="form-group col-sm-3" id="employee1" style="display: none;">
+                                <label for="reg_input" class="req">Employee Name</label>
+                                <select class="form-control" id="ddlEmployee" name="ddlEmployee" valuefield="Id" textfield="EmployeeName" onchange="getDesignationFromEmployee(this.value)" blankRowValue="0" blankRowText="--Select--">  </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-3">
+                                <label>From Destination</label>
+                                <select class="form-control"  id="ddlDestinations" valuefield="Id" textfield="StudentName" >
+                                 </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <h5><b>Change To</b></h5><hr>
+                            <div class="form-group col-sm-3">
+                                <label class="req" for="Transportallocation_routemasterid">Route</label>                                      
+                                <select class="form-control" id="ddlRoute" onchange="getDestinationByRouteId(this.value)" name="ddlRoute" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" ng-model="txtDepartment"></select>
+                            </div>
+                            <div class="form-group col-sm-3">
+                                <label class="req" for="Transportallocation_routedetailsid">Destination</label>
+                                            <select class="form-control" name="ddlDestination" id="ddlDestination" valuefield="Id" textfield="Route" blankRowValue="0" blankRowText="--Select--"></select>
+                            </div>
+                        
+                           
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-5">
+                                <div class="form_sep">
+                                    <input class="btn btn-info" onclick="changeRouteDestination();" type="submit" name="yt0" value="Save">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </section>
+<div class="alert alert-success centerSuccess" id="divSuccessMsg" style="display:none">
+
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TransportApi", "getAllRouteDetailsBySchool", "ddlRoute", false, "", "", "", "");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllDepartmentsBySchoolID", "txtDepartment", false, "", "", "", "");
+
+        //callServiceMethodForDDl("", "/api/TransportApi", "getAllRouteDetails", "ddlRoute", false, "", "", "", "");
+        //callServiceMethodForDDl("", "/api/StudentApi", "GetClasses", "ddlCourse", false, "", "", "", "");
+        //callServiceMethodForDDl("", "/api/EmployeeAPI", "getAllDepartments", "txtDepartment", false, "", "", "", "");
+    })
+
+    function getDestinationByRouteId(Id) {
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethodForDDl(JSON.stringify([Id, SchoolID]), "/api/TransportApi", "getDestinationByRouteIdBySchool", "ddlDestination", false, "", "", "", "");
+        //callServiceMethodForDDl(JSON.stringify([Id), "/api/TransportApi", "getDestinationByRouteId", "ddlDestination", false, "", "", "", "");
+    }
+    $("#ddlCourse").change(function () {
+        var ddlCourse = getControlValue("ddlCourse");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        if (ddlCourse != null && (ddlCourse != -1) && (ddlCourse != undefined)) {
+            callServiceMethodForDDl(JSON.stringify([ddlCourse, SchoolID]), "/api/StudentApi", "GetSectionsbyschool", "ddlSection", false, "", "", "", "");
+
+        }
+    });
+
+    function getAllEmployeeByDepId(val) {
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethodForDDl(JSON.stringify([val, SchoolID]), "/api/TransportApi", "getAllEmployeeByDepIdChangeTransport", "ddlEmployee", false, "", "", "", "");
+    }
+
+    function getAllStudentByClassSectionId(sectionId) {
+
+        var Student = {
+            ClassID: getControlValue("ddlCourse"),
+            SectionID: sectionId,
+            SchoolID : sessionStorage.getItem("SchoolID")
+        }
+
+        //callServiceMethodForDDl(JSON.stringify(Student), "/api/TransportApi", "getAllStudentByClassSectionIdForChangeTransport", "ddlStudents", false, "", "", "", "");
+        callServiceMethodForDDl(JSON.stringify(Student), "/api/TransportApi", "getAllStudentByClassSectionIdForChangeTransportBySchool", "ddlStudents", false, "", "", "", "");
+    }
+
+
+    function getDesignationFromStaudnet(val) {
+        var Student = {
+            SectionID: val,
+            SchoolID: sessionStorage.getItem("SchoolID")
+        }
+        callServiceMethodForDDl(JSON.stringify(Student), "/api/TransportApi", "getDesignationFromStaudnetbySchool", "ddlDestinations", false, "", "", "", "");
+        //callServiceMethodForDDl(JSON.stringify(Student), "/api/TransportApi", "getDesignationFromStaudnet", "ddlDestinations", false, "", "", "", "");
+    }
+
+    function getDesignationFromEmployee(val) {
+        var Student = {
+            SectionID: val,
+            SchoolID: sessionStorage.getItem("SchoolID")
+        }
+        callServiceMethodForDDl(JSON.stringify(Student), "/api/TransportApi", "getDesignationFromEmployeebySchool", "ddlDestinations", false, "", "", "", "");
+        //callServiceMethodForDDl(JSON.stringify(Student), "/api/TransportApi", "getDesignationFromEmployee", "ddlDestinations", false, "", "", "", "");
+
+    }
+
+
+    function changeRouteDestination() {
+
+        if (getControlValue("Transportallocation_usertypeid1") == "Employee") {
+
+            var emp = {
+                route: getControlValue("ddlRoute"),
+                Destination: getControlValue("ddlDestination"),
+                UserType: getControlValue("Transportallocation_usertypeid1"),
+                EmployeeName: getControlValue("ddlEmployee"),
+                SchoolID: sessionStorage.getItem("SchoolID")
+            }
+
+            var ddl = JSON.stringify(emp)
+
+
+            callServiceMethod(ddl, "/api/TransportApi", "changeTransportRouteDestinationBySchool", false, "", "", false, "", true, changeRouteDestination_scs, "", "", "");
+        }
+
+        else  {
+
+            var std = {
+                route: getControlValue("ddlRoute"),
+                Destination: getControlValue("ddlDestination"),
+                UserType: getControlValue("Transportallocation_usertypeid1"),
+                EmployeeName: getControlValue("ddlStudents"),
+                SchoolID: sessionStorage.getItem("SchoolID")
+            }
+
+            var ddl = JSON.stringify(std)
+
+
+            callServiceMethod(ddl, "/api/TransportApi", "changeTransportRouteDestinationBySchool", false, "", "", false, "", true, changeRouteDestination_scs, "", "", "");
+        }
+    }
+
+
+    function changeRouteDestination_scs(p1, p2, p3, datas) {
+
+        $("#divSuccessMsg").fadeIn();
+        $("#divSuccessMsg").html("<strong>Success!</strong> " + datas);
+        setTimeout(function () {
+            $("#divSuccessMsg").fadeOut();
+        }, 2000);
+    }
+
+    $("#Transportallocation_usertypeid1").change(function () {
+        var str = "";
+        str += $(this).val();
+        if (str === 'Student') {
+            $("#department1").hide("slow");
+            $("#employee1").hide("slow");
+            $("#course1").show("slow");
+            $("#batch1").show("slow");
+            $("#student1").show("slow");
+        }
+        if (str === 'Employee') {
+            $("#course1").hide("slow");
+            $("#batch1").hide("slow");
+            $("#student1").hide("slow");
+            $("#department1").show("slow");
+            $("#employee1").show("slow");
+        }
+    });
+
+</script>

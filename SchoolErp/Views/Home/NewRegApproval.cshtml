@@ -1,0 +1,414 @@
+﻿
+@{
+    ViewBag.Title = "NewRegApproval";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<style type="text/css">
+    .imgIcon {
+        width: 0.5%;
+        height: 0.5%;
+    }
+
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 8px;
+            padding-bottom: 8px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+<link href="~/css/bootstrap-timepicker.css" rel="stylesheet" />
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<section class="content-header">
+    <h1>
+        <i class="fa fa-th-list"></i> Approval |<small>New Admission Requests</small>
+    </h1>
+    @*<ul class="breadcrumb">
+            <li><a href="/"><i class="fa fa-home"></i>Home</a></li>
+            <li><a href="/academics/default/index">Academics</a></li>
+            <li class="active">Timetable</li>
+            <li class="active">Timetable Configuration</li>
+        </ul>*@
+</section>
+<section class="content">
+
+
+    <div class="box box-solid">
+        <div class="extra-div">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-search"></i> Search</h3>
+                <div class="box-tools">
+                    @*<a class="btn btn-success btn-sm" href="/TimeTable/TimeTableConfigCreate"><i class="fa fa-plus-square"></i> Create New</a>*@
+                </div>
+            </div>
+        </div>
+
+
+        <form id="w1">
+            <div class="box-body">
+                <div class="row">                  
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="control-label">Class</label>
+                            <select class="form-control" id="ddlCourse" valuefield="Id" textfield="CourseName" blankRowValue="-1" blankRowText="----Select----" aria-required="true"></select>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="control-label">Name</label>
+                            <input type="text" id="tc_name" class="form-control" placeholder="Name">
+
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="control-label">Start Date</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" id="tc_from_date" class="form-control dtpicker" readonly="" size="10">
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="control-label">End Date</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" id="tc_To_date" class="form-control dtpicker" readonly="" size="10">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="control-label">Status</label>
+                            <select id="ddl_status" class="form-control">
+                                <option value="-1">---- Select Status ----</option>
+                                <option value="4">Pending</option>
+                                <option value="5">Approved</option>
+                                <option value="6">Rejected</option>
+                            </select>
+
+                        </div>
+                    </div>
+                </div>               
+            </div>
+            <div class="box-footer">
+                <button type="button" id="btnSearch" class="btn btn-info">Search</button>    <a class="btn btn-default" href="#" onclick="ResetAll()">Reset</a>
+            </div>
+
+        </form>
+    </div>
+    <div class="box box-solid">
+        <div class="box-header with-border">
+            <h3 class="box-title"><i class="fa fa-eye"></i>List</h3>
+        </div>
+        <div class="box-body table-responsive">
+
+            <div id="w2" class="grid-view">
+                <table class="table table-striped table-bordered" id="example1">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Student Name</th>
+                            <th>Class Applied for</th>
+                            <th>DOB</th>
+                            <th>Father</th>
+                            <th>Applied on</th>
+                            <th>Status</th>
+                            <th class="action-column">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyEmployeeDetails">
+                    </tbody>
+                </table>
+            </div>
+            <script type="text/html" id="divEmployeeDetailsJTemplte">
+                {#foreach $T as Datashort}
+                <tr>
+                    <td style="width:10%;">
+                        { $T.Datashort.ID}
+                    </td>
+                    <td>
+                        { $T.Datashort.stReg.FirstName} { $T.Datashort.stReg.LastName}
+                    </td>
+                    <td>
+                        { $T.Datashort.Class}
+                    </td>
+                    <td>
+                        { $T.Datashort.PSYear}
+                    </td>
+                    <td>
+                        { $T.Datashort.stReg.FatherName}
+                    </td>
+                    <td>
+                    </td>
+                    <td style="width:15%;">
+                        <span class="{ $T.Datashort.StatusName}" onclick="EditStatus({ $T.Datashort.ID})">{ $T.Datashort.SStatus} </span>
+                    </td>
+                    <td>
+                        @*<i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" onclick="Edit({ $T.Datashort.ID},'{ $T.Datashort.con.Name}',{ $T.Datashort.con.Status})" title="Edit"></i>*@
+                        <i class="fa fa-fw fa-eye" style="cursor:pointer" onclick="ViewDetails({ $T.Datashort.stReg.ID})" title="View"></i>
+                    </td>
+                </tr>
+                {#/for}
+            </script>
+        </div>
+    </div>
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">
+                        <i class="fa fa-eye"></i> Timetable Configuration		<button type="button" class="close" data-dismiss="modal">
+                            <span aria-hidden="true">×</span><span class="sr-only">Close</span>
+                        </button>
+                    </h3>
+                </div> <!-- /.modal-header -->
+                <div class="modal-body">
+                    <table id="w0" class="table table-striped table-bordered detail-view">
+                        <tbody>
+                            <tr><th style="width:30%">Name</th><td><span id="spName"></span></td></tr>
+                            <tr><th style="width:30%">Class</th><td><span id="spCourse"></span></td></tr>
+                            <tr><th style="width:30%">Weekday</th><td><span id="spWeekDays"></span></td></tr>
+                            <tr><th style="width:30%">Classtiming</th><td><span id="spClassTiming"></span></td></tr>
+                            <tr><th style="width:30%">Start Date</th><td><span id="spStDt"></span></td></tr>
+                            <tr><th style="width:30%">End Date</th><td><span id="spEdDt"></span></td></tr>
+                            @*<tr><th style="width:30%">Created At</th><td>12/21/17, 12:06 PM</td></tr>
+                                <tr><th style="width:30%">Created By</th><td>admin@edusec.org</td></tr>
+                                <tr><th style="width:30%">Updated At</th><td>12/21/17, 12:06 PM</td></tr>
+                                <tr><th style="width:30%">Updated By</th><td>admin@edusec.org</td></tr>*@
+                            <tr>
+                                <th style="width:30%">Status</th>
+                                <td>
+                                    <span class="badge bg-green" id="spActive" style="display:none;"></span>
+                                    <span class="badge bg-red" id="spInactive" style="display:none;"></span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script src="~/js/bootstrap-timepicker.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('.dtpicker').datepicker({
+            //dateFormat: 'dd/mm/yy' ,
+            autoclose: true,
+            format:'dd/mm/yyyy'
+        });
+
+        callServiceMethodForDDl("", "/api/TimeTableApi", "GetAcademicYear", "tc_academic_year", false, "", "", "", "");
+        callServiceMethodForDDl("", "/api/StudentApi", "GetClasses", "ddlCourse", false, "", "", "", "");
+        callServiceMethodForDDl(JSON.stringify(["status", "", "", 1]), "/api/TimeTableApi", "getClassTimings", "tc_classtiming", false, "", "", "", "");
+
+        $("#ddlCourse").change(function () {
+            var ddlCourse = getControlValue("ddlCourse");
+            if (ddlCourse != null && (ddlCourse != -1) && (ddlCourse != undefined)) {
+                callServiceMethodForDDl(JSON.stringify([ddlCourse]), "/api/StudentApi", "GetSections", "ddlSection", false, "", "", "", "");
+            }
+        });
+
+        //fillDataTable();
+        GetValues();
+
+        var ID=getQuerystring("id");
+        if (typeof (ID) != "undefined") {
+            setControlValue("hdn", ID);//
+            setControlValue("hdnID", 0);
+            GetValues(ID);
+
+        }
+        //
+        //callServiceMethodForDDl("", "/api/StudentApi", "GetLeaveStatus", "ddlReqStatus", false, "", "", "", "");
+    });
+    function openModal()
+    {
+        $('#myModal').modal('show');
+    }
+
+    function GetValues()
+    {
+        var course = getControlValue("ddlCourse");
+        var ttname = getControlValue("tc_name");
+        var fromDt = getControlValue("tc_from_date");
+        var toDt = getControlValue("tc_To_date");
+        var status = getControlValue("ddl_status");
+
+        callJTemplateServiceMethod(JSON.stringify([course,ttname,fromDt,toDt,status]), "/api/NewRegApi", "GetNewRegList",
+           "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+    }
+
+    function fillDataTable() {
+        callJTemplateServiceMethod(JSON.stringify(["default"]), "/api/TimeTableApi", "getTimeTableConfig",
+           "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+
+    }
+
+    function successMsg(p1, p2, p3, datas) {
+        setTimeout(function () {
+            $('#example1').DataTable();
+        }, 1000);
+    }
+
+    //
+    $("#btnSearch").click(function () {
+        GetValues();
+    });
+
+    function search()
+    {
+        var year=getControlValue("tc_academic_year");
+        var course = getControlValue("ddlCourse");
+        var section = getControlValue("ddlSection");
+        var ttname = getControlValue("tc_name");
+        var timing = getControlValue("tc_classtiming");
+        var fromDt = getControlValue("tc_from_date");
+        var toDt = getControlValue("tc_To_date");
+        var status = getControlValue("ddl_status");
+
+        callJTemplateServiceMethod(JSON.stringify([year,course,section,ttname,timing,fromDt,toDt,status]), "/api/TimeTableApi", "SearchTimeTableConfig",
+           "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+    }
+
+    function ViewDetails(id)
+    {
+        window.location.href = "/Home/ViewRegApplication?id=" + id;
+    }
+
+    function ResetAll()
+    {
+        setControlValue("tc_academic_year",-1);
+        setControlValue("ddlCourse",-1);
+        setControlValue("ddlSection",-1);
+        setControlValue("tc_name","");
+        setControlValue("tc_classtiming",-1);
+        setControlValue("tc_from_date","");
+        setControlValue("tc_To_date","");
+        setControlValue("ddl_status","-1");
+
+        fillDataTable();
+    }
+
+    function EditStatus(id,name,status)
+    {
+        //alert(id+','+name+','+status);
+        var i=status==1?0:1;
+        var Items = new Array();
+        var Student = {
+            ID: id,
+            Status: i,
+            ViewType:"TimeTableConfig"
+        }
+        Items.push(Student);
+
+        $.ajax({
+            url: "/api/TimeTableApi/SaveTiming",
+            type: "Post",
+            data: JSON.stringify(Items),
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                alert(data.Msg);
+                search();
+            }
+        });
+    }
+
+    function Delete(id)
+    {
+        var result = window.confirm('Are you sure to delete this record?');
+        if (result == true) {
+            $.ajax({
+                url: "/api/TimeTableApi/DeleteRecord",
+                type: "Post",
+                data: JSON.stringify([id,"TimeTableConfig"]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    alert(data.Msg);
+                    search();
+                }
+            });
+        }
+    }
+
+    function GoToCreateTimeTable(x)
+    {
+        window.location.href = "/TimeTable/CreateTimeTable?id="+x;
+    }
+</script>
+

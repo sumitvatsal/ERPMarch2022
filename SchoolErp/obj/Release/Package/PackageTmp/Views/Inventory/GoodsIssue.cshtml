@@ -1,0 +1,1182 @@
+﻿
+@{
+    ViewBag.Title = "GoodsIssue";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<style type="text/css">
+    .imgIcon {
+        width: 0.5%;
+        height: 0.5%;
+    }
+
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #mytable td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #mytable {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 98%;
+        margin: 15px;
+    }
+
+        #mytable td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #mytable tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #mytable tr:hover {
+            background-color: #ddd;
+        }
+
+        #mytable th {
+            padding-top: 8px;
+            padding-bottom: 8px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+<link href="~/css/bower_components/select2/dist/css/select2.min.css" rel="stylesheet" />
+
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<section class="content">
+    <div class="box box-solid">
+        <div class="et">
+            <div class="box-header with-border">
+                <h3 class="box-title">Goods Issue</h3>
+
+            </div>
+        </div>
+        <div class="alert alert-success alert-dismissible centerSuccess" id="divsuccesmsg" style="display:none">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <h4>
+                <i class="icon fa fa-check"></i>
+                success! <span Id="spsuccessMsg"></span>
+            </h4>
+
+        </div>
+
+        <div class="box-body">
+            <div class="row">
+
+                <div class="content">
+
+
+
+                    <div class="row">
+                        <form role="form" id="form1" name="form1">
+                            <div class="col-sm-12">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title"> New Goods Issue</h4>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="panel-body">
+                                            <input type="text" id="unitId" hidden />
+                                            <div class="row">
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label for="Country" class="req">Sale <span class="requird">*</span></label>
+                                                    <select class="form-control" id="ddlSale" ng-model="ddlSale" valuefield="Id" textfield="Name" onchange="BindUnit()" @*blankRowValue="0" blankRowText="--Select--"*@></select>
+                                                </div>
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label class="req" for="Salarydetails_unit">Customer</label>
+                                                    <input class="form-control" readonly id="txtCustomer" name="txtCustomer" type="text" ng-model="txtCustomer" />
+                                                </div>
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label for="Country" class="req">Employee <span class="requird">*</span></label>
+                                                    <select class="form-control" id="ddlEmployee" ng-model="ddlEmployee" valuefield="Id" textfield="Name" @*blankRowValue="0" blankRowText="--Select--"*@></select>
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div id="sandbox" class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label for="simple">Date</label>
+                                                    <input id="simple" type="text" class="form-control" value="">
+                                                </div>
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label class="req" for="Salarydetails_unit">Reference</label>
+                                                    <input class="form-control" id="txtReference" name="txtReference" type="text" ng-model="txtReference" />
+                                                </div>
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="req" for="Salarydetails_unit">Total Quantity</label>
+                                                    <input class="form-control" value="1.00" readonly id="txtTotal" name="txtTotal" type="text" ng-model="txtTotal" />
+                                                </div>
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label>
+                                                        Line Item
+                                                    </label>
+                                                    <div>
+                                                        <a href="#" style="width: 150px;float: right;margin-right: 8px" id="btnadd" class="btn btn-block btn-success" onclick="openModal()">Add</a>
+                                                    </div>
+                                                </div>
+
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-sm-6 col-md-6 col-lg-6">
+                                                    <label class="req" for="Salarydetails_unit">Remarks</label>
+                                                    <textarea class="form-control" id="txtRemark"></textarea>
+                                                </div>
+                                                <div class="form-group col-sm-6 col-md-6 col-lg-6">
+                                                    <label class="req" for="Salarydetails_unit">Journal Remarks</label>
+                                                    <textarea class="form-control" id="txtJournal"></textarea>
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-5">
+                                                    <div class="form_sep">
+                                                        <input class="btn btn-info" id="btnSave" type="button" value="Save">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="hdnID" />
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <table border="1" id="mytable" class="table table-bordered table-striped tbl20 htmlTempletes">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        ProductName
+                                    </th>
+                                    <th>
+                                        WareHouseName
+                                    </th>
+                                    <th>
+                                        Quantity
+                                    </th>
+                                    <th>Description</th>
+                                    
+                                    <th></th>
+                                    <th></th>
+
+                                </tr>
+                            </thead>
+
+                            <tbody id="tbodyEmployeeLeaveRequestDetails"></tbody>
+                        </table>
+                        <script type="text/html" id="tbodyEmployeeLeaveRequestDetailsJTemplte">
+                            {#foreach $T as Datashort}
+                            <tr>
+
+                                <td class="ProductName">
+                                    { $T.Datashort.ProductName}
+                                </td>
+                                <td>
+                                    { $T.Datashort.WarehouseName}
+                                </td>
+
+                                <td>
+                                    { $T.Datashort.Quantity}
+                                </td>
+                                <td>
+                                    { $T.Datashort.Description}
+                                </td>
+                                <td>
+                                    <input type="button" onclick="Edit(this)" value="Edit" />
+
+                                </td>
+
+                                <td>
+                                    <input type="button" onclick="Remove(this)" value="Remove" hidden />
+                                </td>
+                                <td style="display:none;">
+                                    { $T.Datashort.ProductId}
+                                </td>
+
+
+                                <td style="display: none;">
+                                    { $T.Datashort.WarehouseId}
+                                </td>
+                                <td style="display: none;">
+                                    { $T.Datashort.ID}
+                                </td>
+
+                                @*<td>
+            <i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" onclick="Edit({ $T.Datashort.ID})" title="Edit"></i>
+        </td>
+        <td>
+            <i class="fa fa-fw fa-trash" style="cursor:pointer" onclick="Delete({ $T.Datashort.ID })" title="Delete"></i>
+
+        </td>*@
+
+                            </tr>
+                            {#/for}
+                        </script>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" onclick="refreshControls()">&times;</button>
+                    <h4 class="modal-title">New Purchase Details</h4>
+                </div>
+                <div class="modal-body">
+                    <form role="form" id="form1" name="form1">
+
+                        <div class="row">
+                            <div class="form-group col-sm-10 col-md-10 col-lg-10">
+                                <label for="Country" class="req">Product <span class="requird">*</span></label>
+                                <select class="form-control" id="ddlProduct" ng-model="ddlProduct" valuefield="Id" textfield="Name" @*blankRowValue="0" blankRowText="--Select--"*@></select>
+                            </div>
+
+                            <input type="text" id="txtName" hidden />
+                            <input type="text" id="UId" hidden />
+
+                            <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                <label class="invisible">
+                                    Button
+                                </label>
+                                <div>
+                                    <a class="btn btn-success btn-sm" href="/Inventory/NewProducts"><i class="fa fa-plus-square"></i></a>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-10 col-md-10 col-lg-10">
+                                <label for="Country" class="req">WareHouse <span class="requird">*</span></label>
+                                <select class="form-control" id="ddlWare" ng-model="ddlWare" valuefield="Id" textfield="Name" @*blankRowValue="0" blankRowText="--Select--"*@></select>
+                            </div>
+                            <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                <label class="req" for="Salarydetails_unit">Quantity <span class="requird">*</span> </label>
+                                <input class="form-control" value="1.00" id="txtQuantity" name="txtQuantity" type="text" ng-model="txtQuantity" onkeypress="return isNumber(this,event)" />
+                            </div>
+                            <input type="text" id="txtWare" hidden />
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-12 col-md-12 col-lg-12">
+                                <label class="req" for="Salarydetails_unit">Description</label>
+                                <textarea class="form-control" id="txtDesc"></textarea>
+                            </div>
+
+
+                        </div>
+                        <div class="box-footer">
+                            <input class="btn btn-info" id="btnSumit" onclick="addRow()" type="button" value="Save">
+                            <input class="btn btn-info" id="btnupdate" onclick="update()" type="button" value="Update" style="visibility:hidden;">
+
+                        </div>
+
+
+
+                    </form>
+
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="alert alert-success centerSuccess" id="divSucesEmail" style="display:none">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h4>
+            <i class="icon fa fa-check"></i>
+            <span Id="sentEmailMsg"></span>
+        </h4>
+
+    </div>
+</section>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        //var Id = getQuerystring("Id");
+        //if (typeof (Id) != "undefined") {
+
+        //    $("#loader").fadeIn();
+        //    callServiceMethod(JSON.stringify([Id]), "/api/AccountsAPI", "editGradeDetasilById1", false, "", "", false, "", true, editGradeDetasilById_scss, "", "", "");
+        //}
+    })
+
+    function editGradeDetasilById_scss(p1, p2, p3, datas) {
+
+        $("#loader").fadeOut();
+        setControlValue("txtReference", datas.Reference);
+        setControlValue("txtCustomer", datas.Supplier);
+        setControlValue("txtTotal", datas.Quantity);
+        setControlValue("simple", datas.Date);
+        setControlValue("ddlEmployee", datas.Employee);
+        setControlValue("ddlSale", datas.Bil);
+        setControlValue("txtRemark", datas.Remarks);
+        setControlValue("txtJournal", datas.Remarks);
+        getsalayHeadDetails(datas.Id);
+        // $('#ddlSchoolName').val(employee["SchoolID"])
+    }
+
+    function getsalayHeadDetails(id) {
+        callServiceMethod(JSON.stringify([id]), "/api/PayrollAPI", "getsalayHeadDetails", false, "", "", false, "", true, getsalayHeadDetails_scss, "", "", "");
+
+        //callJTemplateServiceMethod(JSON.stringify([id]), "/api/PayrollAPI", "getsalayHeadDetails",
+        //     "tbodyEmployeeDeduction", "tbodyEmployeeDeductionJTemplte", false, "", "", "", "");
+    }
+
+    function getsalayHeadDetails_scss(p1, p2, p3, datas) {
+        setTimeout(function () {
+            if (datas.length > 0) {
+                for (var i = 0; i < datas.length; i++) {
+                    var d = "#txtEarningValue_" + datas[i].HeadId;
+                    setControlValue("txtEarningValue_" + datas[i].HeadId + "", datas[i].HeadAmount);
+                    setControlValue("txtDeductionValue_" + datas[i].HeadId + "", datas[i].HeadAmount);
+                    setControlValue("ddlDeductionType_" + datas[i].HeadId + "", datas[i].Type);
+
+                    //    $("#txtEarningValue_1002").val(datas[i].HeadAmount);
+                }
+            }
+        }, 2000)
+
+    }
+</script>
+<script type="text/javascript">
+
+    function addRow() {
+        debugger;
+        if ($("#ddlProduct").val() == "0") {
+            alert("Please select Product  !");
+            $("#ddlProduct").focus()
+            return false;
+
+        }
+        var ddlHead = $("#ddlWare");
+        if (ddlHead.val() == "0") {
+            alert("Please select Warehouse !");
+            ddlHead.focus()
+            return false;
+
+        }
+        var txtName = document.getElementById('txtName').value;
+        var txtWare = document.getElementById('txtWare').value;
+        var txtQuantity = document.getElementById('txtQuantity').value;
+        var txtDesc = document.getElementById('txtDesc').value;
+        var Productid = getControlValue('ddlProduct');
+        var Wid = getControlValue('ddlWare');
+        var table = document.getElementsByTagName('table')[0];
+
+        var newRow = table.insertRow(1);
+
+        var cel1 = newRow.insertCell(0);
+        var cel2 = newRow.insertCell(1);
+        var cel3 = newRow.insertCell(2);
+        var cel4 = newRow.insertCell(3);
+       var cel5 = newRow.insertCell(4);
+        var cel6 = newRow.insertCell(5);
+        var cell = newRow.insertCell(6);
+        var cell1 = newRow.insertCell(7);
+        var cell2 = newRow.insertCell(8);
+
+       
+
+
+        cel1.innerHTML = txtName;
+        cel2.innerHTML = txtWare;
+        cel3.innerHTML = txtQuantity;
+        cel4.innerHTML = txtDesc;
+        cell.innerHTML = Productid;
+        cell1.innerHTML = Wid;
+        cell2.innerHTML = "0";
+        cell1.style.display = "none";
+        cell.style.display = "none";
+        cell2.style.display = "none";
+
+        var btnRemove = document.createElement("INPUT");
+        btnRemove.type = "button";
+        btnRemove.value = "Remove";
+        btnRemove.setAttribute("onclick", "Remove(this);");
+        cel6.appendChild(btnRemove);
+
+        var btn = document.createElement("INPUT");
+        btn.type = "button";
+        btn.value = "Edit";
+        btn.setAttribute("onclick", "Edit(this);");
+        cel5.appendChild(btn);
+
+
+        $("#ddlProduct").val('0');
+        $("#ddlWare").val('0');
+        $("#txtQuantity").val('1.00');
+        $("#txtDesc").val('');
+        //sumcolumn();
+        $('#myModal').modal('hide');
+
+
+    }
+</script>
+<script>
+    function Remove(button) {
+        //Determine the reference of the Row using the Button.
+        var row = button.parentNode.parentNode;
+        var name = row.getElementsByTagName("TD")[0].innerHTML;
+        if (confirm("Do you want to delete: " + name)) {
+
+            //Get the reference of the Table.
+            var table = document.getElementById("mytable");
+
+            //Delete the Table row using it's Index.
+            table.deleteRow(row.rowIndex);
+
+        }
+        total();
+    };
+
+</script>
+<script>
+    function total() {
+        var sumVal = 0;
+
+        for (var i = 1; i < document.getElementById('mytable').rows.length; i++) {
+            sumVal = sumVal + parseInt(document.getElementById('mytable').rows[i].cells[2].innerHTML);
+        }
+        var result = parseFloat(sumVal);
+        $('#txtTotal').val(result);
+        localStorage.setItem("txtTotal", result)
+        $('#myModal').modal('hide');
+    }
+</script>
+<script type="text/javascript">
+    $("#ddlProduct").change(function () {
+        var ddlProduct = getControlValue("ddlProduct");
+        if (ddlProduct != null && (ddlProduct != -1) && (ddlProduct != undefined)) {
+            var SelectedText = $('#ddlProduct :selected').text();
+            $('#txtName').val(SelectedText);
+        }
+    });
+
+    $("#ddlWare").change(function () {
+        var ddlWare = getControlValue("ddlWare");
+        if (ddlWare != null && (ddlWare != -1) && (ddlWare != undefined)) {
+            var SelectedText = $('#ddlWare :selected').text();
+            $('#txtWare').val(SelectedText);
+        }
+    });
+    var date = new Date();
+    var today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    var optSimple = {
+        format: 'MM/dd/yyyy',
+        todayHighlight: true,
+        orientation: 'bottom right',
+        autoclose: true,
+        container: '#sandbox'
+    };
+
+    var optComponent = {
+        format: 'MM/dd/yyyy',
+        container: '#datePicker',
+        orientation: 'auto top',
+        todayHighlight: true,
+        autoclose: true
+    };
+
+    // SIMPLE
+    $('#simple').datepicker(optSimple);
+
+    // COMPONENT
+    $('#datePicker').datepicker(optComponent);
+
+    // ===================================
+
+    $('#datepicker1').datepicker({
+        format: "mm : dd : yyyy",
+        todayHighlight: true,
+        autoclose: true,
+        container: '#box1',
+        orientation: 'top right'
+    });
+
+    $('#datepicker2').datepicker({
+        format: 'MM/dd/yyyy',
+        todayHighlight: true,
+        autoclose: true,
+        container: '#box2',
+        orientation: 'top right'
+    });
+
+    $('#datepicker1, #datepicker2, #simple, #datePicker').datepicker('setDate', today);
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        debugger;
+        var ID = getQuerystring("id");
+        if (ID != null) {
+            $.ajax({
+                type: 'Post',
+                url: '/api/AccountsAPI/PurchaseInvoiceList1',
+                data: JSON.stringify([ID]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    $('#hdnID').val(result[0].ID);
+                    $('#ddlSale').val(result[0].Bill);
+                    $('#txtCustomer').val(result[0].Supplier);
+                    $('#ddlEmployee').val(result[0].EmployeeId);
+                    $('#unitId').val(result[0].CID);
+                    $('#simple').val(result[0].Date);
+                    $('#txtReference').val(result[0].Reference);
+                    $('#txtTotal').val(result[0].Quantity);
+                    $('#txtRemark').val(result[0].Remarks);
+                    $('#txtJournal').val(result[0].JournalRemarks);
+                    
+                  //  $('#btnSumit') = Update;
+                    //fillDataTable(ID);
+
+                }
+            });
+            
+            localStorage.removeItem("EditBill");
+        }
+        fillDataTable(ID);
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser, SchoolID]), "/api/Default", "getpurch1", "ddlSale", false, "", "", "", "");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser, SchoolID]), "/api/Default", "getEmployee", "ddlEmployee", false, "", "", "", "");
+
+        setControlValue("hdnID", 0);
+        /*        setControlValue("hdnStatus", 1);*/
+        $('.dtpicker').datepicker({
+            //dateFormat: 'dd/mm/yy' ,
+            autoclose: true,
+            format: 'dd/mm/yyyy'
+        });
+
+
+        var ID = getQuerystring("id");
+        if (typeof (ID) != "undefined") {
+            setControlValue("hdn", ID);//
+
+            //GetValues(ID);
+
+        }
+
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                txtQuantity: "required",
+            },
+            messages: {
+                txtQuantity: "Please Enter Quantity (Open New Window)",
+            }
+        })
+        //callServiceMethodForDDl("", "/api/StudentApi", "GetLeaveStatus", "ddlReqStatus", false, "", "", "", "");
+    });
+    function openModal() {
+        $('#myModal').modal('show');
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser, SchoolID]), "/api/Default", "GetProducts", "ddlProduct", false, "", "", "", "");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser, SchoolID]), "/api/Default", "GetWareHouses", "ddlWare", false, "", "", "", "");
+
+    }
+
+
+    function successMsg(p1, p2, p3, datas) {
+
+        $("#loader").fadeOut();
+
+        setTimeout(function () {
+            $('#example1').DataTable({
+
+                dom: 'lBfrtip',
+                bRetrieve: true,
+                bDestroy: true,
+                'columnDefs': [{
+                    "targets": -1,
+                    "orderable": false
+                }],
+            });
+        }, 1000);
+    }
+    function BindUnit() {
+        var productId = $('#ddlSale').val();
+
+        $.ajax({
+            type: 'Get',
+            url: '/api/Default/GetInvoiceNo',
+            data: { ProductId: productId },
+            dataType: 'json',
+            success: function (unitValue) {
+                var unitRecord = unitValue.split(',');
+                var unitName = unitRecord[0];
+                var unitId = unitRecord[1];
+                unitValue = unitValue.replace("\\\"", "");
+                $('#txtCustomer').val(unitName);
+                $('#unitId').val(unitId);
+            }
+        });
+    }
+
+    $("#btnSave").click(function () {
+        debugger;
+
+        if ($("#ddlSale").val() == "0") {
+            alert("Please select Sale  !");
+            $("#ddlSale").focus()
+            return false;
+
+        }
+        var ddlHead = $("#ddlEmployee");
+        if (ddlHead.val() == "0") {
+            alert("Please select Employee !");
+            ddlHead.focus()
+            return false;
+
+        }
+
+        var ID = getControlValue("hdnID");
+        
+        var PurchaseId = getControlValue("ddlSale")
+        var SupplierId = getControlValue("unitId")
+        var EmployeeId = getControlValue("ddlEmployee")
+        var Date = getControlValue("simple")
+        var Total = getControlValue("txtTotal")
+        var Ref = getControlValue("txtReference")
+
+        var Remark = getControlValue("txtRemark")
+        var Journal = getControlValue("txtJournal")
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+
+
+        Save(ID, PurchaseId, SupplierId, EmployeeId, Date, Ref, Total, Remark, Journal, SchoolID);
+        var table = document.getElementById('mytable');
+
+        for (var i = 1; i < table.rows.length; i++) {
+            var ID1 = getControlValue("hdnID");
+            var Name = table.rows[i].cells[0].innerHTML.replace(/^\s+|\s+$/g, '').replace(/\s/g, '');
+            var WareHouses = table.rows[i].cells[1].innerHTML.replace(/^\s+|\s+$/g, '').replace(/\s/g, '');
+            var Product = table.rows[i].cells[6].innerHTML.replace(/^\s+|\s+$/g, '').replace(/\s/g, '');
+            var Warehouseid = table.rows[i].cells[7].innerHTML.replace(/^\s+|\s+$/g, '').replace(/\s/g, '');
+            var Quantity = table.rows[i].cells[2].innerHTML.replace(/^\s+|\s+$/g, '').replace(/\s/g, '');
+            var desc = table.rows[i].cells[3].innerHTML.replace(/^\s+|\s+$/g, '').replace(/\s/g, '');
+            var IDD = table.rows[i].cells[8].innerHTML.replace(/^\s+|\s+$/g, '').replace(/\s/g, '');
+
+            Save2(ID1, Name, WareHouses, Product, Warehouseid, Quantity, desc,IDD);
+        }
+        window.location.href = "/Inventory/GoodsIssueList";
+    });
+
+    function Save(ID, PurchaseId, SupplierId, EmployeeId, Date, Ref, Total, Remark, Journal, SchoolID) {
+
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+            $.ajax({
+                url: "/api/AccountsAPI/SaveRecord",
+                type: "Post",
+                data: JSON.stringify(["NewGoodsIssueMain", ID, PurchaseId, SupplierId, EmployeeId, Date, Ref, Total, Remark, Journal, SchoolID]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    $("#loader").fadeOut();
+                    if (data == 1) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Bill Added Successfully ");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+
+                    }
+                    else if (data == 2) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Bill Updated Successfully ");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+
+                    }
+                    else if (data == -1) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Bill name already Exist");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+                    }
+                    else {
+                        alert("Some Error!!");
+                    }
+                }
+            });
+
+        }
+    }
+    
+    function Save1(ID, PurchaseId, SupplierId, EmployeeId, Date, Ref, Total, Remark, Journal) {
+
+
+        $("#loader").fadeIn();
+        $.ajax({
+            url: "/api/AccountsAPI/SaveRecord",
+            type: "Post",
+            data: JSON.stringify(["NewGoodsIssueMain", ID, PurchaseId, SupplierId, EmployeeId, Date, Ref, Total, Remark, Journal]),
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                $("#loader").fadeOut();
+                if (data == 1) {
+                    $("#divsuccesmsg").fadeIn();
+
+                    $("#spsuccessMsg").html("NewCustomers Added Successfully ");
+                    setTimeout(function () {
+                        $("#divsuccesmsg").fadeOut();
+                        $("#spsuccessMsg").html("");
+                    }, 2000)
+
+                }
+                else if (data == 2) {
+                    $("#divsuccesmsg").fadeIn();
+
+                    $("#spsuccessMsg").html("NewCustomers Updated Successfully ");
+                    setTimeout(function () {
+                        $("#divsuccesmsg").fadeOut();
+                        $("#spsuccessMsg").html("");
+                    }, 2000)
+
+                }
+                else if (data == -1) {
+                    $("#divsuccesmsg").fadeIn();
+
+                    $("#spsuccessMsg").html("NewCustomers name already Exist");
+                    setTimeout(function () {
+                        $("#divsuccesmsg").fadeOut();
+                        $("#spsuccessMsg").html("");
+                    }, 2000)
+                }
+                else {
+                    alert("Some Error!!");
+                }
+                ResetModal();
+                fillDataTable();
+                //$('#myModal').modal('hide');
+
+            }
+        });
+
+
+    }
+    function Save3(ID, Name, WareHouses, Product, Warehouseid, Quantity, desc) {
+
+
+        $("#loader").fadeIn();
+        $.ajax({
+            url: "/api/AccountsAPI/SaveRecord",
+            type: "Post",
+            data: JSON.stringify(["NewGoodsIssue", ID, Name, WareHouses, Product, Warehouseid, Quantity, desc]),
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                $("#loader").fadeOut();
+                if (data == 1) {
+                    $("#divsuccesmsg").fadeIn();
+
+                    $("#spsuccessMsg").html("NewCustomers Added Successfully ");
+                    setTimeout(function () {
+                        $("#divsuccesmsg").fadeOut();
+                        $("#spsuccessMsg").html("");
+                    }, 2000)
+
+                }
+                else if (data == 2) {
+                    $("#divsuccesmsg").fadeIn();
+
+                    $("#spsuccessMsg").html("NewCustomers Updated Successfully ");
+                    setTimeout(function () {
+                        $("#divsuccesmsg").fadeOut();
+                        $("#spsuccessMsg").html("");
+                    }, 2000)
+
+                }
+                else if (data == -1) {
+                    $("#divsuccesmsg").fadeIn();
+
+                    $("#spsuccessMsg").html("NewCustomers name already Exist");
+                    setTimeout(function () {
+                        $("#divsuccesmsg").fadeOut();
+                        $("#spsuccessMsg").html("");
+                    }, 2000)
+                }
+                else {
+                    alert("Some Error!!");
+                }
+                ResetModal();
+                fillDataTable();
+                //$('#myModal').modal('hide');
+
+            }
+        });
+
+
+    }
+
+
+    function ResetAll() {
+        setControlValue("txtName", "");
+        setControlValue("txtContact", "");
+        setControlValue("txtTitle", "");
+        setControlValue("ddlCountry", "");
+        setControlValue("ddlState", "");
+        setControlValue("ddlCity", "");
+        setControlValue("ddlGroup", "");
+        setControlValue("txtAddress", "");
+        setControlValue("ddlRegin", "");
+        setControlValue("txtPostal", "");
+        setControlValue("txtPhone", "");
+        setControlValue("txtWebsite", "");
+        setControlValue("txtFax", "");
+        setControlValue("txtemail", "");
+        setControlValue("txtEmaiAddress", "");
+        setControlValue("txtBalance", "");
+    }
+
+    function ResetModal() {
+        setControlValue("txtName", "");
+        setControlValue("txtContact", "");
+        setControlValue("txtTitle", "");
+        setControlValue("ddlCountry", "");
+        setControlValue("ddlState", "");
+        setControlValue("ddlCity", "");
+        setControlValue("ddlGroup", "");
+        setControlValue("txtAddress", "");
+        setControlValue("ddlRegin", "");
+        setControlValue("txtPostal", "");
+        setControlValue("txtPhone", "");
+        setControlValue("txtWebsite", "");
+        setControlValue("txtFax", "");
+        setControlValue("txtemail", "");
+        setControlValue("txtEmaiAddress", "");
+        setControlValue("txtBalance", "");
+        setControlValue("hdnID", 0);
+    }
+
+</script>
+<script>
+    function fillDataTable(id) {
+        debugger;
+        var t = $('#mytable').DataTable();
+        t.destroy();
+
+        callJTemplateServiceMethod(JSON.stringify([id]), "/api/AccountsAPI", "GoodIssueDetailList",
+            "tbodyEmployeeLeaveRequestDetails", "tbodyEmployeeLeaveRequestDetailsJTemplte", true, successMsg, "", "", "");
+    }
+
+</script>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        debugger;
+        $('#btnSumit').click(function () {
+            total();
+    
+        });
+    });
+</script>
+<style type="text/css">
+
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    .grid td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    .grid {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        .grid td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        .grid tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .grid tr:hover {
+            background-color: #ddd;
+        }
+
+        .grid th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                ddlDesignation: {
+                    selectcheck: true
+                },
+
+                txtGradeName: "required",
+
+
+
+            },
+            messages: {
+
+                txtGradeName: "Please Enter Grade Name",
+                ddlDesignation: "Please Select Designation"
+
+
+            }
+        })
+        jQuery.validator.addMethod('selectcheck', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+
+
+    });
+</script>
+<script type="text/javascript">
+    function isNumber(txt, evt) {
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode == 46) {
+            //Check if the text already contains the . character
+            if (txt.value.indexOf('.') === -1) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if (charCode > 31 &&
+                (charCode < 48 || charCode > 57))
+                return false;
+        }
+        return true;
+    }
+</script>
+<script>
+    function update() {
+        debugger;
+        if ($("#ddlProduct").val() == "0") {
+            alert("Please select Product  !");
+            $("#ddlProduct").focus()
+            return false;
+
+        }
+        var ddlHead = $("#ddlWare");
+        if (ddlHead.val() == "0") {
+            alert("Please select Warehouse !");
+            ddlHead.focus()
+            return false;
+
+        }
+
+        var row = document.getElementById('UId').value;
+        var table = document.getElementById('mytable');
+        table.rows[row].cells[0].innerHTML = document.getElementById('txtName').value;
+        table.rows[row].cells[1].innerHTML = document.getElementById('txtWare').value;
+        table.rows[row].cells[2].innerHTML = document.getElementById('txtQuantity').value;
+        table.rows[row].cells[3].innerHTML = document.getElementById('txtDesc').value;
+        table.rows[row].cells[6].innerHTML = getControlValue('ddlProduct');
+        table.rows[row].cells[7].innerHTML = getControlValue('ddlWare');
+
+
+
+
+
+
+
+
+        total();
+
+        $("#ddlProduct").val('0');
+        $("#ddlWare").val('0');
+        $("#txtQuantity").val('1.00');
+        $("#txtDesc").val('');
+        //sumcolumn();
+        $('#myModal').modal('hide');
+        document.getElementById('btnSumit').style.visibility = 'visible';
+        document.getElementById('btnupdate').style.visibility = 'hidden';
+
+
+
+    }
+</script>
+<script>
+    function Edit(button) {
+        debugger;
+        openModal();
+        var row = button.parentNode.parentNode;
+        var rowindex = button.parentNode.parentNode.rowIndex;
+        //var rowindex1 = button;
+        var sumVal = 0;
+
+        for (var i = 1; i < document.getElementById('mytable').rows.length; i++) {
+            sumVal = sumVal + parseInt(document.getElementById('mytable').rows[i].cells[2].innerHTML);
+        }
+        var txtName = row.getElementsByTagName("TD")[0].innerHTML.replace(/^\s+|\s+$/g, '').replace(/\s/g, '');
+        var txtWare = row.getElementsByTagName("TD")[1].innerHTML.replace(/^\s+|\s+$/g, '').replace(/\s/g, '');
+        var txtQuantity = row.getElementsByTagName("TD")[2].innerHTML.replace(/^\s+|\s+$/g, '').replace(/\s/g, '');
+        var txtDesc = row.getElementsByTagName("TD")[3].innerHTML.replace(/^\s+|\s+$/g, '').replace(/\s/g, '');
+        //var txtDesc1 = row.getElementsByTagName("TD")[4].innerHTML;
+        //var txtDesc2 = row.getElementsByTagName("TD")[5].innerHTML;
+        var Productid = row.getElementsByTagName("TD")[6].innerHTML.replace(/^\s+|\s+$/g, '').replace(/\s/g, '');
+        var Wid = row.getElementsByTagName("TD")[7].innerHTML.replace(/^\s+|\s+$/g, '').replace(/\s/g, '');
+
+
+        $('#UId').val(rowindex);
+        $('#txtName').val(txtName);
+        $('#txtWare').val(txtWare);
+        $('#txtQuantity').val(txtQuantity);
+        $('#txtDesc').val(txtDesc);
+        $('#ddlProduct').val(Productid);
+        $('#ddlWare').val(Wid);
+        document.getElementById('btnSumit').style.visibility = 'hidden';
+        document.getElementById('btnupdate').style.visibility = 'visible';
+
+        // $('#ddlProduct').val(name);
+        // document.getElementById('ddlProduct').attr = name;
+        //$('#myModal').modal('Show');
+
+    }
+
+   
+</script>
+<script>
+    function Save2(ID, Name, WareHouses, Product, Warehouseid, Quantity, desc,IDD) {
+        debugger;
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+            $.ajax({
+                url: "/api/AccountsAPI/SaveRecord",
+                type: "Post",
+                data: JSON.stringify(["NewGoodsIssue", ID, Name, WareHouses, Product, Warehouseid, Quantity, desc,IDD]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    $("#loader").fadeOut();
+                    if (data == 1) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Bill Added Successfully ");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+
+                    }
+                    else if (data == 2) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Bill Updated Successfully ");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+
+                    }
+                    else if (data == -1) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Bill name already Exist");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+                    }
+                    else {
+                        alert("Some Error!!");
+                    }
+
+                }
+            });
+
+        }
+    }
+
+</script>

@@ -1,0 +1,579 @@
+﻿
+@{
+    ViewBag.Title = "Employees";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section class="content">
+
+
+    <div class="box box-solid">
+        <div class="et">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-search"></i> Employee Reports</h3>
+
+            </div>
+        </div>
+
+
+        <div class="box-body">
+            <div class="row" id="divShowColumnDetails">
+
+
+
+
+            </div>
+            <script type="text/html" id="divShowColumnDetailsJTemplte">
+                {#foreach $T as Datashort}
+                <div class="col-sm-3">
+                    <div class="form-group field-empinfosearch-emp_designation_id">
+                        <label><input type="checkbox" value="{ $T.Datashort.Section}" />{ $T.Datashort.Section}</label>
+                        <div class="help-block"></div>
+                    </div>
+                </div>
+                {#/for}
+            </script>
+        </div>
+        <div class="box-footer">
+            <input class="btn btn-primary" onclick="getStudentReports()" value="Get Report" type="button" />
+        </div>
+
+
+    </div>
+</section>
+<section class="content" style="display:none" id="showBindDetails">
+
+
+    <div class="box box-solid">
+        <div class="et">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-search"></i> Employee Filters</h3>
+
+            </div>
+        </div>
+
+        <form id="w0" action="/employee/emp-master/index" method="get">
+            <div class="box-body">
+                <div class="row">
+
+                    <div class="col-sm-4">
+                        <div class="form-group field-empinfosearch-emp_designation_id">
+                            <label for="Country" class="req">School<span class="requird">*</span></label>
+                            <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name"></select>
+
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-sm-4">
+                        <div class="form-group field-empinfosearch-emp_designation_id">
+                            <label class="control-label" for="empinfosearch-emp_designation_id">Department</label>
+                            <select class="form-control" id="txtDepartment" name="txtDepartment" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" ng-model="txtDepartment"></select>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+
+                        <div class="form-group field-empinfosearch-emp_designation_id">
+                            <label class="control-label" for="empinfosearch-emp_designation_id">Designation</label>
+                            <select class="form-control" id="ddlDesgination" name="ddlDesgination" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" ng-model="ddlDesgination"></select>
+
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label class="control-label" for="empinfosearch-emp_designation_id">Status</label>
+                            <select class="form-control" id="ddlStatus" blankRowValue="0" blankRowText="--Select--">
+                                <option value="0">--Select--</option>
+                                <option value="true">Active</option>
+                                <option value="false">Deactive</option>
+                            </select>
+
+                            <div class="help-block"></div>
+                        </div>
+
+                    </div>
+
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label class="control-label" for="empinfosearch-emp_designation_id">Staff</label>
+                            <select class="form-control" name="ddlStaffType" data-required="true" valuefield="Id" textfield="Name" id="ddlStaffType" blankRowValue="0" blankRowText="--Select--"></select>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-sm-4" ">
+                        <div class="form-group field-empinfosearch-searchinput">
+                            <label class="control-label" for="empinfosearch-emp_designation_id">Employee Name</label>
+                            <input type="text" id="txtEmployeeName" class="form-control" placeholder="Enter Employee First/Last Name or Email Id.">
+
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="form-group field-empinfosearch-emp_info_id">
+                            <label class="control-label" for="empinfosearch-emp_designation_id">Employee Code</label>
+                            <input type="text" id="txtEmployeeCode" class="form-control" placeholder="Enter Employee Id">
+
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box-footer">
+                <input class="btn btn-primary" onclick="searchEmployeeDetails()" value="Search" type="button" />
+                <a class="btn btn-default" onclick="restClear()" href="javascript:void(0)">Reset</a>
+                @*<input type="button" id="create_pdf" value="Export Pdf" onclick="pdfExport()" class="btn btn-primary" />
+
+                    <a href="#" class="btn btn-primary" onClick="$('#example1').tableExport({ type: 'excel', escape: 'false' });">Excel Exports</a>*@
+            </div>
+
+        </form>
+    </div>
+
+
+
+    <div class="col-md-12">
+        <!-- general form elements -->
+        <div class="box box-primary">
+            <div class="box-body">
+                <div class="form-group">
+
+                    <div id="divmonthlyAttendenceReport" style="overflow-x: auto;">
+                        <table id="example1" style="max-width:1800px" class="table table-bordered table-striped tbl20 htmlTempletes">
+                            <thead id="tblempheaderDetails">
+                                <tr>
+                                  
+                                    <th style="display:none"   class="Error"  >Error</th>
+                                    <th style="display:none" class="EmployeeCode">EmployeeCode</th>
+                                    <th style="display:none" class="FirstName">FirstName</th>
+                                    <th style="display:none" class="MiddleName">MiddleName</th>
+                                    <th style="display:none" class="LastName">Last Name</th>
+                                    <th style="display:none" class="School">School</th>
+                                    <th style="display:none" class="Department">Department</th>
+                                    <th style="display:none" class="Designation">Designation</th>
+                                    <th style="display:none" class="Mobile">Mobile</th>
+                                    <th style="display:none" class="Email">EmailId</th>
+                                    <th style="display:none" class="Status">Status</th>
+
+
+                                    <th style="display:none" class="JoiningDate">JoiningDate</th>
+                                    <th style="display:none" class="Qualification">Qualification</th>
+                                    <th style="display:none" class="Experience">Experience</th>
+                                    <th style="display:none" class="Staff">Staff</th>
+                                    <th style="display:none" class="DOB">DOB</th>
+                                    <th style="display:none" class="AdharNo">AdhaarNo</th>
+                                    <th style="display:none" class="BiometricID">BiometricId</th>
+                                    <th style="display:none" class="AccountNumber">AccountNumber</th>
+                                    <th style="display:none" class="IFSCCode">IFSCCode</th>
+                                    <th style="display:none" class="PFNo"> PFNo</th>
+                                    <th style="display:none" class="PANNO">PANNO</th>
+                                    <th style="display:none" class="ESINO">ESINO</th>
+                                    <th style="display:none" class=" BankName">BankName</th>
+
+
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyEmployeeDetails"></tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <script type="text/html" id="divEmployeeDetailsJTemplte">
+            {#foreach $T as Datashort}
+            <tr>
+                <td style="display:none" class="Error">
+                    { $T.Datashort.Employeecode}
+                </td>
+                <td style="display:none" class="EmployeeCode">
+                    { $T.Datashort.Employeecode}
+                </td>
+                <td style="display:none" class="FirstName">
+                    { $T.Datashort.FName}
+                </td>
+                <td style="display:none" class="MiddleName">
+                    { $T.Datashort.MName}
+                </td>
+                <td style="display:none" class="LastName">
+                    { $T.Datashort.LName}
+                </td>
+                <td style="display:none" class="School">
+                    { $T.Datashort.School}
+                </td>
+                <td style="display:none" class="Department">
+                    { $T.Datashort.Department}
+                </td>
+                <td style="display:none" class="Designation">
+                    { $T.Datashort.Designation}
+                </td>
+                <td style="display:none" class="Mobile">
+                    { $T.Datashort.Mobile}
+                </td>
+                <td style="display:none" class="Email">
+                    { $T.Datashort.Email}
+                </td>
+                <td style="display:none" class="Status">
+                    <a href="#" id="EmpStatus_{ $T.Datashort.Id}" style="background-color:{ $T.Datashort.Extra10};color:white;padding: 4px;border-radius: 8px;">  { $T.Datashort.Status}</a>
+                </td>
+
+
+                <td style="display:none" class="JoiningDate">{ $T.Datashort.JoiningDate}</td>
+                <td style="display:none" class="Qualification">{ $T.Datashort.qualfication}</td>
+                <td style="display:none" class="Experience">{ $T.Datashort.TotalExperience}</td>
+                <td style="display:none" class="Staff">{ $T.Datashort.UserType}</td>
+                <td style="display:none" class="DOB">{ $T.Datashort.DOB}</td>
+                <td style="display:none" class="AdharNo">{ $T.Datashort.AdhaarNo}</td>
+                <td style="display:none" class="BiometricID">{ $T.Datashort.BiometricId}</td>
+                <td style="display:none" class="AccountNumber">{ $T.Datashort.AccountNumber}</td>
+                <td style="display:none" class="IFSCCode">{ $T.Datashort.IfscCode}</td>
+                <td style="display:none" class="PFNo">{ $T.Datashort.PfNo}</td>
+                <td style="display:none" class="PANNO">{ $T.Datashort.PANNo}</td>
+                <td style="display:none" class="ESINO">{ $T.Datashort.EsiNo}</td>
+                <td style="display:none" class="BankName">{ $T.Datashort.BankName}</td>
+            </tr>
+            {#/for}
+        </script>
+
+
+    </div>
+
+    <div id="divActualGridClone"></div>
+</section>
+<!-- DataTables -->
+
+
+
+
+
+
+
+
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+
+
+
+<link href="~/js/PDFExcelDatatable/buttons.dataTables.min.css" rel="stylesheet" />
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+<script src="~/js/jsExcel/tableExport.js"></script>
+<script src="~/js/jsExcel/jquery.base64.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script>
+<script src="~/js/jsExcel/html2canvas.js"></script>
+
+
+<script src="~/js/jsExcel/base64.js"></script>
+
+
+
+
+<script src="~/js/PDFExcelDatatable/dataTables.buttons.min.js"></script>
+<script src="~/js/PDFExcelDatatable/jszip.min.js"></script>
+<script src="~/js/PDFExcelDatatable/pdfmake.min.js"></script>
+<script src="~/js/PDFExcelDatatable/vfs_fonts.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.html5.min.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.print.min.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.colVis.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+
+        //callServiceMethodForDDl("", "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+
+        //callServiceMethodForDDl("", "/api/EmployeeAPI", "getAllDepartments", "txtDepartment", false, "", "", "", "");
+        //callServiceMethodForDDl("", "/api/EmployeeAPI", "getAllDesignation", "ddlDesgination", false, "", "", "", "");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllDepartmentsBySchoolID", "txtDepartment", false, "", "", "", "");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllDesignationBySchoolID", "ddlDesgination", false, "", "", "", "");
+        callServiceMethodForDDl("", "/api/EmployeeAPI", "getAllStaff", "ddlStaffType", false, "", "", "", "");
+        $("#loader").fadeIn();
+
+
+        callJTemplateServiceMethod("", "/api/ReportingAPI", "getEmployeeColumnForGrids",
+            "divShowColumnDetails", "divShowColumnDetailsJTemplte", false, "", "", "", "");
+        $("#loader").fadeOut();
+
+    });
+
+
+    function searchEmployeeDetails() {
+        $("#loader").fadeIn();
+        var employye = {
+
+            Employeecode: getControlValue("txtEmployeeCode"),
+            School: getControlValue("ddlSchoolName"),
+            Department: getControlValue("txtDepartment"),
+            Designation: getControlValue("ddlDesgination"),
+            UserType: getControlValue("ddlStaffType"),
+            FName: getControlValue("txtEmployeeName"),
+            Status: getControlValue("ddlStatus")
+
+        }
+
+        var ddl = JSON.stringify(employye)
+
+        var t = $('#example1').DataTable();
+        t.destroy();
+        callJTemplateServiceMethod(ddl, "/api/ReportingAPI", "searchEmployeeReporting",
+            "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+    }
+
+
+</script>
+
+<script type="text/javascript">
+
+
+
+    function pdfExport() {
+        //    $("#example1").find("#example1").replace("tblempheaderDetails", "rahulbharti").end().appendTo("#divActualGridClone");
+        $("#example1").clone().appendTo("#divActualGridClone");
+        $("#divActualGridClone").find("#example1").attr("id", "example2");
+        $("#example2").find("#tblempheaderDetails").attr("id", "tblempheaderDetails1");
+        $("#example2").find("#tbodyEmployeeDetails").attr("id", "tbodyEmployeeDetails1");
+        $("#tblempheaderDetails1 tr th").each(function () {
+            if ($(this).css('display') == 'none') {
+                $(this).remove();
+            }
+        });
+        $("#divActualGridClone #tbodyEmployeeDetails1 td").each(function () {
+            if ($(this).css('display') == 'none') {
+                $(this).remove();
+            }
+        });
+
+        $("#loader").fadeIn();
+        var pdf = new jsPDF('p', 'pt', 'a2');
+
+        source = $('#divActualGridClone')[0];
+        pdf.text("Employee Details Reports", 5 + 360, 20);
+        specialElementHandlers = {
+
+            '#bypassme': function (element, renderer) {
+                return true
+            }
+        };
+        margins = {
+            top: 40,
+            bottom: 60,
+            left: 10,
+            width: 1000
+        };
+
+        pdf.fromHTML(
+            source, // HTML string or DOM elem ref.
+            margins.left, // x coord
+            margins.top, { // y coord
+                'width': "3200", // max width of content on PDF
+                'elementHandlers': specialElementHandlers
+            },
+
+            function (dispose) {
+                pdf.save('EmployeeReports.pdf');
+            }, margins);
+        $("#loader").fadeOut();
+        $("#divActualGridClone").html("");
+    }
+
+    function restClear() {
+
+        $("#txtDepartment").val(0);
+        $("#ddlDesgination").val(0);
+        $("#ddlStatus").val(0);
+        $("#txtEmployeeName").val("");
+        $("#txtEmployeeCode").val("");
+
+
+    }
+
+
+
+
+
+    function getStudentReports() {
+        var chekLength = 0;
+        var i = 0;
+
+        $("#divShowColumnDetails input[type=checkbox]").each(function () {
+            if (this.checked) {
+                i++;
+            }
+        })
+        if (i > 0) {
+
+
+            $("#loader").fadeIn();
+            var t = $('#example1').DataTable();
+            t.destroy();
+            var loginuser = (sessionStorage.getItem("userId"));
+            var typeuser = sessionStorage.getItem("type");
+
+            callJTemplateServiceMethod(JSON.stringify([loginuser, typeuser]), "/api/ReportingAPI", "getAllEmployeeDetailsReport",
+                "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+        }
+        else {
+            alert("Please Select at least 1 field");
+        }
+    }
+    function successMsg(p1, p2, p3, datas) {
+
+        if (datas.length > 0) {
+            $("#showBindDetails").fadeIn();
+            for (var i = 0; i < datas.length; i++) {
+
+                $("#EmpStatus_" + datas[i].Id).attr("style", "background-color:" + datas[i].Extra10 + ";color:white;border-radius: 30px;")
+            }
+        }
+        else {
+            $("#showBindDetails").fadeOut();
+        }
+
+        $("#divmonthlyAttendenceReport  th").each(function () {
+            $(this).attr("style", "display:none;width:140px");
+        });
+
+
+        $("#divShowColumnDetails input[type=checkbox]").each(function () {
+            if (this.checked) {
+                var rahul = this.value
+
+                $("#divmonthlyAttendenceReport  th").each(function () {
+                    if ($(this).attr("class") == rahul) {
+                        $(this).show();
+                        $(this).attr("style", "width:30pc");
+                    }
+                    else if ($(this).attr("class") == rahul + " sorting_disabled") {
+                        $(this).show();
+                        $(this).attr("style", "width:30pc");
+                    }
+                    else {
+                        //  $(this).hide();
+                    }
+
+
+                })
+
+
+                $("#divmonthlyAttendenceReport td").each(function () {
+                    if ($(this).attr("class") == rahul) {
+                        $(this).show();
+                    }
+                    else {
+                        //  $(this).attr("style", "display:none");
+                        //   $(this).hide();
+                    }
+                })
+
+            }
+
+
+        })
+
+        setTimeout(function () {
+            $('#example1').DataTable({
+                "ordering": true,
+                "bInfo": true,
+                paging: true,
+                searching: true,
+                bRetrieve: true,
+                bDestroy: true,
+
+                'columnDefs': [{
+                    "targets": -1,
+                    "orderable": false
+                }],
+                dom: 'lBfrtip',
+                buttons: [
+                    //{
+                    //    extend: 'copyHtml5',
+                    //    exportOptions: {
+                    //        columns: [0, ':visible']
+                    //    }
+                    //},
+                    {
+                        extend: 'excelHtml5',
+                        title: 'EmployeeReport',
+                        //orientation: 'landscape',//landscape give you more space
+                        //pageSize: 'A0',//A0 is the largest A5 smallest(A0,A1,A2,A3,legal,A4,A5,letter))
+                        //title: title,
+                        exportOptions: {
+                            columns: ':visible'
+                        }
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        exportOptions: {
+                            //columns: [0, 1, 2, 3, 5, 6]
+                            columns: ':visible'
+                        },
+                        pageSize: 'A1',//A0 is the largest A5 smallest(A0,A1,A2,A3,legal,A4,A5,letter)),
+                        title: 'EmployeeReport',
+                        customize: function (doc) {
+                            doc.styles.title = {
+                                color: 'white',
+                                fontSize: '40',
+                                background: '#1E90FF',
+                                alignment: 'left'
+                            }
+                        }
+                    },
+                    //'colvis'
+                ]
+            });
+        }, 1000);
+        $("#loader").fadeOut();
+    }
+</script>

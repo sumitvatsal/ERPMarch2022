@@ -1,0 +1,423 @@
+﻿
+@{
+    ViewBag.Title = "ViewParentSyllabus";
+   // Layout = "~/Views/Shared/_LayoutEmployee.cshtml";
+     Layout = "~/Views/Shared/_LayoutParents.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<style type="text/css">
+    .imgIcon {
+        width: 0.5%;
+        height: 0.5%;
+    }
+
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 8px;
+            padding-bottom: 8px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+<link href="~/css/bootstrap-timepicker.css" rel="stylesheet" />
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+<section class="content-header">
+    <h1>
+        <i class="fa fa-th-list"></i> Syllabus
+    </h1>
+    @*<ul class="breadcrumb">
+            <li><a href="/"><i class="fa fa-home"></i>Home</a></li>
+            <li><a href="/academics/default/index">Academics</a></li>
+            <li class="active">Timetable</li>
+            <li class="active">Timetable Configuration</li>
+        </ul>*@
+</section>
+<section class="content">
+
+
+    <div class="box box-solid">
+        @*<div class="extra-div">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-search"></i> Search</h3>
+                <div class="box-tools">
+                  
+                    <a class="btn btn-success btn-sm" href="/Syllabus/CreateSyllabus"><i class="fa fa-plus-square"></i> Create New</a>
+                </div>
+            </div>
+        </div>*@
+
+
+       
+    </div>
+    <div class="box box-solid">
+        <div>
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    <i class="fa fa-search"></i> View Syllabus List
+                </h3>
+                @*<div class="box-tools">
+                    <a class="btn btn-info btn-sm" href="/academics/assignment/create"><i class="fa fa-plus-square"></i> <span class="hidden-xs">Add Assignment</span></a>
+                </div>*@
+            </div>
+        </div>
+
+        <div class="box-body table-responsive">
+            <div id="p0" data-pjax-container="" data-pjax-push-state="" data-pjax-timeout="10000">
+                <div id="w1" class="grid-view">
+                    <table id="example1" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>academic year</th>
+                                <th>Class</th>
+                                
+                                <th class="action-column">Download</th>
+                               
+                            </tr>
+                           
+                        </thead>
+                        <tbody id="tBodyHW">
+                            @*<tr data-key="2"><td>1</td><td><a href="/academics/assignment/view?id=2">Test Assignment</a></td><td>2016-17</td><td>Kindergarten1</td><td>KG1-Section1</td><td>Arts</td><td>31/12/2016</td><td>31/01/2017</td><td><span class="not-set">(not set)</span></td><td class="text-center"><a href="/academics/assignment/assignment-file-download?id=2" title="Download" data-method="post"><span class="fa fa-download fa-lg text-green"></span></a></td><td></td></tr>
+                            <tr data-key="1"><td>2</td><td><a href="/academics/assignment/view?id=1">Computer Network</a></td><td>2016-17</td><td>Kindergarten1</td><td>KG1-Section1</td><td>English</td><td>01/09/2016</td><td>30/09/2016</td><td><span class="not-set">(not set)</span></td><td class="text-center"><a href="/academics/assignment/assignment-file-download?id=1" title="Download" data-method="post"><span class="fa fa-download fa-lg text-green"></span></a></td><td></td><*@@*/tr>*@
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <script type="text/html" id="divEmployeeDetailsJTemplte">
+            {#foreach $T as Datashort}
+            <tr>
+
+                <td>
+                    { $T.Datashort.ID}
+                </td>
+                <td>
+                    { $T.Datashort.academicyearname}
+                </td>
+                <td>
+                    { $T.Datashort.Classname}
+                </td>
+
+                <td>
+                    <a href="{ $T.Datashort.hw.FilePath}" title="Download" data-method="post"><span class="{ $T.Datashort.style}"></span></a>
+                </td>
+                @*<td class="text-center">
+            <i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" onclick="Edit({ $T.Datashort.hw.ID})" title="Edit"></i>
+        </td>*@
+            </tr>
+            {#/for}
+        </script>
+    </div>
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">
+                        <i class="fa fa-eye"></i> Timetable Configuration		<button type="button" class="close" data-dismiss="modal">
+                            <span aria-hidden="true">×</span><span class="sr-only">Close</span>
+                        </button>
+                    </h3>
+                </div> <!-- /.modal-header -->
+                <div class="modal-body">
+                    <table id="w0" class="table table-striped table-bordered detail-view">
+                        <tbody>
+                            <tr><th style="width:30%">Name</th><td><span id="spName"></span></td></tr>
+                            <tr><th style="width:30%">Class</th><td><span id="spCourse"></span></td></tr>
+                            <tr><th style="width:30%">Weekday</th><td><span id="spWeekDays"></span></td></tr>
+                            <tr><th style="width:30%">Classtiming</th><td><span id="spClassTiming"></span></td></tr>
+                            <tr><th style="width:30%">Start Date</th><td><span id="spStDt"></span></td></tr>
+                            <tr><th style="width:30%">End Date</th><td><span id="spEdDt"></span></td></tr>
+                            @*<tr><th style="width:30%">Created At</th><td>12/21/17, 12:06 PM</td></tr>
+                                <tr><th style="width:30%">Created By</th><td>admin@edusec.org</td></tr>
+                                <tr><th style="width:30%">Updated At</th><td>12/21/17, 12:06 PM</td></tr>
+                                <tr><th style="width:30%">Updated By</th><td>admin@edusec.org</td></tr>*@
+                            <tr>
+                                <th style="width:30%">Status</th>
+                                <td>
+                                    <span class="badge bg-green" id="spActive" style="display:none;"></span>
+                                    <span class="badge bg-red" id="spInactive" style="display:none;"></span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script src="~/js/bootstrap-timepicker.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('.dtpicker').datepicker({
+            //dateFormat: 'dd/mm/yy' ,
+            autoclose: true,
+            format:'dd/mm/yyyy'
+        });
+
+  
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TimeTableApi", "GetAcademicYearBySchool", "tc_academic_year", false, "", "", "", "");
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TimeTableApi", "GetSubjectsbySCHOOLid", "ddl_subject", false, "", "", "", "");
+
+      //  callServiceMethodForDDl("", "/api/TimeTableApi", "GetAcademicYear", "tc_academic_year", false, "", "", "", "");
+      //  callServiceMethodForDDl("", "/api/StudentApi", "GetClasses", "ddlCourse", false, "", "", "", "");
+      //  callServiceMethodForDDl("", "/api/TimeTableApi", "GetSubjects", "ddl_subject", false, "", "", "", "");
+
+        $("#ddlCourse").change(function () {
+            var ddlCourse = getControlValue("ddlCourse");
+            if (ddlCourse != null && (ddlCourse != -1) && (ddlCourse != undefined)) {
+                var SchoolID = (sessionStorage.getItem("SchoolID"));
+                callServiceMethodForDDl(JSON.stringify([ddlCourse, SchoolID]), "/api/StudentApi", "GetSectionsbyschool", "ddlSection", false, "", "", "", "");
+            }
+        });
+
+        fillDataTable();
+
+
+
+        var ID=getQuerystring("id");
+        if (typeof (ID) != "undefined") {
+            setControlValue("hdn", ID);//
+            setControlValue("hdnID", 0);
+            GetValues(ID);
+
+        }
+        //
+        //callServiceMethodForDDl("", "/api/StudentApi", "GetLeaveStatus", "ddlReqStatus", false, "", "", "", "");
+    });
+    function openModal()
+    {
+        $('#myModal').modal('show');
+    }
+
+    function GetValues(ID)
+    {
+        $.ajax({
+            url: "/api/TimeTableApi/GetClassTiming",// "~/Masters/GetDeptMethod",
+            type: "Post",
+            data: JSON.stringify([ID]), //{ Name: name,ddlAcademicYr
+            //// Address: address, DOB: dob },
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                if(data.ID!=-1)
+                {
+                    setControlValue("hdn", data.ID);
+                    setControlValue("CTName", data.ct.Name);
+                    setControlValue("CTName1", data.ct.Name);
+                    setControlValue("Desc", data.ct.Description);
+
+                    fillDataTable(data.ID);
+                }
+            }
+        });
+    }
+
+    //function fillDataTable() {
+
+    //    var ID = sessionStorage.getItem("EmpId");
+    //    var year=getControlValue("tc_academic_year");
+    //    var course = getControlValue("ddlCourse");
+    //    var section = getControlValue("ddlSection");
+    //    var name = getControlValue("assignment_name");
+    //    var sub_Dt = getControlValue("assignment_submit_date");
+    //    var sub = getControlValue("ddl_subject");
+    //    var HWDt = getControlValue("assignment_Dt");
+    //    var type="Teacher";
+    //    $("#loader").fadeIn();
+    //    callJTemplateServiceMethod(JSON.stringify([type,year,course,section,name,sub_Dt,sub,HWDt,ID]), "/api/HWapi", "getAssignmentList",
+    //       "tBodyHW", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+    //}
+
+    function fillDataTable() {
+
+        debugger;
+        var Parameters = {
+           
+           val8: sessionStorage.getItem("stdID"),
+            val1: sessionStorage.getItem("AcademicYear"),
+            val2: sessionStorage.getItem("ClassId"),
+            val9: sessionStorage.getItem("SchoolID"),
+            val: "Student"
+
+
+          
+        }
+        var ddl = JSON.stringify(Parameters);
+
+        callJTemplateServiceMethod(ddl, "/api/Syllabus", "getSyllabusList",
+            "tBodyHW", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+    }
+
+
+    function successMsg(p1, p2, p3, datas) {
+        $("#loader").fadeOut();
+        setTimeout(function () {
+            $('#example1').DataTable({
+
+                'columnDefs': [{
+                    "targets": [-1,-2,-3,-4,-5],
+                    "orderable": false
+
+                }],
+            });
+        }, 1000);
+    }
+
+    //
+    $("#btnSearch").click(function () {
+        fillDataTable();
+    });
+
+    function search()
+    {
+        var Parameters =
+        {
+            val8: sessionStorage.getItem("EmpId"),
+                val1: getControlValue("tc_academic_year"),
+            val9: sessionStorage.getItem("SchoolID"),
+            val2: course = getControlValue("ddlCourse"),
+                        val: "Teacher"
+        }
+        var ddl = JSON.stringify(Parameters);
+        callJTemplateServiceMethod(ddl, "/api/Syllabus", "getSyllabusList",
+            "tBodyHW", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+
+        
+    }
+
+    function ViewDetails(id,name,status,statusNm,course,fromDt,Edt,weekdays,timing)
+    {
+        setControlValue("spName", name);
+        setControlValue("spCourse", course);
+        setControlValue("spWeekDays", weekdays);
+        setControlValue("spClassTiming", timing);
+        setControlValue("spStDt", fromDt);
+        setControlValue("spEdDt", Edt);
+        if(status==1)
+        {
+            $("#spActive").show();
+            $("#spInactive").hide();
+            setControlValue("spActive", statusNm);
+        }
+        else
+        {
+            $("#spActive").hide();
+            $("#spInactive").show();
+            setControlValue("spInactive", statusNm);
+        }
+        openModal();
+    }
+
+    function ResetAll()
+    {
+        setControlValue("tc_academic_year", -1);
+        setControlValue("ddlCourse",-1);
+        setControlValue("ddlSection",-1);
+        setControlValue("assignment_name", "");
+        setControlValue("assignment_submit_date", "");
+        setControlValue("assignment_Dt", "");
+        setControlValue("ddl_subject", -1);
+
+        fillDataTable();
+    }
+
+    function Edit(id)
+    
+    {
+        window.location.href = "/Syllabus/CreateSyllabus?id=" + id;
+    }
+
+    function Delete(id)
+    {
+        var result = window.confirm('Are you sure to delete this record?');
+        if (result == true) {
+            $.ajax({
+                url: "/api/TimeTableApi/DeleteRecord",
+                type: "Post",
+                data: JSON.stringify([id,"TimeTableConfig"]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    alert(data.Msg);
+                    search();
+                }
+            });
+        }
+    }
+
+    function GoToCreateTimeTable(x)
+    {
+        window.location.href = "/TimeTable/CreateTimeTable?id="+x;
+    }
+</script>

@@ -1,0 +1,187 @@
+﻿
+@{
+    ViewBag.Title = "TransportSmsAlert";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section class="content">
+
+    <div class="page-header">
+        <div class="breadcrumb-line">
+            <ul class="breadcrumb">
+                <li><a href="#"><i class="icon-home2 position-left"></i>Home</a></li>
+                <li><a href="#">Transport</a></li>
+                <li class="active">SMS Alert</li>
+            </ul>
+            <ul class="breadcrumb-elements">
+                <li><a href="/usermanual"><i class="icon-comment-discussion position-left"></i> Support</a></li>
+            </ul>
+            <a class="breadcrumb-elements-toggle"><i class="icon-menu-open"></i></a><a class="breadcrumb-elements-toggle"><i class="icon-menu-open"></i></a>
+        </div>
+    </div><br>
+    <div class="content">
+        <form id="smssettings-form" action="/index.php/transport/transportfeecollection/smsalert" method="post">
+            <div class="row">
+                <div class="col-sm-10">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">SMS Alert</h4>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label for="reg_input" class="req">SMS For</label>
+                                <select class="form-control" data-required="true" name="Transportfeecollection[sms_for]" id="Transportfeecollection_sms_for">
+                                    <option value="prompt">Please select</option>
+                                    <option value="1">Common to All</option>
+                                    <option value="2">Route wise</option>
+                                    <option value="3">Destination wise</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="route" style="">
+                                <label class="req">Route</label>
+                                <select class="form-control" id="ddlRoute" name="ddlRoute" onchange="getDestinationByRouteId(this.value)" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--"></select>
+
+                            </div>
+
+                            <div class="form-group" id="destination" style="">
+                                <label class="req">Destination</label>
+                                <select class="form-control" name="ddlDestination" id="ddlDestination" valuefield="Id" textfield="Route" blankRowValue="0" blankRowText="--Select--"></select>
+                            </div>
+                            <div class="alert alert-warning warning">
+                                <span class="icon-warning icon-2x" style="color:orange"></span>
+                                If you want to incoorporate student information from the database in the message, then you have to include certain codes in the place of user information.                            <br>
+                                The codes are:                            <br>
+                                Student/Employee Name :#name#,Register No./Employee Code :#code# , Route Code : #route# , Destination : #destination#.
+                            </div>
+                            <div class="form-group" id="message">
+                                <label for="reg_input_name" class="req">Message</label>
+                                <textarea rows="2" cols="50" class="form-control" name="txtMessages" id="txtMessages"></textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-5">
+                                <div class="form_sep">
+                                    &nbsp;&nbsp;
+                                    <input type="button" value="Send" class="btn btn-info" onclick="sendSmsFor()" />
+                                </div>
+                                <br>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="alert alert-success centerSuccess" id="divSuccessMsg" style="display:none">
+
+    </div>
+    
+    <script>
+        $(document).ready(function () {
+            var droplist = $('#Transportfeecollection_sms_for');
+            droplist.change(function () {
+                if (droplist.val() === '1') { //! common to all
+                    $("#route").hide("slow");
+                    $("#destination").hide("slow");
+                }
+                if (droplist.val() === '2') { //! Route wise
+                    $("#destination").hide("slow");
+                    $("#route").show("slow");
+                }
+                if (droplist.val() === '3') { //! Destination wise
+                    $("#route").show("slow");
+                    $("#destination").show("slow");
+                }
+            })
+        });
+    </script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            callServiceMethodForDDl("", "/api/TransportApi", "getAllRouteDetails", "ddlRoute", false, "", "", "", "");
+            //callServiceMethodForDDl("", "/api/TransportApi", "ViewAllDestination", "ddlDestination", false, "", "", "", "");
+
+        })
+
+        function getDestinationByRouteId(Id) {
+            callServiceMethodForDDl(JSON.stringify([Id]), "/api/TransportApi", "getDestinationByRouteId", "ddlDestination", false, "", "", "", "");
+        }
+        function sendSmsFor() {
+
+
+            if (getControlValue("Transportfeecollection_sms_for") == "1") {
+                var sms = {
+                    val: getControlValue("Transportfeecollection_sms_for"),
+                    val1: getControlValue("txtMessages")
+                }
+
+                var ddl = JSON.stringify(sms);
+                callServiceMethod(ddl, "/api/TransportApi", "sendSmsForAllTransportAllocationUsers", false, "", "", false, "", true, sendSmsFor_scs, "", "", "");
+
+
+            }
+            else if (getControlValue("Transportfeecollection_sms_for") == "2") {
+                var sms = {
+                    val: getControlValue("Transportfeecollection_sms_for"),
+                    val1: getControlValue("txtMessages"),
+                    val2: getControlValue("ddlRoute")
+                }
+
+                var ddl = JSON.stringify(sms);
+                callServiceMethod(ddl, "/api/TransportApi", "sendSmsForAllTransportAllocationUsers", false, "", "", false, "", true, sendSmsFor_scs, "", "", "");
+
+
+            }
+
+            else {
+                var sms = {
+                    val: getControlValue("Transportfeecollection_sms_for"),
+                    val1: getControlValue("txtMessages"),
+                    val2: getControlValue("ddlRoute"),
+                    val3: getControlValue("ddlDestination")
+                }
+
+                var ddl = JSON.stringify(sms);
+                callServiceMethod(ddl, "/api/TransportApi", "sendSmsForAllTransportAllocationUsers", false, "", "", false, "", true, sendSmsFor_scs, "", "", "");
+            }
+        }
+
+        function sendSmsFor_scs(p1, p2, p3, datas) {
+            $("#divSuccessMsg").fadeIn();
+            $("#divSuccessMsg").html("<strong>Success!</strong> " + datas);
+            setTimeout(function () {
+                $("#divSuccessMsg").fadeOut();
+            }, 2000);
+        }
+    </script>
+</section>
+

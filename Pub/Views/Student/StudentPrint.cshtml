@@ -1,0 +1,1019 @@
+﻿@model SchoolErp.TBLStudent
+
+@{
+    ViewBag.Title = "StudentPrint";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+    <style>
+
+        table, td, th {    
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th, td {
+    padding: 15px;
+}
+.dvImgPreview
+{
+    background-position: center center;
+background-size: cover;
+-webkit-box-shadow: 0 0 1px 1px rgba(0, 0, 0, .3);
+    min-height: 30px;
+    min-width: 30px;
+    height:100px;
+    width:100px;
+    max-height:100px;
+    max-width:100px;
+}
+  
+/*.ImgPreview
+{
+    border-radius: 50%;
+    min-height: 30px;
+    min-width: 30px;
+    height:100px;
+    width:100px;
+    max-height:100px;
+    max-width:100px;
+}*/
+
+.cntrl
+{
+    width:100%;
+}
+    </style>
+
+    <div id="dvContents">
+        <table id="customers">
+            <tr>
+                <td colspan="5"><h2 class="heading">@*Student Details*@<span id="spName"></span></h2></td>
+                
+            </tr>
+
+            <tr>
+                <td rowspan="2">
+                    <img id="profileImg" alt="#" />
+                </td>
+                <td>
+                    <div class="form-group cntrl">
+                        <label>Registration No</label>
+                        :<span id="spRegNo1"></span>
+                    </div>
+                </td>
+                
+            </tr>
+
+            <tr>
+                <td style="width:80%">
+                    <div class="form-group cntrl">
+                        <label>Class</label>
+                        :<span id="spClass1"></span>
+                    </div>
+                </td>
+               
+            </tr>
+
+            <tr>
+                <td colspan="5">
+                    <table style="width:100%">
+                        <tr>
+                            <td colspan="3"><h3> Official Details</h3></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Registration No</label>
+                                    :<span id="spRegNo"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Class</label>
+                                    :<span id="spClass"></span>
+                                </div>
+
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Roll No</label>
+                                    :<span id="spRollNo"></span>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Admission Date</label>
+                                    :<span id="spJoinDt"></span>
+                                </div>
+
+                            </td>
+
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Stream</label>
+                                    :<span id="spStream"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Batch</label>
+                                    :<span id="spBatch"></span>
+                                </div>
+
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>SR No</label>
+                                    :<span id="spSRNo"></span>
+                                </div>
+                            </td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="5">
+                    <table style="width:100%">
+                        <tr>
+                            <td colspan="3"><h3> Personal Details</h3></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>DOB</label>
+                                    :<span id="spDOB"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Gender</label>
+                                    :<span id="spGender"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Blood Group</label>
+                                    :<span id="spBloodGrp"></span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Birth Place</label>
+                                    :<span id="spBirthPlc"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Nationality</label>
+                                    :<span id="spNationality"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Mother Tongue</label>
+                                    :<span id="spMTongue"></span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Languages Known</label>
+                                    :<span id="spLanguages"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Religion</label>
+                                    :<span id="spReligion"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Category</label>
+                                    :<span id="spCategory"></span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Aadhaar No</label>
+                                    :<span id="spAadhar"></span>
+                                </div>
+                            </td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5">
+                    <table style="width:100%;">
+                        <tr>
+                            <td colspan="2"><h3> Contact Details</h3></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Residential Address</label>
+                                    :<span id="spResAdd"></span>
+                                    <span id="spResCity"></span>
+                                    <span id="spResdState"></span>
+                                    <span id="spResdPin"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Correspondance Address</label>
+                                    :<span id="spCorpAdd"></span>
+                                    <span id="spCorpCity"></span>
+                                    <span id="spCorpState"></span>
+                                    <span id="spCorsPin"></span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Preferred Mobile no for SMS</label>
+                                    :<span id="spSMSNo"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Emergency Contact No</label>
+                                    :<span id="spEmerNo"></span>
+                                </div>
+                            </td>
+                           
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Person to be contacted</label>
+                                    :<span id="spEmerPers"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Relation with person</label>
+                                    :<span id="spEmeRel"></span>
+                                </div>
+                            </td>
+
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5">
+                    <table style="width:100%;">
+                        <tr>
+                            <td colspan="4"><h3> Parents/Guardian Details</h3></td>
+                        </tr>
+                        <tr>
+                            <th></th>
+                            <th>
+                                <label>Father</label>
+                            </th>
+                            <th>
+                                <label>Mother</label>
+                                
+                            </th>
+                            <th>
+                                <label>Guardian</label>
+                                
+                            </th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>Photo</label>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <img id="FImg" alt="#" style="border-radius:50%;min-height:30px;min-width:30px;width:100px;height:100px;max-height:100px;max-width:100px;"/>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <img id="MImg" alt="#" style="border-radius:50%;min-height:30px;min-width:30px;width:100px;height:100px;max-height:100px;max-width:100px;"/>
+                                </div>
+                            </td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>Name</label>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spFName"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spMName"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spGname"></span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>DOB</label>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spFDOB"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spMDob"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spGDob"></span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>Nationality</label>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spFNationality"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spMNationality"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spGNationality"></span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>Qualification</label>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spFQual"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spMQual"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spGQual"></span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>Job</label>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spFJob"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spMJob"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spGJob"></span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>Office Address</label>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spFOAdd"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spMOAdd"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spGOAdd"></span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>Designation</label>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spFDesig"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spMDesig"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spGDesig"></span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>Annual Income</label>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spFIncome"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spMIncome"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spGIncome"></span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>Mobile No.</label>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spFMobile"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spMMobile"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spGMobile"></span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>Email</label>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spFMail"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spMMail"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spGMail"></span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>Aadhaar</label>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spFAdhar"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spMAdhar"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spGAdhar"></span>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5">
+                    <table style="width:100%">
+                        <tr>
+                            <td colspan="6"><h3> Previous School Details</h3></td>
+                        </tr>
+                        <tr>
+                            <th></th>
+                            <th>
+                                <label>Year</label>
+                            </th>
+                            <th>
+                                <label>School</label>
+
+                            </th>
+                            <th>
+                                <label>Board</label>
+
+                            </th>
+                            <th><label>Class</label></th>
+                            <th>Marks</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>1</label>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spPrevYear1"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spPrevSchool1"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spPrevBoard1"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spPrevClass1"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spPrevMarks1"></span>
+                                </div>
+                               
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>2</label>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spPrevYear2"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spPrevSchool2"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spPrevBoard2"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spPrevClass2"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spPrevMarks2"></span>
+                                </div>
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>3</label>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spPrevYear3"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spPrevSchool3"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spPrevBoard3"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spPrevClass3"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spPrevMarks3"></span>
+                                </div>
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">
+                                <div class="form-group cntrl">
+                                    <label>Awards won so far in sports, arts or academics</label>
+                                    :<span id="spPrevAwards"></span>
+                                </div>
+                            </td>
+                            <td colspan="3">
+                                <div class="form-group cntrl">
+                                    <label>TC No</label>
+                                    :<span id="spPrevTC"></span>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5">
+                    <table style="width:100%">
+                        <tr>
+                            <td colspan="2"><h3> Health Details</h3></td>
+                        </tr>
+                        <tr>
+                           <td>
+                               <div class="form-group cntrl">
+                                   <label>Weight</label>
+                                   :<span id="spWeight"></span>
+                               </div>
+                           </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Height</label>
+                                    :<span id="spHeight"></span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Vision(L)</label>
+                                    :<span id="spVisionL"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <label>Vision(R)</label>
+                                    :<span id="spVisionR"></span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div class="form-group cntrl">
+                                    <label>Any medication taken for any medical conditions or well being</label>
+                                    :<span id="spMedication"></span>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                </tr>
+            <tr>
+                <td colspan="5">
+                    <table style="width:100%;">
+                        <tr>
+                            <td colspan="3"><h3> Login Credentials</h3></td>
+                        </tr>
+                        <tr>
+                            <th></th>
+                            <th>
+                                <label>Username</label>
+                            </th>
+                            <th>
+                                <label>Password</label>
+                            </th>
+                        </tr>
+                        <tr>
+                            <td><label>Parent</label></td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spPUserName"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spPpwd"></span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label>Student</label></td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spSUsrname"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="form-group cntrl">
+                                    <span id="spSpwd"></span>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    
+<script type="text/javascript">
+     $(document).ready(function () {
+         var docLength = 0;
+         //
+
+        
+         //var id = GetParameterValues('Id');
+        
+         //function GetParameterValues(param) {
+         //    var url = window.location.href.slice(window.location.href.indexOf('?') + 1).split('=');
+         //    for (var i = 0; i < url.length; i++) {
+         //        var urlparam = url[i].split('=');
+         //        if (urlparam[0] == param) {
+         //            return urlparam[1];
+         //        }
+         //    }
+         //}  
+         //alert(" your ID is " + id);
+         //
+         var Id = getQuerystring("id");
+         var par = {
+             val: Id
+         }
+
+        
+         if (typeof (Id) != "undefined") {
+             $("#loader").fadeIn();
+             $.ajax({
+                 url: "/api/StudentApi/FindStudentByID",// "~/Masters/GetDeptMethod",
+                 type: "Post",
+                 data: JSON.stringify(par), //{ Name: name,ddlAcademicYr
+                 //// Address: address, DOB: dob },
+                 contentType: 'application/json; charset=utf-8',
+                 success: function (data) {
+                     var path1 = data.PicPath.replace(/\\/g, "/");
+                     $("#profileImg").attr("src", path1).height(50 + "%").width(50 + "%");
+                     //setControlValue("hdnID", data.ID);
+                     setControlValue("spName", data.FirstName + " " + data.MiddleName + " " + data.LastName);//data.Religion);
+                     setControlValue("spRegNo", data.RegNo);
+                     setControlValue("spRegNo1", data.RegNo);
+                     setControlValue("spClass", data.Class + "-" + data.Section);
+                     setControlValue("spClass1", data.Class + "-" + data.Section);
+                     setControlValue("spFirstNm", data.FirstName);
+                     setControlValue("spMidNm", data.MiddleName);
+                     setControlValue("spBatch", data.batch);
+                     setControlValue("spSRNo", data.SRNo);
+                     setControlValue("spStream", data.stream);
+
+                     setControlValue("spLastNm", data.LastName);
+                     setControlValue("spRollNo", data.RollNo);
+                     setControlValue("spDOB", ChangeDateformat(data.DOB));
+                     setControlValue("spJoinDt", ChangeDateformat(data.JoiningDate));
+                     setControlValue("spGender", data.Gender);
+                     setControlValue("spBloodGrp", data.BloodGroup);
+
+                     setControlValue("spBirthPlc", data.BirthPlace);
+                     setControlValue("spNationality", data.Nationality);
+                     setControlValue("spMTongue", data.MotherTongue);
+                     setControlValue("spLanguages", data.Lang_known);
+                     setControlValue("spReligion", data.Religion);
+                     setControlValue("spCategory", data.Category);
+                     setControlValue("spAadhar", data.AadharNo);
+
+                     setControlValue("spResAdd", data.PermanentAddress);
+                     setControlValue("spCorpAdd", data.CorrespondAddress);
+                     setControlValue("spResCity", data.PermCity);
+                     setControlValue("spCorpCity", data.CorsCity);
+                     setControlValue("spResdState", data.PermState);
+                     setControlValue("spCorpState", data.CorsState);
+                     setControlValue("spResdPin", data.PermPincode);
+                     setControlValue("spCorsPin", data.CorsPincode);
+                     setControlValue("spSMSNo", data.SMSmobileNo);
+                     setControlValue("spEmerNo", data.EmergencyNo);
+                     setControlValue("spEmerPers", data.EmerContPerson);
+                     setControlValue("spEmeRel", data.ContPersRelation);
+
+                     setControlValue("spFName", data.FatherName);
+                     setControlValue("spMName", data.MotherName);
+                     setControlValue("spGname", data.GuardianName);
+                     setControlValue("spFDOB", ChangeDateformat(data.FDOB));
+                     setControlValue("spMDob", ChangeDateformat(data.MDOB));
+                     setControlValue("spGDob", "-");
+                     setControlValue("spFNationality", data.FNationality);
+                     setControlValue("spMNationality", data.MNationality);
+                     setControlValue("spGNationality", data.GNationality);
+                     setControlValue("spFQual", data.FQualification);
+                     setControlValue("spMQual", data.MQualification);
+                     setControlValue("spGQual", data.GQualification);
+                     setControlValue("spFJob", data.FJob);
+                     setControlValue("spMJob", data.MJob);
+                     setControlValue("spGJob", data.GJob);
+                     setControlValue("spFOAdd", data.FOfficeAddress);
+                     setControlValue("spMOAdd", data.MOfficeAddress);
+                     setControlValue("spGOAdd", data.GOfficeAddress);
+                     setControlValue("spFDesig", data.FDesig);
+                     setControlValue("spMDesig", data.MDesig);
+                     setControlValue("spGDesig", data.GDesig);
+                     setControlValue("spFIncome", data.FIncome);
+                     setControlValue("spMIncome", data.MIncome);
+                     setControlValue("spGIncome", data.GIncome);
+                     setControlValue("spFMobile", data.FMobile);
+                     setControlValue("spMMobile", data.Mmobile);
+                     setControlValue("spGMobile", data.Gmobile);
+                     setControlValue("spFMail", data.Fmail);
+                     setControlValue("spMMail", data.Mmail);
+                     setControlValue("spGMail", data.Gmail);
+                     setControlValue("spFAdhar", data.FAdharNo);
+                     setControlValue("spMAdhar", data.MAdharNo);
+                     setControlValue("spGAdhar", data.GAdharNo);
+
+                     setControlValue("spSUsrname", data.SUserID);
+                     setControlValue("spSpwd", data.SPwd);
+                     setControlValue("spPUserName", data.PUserID);
+                     setControlValue("spPpwd", data.PPwd);
+
+                     var i = 1;
+                     $.each(data.prevlist, function (index, item) {
+                         setControlValue("spPrevYear" + i, item.PSYear);
+                         setControlValue("spPrevSchool" + i, item.School);
+                         setControlValue("spPrevBoard" + i, item.Board);
+                         setControlValue("spPrevClass" + i, item.Class);
+                         setControlValue("spPrevMarks" + i, item.Marks);
+                         setControlValue("spPrevAwards", item.Awards);
+                         //$("#spPrevYear" + i).val(item.PSYear);
+                         //$("#spPrevSchool" + i).val(item.School);
+                         //$("#spPrevBoard" + i).val(item.Board);
+                         //$("#spPrevClass" + i).val(item.Class);
+                         //$("#spPrevMarks" + i).val(item.Marks);
+                         //$("#spPrevAwards").val(item.Awards);
+                         if (i == 1) {
+                             setControlValue("spPrevTC", item.TCNo);
+                             //$("#spPrevTC").val(item.TCNo);
+                         }
+                         i = i + 1;
+                     });
+
+                     setControlValue("spHeight", data.ht.Height);
+                     setControlValue("spWeight", data.ht.Weight);
+                     setControlValue("spVisionL", data.ht.VisionLeft);
+                     setControlValue("spVisionR", data.ht.VisionRight);
+                     setControlValue("spMedication", data.ht.MedicationDetails);
+                     //debugger;
+
+                     //$('#profileImg').css({ 'width': '10%', 'height': '10%' });
+
+
+                     if (data.FPicPath != null) {
+                         //$("#dvPreviewF").show();
+                         var path2 = data.FPicPath.replace(/\\/g, "/");
+                         //$("#dvPreviewF").css("background-image", "url(" + path2 + ")");$("#profileImg").attr("src", path1).height(50 + "%").width(50 + "%");
+                         $("#FImg").attr("src", path2);
+                     }
+
+                     if (data.MPicPath != null) {
+                         //$("#dvPreviewM").show();
+                         var path3 = data.MPicPath.replace(/\\/g, "/");
+                         //$("#dvPreviewM").css("background-image", "url(" + path3 + ")");border-radius: 50%;
+                         $("#MImg").attr("src", path3);
+                     }
+
+
+                     printPreview(data.ID);
+                     $("#loader").fadeOut();
+                 }
+             });
+
+         }
+         else {
+
+         }
+
+         
+
+     });
+
+     function ChangeDateformat(dt) {
+         var date = "";
+         if (dt != null) {
+             var formattedDate = new Date(dt);
+             var d = formattedDate.getDate();
+             var m = formattedDate.getMonth();
+             m += 1;  // JavaScript months are 0-11
+             var y = formattedDate.getFullYear();
+
+             date = m + "/" + d + "/" + y;
+         }
+
+         return date;
+     }
+
+     function printPreview(id) {
+         //$('#profileImg').css({ 'width': '10%', 'height': '10%' });
+         var contents = $("#dvContents").html();
+         var frame1 = $('<iframe />');
+         frame1[0].name = "frame1";
+         frame1.css({ "position": "absolute", "top": "-1000000px" });
+         $("body").append(frame1);
+         var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+         frameDoc.document.open();
+         //Create a new HTML document.
+         frameDoc.document.write('<html><head><title>DIV Contents</title> ');
+         frameDoc.document.write('<style type="text/css">  #customers {font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;border-collapse: collapse;width: 100%;}#customers td, #customers th { border: 1px solid #ddd;padding: 8px;}#customers tr:nth-child(even) {background-color: #f2f2f2;}#customers tr:hover {background-color: #ddd;}#customers th {padding-top: 12px;padding-bottom: 12px;text-align: left;background-color: #4CAF50;color: white;} .btn-success {background-color: #00a65a;border-color: #008d4c;}.btn {border-radius: 3px;-webkit-box-shadow: none;box-shadow: none;border: 1px solid transparent;}.btn-block {display: block;width: 100%;}.btn-danger {background-color: #dd4b39;border-color: #d73925;}.btn {border-radius: 3px;box-shadow: none; border: 1px solid transparent;}.btn-block {display: block;width: 100%;}.btn-group-sm>.btn, .btn-sm {padding: 5px 10px;font-size: 12px; line-height: 1.5;border-radius: 3px;}</style>');
+         frameDoc.document.write('</head><body>');
+         //Append the external CSS file.
+         frameDoc.document.write('<link href="/css/style.css" rel="stylesheet" type="text/css" />');
+         //Append the DIV contents.
+         frameDoc.document.write(contents);
+         frameDoc.document.write('</body></html>');
+         frameDoc.document.close();
+         setTimeout(function () {
+             window.frames["frame1"].focus();
+             window.frames["frame1"].print();
+             frame1.remove();
+             window.location.href = "/Student/StudentProfile?id=" + id;
+         }, 100);
+
+     }
+</script>
+

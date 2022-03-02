@@ -1,0 +1,719 @@
+﻿
+@{
+    ViewBag.Title = "GoodsReceipt";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<link href="~/css/bower_components/select2/dist/css/select2.min.css" rel="stylesheet" />
+
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.select2').select2();
+    })
+
+</script>
+<section class="content">
+    <div class="box box-solid">
+        <div class="et">
+            <div class="box-header with-border">
+                <h3 class="box-title">Goods Receipt</h3>
+
+            </div>
+        </div>
+        <div class="alert alert-success alert-dismissible centerSuccess" id="divsuccesmsg" style="display:none">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <h4>
+                <i class="icon fa fa-check"></i>
+                success! <span Id="spsuccessMsg"></span>
+            </h4>
+
+        </div>
+
+        <div class="box-body">
+            <div class="row">
+
+                <div class="content">
+
+
+
+                    <div class="row">
+                        <form role="form" id="form1" name="form1">
+                            <div class="col-sm-12">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title"> New Goods Receipt</h4>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="panel-body">
+                                            <input type="text" id="unitId" hidden />
+                                            <div class="row">
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label for="Country" class="req">Purchases <span class="requird">*</span></label>
+                                                    <select class="form-control" id="ddlPurchases" ng-model="ddlPurchases" valuefield="Id" textfield="Name" onchange="BindUnit()" @*blankRowValue="0" blankRowText="--Select--"*@></select>
+                                                </div>
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label class="req" for="Salarydetails_unit">Supplier</label>
+                                                    <input class="form-control" readonly id="txtSupplier" name="txtSupplier" type="text" ng-model="txtSupplier" />
+                                                </div>
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label for="Country" class="req">Employee <span class="requird">*</span></label>
+                                                    <select class="form-control" id="ddlEmployee" ng-model="ddlEmployee" valuefield="Id" textfield="Name" @*blankRowValue="0" blankRowText="--Select--"*@></select>
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div id="sandbox" class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label for="simple">Date</label>
+                                                    <input id="simple" type="text" class="form-control" value="">
+                                                </div>
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label class="req" for="Salarydetails_unit">Reference</label>
+                                                    <input class="form-control" id="txtReference" name="txtReference" type="text" ng-model="txtReference" />
+                                                </div>
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="req" for="Salarydetails_unit">Total Quantity</label>
+                                                    <input class="form-control" value="1.00" readonly id="txtTotal" name="txtTotal" type="text" ng-model="txtTotal" />
+                                                </div>
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label>
+                                                        Line Item
+                                                    </label>
+                                                    <div>
+                                                        <a href="#" style="width: 150px;float: right;margin-right: 8px" id="btnadd" class="btn btn-block btn-success" onclick="openModal()">Add</a>
+                                                    </div>
+                                                </div>
+
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-sm-6 col-md-6 col-lg-6">
+                                                    <label class="req" for="Salarydetails_unit">Remarks</label>
+                                                    <textarea class="form-control" id="txtRemark"></textarea>
+                                                </div>
+                                                <div class="form-group col-sm-6 col-md-6 col-lg-6">
+                                                    <label class="req" for="Salarydetails_unit">Journal Remarks</label>
+                                                    <textarea class="form-control" id="txtJournal"></textarea>
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-5">
+                                                    <div class="form_sep">
+                                                        <input class="btn btn-info" id="btnSave" type="button" value="Save">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="hdnID" />
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <table border="1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                            <tr>
+                                <th>
+                                    ProductName
+                                </th>
+                                <th>
+                                    WareHouseName
+                                </th>
+                                <th>
+                                    Quantity
+                                </th>
+
+                            </tr>
+                        </table>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" onclick="refreshControls()">&times;</button>
+                    <h4 class="modal-title">New Purchase Details</h4>
+                </div>
+                <div class="modal-body">
+                    <form role="form" id="form1" name="form1">
+                        
+                        <div class="row">
+                            <div class="form-group col-sm-10 col-md-10 col-lg-10">
+                                <label for="Country" class="req">Product <span class="requird">*</span></label>
+                                <select class="form-control" id="ddlProduct" ng-model="ddlProduct" valuefield="Id" textfield="Name" @*blankRowValue="0" blankRowText="--Select--"*@></select>
+                            </div>
+
+                            <input type="text" id="txtName" hidden />
+
+                            <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                <label class="invisible">
+                                    Button
+                                </label>
+                                <div>
+                                    <a class="btn btn-success btn-sm" href="/Inventory/NewProducts"><i class="fa fa-plus-square"></i></a>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-10 col-md-10 col-lg-10">
+                                <label for="Country" class="req">WareHouse <span class="requird">*</span></label>
+                                <select class="form-control" id="ddlWare" ng-model="ddlWare" valuefield="Id" textfield="Name" @*blankRowValue="0" blankRowText="--Select--"*@></select>
+                            </div>
+                            <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                <label class="req" for="Salarydetails_unit">Quantity <span class="requird">*</span> </label>
+                                <input class="form-control" value="1.00" id="txtQuantity" name="txtQuantity" type="text" ng-model="txtQuantity" />
+                            </div>
+                            <input type="text" id="txtWare" hidden />
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-12 col-md-12 col-lg-12">
+                                <label class="req" for="Salarydetails_unit">Description</label>
+                                <textarea class="form-control" id="txtDesc"></textarea>
+                            </div>
+
+
+                        </div>
+                        <div class="box-footer">
+                            <input class="btn btn-info" id="btnSumit" onclick="addRow()" type="button" value="Save">
+                        </div>
+
+
+
+                    </form>
+
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="alert alert-success centerSuccess" id="divSucesEmail" style="display:none">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h4>
+            <i class="icon fa fa-check"></i>
+            <span Id="sentEmailMsg"></span>
+        </h4>
+
+    </div>
+</section>
+
+<script type="text/javascript">
+
+    function addRow() {
+        var txtName = document.getElementById('txtName').value;
+        var txtWare = document.getElementById('txtWare').value;
+        var txtQuantity = document.getElementById('txtQuantity').value;
+        var table = document.getElementsByTagName('table')[0];
+
+        var newRow = table.insertRow(1);
+
+        var cel1 = newRow.insertCell(0);
+        var cel2 = newRow.insertCell(1);
+        var cel3 = newRow.insertCell(2);
+       
+
+
+        cel1.innerHTML = txtName;
+        cel2.innerHTML = txtWare;
+        cel3.innerHTML = txtQuantity;
+
+    }
+    $('#myModal').modal('hide');
+
+    </script>
+<script type="text/javascript">
+    $("#ddlProduct").change(function () {
+        var ddlProduct = getControlValue("ddlProduct");
+        if (ddlProduct != null && (ddlProduct != -1) && (ddlProduct != undefined)) {
+            var SelectedText = $('#ddlProduct :selected').text();
+            $('#txtName').val(SelectedText);
+        }
+    });
+
+    $("#ddlWare").change(function () {
+        var ddlWare = getControlValue("ddlWare");
+        if (ddlWare != null && (ddlWare != -1) && (ddlWare != undefined)) {
+            var SelectedText = $('#ddlWare :selected').text();
+            $('#txtWare').val(SelectedText);
+        }
+    });
+    var date = new Date();
+    var today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    var optSimple = {
+        format: 'MM/dd/yyyy',
+        todayHighlight: true,
+        orientation: 'bottom right',
+        autoclose: true,
+        container: '#sandbox'
+    };
+
+    var optComponent = {
+        format: 'MM/dd/yyyy',
+        container: '#datePicker',
+        orientation: 'auto top',
+        todayHighlight: true,
+        autoclose: true
+    };
+
+    // SIMPLE
+    $('#simple').datepicker(optSimple);
+
+    // COMPONENT
+    $('#datePicker').datepicker(optComponent);
+
+    // ===================================
+
+    $('#datepicker1').datepicker({
+        format: "mm : dd : yyyy",
+        todayHighlight: true,
+        autoclose: true,
+        container: '#box1',
+        orientation: 'top right'
+    });
+
+    $('#datepicker2').datepicker({
+        format: 'MM/dd/yyyy',
+        todayHighlight: true,
+        autoclose: true,
+        container: '#box2',
+        orientation: 'top right'
+    });
+
+    $('#datepicker1, #datepicker2, #simple, #datePicker').datepicker('setDate', today);
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        if (localStorage.getItem("EditBill") != null) {
+            debugger;
+            var BillId = localStorage.getItem("EditBill");
+            $.ajax({
+                type: 'Post',
+                url: '/api/AccountsAPI/PurchaseBillList',
+                data: { aa: BillId },
+                dataType: 'json',
+                success: function (result) {
+                    $('#hdnID').val(result[0].ID);
+                    $('#ddlPurchases').val(result[0].Bil);
+                    $('#txtSupplier').val(result[0].Supplier);
+                    $('#ddlEmployee').val(result[0].Employee);
+                    $('#simple').val(result[0].Date);
+                    $('#txtReference').val(result[0].Reference);
+                    $('#txtTotal').val(result[0].Quantity);
+                    $('#txtRemark').val(result[0].Remarks);
+                    $('#txtJournal').val(result[0].Reference);
+                    $('#btnSumit')=Update;
+
+                }
+            });
+            localStorage.removeItem("EditBill");
+        }
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getpurch", "ddlPurchases", false, "", "", "", "");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getEmployee", "ddlEmployee", false, "", "", "", "");
+
+        setControlValue("hdnID", 0);
+        /*        setControlValue("hdnStatus", 1);*/
+        $('.dtpicker').datepicker({
+            //dateFormat: 'dd/mm/yy' ,
+            autoclose: true,
+            format: 'dd/mm/yyyy'
+        });
+
+
+        var ID = getQuerystring("id");
+        if (typeof (ID) != "undefined") {
+            setControlValue("hdn", ID);//
+
+            GetValues(ID);
+
+        }
+
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                txtQuantity: "required",
+            },
+            messages: {
+                txtQuantity: "Please Enter Quantity (Open New Window)",
+            }
+        })
+        //callServiceMethodForDDl("", "/api/StudentApi", "GetLeaveStatus", "ddlReqStatus", false, "", "", "", "");
+    });
+    function openModal() {
+        $('#myModal').modal('show');
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "GetProducts", "ddlProduct", false, "", "", "", "");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "GetWareHouses", "ddlWare", false, "", "", "", "");
+
+    }
+
+
+    function successMsg(p1, p2, p3, datas) {
+
+        $("#loader").fadeOut();
+
+        setTimeout(function () {
+            $('#example1').DataTable({
+
+                dom: 'lBfrtip',
+                bRetrieve: true,
+                bDestroy: true,
+                'columnDefs': [{
+                    "targets": -1,
+                    "orderable": false
+                }],
+            });
+        }, 1000);
+    }
+    function BindUnit() {
+        var productId = $('#ddlPurchases').val();
+
+        $.ajax({
+            type: 'Get',
+            url: '/api/Default/GetBiilNo',
+            data: { ProductId: productId },
+            dataType: 'json',
+            success: function (unitValue) {
+                var unitRecord = unitValue.split(',');
+                var unitName = unitRecord[0];
+                var unitId = unitRecord[1];
+                unitValue = unitValue.replace("\\\"", "");
+                $('#txtSupplier').val(unitName);
+                $('#unitId').val(unitId);
+            }
+        });
+    }
+
+    $("#btnSave").click(function () {
+        var ID = getControlValue("hdnID");
+        var Name = getControlValue("txtName");
+        var WareHouses = getControlValue("txtWare")
+        var Product = getControlValue("ddlProduct")
+        var Warehouseid = getControlValue("ddlWare")
+        var Quantity = getControlValue("txtQuantity")
+        var desc = getControlValue("txtDesc")
+        var PurchaseId = getControlValue("ddlPurchases")
+        var SupplierId = getControlValue("unitId")
+        var EmployeeId = getControlValue("ddlEmployee")
+        var Date = getControlValue("simple")
+        var Total = getControlValue("txtTotal")
+        var Ref = getControlValue("txtReference")
+   
+        var Remark = getControlValue("txtRemark")
+        var Journal = getControlValue("txtJournal")
+
+        Save(ID, PurchaseId, SupplierId, EmployeeId, Date, Ref, Total, Remark, Journal);
+        Save2(ID, Name, WareHouses, Product, Warehouseid, Quantity, desc);
+    });
+
+    function Save(ID, PurchaseId, SupplierId, EmployeeId, Date, Ref, Total, Remark, Journal) {
+
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+            $.ajax({
+                url: "/api/AccountsAPI/SaveRecord",
+                type: "Post",
+                data: JSON.stringify(["NewGoodsMain", ID, PurchaseId, SupplierId, EmployeeId, Date, Ref, Total, Remark, Journal]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    $("#loader").fadeOut();
+                    if (data == 1) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Bill Added Successfully ");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+
+                    }
+                    else if (data == 2) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Bill Updated Successfully ");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+
+                    }
+                    else if (data == -1) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Bill name already Exist");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+                    }
+                    else {
+                        alert("Some Error!!");
+                    }
+                }
+            });
+
+        }
+    }
+    function Save2(ID, Name, WareHouses, Product, Warehouseid, Quantity, desc) {
+
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+            $.ajax({
+                url: "/api/AccountsAPI/SaveRecord",
+                type: "Post",
+                data: JSON.stringify(["NewGoods", ID, Name, WareHouses, Product, Warehouseid, Quantity, desc]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    $("#loader").fadeOut();
+                    if (data == 1) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Bill Added Successfully ");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+
+                    }
+                    else if (data == 2) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Bill Updated Successfully ");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+
+                    }
+                    else if (data == -1) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Bill name already Exist");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+                    }
+                    else {
+                        alert("Some Error!!");
+                    }
+
+                }
+            });
+
+        }
+    }
+
+    function Save1(ID, PurchaseId, SupplierId, EmployeeId, Date, Ref, Total, Remark, Journal) {
+
+
+        $("#loader").fadeIn();
+        $.ajax({
+            url: "/api/AccountsAPI/SaveRecord",
+            type: "Post",
+            data: JSON.stringify(["NewGoodsMain", ID, PurchaseId, SupplierId, EmployeeId, Date, Ref, Total, Remark, Journal]),
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                $("#loader").fadeOut();
+                if (data == 1) {
+                    $("#divsuccesmsg").fadeIn();
+
+                    $("#spsuccessMsg").html("NewCustomers Added Successfully ");
+                    setTimeout(function () {
+                        $("#divsuccesmsg").fadeOut();
+                        $("#spsuccessMsg").html("");
+                    }, 2000)
+
+                }
+                else if (data == 2) {
+                    $("#divsuccesmsg").fadeIn();
+
+                    $("#spsuccessMsg").html("NewCustomers Updated Successfully ");
+                    setTimeout(function () {
+                        $("#divsuccesmsg").fadeOut();
+                        $("#spsuccessMsg").html("");
+                    }, 2000)
+
+                }
+                else if (data == -1) {
+                    $("#divsuccesmsg").fadeIn();
+
+                    $("#spsuccessMsg").html("NewCustomers name already Exist");
+                    setTimeout(function () {
+                        $("#divsuccesmsg").fadeOut();
+                        $("#spsuccessMsg").html("");
+                    }, 2000)
+                }
+                else {
+                    alert("Some Error!!");
+                }
+                ResetModal();
+                fillDataTable();
+                //$('#myModal').modal('hide');
+
+            }
+        });
+
+
+    }
+    function Save3(ID, Name, WareHouses, Product, Warehouseid, Quantity, desc) {
+
+
+        $("#loader").fadeIn();
+        $.ajax({
+            url: "/api/AccountsAPI/SaveRecord",
+            type: "Post",
+            data: JSON.stringify(["NewGoods", ID, Name, WareHouses, Product, Warehouseid, Quantity, desc]),
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                $("#loader").fadeOut();
+                if (data == 1) {
+                    $("#divsuccesmsg").fadeIn();
+
+                    $("#spsuccessMsg").html("NewCustomers Added Successfully ");
+                    setTimeout(function () {
+                        $("#divsuccesmsg").fadeOut();
+                        $("#spsuccessMsg").html("");
+                    }, 2000)
+
+                }
+                else if (data == 2) {
+                    $("#divsuccesmsg").fadeIn();
+
+                    $("#spsuccessMsg").html("NewCustomers Updated Successfully ");
+                    setTimeout(function () {
+                        $("#divsuccesmsg").fadeOut();
+                        $("#spsuccessMsg").html("");
+                    }, 2000)
+
+                }
+                else if (data == -1) {
+                    $("#divsuccesmsg").fadeIn();
+
+                    $("#spsuccessMsg").html("NewCustomers name already Exist");
+                    setTimeout(function () {
+                        $("#divsuccesmsg").fadeOut();
+                        $("#spsuccessMsg").html("");
+                    }, 2000)
+                }
+                else {
+                    alert("Some Error!!");
+                }
+                ResetModal();
+                fillDataTable();
+                //$('#myModal').modal('hide');
+
+            }
+        });
+
+
+    }
+
+
+    function ResetAll() {
+        setControlValue("txtName", "");
+        setControlValue("txtContact", "");
+        setControlValue("txtTitle", "");
+        setControlValue("ddlCountry", "");
+        setControlValue("ddlState", "");
+        setControlValue("ddlCity", "");
+        setControlValue("ddlGroup", "");
+        setControlValue("txtAddress", "");
+        setControlValue("ddlRegin", "");
+        setControlValue("txtPostal", "");
+        setControlValue("txtPhone", "");
+        setControlValue("txtWebsite", "");
+        setControlValue("txtFax", "");
+        setControlValue("txtemail", "");
+        setControlValue("txtEmaiAddress", "");
+        setControlValue("txtBalance", "");
+    }
+
+    function ResetModal() {
+        setControlValue("txtName", "");
+        setControlValue("txtContact", "");
+        setControlValue("txtTitle", "");
+        setControlValue("ddlCountry", "");
+        setControlValue("ddlState", "");
+        setControlValue("ddlCity", "");
+        setControlValue("ddlGroup", "");
+        setControlValue("txtAddress", "");
+        setControlValue("ddlRegin", "");
+        setControlValue("txtPostal", "");
+        setControlValue("txtPhone", "");
+        setControlValue("txtWebsite", "");
+        setControlValue("txtFax", "");
+        setControlValue("txtemail", "");
+        setControlValue("txtEmaiAddress", "");
+        setControlValue("txtBalance", "");
+        setControlValue("hdnID", 0);
+    }
+
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        debugger;
+        $('#btnSumit').click(function () {
+            var value3 = $('#txtQuantity').val();
+            var result = parseFloat(value3) ;
+            $('#txtTotal').val(result);
+            localStorage.setItem("txtTotal", result)
+            $('#myModal').modal('hide');
+
+        });
+    });
+</script>
+
+

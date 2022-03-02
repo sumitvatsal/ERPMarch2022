@@ -1,0 +1,1397 @@
+﻿
+@{
+    ViewBag.Title = "StudentFeeCalculationParent";
+    //Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutParents.cshtml";
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<style type="text/css">
+    .imgIcon {
+        width: 0.5%;
+        height: 0.5%;
+    }
+
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    .example td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+    .example {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        .example td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        .example tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .example tr:hover {
+            background-color: #ddd;
+        }
+
+        .example th {
+            padding-top: 8px;
+            padding-bottom: 8px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+
+    /*#example2 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+    #example2 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+        #example2 td, #customers th {
+            border: 1px solid #ddd;
+        }
+
+        #example2 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example2 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example2 th {
+            padding-top: 8px;
+            padding-bottom: 8px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }*/
+</style>
+
+<section class="content-header">
+    <h1>
+        <i class="fa fa-eye"></i> Fee Payment |<small id="CTName"></small> <input type="hidden" id="TXTSCHOOL" />
+    </h1>
+    @*<ul class="breadcrumb">
+            <li><a href="/"><i class="fa fa-home"></i>Home</a></li>
+            <li><a href="/academics/default/index">Academics</a></li>
+            <li class="active">Timetable</li>
+            <li><a href="/timetable/class-timing/index">Class Timing</a></li>
+            <li class="active">gffd</li>
+        </ul>*@
+</section>
+<section class="content">
+    <div class="box box-solid">
+        <div class="box-body table-responsive">
+            <p class="text-right btn-view-group edusecArLangTextLeft">
+                <a class="btn btn-default btn-sm" href="/AdminPanel/StudentDashboard"><i class="fa fa-chevron-circle-left"></i> Back</a>							@*<a class="btn btn-info btn-sm" href="/timetable/class-timing/update?id=2" data-target="#globalModal" data-toggle="modal" data-backdrop="static"><i class="fa fa-pencil-square-o"></i> Update</a>										<a class="btn btn-danger btn-sm" href="/timetable/class-timing/delete?id=2" data-confirm="Are you sure you want to delete this item?" data-method="post"><i class="fa fa-trash-o"></i> Delete</a>*@
+            </p>
+
+            <table class="table table-bordered">
+                <colgroup>
+                    <col width="200px">
+                    <col width="250px">
+                    <col width="200px">
+                    <col width="250px">
+                </colgroup>
+                <tbody>
+                    <tr>
+                        <th>Name</th>
+                        <td><span id="CTName1"></span></td>
+                        <th>Father Name</th>
+                        <td><span id="spFatherNm"></span></td>
+                    </tr>
+                    <tr>
+                        <th>Class</th>
+                        <td><span id="spClass"></span></td>
+                        <th>Roll No</th>
+                        <td><span id="spRoll"></span></td>
+                    </tr>
+                    <tr>
+                        <th>Academic Year</th>
+                        <td colspan="3">
+                            <div class="form-group">
+                                <select id="ddl_academic_year" class="form-control" valuefield="ID" textfield="StartYear" blankRowValue="-1" blankRowText="----Select----" onchange="" aria-required="true"></select>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+        <div class="col-md-12">
+            <div class="box box-solid">
+
+                <div class="col-md-6">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><i class="fa fa-eye"></i> Fee Structure </h3>
+                    </div>
+                    <div class="box-body table-responsive">
+
+                        <div id="w2" class="grid-view">
+                            <table class="table table-striped table-bordered example" id="example1">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th class="text-center">Head Name</th>
+                                        <th class="text-center">Amount (in Rs.)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyEmployeeDetails"></tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-right">
+                                            @*<input type="text" id="txtTotal" />*@
+                                            <label id="txtTotal"></label>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            @*<table class="table table-striped table-bordered" style="width:60%;">
+                                    <tr>
+
+                                    </tr>
+                                </table>*@
+                        </div>
+                        <script type="text/html" id="divEmployeeDetailsJTemplte">
+                            {#foreach $T as Datashort}
+                            <tr>
+                                <td>
+                                    { $T.Datashort.count}
+                                </td>
+                                <td>
+                                    { $T.Datashort.ct.FeeCategory}
+                                </td>
+                                <td class="text-right">
+                                    { $T.Datashort.fsc.Amount}
+                                    <input type="hidden" value="{ $T.Datashort.fsc.Amount}" />
+                                </td>
+                            </tr>
+                            {#/for}
+                        </script>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><i class="fa fa-eye"></i> Previous Fee History </h3>
+                    </div>
+                    <div class="box-body table-responsive">
+
+                        <div id="w4" class="grid-view">
+                            <table class="table table-striped table-bordered example" id="example3">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Month</th>
+                                        <th>Fee</th>
+                                        <th>Payable Fee</th>
+                                        <th>Due Amount</th>
+                                        <th>Amount Paid</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyPrevFeeDetails"></tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-right"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            @*<table class="table table-striped table-bordered" style="width:60%;">
+                                    <tr>
+
+                                    </tr>
+                                </table>*@
+                        </div>
+                        <script type="text/html" id="divPrevFeeJTemplte">
+                            {#foreach $T as Datashort}
+                            <tr>
+                                <td style="width:10%;">
+                                    { $T.Datashort.count}
+                                    <input type="hidden" value="{ $T.Datashort.fcal.fldId}" />
+                                </td>
+                                <td>
+                                    { $T.Datashort.fcal.Months}
+                                    <input type="hidden" value="{ $T.Datashort.fcal.monthId}" />
+                                </td>
+                                <td class="PmonthlyAmnt">
+                                    { $T.Datashort.fcal.monthlyAmount}
+                                </td>
+                                <td>
+                                    { $T.Datashort.fcal.ActualPayableAmnt}
+                                </td>
+                                <td class="PduesAmount">
+                                    { $T.Datashort.fcal.duesAmount}
+                                </td>
+                                <td>
+                                    { $T.Datashort.fcal.PaidAmount}
+
+                                </td>
+                            </tr>
+                            {#/for}
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="box-solid">
+            <div class="box-header with-border">
+                <h3 class="box-title"> Payment Details</h3>
+            </div>
+            <div class="box-body">
+                <div class="col-md-6">
+                    <div class="form-group" id="montsloading">
+                        <label style="color:steelblue;font:bold;font-size:large;">Loading.... please wait for seconds</label>
+                    </div>
+                    <div class="form-group" id="droupdown">
+                        <label>Select Months</label>
+                        <select class="form-control select2" id="ddlSelectedMonth" onchange="getDddlValue()" valuefield="month_id" textfield="month" multiple="multiple" data-placeholder="Select a month" style="width: 100%;" tabindex="-1" aria-hidden="true">
+                            @*<option value="0">January</option>
+                <option value="1">Febuary</option>
+                <option value="2">March</option>
+                <option value="3">April</option>
+                <option value="4">May</option>
+                <option value="5">June</option>
+                <option value="6">July</option>
+                <option value="7">August</option>
+                <option value="8">September</option>
+                <option value="9">October</option>
+                <option value="10">November</option>
+                <option value="11">December</option>*@
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label">Total Fee Amount</label>
+                                <input type="text" id="txtTotalAmount" readonly />
+                            </div>
+                        </div>
+                        @*<div class="col-sm-4">
+            <div class="form-group">
+                <label class="control-label">Discount (per month)</label>
+                <input  id="txtDiscount" onchange="calculateDiscount()" />
+                <input type="hidden" id="hdnDiscount" />
+            </div>
+        </div>*@
+                        @*<div class="col-sm-4">
+            <div class="form-group">
+                <label class="control-label">% or amount</label>
+                <select class="form-control"  id="ddlDiscountType" onchange="calculateDiscount()" data-placeholder="Select a month" style="width: 100%;" tabindex="-1" aria-hidden="true">
+                    <option value="0">%</option>
+                    <option value="1">Amount</option>
+                </select>
+            </div>
+        </div>*@
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label">Payable Amount</label>
+                                <input type="hidden" id="txtFinalPayableAmnt_hdn" />
+                                <input type="text" id="txtFinalPayableAmnt" readonly />
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group" id="DueFeeAmount">
+                                <label class="control-label">Late Fee Fine</label>
+                                <input type="number" min="1" readonly id="txtDueFeeAmount" @*onchange="CheckPaidAmnt()"*@ />
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label">Amount being Paid</label>
+                                <input type="text" id="txtFinalAmntbeingPaid" onchange="CheckPaidAmnt()" />
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label">Final Amount being Paid</label> <br />
+                                <label class="control-label" style="color:green; font-size:x-large;" id="FinalAmntbeingPaid"></label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            @*<input type="button" value="Save" onclick="savePayemnt()" />*@
+                            <input class="btn btn-primary" type="button" value="Pay NOW" @*onclick="save()"*@ />
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="col-md-6" style="display:none;">
+
+                    <table id="tblAppend" border="1" style="width:100%"></table>
+                    <table id="tblAppendTotal" class="hide" border="1" style="width:100%">
+                        <tr>
+                            <td> Total Paid</td>
+                            <td id="txtTotalPaid"></td>
+                        </tr>
+                        <tr>
+                            <td> Paid Amount</td>
+                            <td><input type="text" onblur="checkAmountPayemnt()" id="txtPaidAmount" /></td>
+                        </tr>
+                    </table>
+                    <input type="text" id="txtDueBal" />
+                </div>
+                <div class="box-body table-responsive">
+
+                    <div id="w3" class="grid-view">
+                        <table class="table table-striped table-bordered example" id="example2">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Month</th>
+                                    <th>Monthly Fee</th>
+                                    @*<th>Payable Fee</th>
+                                        <th>Due Amount</th>
+                                        <th>Amount Paid</th>*@
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyPay"></tbody>
+                            <tfoot>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td id="totMonthlyAmnt"></td>
+                                    @*<td></td>
+                                        <td id="totDueSum"></td>
+                                        <td>
+                                            <label id="txtTotalToBePaid"></label>
+                                        </td>*@
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <script type="text/html" id="divPayTemplte">
+                        {#foreach $T as Datashort}
+                        <tr>
+                            <td style="width:10%;">
+                                { $T.Datashort.count}
+                                <input type="hidden" value="{ $T.Datashort.cal.fldId}" />
+                            </td>
+                            <td>
+                                { $T.Datashort.cal.Months}
+                                <input type="hidden" value="{ $T.Datashort.cal.monthId}" />
+                            </td>
+                            <td class="monthlyAmnt">
+                                { $T.Datashort.cal.monthlyAmount}
+                            </td>
+                            @*<td >
+                                    { $T.Datashort.cal.ActualPayableAmnt}
+                                </td>
+                                <td class="duesAmount">
+                                    { $T.Datashort.cal.duesAmount}
+                                </td>
+                                <td>
+                                    { $T.Datashort.cal.PaidAmount}
+                                    <input type="text" onchange="editTemp(this,{ $T.Datashort.cal.fldId},{ $T.Datashort.cal.monthlyAmount})" value="{$T.Datashort.cal.PaidAmount}" style="display:none;"/>
+
+                                </td>*@
+                        </tr>
+                        {#/for}
+                    </script>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <input type="hidden" id="hdnID" />
+    <input type="hidden" id="hdnFSID" />
+    <input type="hidden" id="hdnDueMonth" />
+    <input type="hidden" id="hdnDueMonth_nm" />
+    <input type="hidden" id="hdnDueAmnt" />
+    <input type="hidden" id="hdnDuePayable" />
+</section>
+<div class="alert alert-success centerSuccess" id="divSucesEmail" style="display:none">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+    <h4>
+        <i class="icon fa fa-check"></i>
+        <span Id="sentEmailMsg" ng-bind="successMsg"></span>
+    </h4>
+
+</div>
+<style type="text/css">
+    .hide {
+        display: none;
+    }
+</style>
+<link href="~/css/bower_components/select2/dist/css/select2.min.css" rel="stylesheet" />
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+
+<script type="text/javascript">
+    var i = 0;
+    var PrevFeeArray = new Array();
+    setControlValue("hdnDueMonth", -1);
+    setControlValue("hdnDueMonth_nm", "");
+    var last_valid_selection = null;
+    $(document).ready(function () {
+        $("#ddlSelectedMonth").change(function () {
+
+            if ($(this).val().length > 1) {
+
+                $(this).val(last_valid_selection);
+            } else {
+                last_valid_selection = $(this).val();
+            }
+
+
+
+            
+
+
+        });
+    });
+    $(document).ready(function () {
+
+        $('.select2').select2();
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TimeTableApi", "GetAcademicYearBySchool", "ddl_academic_year", false, "", "", "", "");
+
+        var ac_yr = localStorage.getItem('academic_year');
+        if (ac_yr != "" && ac_yr != "-1" && ac_yr != null) {
+            setTimeout(function () {
+                setControlValue("ddl_academic_year", parseInt(ac_yr));
+                getMonths_feeStructure();
+                //FreezeMonths();
+            }, 1000);
+
+        }
+
+        setControlValue("hdnID", 0);
+        setControlValue("hdnDiscount", 0);
+        var ID = getQuerystring("id");
+        if (typeof (ID) != "undefined") {
+            setControlValue("hdnID", ID);//
+            GetValues(ID);
+            //fillDataTable();
+            fillPrevFeeTable();
+        }
+    });
+
+    $("#ddl_academic_year").change(function () {
+        getMonths_feeStructure();
+    });
+
+    function getMonths_feeStructure() {
+        var ddlCourse = getControlValue("ddl_academic_year");
+        if (ddlCourse != null && (ddlCourse != -1) && (ddlCourse != undefined)) {
+            callServiceMethodForDDl(JSON.stringify([ddlCourse]), "/api/FeesApi", "GetMonthsBySession", "ddlSelectedMonth", false, "", "", "", "");
+
+            fillDataTable();
+            fillPrevFeeTable()
+        }
+    }
+
+    function GetValues(ID) {
+        $("#loader").fadeIn();
+
+        var fee = {
+            val: ID
+        }
+        $.ajax({
+            url: "/api/StudentApi/FindStudentByID",
+            type: "Post",
+            data: JSON.stringify(fee),
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                setControlValue("CTName", data.FirstName + " " + data.MiddleName + " " + data.LastName);//data.Religion);
+                setControlValue("CTName1", data.FirstName + " " + data.MiddleName + " " + data.LastName);
+                setControlValue("spFatherNm", data.FatherName);
+                setControlValue("spRoll", data.RollNo);
+                setControlValue("spClass", data.Class + "-" + data.Section);
+
+                setControlValue("spRegNo", data.RegNo);
+                setControlValue("TXTSCHOOL", data.SchoolID)
+
+                //fillDataTable();
+                emptyTempTable();
+            }
+        });
+    }
+
+    function fillDataTable() {
+
+        var id = getControlValue("hdnID");
+        var year = getControlValue("ddl_academic_year");
+
+        $.ajax({
+            url: "/api/FeesApi/getFeeStructureIDByStdID",
+            type: "Post",
+            data: JSON.stringify([id, year]),
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                if (data != -1) {
+                    setControlValue("hdnFSID", data);
+
+                    callJTemplateServiceMethod(JSON.stringify(["FeeStructureConfig",
+                        data]), "/api/FeesApi", "getList",
+                        "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true,
+                        successMsg, "", "", "");
+                }
+            }
+        });
+    }
+
+    function successMsg(p1, p2, p3, datas) {
+        setTimeout(function () {
+            var arrr = {};
+            $("#ddlSelectedMonth").val(arrr).trigger("change");
+            //$('#ddlSelectedMonth option').filter('[value="0"]').attr('disabled', "disabled");
+            FreezeMonths();
+            var totalAmt = 0;
+            $("#tbodyEmployeeDetails tr input[type=hidden]").each(function () {
+                totalAmt += parseInt($(this).val());
+            });
+            $("#txtTotal").html(totalAmt);
+        }, 1000);
+        $("#loader").fadeOut();
+
+    }
+
+    function fillPrevFeeTable() {
+
+        var id = getControlValue("hdnID");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        var AcademicYear = getControlValue("ddl_academic_year");
+        callJTemplateServiceMethod(JSON.stringify(["PrevFeeDetailstudent", id, SchoolID, AcademicYear]), "/api/FeesApi", "getList",
+            "tbodyPrevFeeDetails", "divPrevFeeJTemplte", true, successPrevFeeMsg, "", "", "");
+        $("#droupdown").hide();
+        $("ddlSelectedMonth").hide();
+        $("#montsloading").show();
+
+    }
+
+    function successPrevFeeMsg(p1, p2, p3, datas) {
+        $("#loader").fadeOut();
+        setTimeout(function () {
+            var dueSum = 0; var duemonth;
+            $("#tbodyPrevFeeDetails").find('tr').each(function (i) {
+                var $tds = $(this).find('td'),
+                    monthID = $tds.eq(1).find('input[type=hidden]').val(),
+                    monthNm = $tds.eq(1).text();
+                monthAmnt = $tds.eq(2).text();
+                dues = $.trim($tds.eq(4).text());
+                payable = $.trim($tds.eq(3).text());
+                paid = $.trim($tds.eq(5).text());
+                id = $tds.eq(0).find('input[type=hidden]').val();
+                if (dues != "" && dues != "0" && i == ($('#tbodyPrevFeeDetails tr').length - 1)) {
+                    dueSum = parseFloat(paid);
+                    duemonth = monthID;
+                    setControlValue("hdnDueMonth", duemonth);
+                    setControlValue("hdnDueAmnt", dueSum);
+                    setControlValue("hdnDuePayable", payable);
+                    setControlValue("hdnDueMonth_nm", monthNm);
+                }
+                else {
+                    //setControlValue("hdnDueAmnt", dueSum);
+                }
+            });
+            $("#loader").fadeOut();
+            $("ddlSelectedMonth").show();
+            $("#droupdown").show();
+            $("#montsloading").hide();
+            for (var j = 0; j < $('#ddlSelectedMonth').children('option').length; j++) {
+                if (dueSum != 0 || dueSum != "") {
+                    if (j != duemonth) {
+                        $('#ddlSelectedMonth option').filter('[value="' + j + '"]').attr('disabled', true);
+                    }
+                }
+                else {
+                    $('#ddlSelectedMonth option').filter('[value="' + j + '"]').attr('disabled', false);
+                }
+            }
+        }, 10000);
+
+    }
+
+    function emptyTempTable() {
+        $.ajax({
+            url: "/api/FeesApi/DeleteRecord",
+            type: "Post",
+            data: JSON.stringify([0, "TruncateFeeTemp"]),
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+            }
+        });
+    }
+
+    function editTemp(val, id) {
+        var value = val.value;
+        $.ajax({
+            url: "/api/FeesApi/SaveRecord",
+            type: "Post",
+            data: JSON.stringify(["FeeCalculate", id, value]),
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                fillTempTable();
+            }
+        });
+    }
+
+    function calculateDiscount() {
+        var value = parseFloat(getControlValue("txtDiscount"));
+        var payable = getControlValue("txtFinalPayableAmnt_hdn");
+        var FineAmount = parseFloat(getControlValue("txtDueFeeAmount"));
+
+        if (isNaN(value)) {
+            value = "";
+        }
+        var payable_calc = payable;
+        if (value != "") {
+            var type = getControlValue("ddlDiscountType");
+
+            if (type == "0") {
+                payable_calc = (payable - (payable * value / 100));
+                //hdnDiscount
+                setControlValue("hdnDiscount", (payable * value / 100));
+            }
+            else {
+                payable_calc = payable - value;
+                setControlValue("hdnDiscount", value);
+            }
+
+        }
+        payable_calc = payable_calc <= 0 ? 0 : payable_calc;
+        setControlValue("txtFinalPayableAmnt", payable_calc);
+        setControlValue("txtFinalAmntbeingPaid", payable_calc);
+        var FinalAmntbeingPaid = parseFloat($("#txtFinalAmntbeingPaid").val());
+        setControlValue("FinalAmntbeingPaid", FinalAmntbeingPaid + FineAmount);
+        $("#final").show();
+    }
+
+    function CheckPaidAmnt() {
+        var value = parseFloat(getControlValue("txtFinalAmntbeingPaid"));
+        var payable = parseFloat(getControlValue("txtFinalPayableAmnt"));
+
+        var checkAmnt = payable / 2;
+        if ((value - 1) < checkAmnt) {
+            alert("Entered amount value must be more than half of the payable amount");
+            setControlValue("txtFinalAmntbeingPaid", "");
+        }
+        if (value > payable) {
+            setControlValue("txtFinalAmntbeingPaid", payable);
+        }
+
+    }
+
+    function getDddlValue() {
+        var s = {};
+        var PaidMonths = new Array();
+        var data = $('#ddlSelectedMonth').select2('data');
+        var dataLast;
+        $('#ddlSelectedMonth option').each(function (index) {
+            var dt = this;
+            if (data.length > 0) {
+                dataLast = data[data.length - 1].id - data[0].id;  //added this line  -data[0].id  bec before unable to select month after nov
+                dataLast1 = data[data.length - 1].id;  // before it was  dataLast = data[data.length - 1].id; 
+                var darray = new Array();
+                for (var p = 0; p < data.length; p++) {
+                    darray.push(parseInt(data[p].id));
+                }
+
+                if (jQuery.inArray(-1, darray) != -1) {
+                    $("#ddlSelectedMonth").val(s).trigger("change");
+                    return false;
+                }
+
+                for (var i = 0; i < PrevFeeArray.length; i++) {
+                    PaidMonths.push(PrevFeeArray[i].monthId);
+                    if (jQuery.inArray(parseInt(PrevFeeArray[i].monthId), darray) != -1) {
+                        alert("Fees paid for the selected month");
+                        $("#ddlSelectedMonth").val(s).trigger("change");
+                        return false;
+                    }
+                }
+
+                var duemonth = getControlValue("hdnDueMonth");
+                if (duemonth != -1 && dataLast1 != duemonth) //changed dataLast to dataLast1
+                {
+                    var monthNm = getControlValue("hdnDueMonth_nm");
+                    $("#ddlSelectedMonth").val(s).trigger("change");
+                    alert("First due fees has to be paid for month of - " + monthNm);
+                    return false;
+                }
+
+                //for (var i = 0; i < PrevFeeArray.length; i++) {
+                //    PaidMonths.push(PrevFeeArray[i].monthId);
+                //    if (dataLast == PrevFeeArray[i].monthId) {
+                //        alert("Fees paid for the selected month");                            
+                //        $("#ddlSelectedMonth").val(s).trigger("change");
+                //        return false;
+                //    }
+                //}
+
+
+
+                if (index > dataLast) {
+                    return false;
+                }
+                else {
+                    if (dt.disabled == true || dt.selected == true || parseInt(dt.value) == -1) {
+                        //
+                    }
+                    else {
+                        if (parseInt(dt.value) < dataLast) {
+                            if (jQuery.inArray(parseInt(dt.value), PaidMonths) == -1) {
+                                $("#ddlSelectedMonth").val(s).trigger("change");
+                                return false;
+                            }
+                            else {
+
+                            }
+                        }
+                        else {
+
+                        }
+                    }
+                }
+            }
+            else {
+
+            }
+
+        });
+
+        var ar = new Array();
+        var currentMonth = $("#ddlSelectedMonth").val();
+        var month_txt = $('#ddlSelectedMonth').find(":selected").text();
+        var data1 = $('#ddlSelectedMonth').select2('data');
+        //added to get checkFeedueDate , getFeeStructureIDByStdID
+        var currentMonthss = currentMonth.toString();
+        if (currentMonthss == "") {
+            $("#txtDueFeeAmount").val("0")
+            $("#DueFeeAmount").hide();
+        }
+        else
+        {
+            var schoolid = sessionStorage.getItem("SchoolID");
+            var Academicyear = $("#ddl_academic_year").val();
+            $.ajax({
+                url: "/api/FeesApi/checkFeedueDate",
+                type: "Post",
+                data: JSON.stringify([schoolid, currentMonthss, Academicyear]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (datasss) {
+                    var q = new Date();
+                    //var m = q.getMonth();
+                    //var d = q.getDay();
+                    //var y = q.getFullYear();
+
+                    //date = new Date(y, m, d);
+                    if (new Date(datasss) < q) {
+
+                        $("#DueFeeAmount").show();
+                        var id = getControlValue("hdnID");
+                        var year = getControlValue("ddl_academic_year");
+
+                        $.ajax({
+                            url: "/api/FeesApi/getFeeStructureIDByStdID",
+                            type: "Post",
+                            data: JSON.stringify([id, year]),
+                            contentType: 'application/json; charset=utf-8',
+                            success: function (data) {
+                                if (data != -1) {
+                                    setControlValue("hdnFSID", data);
+                                    var structureid = data; //2
+
+                                    $.ajax({
+                                        url: "/api/FeesApi/getDuefine",
+                                        type: "Post",
+                                        data: JSON.stringify([structureid]),
+                                        contentType: "application/json; charset=utf-8",
+                                        success: function (dataas) {
+                                            var fine = parseFloat(dataas);
+                                            var totalamountwithfine = parseFloat(getControlValue("txtFinalAmntbeingPaid"));
+                                            $("#txtDueFeeAmount").val(dataas);
+                                            setControlValue("txtFinalAmntbeingPaid", totalamountwithfine + fine)
+                                        }
+
+                                    });
+
+
+                                }
+                            }
+                        });
+
+
+
+
+
+                    }
+                    else {
+                        $("#txtDueFeeAmount").val("0")
+                        $("#DueFeeAmount").hide();
+                    }
+
+                }
+
+            });
+
+        }
+     
+        for (var i = 0; i < currentMonth.length; i++) {
+
+            var months = {
+                monthID: data1[i].id,
+                month: data1[i].text
+            }
+            ar.push(months);
+        }
+        var id = getControlValue("hdnID");
+        var SchoolID = getControlValue("TXTSCHOOL");
+        //var SchoolID = sessionStorage.getItem("SchoolID");
+        CalculateFeeTemp(id, ar, currentMonth, SchoolID);
+    }
+    //function getDddlValue() {
+    //    var s = {};
+    //    var PaidMonths = new Array();
+    //    var data = $('#ddlSelectedMonth').select2('data');
+    //    var dataLast;
+    //    $('#ddlSelectedMonth option').each(function (index) {
+    //        var dt = this;
+    //        if (data.length > 0) {
+    //            dataLast = data[data.length - 1].id;
+    //            var darray = new Array();
+    //            for (var p = 0; p < data.length; p++) {
+    //                darray.push(parseInt(data[p].id));
+    //            }
+
+    //            if (jQuery.inArray(-1, darray) != -1) {
+    //                $("#ddlSelectedMonth").val(s).trigger("change");
+    //                return false;
+    //            }
+
+    //            for (var i = 0; i < PrevFeeArray.length; i++) {
+    //                PaidMonths.push(PrevFeeArray[i].monthId);
+    //                if (jQuery.inArray(parseInt(PrevFeeArray[i].monthId), darray) != -1) {
+    //                    alert("Fees paid for the selected month");
+    //                    $("#ddlSelectedMonth").val(s).trigger("change");
+    //                    return false;
+    //                }
+    //            }
+
+    //            var duemonth = getControlValue("hdnDueMonth");
+    //            if (duemonth != -1 && dataLast != duemonth) {
+    //                var monthNm = getControlValue("hdnDueMonth_nm");
+    //                $("#ddlSelectedMonth").val(s).trigger("change");
+    //                alert("First due fees has to be paid for month of - " + monthNm);
+    //                return false;
+    //            }
+
+    //            //for (var i = 0; i < PrevFeeArray.length; i++) {
+    //            //    PaidMonths.push(PrevFeeArray[i].monthId);
+    //            //    if (dataLast == PrevFeeArray[i].monthId) {
+    //            //        alert("Fees paid for the selected month");
+    //            //        $("#ddlSelectedMonth").val(s).trigger("change");
+    //            //        return false;
+    //            //    }
+    //            //}
+
+
+
+    //            if (index > dataLast) {
+    //                return false;
+    //            }
+    //            else {
+    //                if (dt.disabled == true || dt.selected == true || parseInt(dt.value) == -1) {
+    //                    //
+    //                }
+    //                else {
+    //                    if (parseInt(dt.value) < dataLast) {
+    //                        if (jQuery.inArray(parseInt(dt.value), PaidMonths) == -1) {
+    //                            $("#ddlSelectedMonth").val(s).trigger("change");
+    //                            return false;
+    //                        }
+    //                        else {
+
+    //                        }
+    //                    }
+    //                    else {
+
+    //                    }
+    //                }
+    //            }
+    //        }
+    //        else {
+
+    //        }
+
+    //    });
+
+    //    var ar = new Array();
+    //    var currentMonth = $("#ddlSelectedMonth").val();
+    //    var month_txt = $('#ddlSelectedMonth').find(":selected").text();
+    //    var data1 = $('#ddlSelectedMonth').select2('data');
+
+    //    for (var i = 0; i < currentMonth.length; i++) {
+
+    //        var months = {
+    //            monthID: data1[i].id,
+    //            month: data1[i].text
+    //        }
+    //        ar.push(months);
+    //    }
+    //    var id = getControlValue("hdnID");
+    //    SchoolID = getControlValue("TXTSCHOOL");
+    //    CalculateFeeTemp(id, ar, currentMonth, SchoolID);
+    //}
+
+    function CalculateFeeTemp(ID, month, monthID, SchoolID) {
+        var tot = getControlValue("txtTotal");
+        var payable = getControlValue("txtFinalPayableAmnt");
+        if (payable == "" || isNaN(payable) || payable == "0") {
+            payable = tot;
+        }
+        var Items = new Array();
+        var fees = {
+            ID: 0,
+            monthList: month,
+            courses: tot,
+            style: payable,
+            SchoolID: SchoolID
+
+        }
+        Items.push(fees);
+        $.ajax({
+            url: "/api/FeesApi/SaveTemp",
+            type: "Post",
+            //data: JSON.stringify(["FeeCalculate", ID,month,monthID, tot]),
+            data: JSON.stringify(Items),
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                if (data != -1) {
+
+                }
+                else {
+                    alert("Some Error!!");
+                }
+                fillTempTable();
+            }
+        });
+    }
+
+    function fillTempTable() {
+
+        var id = getControlValue("hdnID");
+        var SchoolID = getControlValue("TXTSCHOOL");
+        callJTemplateServiceMethod(JSON.stringify(["FeeCalculate", SchoolID]), "/api/FeesApi", "getList",
+            "tbodyPay", "divPayTemplte", true, successMsgTemp, "", "", "");
+    }
+
+    function successMsgTemp(p1, p2, p3, datas) {
+        //txtTotalToBePaid
+        setTimeout(function () {
+            var dueSum = 0; var duemonth;
+            //$("#tbodyPrevFeeDetails").find('tr').each(function (i) {
+            //    var $tds = $(this).find('td'),
+            //    monthID = $tds.eq(1).find('input[type=hidden]').val(),
+            //    monthAmnt = $tds.eq(2).text();
+            //    dues =$.trim($tds.eq(4).text());
+            //    paid = $tds.eq(5).text();
+            //    id = $tds.eq(0).find('input[type=hidden]').val();
+            //    if(dues!="" && dues!="0")
+            //    {
+            //        dueSum = parseFloat(dues);
+            //        duemonth = monthID;
+            //        setControlValue("hdnDueMonth", duemonth);
+            //        setControlValue("hdnDueAmnt", dueSum);
+            //        return false;
+            //    }
+            //});
+            //var totalAmt = 0;
+            //$("#tbodyPay tr input[type=text]").each(function () {
+            //    totalAmt += parseFloat($(this).val());
+            //});
+            //$("#txtTotalToBePaid").html(totalAmt);
+            var sum = 0;
+            dueSum = getControlValue("hdnDueAmnt");
+            // iterate through each td based on class and add the values
+            $(".monthlyAmnt").each(function () {
+
+                var value = $(this).text();
+                // add only if the value is number
+                if (!isNaN(value) && value.length != 0) {
+                    sum += parseFloat(value);
+                }
+            });
+            $("#totMonthlyAmnt").html(sum);
+            $("#txtTotalAmount").val(sum);
+
+            //$(".duesAmount").each(function() {
+
+            //    var value = $(this).text();
+            //    // add only if the value is number
+            //    if(!isNaN(value) && value.length != 0) {
+            //        dueSum += parseFloat(value);
+            //    }
+            //});
+            //$("#totDueSum").html(dueSum);
+            //var payable = sum - Math.abs(dueSum);   setControlValue("hdnDuePayable", payable);
+            var payable;
+            if (dueSum != 0) {
+                sum = parseFloat(getControlValue("hdnDuePayable"));
+            }
+            payable = sum - Math.abs(dueSum);
+            $("#txtFinalPayableAmnt").val(payable);
+            $("#txtFinalPayableAmnt_hdn").val(payable);
+            calculateDiscount();
+        }, 200);
+    }
+
+    function getMonthString(num) {
+        //  var numm = parseInt(num + 1)
+        var month;    //Create a local variable to hold the string
+        switch (parseInt(num)) {
+            case 0:
+                month = "January";
+                break;
+            case 1:
+                month = "February";
+                break;
+            case 2:
+                month = "March";
+                break;
+            case 3:
+                month = "April";
+                break;
+            case 4:
+                month = "May";
+                break;
+            case 5:
+                month = "June";
+                break;
+            case 6:
+                month = "July";
+                break;
+            case 7:
+                month = "August";
+                break;
+            case 8:
+                month = "September";
+                break;
+            case 9:
+                month = "October";
+                break;
+            case 10:
+                month = "November";
+                break;
+            case 11:
+                month = "December";
+                break;
+            default:
+                month = "Invalid month";
+        }
+        return month;
+    }
+
+    function savePayemnt() {
+        debugger;
+        var totalamt = '';
+        var paidamt = '';
+        var remainAmt = '';
+        var dueamount = '';
+        var Items = new Array();
+
+        $("#tblAppend tr input[type=text]").each(function () {
+            //  alert($(this).val());
+            totalamt = $("#txtTotalPaid").html();
+            paidamt = $("#txtPaidAmount").val();
+            monthlyamt = $(this).val();
+
+            var obj = new Object();
+            obj.monthlyamt = $(this).val();
+            obj.Month = $(this).attr("month");
+            obj.MonthId = $(this).attr("monnrrhUId");
+            dueamount = remainAmt;
+            if (remainAmt == "") {
+                remainAmt = parseInt(paidamt) - parseInt(monthlyamt);
+                obj.amount = $(this).val()
+
+            }
+            else if ($(this).val() > remainAmt) {
+                obj.amount = remainAmt.toString();
+                dueamount = parseInt(remainAmt) - parseInt(monthlyamt)
+                //   alert(remainAmt);
+            }
+            else {
+                remainAmt = parseInt(remainAmt) - parseInt(monthlyamt);
+                obj.amount = $(this).val()
+            }
+            //    alert(obj.amount);
+
+            if (remainAmt.toString().indexOf("-") == "0") {
+                obj.duesAmount = remainAmt.toString();
+            }
+            else {
+                if (dueamount.toString().indexOf("-") == "0") {
+                    //   alert(remainAmt);
+                    obj.duesAmount = dueamount.toString();
+                }
+                else {
+                    obj.duesAmount = "0";
+                }
+            }
+
+            Items.push(obj);
+
+        });
+
+        $.ajax({
+            type: "POST",
+            url: "/Employee/saveFeeDetails",
+            contentType: "application/json; charset=utf-8",
+            data: "{'fee':" + JSON.stringify(Items) + "}",
+            success: function (response) {
+            },
+            failure: function (response) {
+                alert(response.d);
+            }
+        });
+
+        //  callServiceMethod("{fee:" + JSON.stringify(Items) + "}", "FeeManagement.aspx", "saveFeeDetails", false, "", "", false, "", false, "", "", "", "");
+
+
+    }
+
+    function save() {
+        $("#loader").fadeIn();
+        var table = $("#tbodyPay");
+        var FinalAmntPaid = parseFloat(getControlValue("txtFinalAmntbeingPaid"));
+        var actualPayable = parseFloat(getControlValue("txtFinalPayableAmnt"));
+        var totalamt = '';
+        var paidamt = '';
+        var remainAmt = '';
+        var dueamount = '';
+        var Items = new Array();
+        var count = $('#tbodyPay tr').length;
+        var monthlyPayable = actualPayable / count;
+
+
+
+        var StudentID = getControlValue("hdnID");
+        var value = parseFloat(getControlValue("txtDiscount"));
+        var type = getControlValue("ddlDiscountType");
+        var SchoolID = getControlValue("TXTSCHOOL");
+        table.find('tr').each(function (i) {
+            var $tds = $(this).find('td'),
+                month = $tds.eq(1).text(),
+                monthAmnt = $tds.eq(2).text();
+            dues = $tds.eq(4).text();
+            paid = $tds.eq(5).text();
+            id = $tds.eq(5).find('input[type=hidden]').val();
+
+            totalamt = actualPayable;
+            paidamt = FinalAmntPaid / count;
+            monthlyamt = monthlyPayable;
+
+            if (FinalAmntPaid < actualPayable && count > 1) {
+                if (FinalAmntPaid >= monthlyPayable) {
+                    paidamt = monthlyPayable;
+                    FinalAmntPaid = FinalAmntPaid - monthlyPayable;
+                }
+                else {
+                    paidamt = FinalAmntPaid;
+                }
+
+            }
+
+            var obj = new Object();
+            obj.monthlyamt = monthAmnt;
+            if (type == "0") {
+                obj.discountPer = value;
+            }
+            else {
+                obj.discountPer = null;
+            }
+            obj.discountAmnt = getControlValue("hdnDiscount");
+            obj.Month = month;
+            obj.AcademicYear = getControlValue("ddl_academic_year");
+            obj.MonthId = $tds.eq(1).find('input[type=hidden]').val();
+            obj.feeStructureID = getControlValue("hdnFSID");
+            obj.studentId = StudentID;
+            obj.SchoolID = SchoolID;
+            obj.ActualPayableAmnt = monthlyPayable;
+            dueamount = remainAmt;
+            if (remainAmt == "") {
+                remainAmt = parseFloat(paidamt) - parseFloat(monthlyamt);
+                obj.amount = paidamt;
+
+            }
+            else if (monthlyPayable > remainAmt) {
+                obj.amount = remainAmt.toString();
+                dueamount = parseFloat(remainAmt) - parseFloat(monthlyamt)
+                //   alert(remainAmt);
+            }
+            else {
+                remainAmt = parseFloat(remainAmt) - parseFloat(monthlyamt);
+                obj.amount = paidamt;
+            }
+            //    alert(obj.amount);
+
+            if (remainAmt.toString().indexOf("-") == "0") {
+                obj.duesAmount = remainAmt.toString();
+            }
+            else {
+                if (dueamount.toString().indexOf("-") == "0") {
+                    //   alert(remainAmt);
+                    obj.duesAmount = dueamount.toString();
+                }
+                else {
+                    obj.duesAmount = "0";
+                }
+            }
+
+            Items.push(obj);
+        });
+        $.ajax({
+            type: "POST",
+            url: "/api/FeesApi/saveFeeDetails",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(Items),
+            success: function (response) {
+                $("#divSucesEmail").fadeIn();
+                //  $scope.successMsg = msg.data;
+                $("#sentEmailMsg").html(response.StatusNm);
+
+                setTimeout(function () {
+                    $("#divSucesEmail").fadeOut();
+                }, 2000);
+                // alert(response.StatusNm);
+                localStorage.setItem('academic_year', getControlValue("ddl_academic_year"));
+                location.reload();
+                $("#loader").fadeOut();
+                //fillPrevFeeTable();
+            },
+            failure: function (response) {
+                alert(response.d);
+            }
+        });
+    }
+
+    function checkAmountPayemnt() {
+        var totalPaidAmount = $("#txtPaidAmount").val();
+        var totalAmt = $("#txtTotalPaid").html();
+        if (parseFloat(totalPaidAmount) > parseFloat(totalAmt)) {
+            var remanamt = parseInt(totalPaidAmount) - parseInt(totalAmt);
+            alert("Please Select Next Month Because you paid Advance Fees");
+        }
+        else {
+
+        }
+    }
+
+    function FreezeMonths() {
+        $.ajax({
+            type: "POST",
+            url: "/api/FeesApi/getFeeDetails",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify([getControlValue("hdnID"), getControlValue("ddl_academic_year")]),
+            success: function (data) {
+                PrevFeeArray = data;
+                setTimeout(function () {
+                    for (var i = 0; i < data.length; i++) {
+
+                        //for (var j = 0; j < $('#ddlSelectedMonth').children('option').length; j++) {
+                        //    if (j == data[i].monthId) {
+                        //        $('#ddlSelectedMonth option').filter('[value="' + j + '"]').attr('disabled', "disabled");
+                        //    }
+                        //}
+                        $('#ddlSelectedMonth option').each(function (index) {
+                            if (this.value == data[i].monthId) {
+                                this.disabled = true;
+                            }
+                        });
+                    }
+                }, 2000)
+            },
+            failure: function (response) {
+                alert(response.d);
+            }
+        });
+    }
+
+</script>
+@*<script type="text/javascript">
+        $(document).ready(function () {
+            $.ajax({
+                type: "POST",
+                url: "/api/FeesApi/getFeeDetails",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify([getControlValue("hdnID"), getControlValue("ddl_academic_year")]),
+                success: function (data) {
+                    setTimeout(function () {
+                         for (var i = 0; i < data.length; i++) {
+
+                            for (var j = 0; j < $('#ddlSelectedMonth').children('option').length; j++) {
+                                if (j == data[i].monthId) {
+                                     $('#ddlSelectedMonth option').filter('[value="' + j + '"]').attr('disabled', "disabled");
+                                }
+                            }
+                        }
+                    }, 1000)
+                },
+                failure: function (response) {
+                    alert(response.d);
+                }
+            });
+
+
+
+            })
+    </script>*@

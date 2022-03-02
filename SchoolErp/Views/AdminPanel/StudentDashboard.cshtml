@@ -1,0 +1,909 @@
+﻿
+@{
+    ViewBag.Title = "StudentDashboard";
+    Layout = "~/Views/Shared/_LayoutStudent.cshtml";
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event)
+    {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length)
+        {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+  <!-- Content Wrapper. Contains page content -->
+<div class="contesnt-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            <i class="fa fa-dashboard"></i> Dashboard |<small> Student </small>
+        </h1>
+        <ul class="breadcrumb">
+            <li><a href="/"><i class="fa fa-home"></i>Home</a></li>
+            <li class="active">Student Dashboard</li>
+        </ul>
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <!-- Small boxes (Stat box) -->
+        <div class="row">
+
+            @*<div class="panel-body" style="background-color: #489ac3 !important;color: white;">
+            <h3 class="panel-title fontSize" style="margin-bottom: 5px;">
+
+                <span style="font:500; font-size:xx-large;font-family:'Arabic Typesetting';" id="spSchoolName"></span><br />   <b>Welcome,</b> &nbsp;<span id="spEmpFullName"></span>			<span class="pull-right" title="Select Date" style="font-weight:600;">
+                    <sapn class="datepicker">
+                        <span id="event-date">@ViewBag.CurrntDate</span>
+                    </sapn>
+                </span>
+            </h3>
+            <marquee onmouseout="this.setAttribute('scrollamount',2, 0);" onmouseover="this.setAttribute('scrollamount', 0, 0);" scrollamount="2" behavior="scroll" direction="left">
+                @ViewBag.thoughts
+            </marquee>
+        </div>*@
+            <div class="panel-body" style="background-color: #489ac3 !important;color: white;">
+                <h3 class="panel-title fontSize" style="margin-bottom: 5px;">
+                    <b>Welcome,</b> &nbsp;<span id="spEmpFullName"></span>			<span class="pull-right" title="Select Date" style="font-weight:600;">
+                        <sapn class="datepicker">
+                            @*<span id="event-date">@ViewBag.CurrntDate</span>*@
+                            <span id="event-date"></span>
+                        </sapn>
+                    </span>
+                </h3>
+                <marquee onmouseout="this.setAttribute('scrollamount',2, 0);" onmouseover="this.setAttribute('scrollamount', 0, 0);" scrollamount="2" behavior="scroll" direction="left">
+                    @*@ViewBag.thoughts*@   <span id="thoughts"></span>
+                </marquee>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+        <div style="height:20px"></div>
+        <div class="clearfix"></div>
+        <!-- /.row -->
+        <!-- Main row -->
+        <div class="row">
+            <!-- Left col -->
+            <section class="col-lg-7 connectedSortable">
+                <!-- Custom tabs (Charts with tabs)-->
+                <div id="ShowEventslist" class="nav-tabs-custom">
+                    <!-- Tabs within a box -->
+                    <ul class="nav nav-tabs pull-right">
+        
+                        <li class="pull-left header"><i class="fa fa-inbox"></i> Events</li>
+                    </ul>
+                    <div class="tab-content no-padding">
+                      
+                       
+                        <table id="grid" class="table table-bordered table-striped tbl20 htmlTempletes">
+                            <thead>
+                                <tr>
+                                    <th>Event Name</th>
+                                    <th>Event Type</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyEmployeeEvents"></tbody>
+
+                        </table>
+                        <script type="text/html" id="tbodyEmployeeEventsJTemplte">
+                            {#foreach $T as Datashort}
+                            <tr>
+                                <td>
+                                    { $T.Datashort.EventName}
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-block btn-success btn-sm">{ $T.Datashort.EventType}</button>
+                                </td>
+                                <td>
+                                    { $T.Datashort.StartDate}
+                                </td>
+                                <td>
+                                    { $T.Datashort.EndDate}
+                                </td>
+
+                            </tr>
+                            {#/for}
+                        </script>
+                    </div>
+                </div>
+                <!-- /.nav-tabs-custom -->
+                <div id="ShowTaskitems" class="box box-danger">
+                    <div class="panel panel-flat ">
+                        <div class="box-header">
+                            <i class="ion ion-clipboard"></i>
+                            <h3 class="box-title">Task Manager</h3>
+
+                        </div>
+
+                        <div class="table-responsive">
+                            <table id="grid" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                <thead>
+                                    <tr>
+                                        <th>Task Name</th>
+                                        <th>Task Description</th>
+                                        <th>Priority</th>
+                                        <th>Task Date</th>
+                                       
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyEmployeeLeaves"></tbody>
+
+                            </table>
+                            <script type="text/html" id="tbodyEmployeeLeavesJTemplte">
+                                {#foreach $T as Datashort}
+                                <tr>
+                                    <td>
+                                        { $T.Datashort.TaskName}
+                                    </td>
+                                    <td>
+                                        { $T.Datashort.Description}
+                                    </td>
+                                    <td>
+                                        <a href="#" style="color:white;padding: 4px;border-radius: 8px;background-color:{ $T.Datashort.priorityColor}"> { $T.Datashort.Priority}   </a>
+                                    </td>
+                                    <td>
+                                        { $T.Datashort.TaskDate}
+                                    </td>
+                                   
+
+                                </tr>
+                                {#/for}
+                            </script>
+
+
+                        </div>
+
+                    </div>
+                </div>
+                <!-- TO DO List -->
+                <div id="ShowLeavelist" class="box box-danger">
+                    <div class="panel panel-flat ">
+                        <div class="box-header">
+                            <i class="ion ion-clipboard"></i>
+                            <h3 class="box-title">Leave Apply Details</h3>
+
+                        </div>
+
+                        <div class="table-responsive">
+                            <table id="example13" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                <thead>
+                                    <tr>
+
+                                        <th>Date from</th>
+                                        <th>Date to</th>
+                                        <th>Reason</th>
+                                        <th>Applied on</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyLeaveEmployeeDetails"></tbody>
+                            </table>
+
+                            <script type="text/html" id="divLeaveEmployeeDetailsJTemplte">
+                                {#foreach $T as Datashort}
+                                <tr>
+                                    <td>
+                                        { $T.Datashort.datefrom}
+                                    </td>
+                                    <td>
+                                        { $T.Datashort.dateto}
+                                    </td>
+                                    <td>
+                                        { $T.Datashort.leave.Reason}
+                                    </td>
+                                    <td>
+                                        { $T.Datashort.RequestDt}
+                                    </td>
+                                    <td>
+                                        <a href="javascript:void(0)" id="EmpStatus_{ $T.Datashort.leaveID}"> { $T.Datashort.statusNm} </a>
+                                    </td>
+                                    <td style="display:none;">
+                                        { $T.Datashort.leave.ID}
+                                    </td>
+
+
+                                </tr>
+                                {#/for}
+                            </script>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- /.box -->
+                <!-- quick email widget -->
+                 
+            </section>
+            <!-- /.Left col -->
+            <!-- right col (We are only adding the ID to make the widgets sortable)-->
+            <section class="col-lg-5 connectedSortable">
+                <!-- Map box -->
+                <div id="ShowNoticeitems" class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Notice Board</h3>
+
+                        <div class="box-tools pull-right">
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse">
+                                <i class="fa fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                        </div>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <ul class="products-list product-list-in-box" id="showAllNotice">
+
+
+
+                            <!-- /.item -->
+                        </ul>
+
+                        <script type="text/html" id="showAllNoticJTemplateDetails">
+                            {#foreach $T as Datashort}
+                            <li class="item">
+                                <div class="my-circle pull-left" style="border: 2px solid #1dcbbe;"><a style="color:#1dcbbe;" href='#' data-toggle='tooltip' title='{ $T.Datashort.userType}'><b>{ $T.Datashort.Extra}</b></a> </div>
+                                <div class="product-info">
+                                    <a href="javascript:void(0)" class="product-title">{ $T.Datashort.Title} <span class="label label-danger pull-right"> { $T.Datashort.NoticeDate}</span></a>
+                                    <span class="product-description">
+                                        { $T.Datashort.Desc}
+                                    </span>
+                                </div>
+                            </li>
+
+
+                            {#/for}
+                        </script>
+                    </div>
+                    <!-- /.box-body -->
+                    <div class="box-footer text-center">
+                        <a href="/Student/NoticeBoard" class="uppercase">View All Notices</a>
+                    </div>
+                    <!-- /.box-footer -->
+                </div>
+                <!-- /.box -->
+                <div id="applyleave" class="box box-info">
+                    <div class="box-header">
+                        <i class="fa fa-envelope"></i>
+                        <h3 class="box-title">Apply For Leave</h3>
+                        <!-- tools box -->
+                        <div class="pull-right box-tools">
+                            <button type="button" class="btn btn-info btn-sm" data-widget="remove" data-toggle="tooltip"
+                                    title="Remove">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                        <!-- /. tools -->
+                    </div>
+                    <div class="box-body">
+                        <!-- Date -->
+                        <!-- Date range -->
+                        <div class="form-group">
+                            <label>Select leave duration:</label>
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control pull-right" id="txtDtRange" readonly="">
+                            </div>
+                            <!-- /.input group -->
+                        </div>
+                        <div class="form-group">
+                            <label>Total Days:</label>
+                            <span id="lblDays"></span>
+                            <!-- /.input group -->
+                        </div>
+                        <!-- /.form group -->
+                        <div class="form-group">
+                            <label>Purpose:</label>
+                            <textarea class="form-control" rows="3" placeholder="Enter ..." id="txtPurpose"></textarea>
+                            <!-- /.input group -->
+                        </div>
+                        <div class="box-footer">
+                            <input type="button" class="btn btn-primary" value="Apply" id="Apply" name="Save">
+                            <input type="hidden" id="hdnID" value="1">
+                        </div>
+                        <!-- /.form group -->
+                    </div>
+                </div>
+
+                <div id="ShowAssignment" class="box box-danger">
+                    <div class="panel panel-flat ">
+                        <div class="box-header">
+                            <i class="ion ion-clipboard"></i>
+                            <h3 class="box-title">Assignments</h3>
+
+                        </div>
+
+                        <div class="table-responsive">
+                            <table id="example12" class="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Name</th>
+                                        <th>Subject</th>
+                                        <th>Assignment Date</th>
+                                        <th>Submission Date</th>
+                                        <th class="action-column">Download</th>
+                                        <th>View</th>
+                                    </tr>
+
+                                </thead>
+                                <tbody id="tBodyHW"></tbody>
+                            </table>
+
+                            <script type="text/html" id="divEmployeeDetailsJTemplte">
+                                {#foreach $T as Datashort}
+                                <tr>
+                                    <td>
+                                        { $T.Datashort.ID}
+                                    </td>
+                                    <td>
+                                        { $T.Datashort.hw.AssignmentNm}
+                                    </td>
+                                    <td>
+                                        { $T.Datashort.subject}
+                                    </td>
+                                    <td>
+                                        { $T.Datashort.hwDt}
+                                    </td>
+                                    <td>
+                                        { $T.Datashort.subDt}
+                                    </td>
+                                    <td>
+                                        <a href="{ $T.Datashort.hw.FilePath}" title="Download" data-method="post"><span class="{ $T.Datashort.style}"></span></a>
+                                    </td>
+                                    <td>
+                                        <i class="fa fa-fw fa-eye" style="cursor:pointer" onclick="ViewDetails({ $T.Datashort.hw.ID},'{ $T.Datashort.hw.AssignmentNm}','{ $T.Datashort.subject}','{ $T.Datashort.hwDt}','{ $T.Datashort.subDt}','{ $T.Datashort.hw.FilePath}','{ $T.Datashort.course}','{ $T.Datashort.year}','{ $T.Datashort.hw.Marks}','{ $T.Datashort.hw.AssignmentDesc}','{ $T.Datashort.hw.HW_givenBy}','{ $T.Datashort.teacher}')" title="View"></i>
+                                    </td>
+                                </tr>
+                                {#/for}
+                            </script>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- /.box -->
+            </section>
+            <!-- right col -->
+        </div>
+        <!-- /.row (main row) -->
+    </section>
+    <!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fa fa-object-group"></i> <span id="spTitle"></span>( <span id="spSubject1"></span> | <span id="spYear"></span> | <span id="spCourse"></span>)
+                    <button type="button" class="close" data-dismiss="modal" onclick="ResetModal()">
+                        <span aria-hidden="true">×</span><span class="sr-only">Close</span>
+                    </button>
+                </h3>
+            </div> <!-- /.modal-header -->
+            <div class="modal-body">
+                <div class="box-body table-responsive">
+                    <table id="w1" class="table table-striped table-bordered detail-view">
+                        <tbody>
+                            <tr class="odd">
+                                <th class="col-sm-3">Assignment Date</th>
+                                <td class="col-sm-3"><span id="spHWDt"></span></td>
+                                <th class="col-sm-3">Submission Date</th>
+                                <td class="col-sm-3"><span id="spSubmitDt"></span></td>
+                            </tr>
+                            <tr class="even">
+                                <th class="col-sm-3">Assignment File</th>
+                                <td class="col-sm-3"><a id="dwlod_link" download><span class="label label-success"> Download </span></a></td>
+                                <th class="col-sm-3">Assignment Mark</th>
+                                <td class="col-sm-3"><span id="spMarks"></span></td>
+                            </tr>
+
+                            <tr class="odd">
+                                <th class="col-sm-3">Subject</th>
+                                <td class="col-sm-3"><span id="spSubject"></span></td>
+                                <th class="col-sm-3">Created By</th>
+                                <td class="col-sm-3"><span id="spCreatedBy"></span></td>
+                            </tr>
+                            <tr class="even"><th>Description</th><td colspan="3"><span id="spDesc"></span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<!-- /.content-wrapper -->
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        Thoughtsofday();
+        var curr = new Date; // get current date
+        var first = curr.getDate() - curr.getDay(); // First day is the day of the month - the day of the week
+        var last = first + 6; // last day is the first day + 6
+
+
+        var fdate = new Date(getMonday(new Date()));
+        var ldate = new Date(getSunday(new Date()));
+        var fweekmonth=0;
+        var fweekday = 0;
+
+        var lweekmonth = 0;
+        var lweekday = 0;
+
+        if ((lweekmonth + 1) <10) {
+            lweekmonth = '0' + (lweekmonth + 1);
+        }
+        else {
+
+            lweekmonth = (lweekmonth + 1);
+        }
+        if (ldate.getDate() < 10) {
+            lweekday = '0' + ldate.getDate();
+        }
+        else {
+            lweekday = ldate.getDate();
+        }
+
+
+
+
+        if ((fweekmonth + 1) < 10)
+        {
+            fweekmonth = '0' + (fweekmonth + 1);
+        }
+        else
+        {
+
+            fweekmonth = (fweekmonth + 1);
+        }
+        if (fdate.getDate() < 10)
+        {
+            fweekday = '0' + fdate.getDate();
+        }
+        else
+        {
+            fweekday = fdate.getDate();
+        }
+        var firstDayWeek = fweekmonth + '/' + fweekday + '/' + fdate.getFullYear()
+        var lastDayWeek = lweekmonth + '/' + lweekday + '/' + ldate.getFullYear()
+
+
+     //   alert(firstDayWeek.toString('mm/dd/yyyy')+' - '+lastDayWeek);
+
+
+
+
+
+
+        var emp = {
+            Department: sessionStorage.getItem("deptId"),
+            StartDate: firstDayWeek,
+            EndDate: lastDayWeek,
+            ClassId: sessionStorage.getItem("ClassId"),
+            Section: sessionStorage.getItem("SectionId"),
+            SchoolID: sessionStorage.getItem("SchoolID")
+        }
+        callJTemplateServiceMethod(JSON.stringify(emp), "/api/StudentApi", "getOnlyAllStudentsEventsBySchool",
+        "tbodyEmployeeEvents", "tbodyEmployeeEventsJTemplte", false, "", "", "", "");
+
+
+        var curr = new Date; // get current date
+        var first = curr.getDate() - curr.getDay(); // First day is the day of the month - the day of the week
+        var last = first + 6; // last day is the first day + 6
+
+
+
+
+        //   alert(firstDayWeek.toString('mm/dd/yyyy')+' - '+lastDayWeek);
+        var firstDayWeek = new Date(curr.setDate(first)).toUTCString();
+        var lastDayWeek = new Date(curr.setDate(last)).toUTCString();
+
+
+
+        var empp = {
+            StartDate: firstDayWeek,
+            EndDate: lastDayWeek,
+            SchoolID: sessionStorage.getItem("SchoolID")
+        }
+
+        callJTemplateServiceMethod(JSON.stringify(empp), "/api/EventsAPI", "getStudentNoticeBoardDetails",
+                   "showAllNotice", "showAllNoticJTemplateDetails", true, getAllNoticeBoardDetails_Scs, "", "", "");
+
+    })
+    function getAllNoticeBoardDetails_Scs(p1, p2, p3, datas) {
+        setTimeout(function () { $('[data-toggle="tooltip"]').tooltip(); }, 1000)
+
+    }
+    function getMonday(d) {
+        d = new Date(d);
+        var day = d.getDay(),
+            diff = d.getDate() - day + (day == 0 ? -6 : 1);
+        return new Date(d.setDate(diff));
+    }
+
+    function getSunday(d) {
+        d = new Date(d);
+        var day = d.getDay(),
+            diff = d.getDate() + day;
+        return new Date(d.setDate(diff));
+    }
+    var startDt;
+    var endDt;
+    $('#txtDtRange').daterangepicker();
+
+    $('#txtDtRange').on('change', function () {
+        startDt = $('#txtDtRange').data('daterangepicker').startDate._d;
+        endDt = $('#txtDtRange').data('daterangepicker').endDate._d;
+
+        var millisecondsPerDay = 1000 * 60 * 60 * 24;
+        var millisBetween = endDt.getTime() - startDt.getTime();
+        var days = (millisBetween / millisecondsPerDay) + 1;
+        $('#lblDays').html(Math.floor(days));
+        // Round down.
+        //alert(Math.floor(days));
+    });
+
+    $("#Apply").click(function () {
+       
+        var txt = getControlValue("txtPurpose");
+        var id = getControlValue("hdnID");
+        if (startDt != undefined && endDt != undefined) {
+            if (txt != "") {
+                var Items = new Array();
+                var Student = {
+                    ID: id,
+                    DOB: $('input[name=daterangepicker_start]').val(),
+                    MDOB: endDt,
+                    PermanentAddress: txt,
+                    SchoolID: sessionStorage.getItem("SchoolID")
+                }
+                Items.push(Student);
+
+                $.ajax({
+                    url: "/api/StudentApi/ApplyForLeave",// "~/Masters/GetDeptMethod",
+                    type: "Post",
+                    data: JSON.stringify(Items), //{ Name: name,ddlAcademicYr
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (data) {
+                        alert(data.FirstName);
+                        if (data.RegNo != "0") {
+                            setControlValue("txtDtRange", "");
+                            //  setControlValue("txtPurpose", "");
+                            $("#lblDays").html("");
+                            $("#txtPurpose").val("");
+                            $('#myModal').modal('hide');
+                        }
+      
+                    }
+                });
+
+
+              
+            }
+        }
+
+
+    });
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#ShowAssignment").hide();
+        $("#ShowLeavelist").hide();
+        $("#applyleave").hide();
+        $("#ShowNoticeitems").hide();
+        $("#ShowTaskitems").hide();
+        $("#ShowEventslist").hide();
+        var Id = sessionStorage.getItem("stdID");
+        if (typeof (Id) != "undefined") {
+            setControlValue("hdnID", Id);
+        }
+        $("#loader").fadeIn();
+        var leave = {
+            val: Id,
+            val1: sessionStorage.getItem("SchoolID")
+        }
+        callJTemplateServiceMethod(JSON.stringify(leave), "/api/StudentApi", "getStudentsLeaveDetbyID",
+            "tbodyLeaveEmployeeDetails", "divLeaveEmployeeDetailsJTemplte", true, successMsg1, "", "", "");
+
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        var Sectionid = sessionStorage.getItem("SectionId");
+        var classid = sessionStorage.getItem("ClassId");
+        var academicyear = sessionStorage.getItem("AcademicYear");
+        
+        callJTemplateServiceMethod(JSON.stringify([SchoolID, Sectionid, classid, academicyear]), "/api/HWapi", "getAssignmentListDetailsDashboard", "tBodyHW", "divEmployeeDetailsJTemplte", true, successMsg_sss, "", "", "");
+
+        CHECKDESHBOARDITEMS();
+        //DisableDeleteBtn();
+    });
+    function CHECKDESHBOARDITEMS() {
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        $.ajax({
+            type: "POST",
+            url: "/api/RolesPermissionApi/checkRoleManagementRigtsSchool",
+            data: JSON.stringify([SchoolID]),
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                if (data.list.length > 0) {
+                    for (var i = 0; i < data.list.length; i++) {
+                        if (data.list[i] == 6) {
+                            $("#ShowEventslist").show();
+
+                        }
+                        else if (data.list[i] == 7) {
+                            $("#ShowTaskitems").show();
+                        }
+                        else if (data.list[i] == 8) {
+                            $("#ShowNoticeitems").show();
+
+                        }
+                        else if (data.list[i] == 4) {
+                            $("#ShowLeavelist").show();
+                            $("#applyleave").show();
+
+                        }
+                        else if (data.list[i]==17)
+                        {
+                            $("#ShowAssignment").show();
+                           
+                        }
+                    }
+
+                }
+
+            }
+
+
+        });
+    }
+
+    function successMsg1(p1, p2, p3, datas) {
+        if (datas.length > 0) {
+
+            for (var i = 0; i < datas.length; i++) {
+
+                $("#EmpStatus_" + datas[i].leaveID).attr("style", "background-color:" + datas[i].color + ";color:white;padding: 4px;border-radius: 8px;")
+            }
+        }
+    }
+
+
+    function successMsg_sss(p1,p2,p3,datas)
+    {
+        setTimeout(function () {
+            $('#example12').DataTable({
+
+
+                "lengthChange": false,
+
+                "pageLength": 5,
+            });
+            $("#loader").fadeOut();
+        }, 1000);
+    }
+    function successMsg(p1, p2, p3, datas) {
+        
+
+        setTimeout(function () {
+            $('#example13').DataTable({
+
+
+                "lengthChange": false,
+
+                "pageLength": 5,
+            });
+            $("#loader").fadeOut();
+        }, 1000);
+    }
+
+    function ViewDetails(id,name,sub,hwdt,subdt,path,course,year,marks,desc,givenBy,teachernm)
+    {
+        setControlValue("spTitle", name);
+        setControlValue("spSubmitDt", subdt);
+        setControlValue("spHWDt", hwdt);
+        $("#dwlod_link").attr("href", path);
+        //setControlValue("dwlod_link", path);
+        setControlValue("spMarks", marks);
+        setControlValue("spSubject", sub);
+        setControlValue("spSubject1", sub);
+        setControlValue("spCreatedBy",teachernm+" ("+ givenBy+")");
+        setControlValue("spDesc", desc);
+        setControlValue("spYear", year);
+        setControlValue("spCourse", course);
+
+      
+        openModal();
+    }
+    function openModal()
+    {
+        $('#myModal').modal('show');
+    }
+
+    function Thoughtsofday() {
+
+        var School =
+        {
+            SchoolID: sessionStorage.getItem("SchoolID")
+        }
+        var dll = JSON.stringify(School)
+        $.ajax({
+            type: "POST",
+            url: "/api/Default/GetThoughtofday",
+            contentType: "application/json;charset=utf-8",
+            data: dll,
+            success: function (datas) {
+
+
+                setControlValue("thoughts", datas.Thought),
+                    setControlValue("event-date", datas.Todaydate)
+
+
+            }
+
+        });
+
+    }
+</script>
+<style type="text/css">
+    #grid {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #grid td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #grid tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #grid tr:hover {
+            background-color: #ddd;
+        }
+
+        #grid th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+
+
+           #example12 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example12 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example12 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example12 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example12 th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+
+
+
+
+                   #example13 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example13 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example13 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example13 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example13 th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+
+
+        
+           .my-circle {
+    border-radius: 50%;
+    font-size: 16px;
+    height: 35px;
+    width: 35px;
+    line-height: 30px;
+    margin-top: 2px;
+}
+     .my-circle a {
+    text-align: center;
+    display: block;
+}
+</style>
+
+<script type="text/javascript">
+   
+    $(document).ready(function () {
+        setControlValue("spSchoolName", sessionStorage.getItem("SchoolName"));
+        setControlValue("spEmpFullName", sessionStorage.getItem("fname") + " " + sessionStorage.getItem("lname"));
+        if (sessionStorage.getItem("stdID") != "") {
+            getAllTaasks(sessionStorage.getItem("stdID"));
+        }
+    })
+
+    function getAllTaasks(val) {
+        $("#loader").fadeIn();
+        var task = {
+            val: val,
+            val1: sessionStorage.getItem("SchoolID")
+        }
+        callJTemplateServiceMethod(JSON.stringify(task), "/api/StudentApi", "getStudentTaskByStdId",
+                     "tbodyEmployeeLeaves", "tbodyEmployeeLeavesJTemplte", true, sussess_msg, "", "", "");
+        $("#loader").fadeOut();
+    }
+    function sussess_msg(p1,p2,p3,datas)
+    {
+    
+        setTimeout(function () {
+            $('#example1').DataTable();
+        }, 2000)
+    }
+ 
+ 
+</script>
+
+ 

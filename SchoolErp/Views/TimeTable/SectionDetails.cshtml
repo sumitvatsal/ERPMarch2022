@@ -1,0 +1,111 @@
+﻿
+
+@{
+    ViewBag.Title = "SectionDetails";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<style type="text/css">
+    .imgIcon {
+        width: 0.5%;
+        height: 0.5%;
+    }
+
+    .oddTr {
+        background-color: #dddddd;
+    }
+</style>
+<form id="class-timing-detail" role="form" name="form1">
+    <input type="hidden" id="hdnID">
+    <div class="modal-body">
+        <div class="row">
+         
+           
+            <div class="col-sm-2">
+                <div class="class="form-group"">
+                    <label for="Country" class="req">Section <span class="requird">*</span></label>
+                    <select class="form-control" id="ddlSection" name="ddlSection" valuefield="Id" textfield="SectionName" blankRowValue="-1" blankRowText="----Select----" aria-required="true"></select>
+                    <div class="help-block"></div>
+                </div>
+            </div>
+          
+
+
+           
+        </div>
+    
+     
+    </div><!--./modal-body-->
+
+    <div class="modal-footer">
+        <a href="#" style="width: 170px;float: left;" id="btnadd" class="btn btn-block btn-primary" onclick="GoToAddPeriods()">Create</a>
+
+    </div>
+
+</form>
+<script type="text/javascript">
+    $(document).ready(function () {
+        debugger;
+       
+        var ClassID = getQuerystring("ClassId");
+
+        if (typeof (ClassID) != "undefined") {
+
+            var ClassID = getQuerystring("ClassId");
+
+            var SchoolID = sessionStorage.getItem("SchoolID");
+
+            callServiceMethodForDDl(JSON.stringify([SchoolID, ClassID]), "/api/TimeTableApi", "GetSectionbySCHOOLidbyclass", "ddlSection", false, "", "", "", "");
+
+
+
+        }
+
+        if (typeof (ID) != "undefined") {
+            setControlValue("hdn", ID);//
+            setControlValue("hdnID", 0);
+            GetValues(ID);
+
+        }
+
+
+
+
+    });
+    function GoToAddPeriods() {
+        var id = getQuerystring("ID");
+        var ClassID = getQuerystring("ClassId");
+        var SectionId = getControlValue("ddlSection");
+        window.location.href = "/TimeTable/ClassTimingDetails?id=" + id + "&ClassID=" + ClassID + "&SectionId=" + SectionId;
+    }
+    </script>

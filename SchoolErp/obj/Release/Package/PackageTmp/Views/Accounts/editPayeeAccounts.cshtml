@@ -1,0 +1,366 @@
+﻿
+@{
+    ViewBag.Title = "editPayeeAccounts";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    //Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section class="content">
+
+    <div class="box box-solid">
+        <div class="box-header with-border">
+            <h3 class="box-title"><i class="fa fa-search"></i> View Payable Details</h3>
+        </div>
+        <div class="box-body no-padding">
+            <table id="w0" class="table table-striped table-bordered detail-view">
+                <tbody>
+                    <tr><th>School</th><td id="ddlSchoolName"></td></tr>
+                    <tr><th>Payee</th><td id="txtPayeeName"></td></tr>
+                    <tr><th>Category Name</th><td id="txtCategoryName"></td></tr>
+                    <tr><th>Total Amount</th><td id="txtTotalAmount"></td></tr>
+                    <tr><th>Paid  Amount</th><td id="txtPaidAmount"></td></tr>
+                    <tr><th>Due  Amount</th><td id="txtDueAmmount"></td></tr>
+                    <tr><th>Primary Date</th><td id="txtPrimaryDate"></td></tr>
+                    <tr><th>Last Date</th><td id="txtLastDate"></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="box box-solid">
+        <div class="box-header with-border">
+            <h3 class="box-title"><i class="fa fa-plus-square"></i> Pay Due Payment</h3>
+        </div>
+        <form    id="form1" name="form1">
+           <div class="box-body">
+               <div class="row pay-fields">
+                   Bank
+                   <div class="col-sm-4">
+                       <div class="form-group">
+                           <label class="control-label" for="exppayabledetails-exp_pay_dt_amt">Paying Amount <span class="requird">*</span></label>
+                           <input type="text" id="txtPayeingAmount" onkeypress="return priceonly(event,this)" class="form-control" name="txtPayeingAmount" placeholder="Paying Amount" />
+
+                           <div class="help-block"></div>
+                       </div>
+                   </div>
+                   <div class="col-sm-4">
+                       <div class="form-group">
+                           <label class="control-label" for="exppayabledetails-exp_pay_dt_date">Payment Date <span class="requird">*</span></label>
+                           <input type="text" id="txtPaymentDate" name="txtPaymentDate" placeholder="Select Payment Date" class="form-control datepicker" @*data-date-format="dd/mm/yyyy"*@ />
+
+
+                           <div class="help-block"></div>
+                       </div>
+                   </div>
+                   <div class="col-sm-4">
+                       <div class="form-group field-exppayabledetails-exp_pay_dt_mode required">
+                           <label class="control-label" for="exppayabledetails-exp_pay_dt_mode">Payment Mode</label>
+                           <select id="ddlPaymentMode" class="form-control" name="ddlPaymentMode">
+                               <option value="Cash">Cash</option>
+                               <option value="Cheque">Cheque</option>
+                           </select>
+
+                           <div class="help-block"></div>
+                       </div>
+                   </div>
+               </div>
+                <div class="row cheque-inputs" style="display: none;">
+                    <div class="col-sm-4">
+                        <div class="form-group ">
+                            <label class="control-label" for="exppayabledetails-exp_pay_dt_chq_no">Cheque No.</label>
+                            <input type="text" id="txtCheckNo"  name="txtCheckNo" placeholder="Cheque Number" class="form-control datepicker" data-date-format="dd/mm/yyyy"  />
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group field-exppayabledetails-exp_pay_dt_chq_date">
+                            <label class="control-label" for="exppayabledetails-exp_pay_dt_chq_date">Cheque Date</label>
+                            <input type="text" id="txtChequDate"  name="txtChequDate" placeholder="Select Cheque Date" class="form-control datepicker" @*data-date-format="dd/mm/yyyy"*@ size="10">
+
+
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label class="control-label" for="exppayabledetails-exp_pay_dt_chq_bank">Bank</label>
+                            <select id="ddlBankName" class="form-control" name="ddlBankName">
+                                <option disabled="" value="0" selected="">Select Bank</option>
+                                <option value="ALLAHABAD BANK">ALLAHABAD BANK</option>
+                                <option value="ANDHRA BANK">ANDHRA BANK</option>
+                                <option value="AXIS BANK">AXIS BANK</option>
+                                <option value="BANK OF BARODA">BANK OF BARODA</option>
+                                <option value="BANK OF INDIA">BANK OF INDIA</option>
+                                <option value="BANK OF MAHARASHTRA">BANK OF MAHARASHTRA</option>
+                                <option value="CANARA BANK">CANARA BANK</option>
+                                <option value="CENTRAL BANK OF INDIA">CENTRAL BANK OF INDIA</option>
+                                <option value="CITI BANK">CITI BANK</option>
+                                <option value="DENA BANK">DENA BANK</option>
+                                <option value="FEDERAL BANK">FEDERAL BANK</option>
+                                <option value="HDFC BANK">HDFC BANK</option>
+                                <option value="ICICI BANK LIMITED">ICICI BANK LIMITED</option>
+                                <option value="INDIAN OVERSEAS BANK">INDIAN OVERSEAS BANK</option>
+                                <option value="indusind-bank">INDUSIND BANK</option>
+                                <option value="KOTAK MAHINDRA BANK LIMITED">KOTAK MAHINDRA BANK LIMITED</option>
+                                <option value="PUNJAB AND SIND BANK">PUNJAB AND SIND BANK</option>
+                                <option value="PUNJAB NATIONAL BANK">PUNJAB NATIONAL BANK</option>
+                                <option value="STATE BANK OF INDIA">STATE BANK OF INDIA</option>
+                                <option value="SYNDICATE BANK">SYNDICATE BANK</option>
+                                <option value="UCO BANK">UCO BANK</option>
+                                <option value="UNION BANK OF INDIA">UNION BANK OF INDIA</option>
+                                <option value="YES BANK">YES BANK</option>
+                            </select>
+
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row pay-fields">
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <label class="control-label" for="exppayabledetails-exp_pay_dt_remarks">Remarks <span class="requird">*</span></label>
+                            <textarea id="txtRemarks" class="form-control" name="txtRemarks" maxlength="255"></textarea>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box-footer">
+               <input type="button" onclick="savePaymentDetails()" value="Update" class="btn btn-primary">  
+            </div>
+        </form>
+    </div>
+
+</section>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#ddlPaymentMode').change(function () {
+            if ($('#ddlPaymentMode').val() == "Cash") {
+                $('.cheque-inputs').hide();
+            }
+            else {
+                $('.cheque-inputs').show();
+            }
+        });
+
+
+    });
+
+    $(document).ready(function () {
+        $('#txtPaymentDate').datepicker({
+            autoclose: true
+        });
+        $('#txtChequDate').datepicker({
+            autoclose: true
+        });
+        var Id = getQuerystring("Id");
+        if (typeof (Id) != "undefined") {
+            $("#loader").fadeIn();
+            callServiceMethod(JSON.stringify([Id]), "/api/AccountsAPI", "editPaymentUpdateDetails", false, "", "", false, "", true, editPaymentUpdateDetails_scs, "", "", "");
+        }
+        
+
+    })
+
+
+    function editPaymentUpdateDetails_scs(p1, p2, p3, datas)
+    {
+
+
+        setControlValue("txtPayeeName", datas.Name);
+        setControlValue("txtCategoryName", datas.Category);
+        setControlValue("txtTotalAmount", datas.TotalAmount);
+        setControlValue("txtPaidAmount", datas.PayingAmount);
+        setControlValue("txtDueAmmount", datas.DuesAmount);
+        setControlValue("txtPrimaryDate", datas.PrimaryDate);
+        setControlValue("txtLastDate", datas.LastDate);
+        setControlValue("ddlSchoolName", datas.School);
+
+         //   setControlValue("txtfirstName", datas.FName);
+         //   setControlValue("txtMiddleName", datas.MName);
+         //   setControlValue("txtLastName", datas.LName);
+         //   setControlValue("txtDOB", datas.DOB);
+         //   setControlValue("ddlGender", datas.Gender);
+         //   setControlValue("txtEmailId", datas.Email);
+         //   setControlValue("txtUserNam", datas.UserName);
+         //   setControlValue("txtPassword", datas.Password);
+
+         //   getAllStatebyId(datas.Country);
+         //   getCityByStateId(datas.State)
+         //   setTimeout(function () {
+         //       setControlValue("ddlCountry", datas.Country);
+         //       setControlValue("ddlState", datas.State);
+         //       setControlValue("ddlCity", datas.city);
+         //       setControlValue("ddlReligion", datas.Religon);
+         //       setControlValue("ddlMarried", datas.MaritalStaus);
+         //       setControlValue("ddlStaffType", datas.UserType);
+         //   },2000)
+
+
+
+         //   setControlValue("txtPermanentAddress1", datas.PresentAddress);
+         //   setControlValue("txtPermanentAddress2", datas.PermanentAddress);
+         //   setControlValue("txtPincode", datas.Pin);
+         //   setControlValue("txtPhoneNo", datas.Phone);
+         //   setControlValue("txtMobileNo", datas.Mobile);
+         //   setControlValue("txtAdhaarNumber", datas.AdhaarNo);
+         //   setControlValue("txtMotherName", datas.MotherName);
+         //   setControlValue("txtFatherName", datas.FatherName);
+
+         //   //setControlValue("ImageUpload", );
+         ////   $("#ImageUpload").val(datas.ImageUpload);
+
+         //   $("#dvPreviewF").show();
+         //   $("#dvPreviewF").css("background-image", "url(" + datas.ImageUpload + ")");
+
+         //        setControlValue("ddlPamentType", datas.PaymentMode);
+         //       setControlValue("txtAccountNumber", datas.AccountNumber);
+         //       setControlValue("txtIfscCode", datas.IfscCode);
+         //       setControlValue("ddlBankName", datas.BankName);
+         //       setControlValue("txtPfNo", datas.PfNo);
+         //       setControlValue("txtPanNo", datas.PANNo);
+         //       setControlValue("txtESINo", datas.EsiNo);
+
+
+                $("#loader").fadeOut();
+
+
+    }
+
+ 
+    function savePaymentDetails()
+    {
+        if ($("#form1").valid()) {
+          
+
+            if (parseFloat(getControlValue("txtPayeingAmount")) > parseFloat(getControlValue("txtDueAmmount")))
+            {
+                alert("Paying amount must be less then Dues amount.")
+                return false;
+            }
+            else
+            {
+                $("#loader").fadeIn();
+                var payee = {
+
+                    Id: getQuerystring("Id"),
+                    //Name: getControlValue("txtPayeeName"),
+                    //Category: getControlValue("ddlCategory"),
+                    //PrimaryDate: getControlValue("txtPrimaryDate"),
+                    //LastDate: getControlValue("txtLastDate"),
+                    //TotalAmount: getControlValue("txtTotalAmount"),
+                    //PaymentType: getControlValue("ddlPaymentType"),
+                    PayingAmount: getControlValue("txtPayeingAmount"),
+
+                    //  DuesAmount: duebal,
+                    PaymentDate: getControlValue("txtPaymentDate"),
+                    PaymentMode: getControlValue("ddlPaymentMode"),
+                    Checqno: getControlValue("txtCheckNo"),
+                    ChequeDate: getControlValue("txtChequDate"),
+                    BankRemarks: getControlValue("ddlBankName"),
+                    Remarks: getControlValue("txtRemarks"),
+                    SchoolID: sessionStorage.getItem("SchoolID")
+
+                }
+                var ddl = JSON.stringify(payee)
+                callServiceMethod(ddl, "/api/AccountsAPI", "updatePayeementsDetails", false, "", "", false, "", true, savePayeements_scs, "", "", "");
+            }
+        }
+    }
+
+    function savePayeements_scs(p1, p2, p3, datas) {
+        $("#loader").fadeOut();
+
+        location.href = "/Accounts/ViewPayeeAccounts";
+    }
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+               
+ 
+
+
+
+
+                txtPayeingAmount: "required",
+                txtPaymentDate: "required",
+                txtRemarks: "required",
+          
+ 
+
+            },
+            messages: {
+
+
+                txtPayeingAmount: "Please Enter Paying Amount",
+                txtRemarks: "Please Enter Remarks",
+                txtPaymentDate: "Please Select Payment  Date",
+               
+ 
+                
+
+
+            }
+        })
+        
+
+       
+
+        //$("#ddlPaymentType").validate({
+        //    rules: {
+        //        select_field: {
+        //            required: {
+        //                depends: function (element) {
+        //                    if ('2' == $('#ddlPaymentType').val()) {
+        //                        //Set predefined value to blank.
+        //                       alert("rahul")
+        //                    }
+        //                    return true;
+        //                }
+        //            }
+        //        }
+        //    }
+        //});
+
+    });
+
+
+
+
+</script>

@@ -1,0 +1,452 @@
+﻿
+@{
+    ViewBag.Title = "ViewEmployeeSchoolAdmin";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutSchoolAdmin.cshtml";
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section class="content" style="overflow-x: scroll;width:100%">
+    <div class="row" >
+        <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">View Employee Details</h3>
+                </div>
+                <div class="box-body">
+                 
+                    <div class="form-group">
+                        <a href="/Employee/AddEmployee" style="width: 150px;float: right;margin-right: 8px" class="btn btn-block btn-primary">Add New Employee</a>
+                        <div style="height:40px"></div>
+                        <div>
+
+                            <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                <thead>
+                                    <tr>
+                                        <th>School</th>
+                                        <th>User Type</th>
+                                        <th>Employee Code</th>
+                                        <th>Photo</th>
+                                        <th>Name</th>
+                                        <th>Department</th>
+                                        <th>Designation</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                        <th>Delete</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyEmployeeDetails"></tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <script type="text/html" id="divEmployeeDetailsJTemplte">
+                {#foreach $T as Datashort}
+                <tr>
+                    <td>
+                        { $T.Datashort.School}
+                    </td>
+                    <td>
+                        { $T.Datashort.TypeName}
+                    </td>
+
+                    <td>
+                        { $T.Datashort.Employeecode}
+                    </td>
+                    <td>
+                        <img src="{ $T.Datashort.ImageUpload}" alt="#" />
+                    </td>
+                    <td>
+                        { $T.Datashort.FName}
+                    </td>
+                    <td>
+                        { $T.Datashort.Department}
+                    </td>
+                    <td>
+                        { $T.Datashort.Designation}
+                    </td>
+                    <td>
+                        <button type="button" onclick="confirmVMR('Are you sure? You want to Activate/DeActivate This Employee',employeeActivateDeactivate,'{ $T.Datashort.Status}',{ $T.Datashort.Id})" class="{ $T.Datashort.Extra10}">{ $T.Datashort.Status}</button>
+                        @*<input type="checkbox" onclick="confirmVMR('Are you sure? You want to Activate/DeActivate This Employee',employeeActivateDeactivate,this,{ $T.Datashort.Id})" { $T.Datashort.Status} />*@
+
+                    </td>
+                    <td>
+                        <a href="javascript:void(0)" id="anchrfModelDeocument{ $T.Datashort.Id}" data-toggle="modal" data-target="#myModal" style="display:none" onclick="ViewDocumentsByEmployeeId({ $T.Datashort.Id},'{ $T.Datashort.ImageUpload}')">View Documents</a>
+
+                        @*<div class="dropdown">
+                <button class="btn btn dropdown-toggle" type="button" data-toggle="dropdown" onchange="performActionByEmploy(this.value,{ $T.Datashort.Id})" id="ddlEmployeeAction">
+                    Action
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a href="#">View</a></li>
+                    <li><a onclick="ViewDocumentsByEmployeeId({ $T.Datashort.Id},'{ $T.Datashort.ImageUpload}')" value="ViewDocument" href="javascript:void(0)">Documents</a></li>
+                    <li><a href="#">Print</a></li>
+                </ul>
+            </div>*@
+
+                        <select class="form-control dropdown-toggle" onchange="performActionByEmploy(this.value,{ $T.Datashort.Id})" id="ddlEmployeeAction">
+                            <option>Action</option>
+                            <option value="ViewEmployee">View</option>
+                            <option onclick="ViewDocumentsByEmployeeId({ $T.Datashort.Id},'{ $T.Datashort.ImageUpload}')" value="ViewDocument">Documents</option>
+                            <option value="EmployeeEdit">Edit</option>
+                        </select>
+                    </td>
+                    <td>
+                    
+                        <i class="fa fa-fw fa-trash" style="cursor:pointer" onclick="deleteEmployeeById({ $T.Datashort.Id})"></i>
+                 
+                    </td>
+                </tr>
+                {#/for}
+            </script>
+
+
+        </div>
+        <!-- /.row -->
+        <!-- Modal -->
+        <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Documents View</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="col-md-12">
+                            <div class="col-md-4"></div>
+                            <div class="col-md-4">
+                                <img id="ImgEmployeeImg" style="height: 183px;width: 218px;" alt="" />
+
+
+                            </div>
+                            <div class="col-md-4"></div>
+                            <div style="clear:both"></div>
+                        </div>
+
+
+                        <div class="col-md-12">
+                            <!-- general form elements -->
+                            <div class="box box-primary">
+                                <div class="box-body">
+                                    <table class="table table-bordered table-striped tbl20 htmlTempletes">
+                                        <thead>
+                                            <tr>
+                                                <th>Document Name</th>
+                                                <th>PdF</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbodyEmployeeDocuments"></tbody>
+
+                                    </table>
+                                    <script type="text/html" id="tbodyEmployeeDocumentsJTemplte">
+                                        {#foreach $T as Datashort}
+                                        <tr>
+                                            <td>
+                                                { $T.Datashort.Name}
+                                            </td>
+                                            <td>
+                                                <a href="{ $T.Datashort.Id}" download>Download</a>
+                                            </td>
+
+                                        </tr>
+                                        {#/for}
+                                    </script>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        </div>
+</section>
+
+<!-- DataTables -->
+<link href="~/js/PDFExcelDatatable/buttons.dataTables.min.css" rel="stylesheet" />
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/js/PDFExcelDatatable/dataTables.buttons.min.js"></script>
+<script src="~/js/PDFExcelDatatable/jszip.min.js"></script>
+<script src="~/js/PDFExcelDatatable/pdfmake.min.js"></script>
+<script src="~/js/PDFExcelDatatable/vfs_fonts.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.html5.min.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.print.min.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.colVis.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#loader").fadeIn();
+        var t = $('#example1').DataTable();
+        t.destroy();
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callJTemplateServiceMethod(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllEmployeeDetaulsBYSchool",
+            "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+    });
+    function successMsg(p1, p2, p3, datas)
+    {
+
+      
+      
+        setTimeout(function () {
+            $('#example1').DataTable({
+                //destroy: true,
+                dom: 'lBfrtip',
+                bRetrieve: true,
+                bDestroy: true,
+                'columnDefs': [{
+                    "targets": [-1, -2, -7],
+                    "orderable": false
+                }],
+
+                buttons: [
+                    //{
+                    //    extend: 'copyHtml5',
+                    //    exportOptions: {
+                    //        columns: [0, ':visible']
+                    //    }
+                    //},
+                    {
+                        extend: 'excelHtml5',
+                        text: 'Export Excel',
+                        exportOptions: {
+                            //columns: ':visible'
+                           columns: [4,2,1,5,6]
+                        }
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        text: 'Export Pdf' ,
+                        exportOptions: {
+                            //columns: [0,  2,3,4, 5]
+                             columns: [4, 2, 1, 5, 6]
+                        },
+                        title: 'Employee List',
+                        customize: function(doc) {
+                doc.styles.title = {
+                    color: '',
+                    fontSize: '20',
+                    background: 'blue',
+                    alignment: 'left'
+                }   
+            }  
+                    },
+                    'colvis'
+                ]
+            });
+        }, 1000);
+        $("#loader").fadeOut();
+    }
+
+
+    function deleteEmployeeById(Id) {
+        var result = window.confirm('Are you sure to delete this record?');
+        if (result == true) {
+            var Id = Id;
+            $.ajax({
+                type: "Get",
+                url: "@Url.Content("~/api/EmployeeAPI/deleteEmployeeById")",
+                contentType: "application/json; charset=utf-8",
+                data: { Id: Id },
+                dataType: "json",
+                success: function (b) {
+                    $("#loader").fadeOut();
+                    var t = $('#example1').DataTable();
+                    t.destroy();
+                    SchoolID = sessionStorage.getItem("SchoolID");
+                    callJTemplateServiceMethod(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllEmployeeDetaulsBYSchool",
+                        "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg1, "", "", "");
+                    $("#divSuccessMsg").fadeIn();
+                    $("#divSuccessMsg").html("<strong>Success!</strong> " + b);
+                    setTimeout(function () {
+                        $("#divSuccessMsg").fadeOut();
+                   
+                      
+                        alert(b);
+
+                    }, 2000)
+                },
+
+                error: function () {
+
+                }
+            });
+        }
+    }
+
+    function successMsg1(p1, p2, p3, datas) {
+        $("#loader").fadeOut();
+        setTimeout(function () {
+
+            $('#example1').DataTable({
+
+                'columnDefs': [{
+                    "targets": [-1, -2, -7],
+                    "orderable": false
+
+                }],
+
+
+            })
+        }, 1000);
+        $("#loader").fadeOut();
+       
+    }
+
+    function ViewDocumentsByEmployeeId(val,Image)
+    {
+        $("#ImgEmployeeImg").attr("src",Image);
+
+        callJTemplateServiceMethod(JSON.stringify([val]), "/api/EmployeeAPI", "getEmployeeDocuemnts",
+                       "tbodyEmployeeDocuments", "tbodyEmployeeDocumentsJTemplte", false, "", "", "", "");
+
+
+
+    }
+    function ViewDocumentsByEmployeeId_scs(p1,p2,p3,datas)
+    {
+
+    }
+
+    function employeeActivateDeactivate(thiss,EmpId)
+    {
+        if(thiss=="Activate")
+        {
+            thiss=false;
+        }
+        else
+        {
+            thiss=true;
+        }
+        var employye = {
+
+            Id: EmpId,
+            Status: thiss
+        }
+        var ddl = JSON.stringify(employye)
+        callServiceMethod(ddl, "/api/EmployeeAPI", "EmployeStatusUpdate", false, "", "", false, "", true, employeeActivateDeactivate_scs, "", "", "");
+
+
+    }
+
+    function employeeActivateDeactivate_scs(p1, p2, p3, datas)
+
+    {
+        //SchoolID = sessionStorage.getItem("SchoolID");
+        //callJTemplateServiceMethod(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllEmployeeDetaulsBYSchool",
+        //    "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+
+        location.reload();
+        //callJTemplateServiceMethod("", "/api/EmployeeAPI", "getAllEmployeeDetauls",
+        //   "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+    }
+
+    function performActionByEmploy(val,id)
+    {
+        if(val=="ViewDocument")
+        {
+            $("#anchrfModelDeocument"+id+"").click();
+        }
+        else if(val=="EmployeeEdit")
+        {
+
+            window.location.href ="/Employee/AddEmployee?Id="+id;
+        }
+        else {
+        
+            window.location.href="/Employee/ViewEmployeeDetails?Id="+id;  
+        }
+
+    }
+</script>
+<style type="text/css">
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+    width: 35px;
+    height: 35px;
+    border-radius: 100%;
+}
+
+ 
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+           /*padding: 8px;*/ 
+             
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+
+    
+</style>
+ 
+ 

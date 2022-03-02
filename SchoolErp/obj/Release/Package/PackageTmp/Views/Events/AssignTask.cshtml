@@ -1,0 +1,491 @@
+﻿
+@{
+    ViewBag.Title = "AssignTask";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<div class="content">
+    <form id="form1" name="form1">
+        <div class="row" ng-app="eventApp" ng-controller="taskDetails">
+            <div class="col-md-12">
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">Assign Task</h4>
+                        </div>
+                        <div class="panel-body">
+
+                            <div class="form-group">
+                                <label for="Country" class="req">School<span class="requird">*</span></label>
+                                <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name"></select>
+
+                            </div>
+                            <div class="form-group">
+                                <label for="reg_input_name" class="req">Task  <span class="requird">*</span></label>
+                                <input type="text" id="txtTaskName" ng-model="txtTaskName" name="txtTaskName" class="form-control" />
+                                <input type="text" id="txtTaskId" style="display:none" ng-model="txtTaskId" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label for="reg_input_name" class="req">Description</label>
+                                <textarea class="form-control" ng-model="txtTaskDescription" id="txtTaskDescription"></textarea>
+                            </div>
+                            <div class="form-group success">
+                                <label for="reg_input_name" class="req">Priority <span class="requird">*</span></label>
+                                <select class="form-control" style="color:black;" ng-model="ddlTaskPriority" name="ddlTaskPriority" id="ddlTaskPriority">
+                                    <option value="">Please Select</option>
+                                    <option value="Highest Priority">Highest Priority</option>
+                                    @*<option value="High Priority">High Priority</option>*@
+                                    <option value="Normal Priority">Normal Priority</option>
+                                    <option value="Low Priority">Low Priority</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="reg_input_name" class="req">Task Date <span class="requird">*</span></label>
+                                <input type="text" id="taskDate" name="taskDate" ng-model="taskDate" @*data-date-format="dd/mm/yyyy"*@ placeholder="dd/mm/yyyy" class="form-control datepicker" @*data-date-format="dd/mm/yyyy"*@>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="form-group success">
+                                <label for="reg_input_name" class="req">User Type <span class="requird">*</span></label>
+                                <select class="form-control" ng-model="ddlUserType" style="color:black;" name="ddlUserType" id="ddlUserType">
+                                    <option value="">Please Select</option>
+                                    <option value="1">Student</option>
+                                    <option value="2">Employee</option>
+                                </select>
+                            </div>
+                            <div class="form-group success" id="course" style="display: block;">
+
+                                    <label for="reg_input" class="req">Class<span class="requird">*</span></label>
+                                    <select class="form-control" id="ddlCourse" ng-model="ddlCourse" name="ddlCourse" valuefield="Id" textfield="CourseName" blankRowValue="0" blankRowText="----Select----"></select>
+                            </div>
+                            <div class="form-group success" id="batch" style="display: block;">
+                                <label for="reg_input" class="req">Section</label>
+                                <select class="form-control" id="ddlSection" ng-model="ddlSection" name="ddlSection" valuefield="Id" onchange="getStudentsBySectionId(this.value)" textfield="SectionName" blankRowValue="0" blankRowText="----Select----"></select>
+                            </div>
+                            <div class="form-group" id="student" style="display: block;">
+                                <label for="reg_input" class="req">Student (Press Ctrl to select more than one student)</label>
+                                <select class="form-control select2" ng-model="ddlStudents" id="ddlStudents" name="ddlStudents" valuefield="Id" textfield="TaskName" multiple="multiple"></select>
+
+                            </div>
+                            <div class="form-group success" id="department" style="display: none;">
+                                <label for="reg_input" class="req">Department</label>
+                                <select class="form-control" ng-model="txtDepartment" valuefield="Id" onchange="getEmployeeNameFromDepartment(this.value)" textfield="Name" blankRowValue="0" blankRowText="--Select--" id="txtDepartment"></select>
+                            </div>
+                            <div class="form-group" id="employee" style="display: none;">
+                                <label for="reg_input" class="req">Employee (Press Ctrl to select more than one employee)</label>
+                                <select style="width:100%" class="form-control select2" id="ddlEmployees" ng-model="ddlEmployees" valuefield="Id" textfield="TaskName" multiple="multiple"></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="reg_input_name" class="req">Status <span class="requird">*</span></label>
+                                <select class="form-control" style="color:black;" ng-model="ddlTaskStatus" name="ddlTaskStatus" id="ddlTaskStatus">
+                                    <option value="">Please Select</option>
+                                    <option value="Open">Open</option>
+                                    <option value="On hold">On hold</option>
+                                    <option value="Resolved">Resolved</option>
+                                    <option value="Closed">Closed</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <input type="button" class="btn btn-info" ng-click="saveTaskDetails()" value="Save" />
+                                <input type="button" class="btn btn-purple" ng-click="clearAllTextBoxx()" value="Reset" />
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                @*<div class="col-sm-8">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">Assign Task</h4>
+                            </div>
+                            <div class="panel-body">
+                                <div class="col-sm-12">
+
+                                    <div class="panel-body">
+                                        <div class="form-group">
+                                            <label for="reg_input_name" class="req">Task</label>
+                                            <input type="text" id="txtTaskName" ng-model="txtTaskName" class="form-control" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reg_input_name" class="req">Description</label>
+                                            <textarea class="form-control" ng-model="txtTaskDescription" id="txtTaskDescription" ></textarea>
+                                        </div>
+                                        <div class="form-group success">
+                                            <label for="reg_input_name" class="req">Priority</label>
+                                            <select class="form-control" ng-model="ddlTaskPriority" id="ddlTaskPriority">
+                                                <option value="">Please Select</option>
+                                                <option value="Highest Priority">Highest Priority</option>
+                                                <option value="High Priority">High Priority</option>
+                                                <option value="Normal Priority">Normal Priority</option>
+                                                <option value="Low Priority">Low Priority</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="reg_input_name" class="req">Task Date</label>
+                                            <input type="text" id="taskDate" ng-model="taskDate" class="form-control">
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-5">
+                                        <div class="form_sep">
+                                         <input type="button" class="btn btn-info" ng-click="saveTaskDetails()" value="Save" />
+                                            <input type="button" class="btn btn-info" ng-click="clearAllTextBoxx()" value="Clear" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>*@
+            </div>
+            <div class="alert alert-success centerSuccess" id="divSucesEmail" style="display:none">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h4>
+                    <i class="icon fa fa-check"></i>
+                    <span Id="sentEmailMsg" ng-bind="successMsg"></span>
+                </h4>
+
+            </div>
+
+            <div class="alert alert-error centerSuccess" id="divError" style="display:none">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h4>
+                    <i class="icon fa fa-close"></i>
+                    <span Id="ErrorMsg" ng-bind="successMsg"></span>
+                </h4>
+            </div>
+        </div>
+
+    </form>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+<link href="~/css/bower_components/select2/dist/css/select2.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<script src="~/js/Events/model.js"></script>
+<script src="~/js/Events/controller.js"></script>
+<script src="~/js/Events/service.js"></script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+      
+
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+
+        //callServiceMethodForDDl("", "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        $('#taskDate').datepicker();
+        // $('#ddlEmployees').select2();
+        $('#ddlStudents').select2();
+        $('#ddlEmployees').select2();
+
+        var SchoolID = getControlValue("ddlSchoolName");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+        var SchoolID = getControlValue("ddlSchoolName");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllDepartmentsBySchoolID", "txtDepartment", false, "", "", "", "");
+
+        $("#ddlSchoolName").change(function () {
+            var SchoolID = getControlValue("ddlSchoolName");
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+
+        });
+        $("#ddlSchoolName").change(function () {
+            var SchoolID = getControlValue("ddlSchoolName");
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllDepartmentsBySchoolID", "txtDepartment", false, "", "", "", "");
+
+        });
+
+    })
+
+    $("#ddlCourse").change(function () {
+        var ddlCourse = getControlValue("ddlCourse");
+        var SchoolID = getControlValue("ddlSchoolName");
+        $('#ddlStudents').empty();
+        $('#ddlStudents').val("");
+        if (ddlCourse != null && (ddlCourse != -1) && (ddlCourse != undefined)) {
+            callServiceMethodForDDl(JSON.stringify([ddlCourse, SchoolID]), "/api/StudentApi", "GetSectionsbyschool", "ddlSection", false, "", "", "", "");
+        }
+    });
+
+    function getStudentsBySectionId(val) {
+        var employye = {
+            SchoolID: getControlValue("ddlSchoolName"),
+            Class: getControlValue("ddlCourse"),
+            Section: val
+        }
+
+        var ddl = JSON.stringify(employye)
+        callServiceMethodForDDl(ddl, "/api/StudentApi", "getStudentsBySectionClassIdbyschool", "ddlStudents", false, "", "", "", "");
+
+
+    }
+
+    function getEmployeeNameFromDepartment(val) {
+        var employye = {
+            //  Class: getControlValue("ddlCourse"),
+            SchoolID: getControlValue("ddlSchoolName"),
+            Department: val
+        }
+
+        var ddl = JSON.stringify(employye)
+        callServiceMethodForDDl(ddl, "/api/StudentApi", "getEmployeeNameFromDepartmentBYSchool", "ddlEmployees", false, "", "", "", "");
+
+
+    }
+
+    //function saveTaskDetails()
+    //{
+    //     var lang = $("#ddlStudents").select2('data');
+
+
+    //    var task = {
+    //        TaskName: getControlValue("txtTaskName"),
+    //        Description: getControlValue("txtTaskDescription"),
+    //        Priority: getControlValue("ddlTaskPriority"),
+    //        TaskDate: getControlValue("taskDate"),
+    //        UserType: getControlValue("ddlUserType"),
+    //        Class: getControlValue("ddlCourse"),
+    //        Section: getControlValue("ddlSection"),
+    //        Student: $("#ddlStudents").select2('data'),
+    //        Status: getControlValue("ddlTaskStatus"),
+    //        Department: getControlValue("txtDepartment"),
+    //        Employee: getControlValue("ddlEmployees"),
+
+
+    //    }
+
+    //    var ddl = JSON.stringify(task)
+
+
+    //    callServiceMethod(ddl, "/api/EventsAPI", "saveTaskDetails", false, "", "", false, "", true, saveTaskDetails_scs, "", "", "");
+
+
+    //}
+
+    //function saveTaskDetails_scs(p1, p2, p3, datas)
+    //{
+
+
+    //}
+</script>
+<script type="text/javascript">
+
+    $('#ddlUserType').change(function () {
+        if ($('#ddlUserType option:selected').val() === '1') { //! Student
+            $('#department').hide("slow");
+            $('#employee').hide("slow");
+            $('#course').show("slow");
+            $('#batch').show("slow");
+            $('#student').show("slow");
+
+        } else if ($('#ddlUserType option:selected').val() === '2') { //! Employee
+            $('#course').hide("slow");
+            $('#batch').hide("slow");
+            $('#student').hide("slow");
+            $('#department').show("slow");
+            $('#employee').show("slow");
+        }
+    })
+
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var Id = getQuerystring("Id");
+        //  var SchoolID = sessionStorage.getItem("SchoolID");
+
+        // var  SchoolID = getControlValue("ddlSchoolName");
+
+        if (typeof (Id) != "undefined") {
+            $("#loader").fadeIn();
+            callServiceMethod(JSON.stringify([Id]), "/api/EventsAPI", "editTaskDetailsById", false, "", "", false, "", true, editEmployeeDetailsById_scs, "", "", "");
+        }
+
+
+    })
+
+
+    function editEmployeeDetailsById_scs(p1, p2, p3, datas) {
+
+
+        setControlValue("txtTaskId", datas.Id);
+        setControlValue("txtTaskName", datas.TaskName);
+        setControlValue("txtTaskDescription", datas.Description);
+        setControlValue("ddlTaskPriority", datas.Priority);
+        setControlValue("taskDate", datas.TaskDate);
+        setControlValue("ddlUserType", datas.UserType);
+        //  $('#ddlSchoolName').val(employee["SchoolID"])
+        setControlValue("ddlSchoolName", datas.SchoolID)
+        if (datas.UserType == "1") {
+            var SchoolID = getControlValue("ddlSchoolName");
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+            setTimeout(function () {
+
+                setControlValue("ddlCourse", datas.Class);
+            }, 2000)
+            var SchoolID = getControlValue("ddlSchoolName");
+            callServiceMethodForDDl(JSON.stringify([datas.Class, SchoolID]), "/api/StudentApi", "GetSectionsbyschool", "ddlSection", false, "", "", "", "");
+            setTimeout(function () {
+                setControlValue("ddlSection", datas.Section);
+
+                getStudentsBySectionId(datas.Section);
+            }, 2000);
+
+            setTimeout(function () {
+                var s = new Array();
+                s.push(datas.StudentName);
+                $("#ddlStudents").val(s).trigger('change');
+            }, 3000)
+
+            $('#ddlStudents').attr("disabled", "disabled");
+            // setControlValue("ddlStudents", datas.StudentName);
+            // getStudentsBySectionId(datas.Section);
+        }
+        else {
+            $('#course').hide("slow");
+            $('#batch').hide("slow");
+            $('#student').hide("slow");
+            $('#department').show("slow");
+            $('#employee').show("slow");
+            callServiceMethodForDDl("", "/api/EmployeeAPI", "getAllDepartments", "txtDepartment", false, "", "", "", "");
+            setTimeout(function () {
+                setControlValue("txtDepartment", datas.Department);
+                getEmployeeNameFromDepartment(datas.Department)
+            }, 2000)
+
+
+            setTimeout(function () {
+                var s = new Array();
+                s.push(datas.EmployeeName);
+                $("#ddlEmployees").val(s).trigger('change');
+            }, 3000)
+
+            $('#ddlEmployees').attr("disabled", "disabled");
+        }
+        setControlValue("ddlTaskStatus", datas.Status);
+        $("#loader").fadeOut();
+    }
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+            $("#form1").validate({
+                errorClass: "my-error-class",
+                validClass: "my-valid-class",
+
+                rules: {
+                    ddlTaskPriority: {
+                        selectcheck: true
+                    },
+                    ddlUserType: {
+                        selectcheck1: true
+                    },
+                    txtTaskName: "required",
+                    taskDate: {
+
+                        required: true
+                    },
+                    ddlTaskStatus: {
+                        selectcheck3: true
+                    },
+
+
+
+                },
+                messages: {
+                    ddlTaskPriority: "Please Select  Task Priority",
+                    ddlUserType: "Please Select User Type",
+                    txtTaskName: "Please Enter Task Name",
+                    taskDate: "Please Enter Task Date",
+                    ddlTaskStatus: "Please Select Task Status",
+                    //ddlCourse :"please"
+
+                }
+            })
+            jQuery.validator.addMethod('selectcheck', function (value) {
+                if (value == "") {
+                    return (value != '');
+                }
+                else if (value == "? undefined:undefined ?") {
+                    return (value != '? undefined:undefined ?');
+                }
+                else {
+                    return true;
+                }
+
+            }, "Please Select Country");
+
+            jQuery.validator.addMethod('selectcheck1', function (value) {
+                if (value == "") {
+                    return (value != '');
+                }
+                else if (value == "? undefined:undefined ?") {
+                    return (value != '? undefined:undefined ?');
+                }
+                else {
+                    return true;
+                }
+
+            }, "Please Select Country");
+            jQuery.validator.addMethod('selectcheck3', function (value) {
+                if (value == "") {
+                    return (value != '');
+                }
+                else if (value == "? undefined:undefined ?") {
+                    return (value != '? undefined:undefined ?');
+                }
+                else {
+                    return true;
+                }
+
+            }, "Please Select Country");
+
+        
+
+
+
+
+    });
+</script>

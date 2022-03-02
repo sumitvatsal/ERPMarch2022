@@ -1,0 +1,404 @@
+﻿@{
+    ViewBag.Title = "CreateMeeting";
+    Layout = ViewBag.isPartialView;
+}
+
+@*<h2>CreateMeeting</h2>*@
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<link href="~/css/bootstrap-timepicker.css" rel="stylesheet" />
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<form id="class-timing-detail" role="form" name="form1">
+    <section class="content">
+        <div class="box box-solid" id="create" style="display:none">
+            @*<div class="et">
+                <div class="box-header with-border">
+                    <h3 class="box-title">CreateMeeting</h3>
+
+                </div>
+            </div>*@
+            <div class="extra-div">
+                <div class="box-header with-border">
+                    <h3 class="box-title"><i class="fa fa-table"></i> Create Meeting </h3>
+
+                </div>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="form-group field-empinfosearch-emp_designation_id">
+                            <label for="Country" class="req">School<span class="requird">*</span></label>
+                            <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name"></select>
+
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group field-assignment-assignment_course_id required">
+                            <label for="Country" class="req">Class <span class="requird">*</span></label>
+                            <select class="form-control" id="ddlCourse" name="ddlCourse" valuefield="Id" textfield="CourseName" blankRowValue="-1" blankRowText="----Select----" aria-required="true"></select>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group field-assignment-assignment_course_id required">
+                            <label for="Country" class="req">Section <span class="requird">*</span></label>
+                            <select class="form-control" id="ddlSection" name="ddlSection" valuefield="Id" textfield="SectionName" blankRowValue="-1" blankRowText="----Select----" aria-required="true"></select>
+                            <div class="help-block"></div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-4">
+
+                        <label class="control-label" for="assignment-assignment_course_id">Teacher <span class="requird">*</span></label>
+                        <select id="ddl_employees" name="ddl_employees" class="form-control" aria-required="true" valuefield="ID" textfield="Msg" blankRowValue="-1" blankRowText="----Select----"></select>
+
+                        <div class="help-block"></div>
+                    </div>
+
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label class="control-label">Subject<span class="requird">*</span></label>
+                            <select class="form-control select2" id="ddl_subs" name="ddl_subs" valuefield="ID" textfield="Subject"></select>
+                            <div class="help-block"></div>
+                            <label id="spmsg1" />
+                        </div>
+
+                    </div>
+
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label>Date From<span class="requird">*</span></label>
+                            <input id="simple" type="text" class="form-control" value="dd-mm-yyyy">
+
+                        </div>
+                    </div>
+
+
+
+
+                </div>
+                <div class="row">
+
+                    <div class="col-sm-4 col-xs-4 ">
+                        <div class="form-group ">
+                            <div class=""><label for="start-time">Start Time <span class="requird">*</span></label></div>
+                            <div class="input-group bootstrap-timepicker timepicker " style="width:98%;">
+                                <input id="sTime" type="text" name="sTime" readonly="readonly" class="form-control input-small timer">
+                                <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-sm-4 col-md-4 col-lg-4 ">
+                        <label>Duration<span class="requird">*</span></label>
+
+                        <select id="Duration" class="sdk-select form-control ">
+                            <option value=1>1</option>
+                            <option value=2>2</option>
+                            <option value=3>3</option>
+                        </select>
+                    </div>
+
+
+                    <div class="row" style="margin-left:18px; margin-top:22px;">
+                        <button type="button" id="btnCreate" class="btn btn-primary pull-left">Create</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="alert alert-success alert-dismissible centerSuccess" id="divsuccesmsg" style="display:none">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <h4>
+                <i class="icon fa fa-check"></i>
+                success! <span Id="spsuccessMsg"></span>
+            </h4>
+
+        </div>
+
+
+
+
+        <div class="box box-solid" style="border:1px solid #eee">
+            <div class="extra-div">
+                <div class="box-header with-border">
+                    <h3 class="box-title"><i class="fa fa-table"></i> Create Meeting Details</h3>
+
+                </div>
+            </div>
+            <div class="box-body table-responsive">
+                <div id="w1" class="grid-view">
+
+                    <table id="example1" class="table table-bordered table-striped " style="overflow-x: auto;">
+                        <thead>
+                            <tr>
+                                <th class="">ID</th>
+                                <th>Date</th>
+                                <th>StarTime</th>
+                                <th>Duration</th>
+                                <th>MeetingId</th>
+                                <th>Password</th>
+                                <th>Class</th>
+                                <th>Section</th>
+                                <th>TeacherId</th>
+                                <th>Subject</th>
+
+                                @*
+                                <th>Action</th>*@
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyEmployeeLeaveRequestDetails"></tbody>
+                    </table>
+
+
+
+
+
+                </div>
+            </div>
+            <script type="text/html" id="tbodyEmployeeLeaveRequestDetailsJTemplte">
+                {#foreach $T as Datashort}
+                <tr>
+                    <td class="">
+                        {$T.Datashort.ZID}
+                    </td>
+                    <td>
+                        { $T.Datashort.Dt}
+                    </td>
+                    <td>
+                        { $T.Datashort.Time}
+                    </td>
+                    <td>
+                        { $T.Datashort.Duration}
+                    </td>
+                    <td>
+                        {$T.Datashort.MeetingID}
+                    </td>
+                    <td>
+                        { $T.Datashort.Password}
+                    </td>
+                    <td>
+                        { $T.Datashort.Class}
+                    </td>
+                    <td>
+                        { $T.Datashort.Section}
+                    </td>
+                    <td>
+                        { $T.Datashort.Teacher}
+                    </td>
+                    <td>
+                        { $T.Datashort.Subject}
+                    </td>
+
+
+                    @*
+                    <td class="text-center">
+
+                        <i class="fa fa-fw fa-trash" style="cursor:pointer" onclick="Delete({ $T.Datashort.ID})" title="Delete"></i>
+                    </td>*@
+
+                </tr>
+                {#/for}
+            </script>
+
+
+        </div>
+
+
+
+    </section>
+</form>
+
+
+<link rel="stylesheet" href="/css/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(function () {
+
+
+            if (sessionStorage.getItem("type") == 4) {
+                document.getElementById('create').style.display = 'none';
+            }
+            else {
+                document.getElementById('create').style.display = 'block';
+                $("#simple").datepicker({ format: 'dd/mm/yyyy' });
+
+            }
+
+
+        });
+
+        //document.getElementById('Create').style.display = 'none';
+        //$("#Create").hide();
+        // hide(document.getElementById('Create'));
+        debugger;
+        // fillDataTable();
+
+
+
+    });
+</script>
+
+<script src="~/js/bootstrap-timepicker.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+        $('.timer').timepicker({ timeFormat: 'h:mm:ss p', startTime: new Date(0, 0, 0, 00, 0, 0), interval: 05 });
+
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TimeTableApi", "GetEmpsbySchoolID", "ddl_employees", false, "", "", "", "");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+
+
+        //var ID = getQuerystring("id");
+        //if (typeof (ID) != "undefined") {
+        //    setControlValue("hdn", ID);//
+        //    setControlValue("hdnID", 0);
+        //    GetValues(ID);
+
+        //}
+        fillDataTable();
+
+        $("#ddl_employees").change(function () {
+            var ddlsub = getControlValue("ddl_employees");
+            if (ddlsub != null && (ddlsub != -1) && (ddlsub != undefined)) {
+                var SchoolID = sessionStorage.getItem("SchoolID");
+                var ClassId = getControlValue("ddlCourse");
+                var SectionId = getControlValue("ddlSection");
+
+                callServiceMethodForDDl(JSON.stringify([SchoolID, ddlsub, ClassId, SectionId]), "/api/TimeTableApi", "GetSubjectsbySCHOOLid1", "ddl_subs", false, "", "", "", "");
+            }
+        });
+
+
+        $("#ddlCourse").change(function () {
+            var ddlCourse = getControlValue("ddlCourse");
+            if (ddlCourse != null && (ddlCourse != -1) && (ddlCourse != undefined)) {
+                var SchoolID = getControlValue("ddlSchoolName");
+                // callServiceMethodForDDl(JSON.stringify([ddlCourse, SchoolID]), "/api/StudentApi", "GetStreamsbySchool", "ddlStream", false, "", "", "", "");
+                callServiceMethodForDDl(JSON.stringify([ddlCourse, SchoolID]), "/api/StudentApi", "GetSectionsbyschool", "ddlSection", false, "", "", "", "");
+                //callServiceMethodForDDl(JSON.stringify([ddlCourse]), "/api/StudentApi", "GetBatches", "ddlBatch", false, "", "", "", "");
+            }
+        });
+
+
+        $("#btnCreate").click(function () {
+            debugger;
+
+            //var is_break = 0;
+            //var status = 1;
+            var UserId = (sessionStorage.getItem("userId"));
+            var SubjectId = getControlValue("ddl_subs");
+            var sTime = getControlValue("sTime");
+            var Duration = getControlValue("Duration");
+            //var CT_id = getControlValue("hdn");
+            // var id = getControlValue("hdnID");
+            var school = getControlValue("ddlSchoolName");
+            var Class = getControlValue("ddlCourse");
+            var Section = getControlValue("ddlSection");
+            var TeacherId = getControlValue("ddl_employees");
+            var Date = getControlValue("simple");
+            //if ($("#is_break").is(':checked')) {
+            //    is_break = 1;
+            //}
+
+            SaveDetails(UserId, Date, SubjectId, sTime, Duration, school, Class, Section, TeacherId);
+
+
+
+        });
+
+        function SaveDetails(UserId, Date, SubjectId, sTime, Duration, school, Class, Section, TeacherId) {
+            if ($("#class-timing-detail").valid()) {
+                $("#loader").fadeIn();
+
+                $.ajax({
+                    url: "/api/ZoomCreateMeeting/CreateMeeting",
+                    type: "Post",
+                    data: JSON.stringify([UserId, Date, SubjectId, sTime, Duration, school, Class, Section, TeacherId]),
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (msg) {
+                        $("#spsuccessMsg").html(msg);
+
+                        $("#divsuccesmsg").fadeIn(1000);
+
+                        $("#spsuccessMsg").html(msg);
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 1000)
+                        $("#loader").fadeOut();
+
+                        Reset();
+
+                        //window.location.reload();
+                    }
+                });
+            }
+        }
+
+
+        function Reset() {
+
+            //  $("#ddlCourse").val(0) ;
+            setControlValue("ddlCourse", "-1");
+            setControlValue("ddlSection", "");
+            setControlValue("ddl_employees", "-1");
+            // $("#ddl_employees").val(0);
+            setControlValue("ddl_subs", "");
+            setControlValue("simple", "dd-mm-yyyy");
+            fillDataTable();
+
+        }
+
+
+    });
+</script>
+<script>
+    function fillDataTable() {
+        //var id = getControlValue("hdnFSID");
+        //var CT_id = getControlValue("txtSearchName");
+        //var ClassId = 0;
+        //var SectionId = 0;
+        //var Yearid = getControlValue("tc_academic_year");
+        //var Cat = 0;
+        var SchoolID = sessionStorage.getItem("SchoolID");
+
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        var SID = (sessionStorage.getItem("stdID"));
+
+        //callJTemplateServiceMethod(JSON.stringify(["FeeStructureConfig", id, CT_id, ClassId, SectionId, Yearid, Cat, SchoolID]), "/api/FeesApi", "getList",
+        //    "tbodyEmployeeDetails", "tbodyEmployeeEarningJTemplte", true, successMsg, "", "", "");
+
+        callJTemplateServiceMethod(JSON.stringify([loginuser, typeuser, SchoolID, SID]), "/api/ZoomCreateMeeting", "ViewStructure",
+            "tbodyEmployeeLeaveRequestDetails", "tbodyEmployeeLeaveRequestDetailsJTemplte", true, successMsg, "", "", "");
+
+
+    }
+
+    function successMsg(p1, p2, p3, datas) {
+        $("#loader").fadeOut();
+
+        setTimeout(function () {
+            $('#example1').DataTable({
+
+                dom: 'lBfrtip',
+                bRetrieve: true,
+                bDestroy: true,
+                'columnDefs': [{
+                    "targets": -1,
+                    "orderable": false
+                }],
+            });
+        }, 1000);
+
+    }
+
+
+</script>

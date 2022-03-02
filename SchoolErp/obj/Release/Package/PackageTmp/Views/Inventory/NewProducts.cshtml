@@ -1,0 +1,543 @@
+﻿
+@{
+    ViewBag.Title = "NewProducts";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<link href="~/css/bower_components/select2/dist/css/select2.min.css" rel="stylesheet" />
+
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.select2').select2();
+    })
+
+</script>
+<section class="content">
+    <div class="box box-solid">
+        <div class="et">
+            <div class="box-header with-border">
+                <h3 class="box-title">Products</h3>
+
+            </div>
+        </div>
+        <div class="alert alert-success alert-dismissible centerSuccess" id="divsuccesmsg" style="display:none">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <h4>
+                <i class="icon fa fa-check"></i>
+                success! <span Id="spsuccessMsg"></span>
+            </h4>
+
+        </div>
+
+        <div class="box-body">
+            <div class="row">
+
+                <div class="content">
+
+
+
+                    <div class="row">
+                        <form role="form" id="form1" name="form1">
+                            <div class="col-sm-12">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title"> New Product</h4>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="panel-body">
+
+                                            <div class="row">
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="req" for="Salarydetails_unit">Barcode </label>
+                                                    <input class="form-control" id="txtBarcode" name="txtBarcode" type="text" ng-model="txtBarcode" />
+                                                </div>
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="req" for="Salarydetails_unit">SN </label>
+                                                    <input class="form-control" id="txtSn" name="txtSn" type="text" ng-model="txtSn" />
+                                                </div>
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label class="req" for="Salarydetails_unit">Product Name </label>
+                                                    <input class="form-control" id="txtProduct" name="txtProduct" type="text" ng-model="txtProduct" />
+                                                </div>
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label class="req" for="Salarydetails_unit">Model </label>
+                                                    <input class="form-control" id="txtModel" name="txtModel" type="text" ng-model="txtModel" />
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="req" for="Salarydetails_unit">Unit Price <span class="requird">*</span> </label>
+                                                    <input class="form-control" value="0.00" id="txtunitorder" name="txtunitorder" type="text" ng-model="txtunitorder" onkeypress="return isNumber(this,event)" />
+                                                </div>
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="req" for="Salarydetails_unit">Units In Stock </label>
+                                                    <input class="form-control" value="0.00" readonly id="txtStocke" name="txtStocke" type="text" ng-model="txtStocke" />
+                                                </div>
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="req" for="Salarydetails_unit">Units On Order </label>
+                                                    <input class="form-control" value="0.00" readonly id="txtUnits" name="txtUnits" type="text" ng-model="txtUnits" />
+                                                </div>
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="req" for="Salarydetails_unit">Reorder Level <span class="requird">*</span> </label>
+                                                    <input class="form-control" value="10.00" id="txtReorder" name="txtReorder" type="text" ng-model="txtReorder" onkeypress="return isNumber(this,event)" />
+                                                </div>
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label for="Country" class="req">Category <span class="requird">*</span></label>
+                                                    <select class="form-control" id="ddlCategory" ng-model="ddlCategory" valuefield="Id" textfield="Name" @*blankRowValue="0" blankRowText="--Select--"*@></select>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label for="Country" class="req">Unit <span class="requird">*</span></label>
+                                                    <select class="form-control" id="ddlUnit" ng-model="ddlUnit" valuefield="Id" textfield="Name" @*blankRowValue="0" blankRowText="--Select--"*@></select>
+                                                </div>
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="invisible">
+                                                        Button
+                                                    </label>
+                                                    <div>
+                                                        <a class="btn btn-success btn-sm" href="/Masters/NewCity"><i class="fa fa-plus-square"></i></a>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label for="Country" class="req">Brand <span class="requird">*</span></label>
+                                                    <select class="form-control" id="ddlBrand" ng-model="ddlBrand" valuefield="Id" textfield="Name" @*blankRowValue="0" blankRowText="--Select--"*@></select>
+                                                </div>
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="invisible">
+                                                        Button
+                                                    </label>
+                                                    <div>
+                                                        <a class="btn btn-success btn-sm" href="/Masters/NewCity"><i class="fa fa-plus-square"></i></a>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-12">
+
+                                                <div class="panel panel-default">
+                                                    <div class="panel-heading">
+                                                        <h4 class="panel-title">Upload Images in Product Details</h4>
+                                                    </div>
+                                                    <div class="panel-body">
+                                                        <div>
+                                                            <div class="form-group col-lg-6">
+                                                                <label for="reg_input_logo">Upload Image</label>
+                                                                <input id="GalleryImage" type="file">
+                                                            </div>
+
+                                                            <div>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-sm-12 col-md-12 col-lg-12">
+                                                    <label class="req" for="Salarydetails_unit">Product Details</label>
+                                                    <textarea class="form-control" id="txtProductDetails"></textarea>
+                                                </div>
+
+
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-sm-5">
+                                                    <div class="form_sep">
+                                                        <input class="btn btn-info" id="btnSumit" type="button" value="Save">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="hdnID" />
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#GalleryImage").change(function () {
+            var files = !!this.files ? this.files : [];
+
+            var iSize = (files[0].size / 1024);
+            iSize = (Math.round(iSize * 100) / 100)
+            var ext = $('#GalleryImage').val().split('.').pop().toLowerCase();
+            if ($.inArray(ext, ['png', 'jpg', 'jpeg']) == -1) {
+                $("#inputFile").val("");
+                $("#GalleryImage").val("");
+                alert('invalid extension,please upload jpg,jpeg,png');
+
+                return;
+            }
+            if (iSize > 1000) {
+                $("#inputFile").val("");
+                $("#GalleryImage").val("");
+                alert("Image size must be less than 1 Mb");
+
+                return;
+            }
+        });
+        var ID = getQuerystring("id");
+        if (ID != null) {
+            //var customerId = localStorage.getItem("EditCustomer");
+            $.ajax({
+                type: 'Post',
+                url: '/api/AccountsAPI/ProductList1',
+                data: JSON.stringify([ID]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    $('#hdnID').val(result[0].ID);
+                    $('#txtBarcode').val(result[0].Barcode);
+                    $('#txtSn').val(result[0].Sn);
+                    $('#txtProduct').val(result[0].productname);
+                    $('#txtModel').val(result[0].model);
+                    $('#txtunitorder').val(result[0].unitprice);
+                    $('#txtStocke').val(result[0].unitinstoke);
+                    $('#txtUnits').val(result[0].unitonorder);
+                    $('#txtReorder').val(result[0].reorderlevel);
+                    $('#ddlCategory').val(result[0].category);
+                    $('#ddlUnit').val(result[0].unit);
+                    $('#ddlBrand').val(result[0].brand);
+                    $('#txtProductDetails').val(result[0].productDetail);
+                    $('#GalleryImage').val(result[0].Image);
+                }
+            });
+            localStorage.removeItem("EditProducts");
+        }
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser, SchoolID]), "/api/Default", "GetUnits", "ddlUnit", false, "", "", "", "");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser, SchoolID]), "/api/Default", "GetCategories", "ddlCategory", false, "", "", "", "");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser, SchoolID]), "/api/Default", "getBrands", "ddlBrand", false, "", "", "", "");
+
+        setControlValue("hdnID", 0);
+        /*        setControlValue("hdnStatus", 1);*/
+        $('.dtpicker').datepicker({
+            //dateFormat: 'dd/mm/yy' ,
+            autoclose: true,
+            format: 'dd/mm/yyyy'
+        });
+
+        fillDataTable();
+
+        var ID = getQuerystring("id");
+        if (typeof (ID) != "undefined") {
+            setControlValue("hdn", ID);//
+
+            GetValues(ID);
+
+        }
+
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                txtName: "required",
+            },
+            messages: {
+                txtName: "Please Enter WareHouse Name",
+            }
+        })
+        //callServiceMethodForDDl("", "/api/StudentApi", "GetLeaveStatus", "ddlReqStatus", false, "", "", "", "");
+    });
+    function readURL(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                $('#blah')
+                    .attr('src', e.target.result);
+            };
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    function openModal() {
+        $('#myModal').modal('show');
+    }
+
+
+    function successMsg(p1, p2, p3, datas) {
+
+        $("#loader").fadeOut();
+
+        setTimeout(function () {
+            $('#example1').DataTable({
+
+                dom: 'lBfrtip',
+                bRetrieve: true,
+                bDestroy: true,
+                'columnDefs': [{
+                    "targets": -1,
+                    "orderable": false
+                }],
+            });
+        }, 1000);
+    }
+
+
+    $("#btnSumit").click(function () {
+        if ($("#ddlCategory").val() == "0") {
+            alert("Please select Category  !");
+            $("#ddlCategory").focus()
+            return false;
+
+        }
+        var ddlHead = $("#ddlUnit");
+        if (ddlHead.val() == "0") {
+            alert("Please select Unit !");
+            ddlHead.focus()
+            return false;
+
+        }
+        if ($("#ddlBrand").val() == "0") {
+            alert("Please select Brand  !");
+            $("#ddlBrand").focus()
+            return false;
+
+        }
+        var ID = getControlValue("hdnID");
+        var Barcode = getControlValue("txtBarcode");
+        var SN = getControlValue("txtSn")
+        var Product = getControlValue("txtProduct")
+        var Model = getControlValue("txtModel")
+        var UnitOrder = getControlValue("txtunitorder")
+        var stoke = getControlValue("txtStocke")
+        var UnitName = getControlValue("txtUnits")
+        var Reorder = getControlValue("txtReorder")
+        var Category = getControlValue("ddlCategory")
+        var Unit = getControlValue("ddlUnit")
+        var Brand = getControlValue("ddlBrand")
+        var image = $("#GalleryImage").val();
+        var ProductDetail = getControlValue("txtProductDetails")
+        var loginuser = (sessionStorage.getItem("userId"));
+        var active = 1;
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+
+        Save(ID, Barcode, SN, Product, Model, UnitOrder, stoke, UnitName, Reorder, Category, Unit, Brand, ProductDetail, image, loginuser, active, SchoolID);
+    });
+
+    function Save(ID, Barcode, SN, Product, Model, UnitOrder, stoke, UnitName, Reorder, Category, Unit, Brand, ProductDetail, image, loginuser, active, SchoolID) {
+
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+            $.ajax({
+                url: "/api/AccountsAPI/SaveRecord",
+                type: "Post",
+                data: JSON.stringify(["NewProducts", ID, Barcode, SN, Product, Model, UnitOrder, stoke, UnitName, Reorder, Category, Unit, Brand, ProductDetail, image, loginuser, active, SchoolID]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    $("#loader").fadeOut();
+                    if (data == 1) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Product Added Successfully ");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                            window.location.href = "/Inventory/Products";
+                        }, 2000)
+
+                    }
+                    else if (data == 2) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Product Updated Successfully ");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                            window.location.href = "/Inventory/Products";
+                        }, 2000)
+
+                    }
+                    else if (data == -1) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Product name already Exist");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+                    }
+                    else {
+                        alert("Some Error!!");
+                    }
+                    ResetModal();
+                    fillDataTable();
+                    //$('#myModal').modal('hide');
+
+                }
+            });
+
+        }
+    }
+
+    function Save1(ID, Barcode, SN, Product, Model, UnitOrder, stoke, UnitName, Reorder, Category, Unit, Brand, ProductDetail, image, loginuser, active) {
+
+
+        $("#loader").fadeIn();
+        $.ajax({
+            url: "/api/AccountsAPI/SaveRecord",
+            type: "Post",
+            data: JSON.stringify(["NewProducts", ID, Barcode, SN, Product, Model, UnitOrder, stoke, UnitName, Reorder, Category, Unit, Brand, ProductDetail, image, loginuser, active]),
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                $("#loader").fadeOut();
+                if (data == 1) {
+                    $("#divsuccesmsg").fadeIn();
+
+                    $("#spsuccessMsg").html("Product Added Successfully ");
+                    setTimeout(function () {
+                        $("#divsuccesmsg").fadeOut();
+                        $("#spsuccessMsg").html("");
+                        window.location.href = "/Inventory/Products";
+                    }, 2000)
+
+                }
+                else if (data == 2) {
+                    $("#divsuccesmsg").fadeIn();
+
+                    $("#spsuccessMsg").html("Product Updated Successfully ");
+                    setTimeout(function () {
+                        $("#divsuccesmsg").fadeOut();
+                        $("#spsuccessMsg").html("");
+                        window.location.href = "/Inventory/Products";
+                    }, 2000)
+
+                }
+                else if (data == -1) {
+                    $("#divsuccesmsg").fadeIn();
+
+                    $("#spsuccessMsg").html("Product name already Exist");
+                    setTimeout(function () {
+                        $("#divsuccesmsg").fadeOut();
+                        $("#spsuccessMsg").html("");
+                    }, 2000)
+                }
+                else {
+                    alert("Some Error!!");
+                }
+                ResetModal();
+                fillDataTable();
+                //$('#myModal').modal('hide');
+
+            }
+        });
+
+
+    }
+
+
+    function ResetAll() {
+        setControlValue("txtBarcode", "");
+        setControlValue("txtSn", "");
+        setControlValue("txtProduct", "");
+        setControlValue("txtModel", "");
+        setControlValue("txtunitorder", "");
+        setControlValue("txtStocke", "");
+        setControlValue("txtUnits", "");
+        setControlValue("txtReorder", "");
+        setControlValue("ddlCategory", "");
+        setControlValue("ddlUnit", "");
+        setControlValue("ddlBrand", "");
+        setControlValue("GalleryImage", "");
+        setControlValue("txtProductDetails", "");
+        fillDataTable();
+    }
+
+    function ResetModal() {
+        setControlValue("txtBarcode", "");
+        setControlValue("txtSn", "");
+        setControlValue("txtProduct", "");
+        setControlValue("txtModel", "");
+        setControlValue("txtunitorder", "");
+        setControlValue("txtStocke", "");
+        setControlValue("txtUnits", "");
+        setControlValue("txtReorder", "");
+        setControlValue("ddlCategory", "");
+        setControlValue("ddlUnit", "");
+        setControlValue("ddlBrand", "");
+        setControlValue("GalleryImage", "");
+        setControlValue("txtProductDetails", "");
+        setControlValue("hdnID", 0);
+    }
+
+</script>
+<script type="text/javascript">
+    function isNumber(txt, evt) {
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode == 46) {
+            //Check if the text already contains the . character
+            if (txt.value.indexOf('.') === -1) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if (charCode > 31 &&
+                (charCode < 48 || charCode > 57))
+                return false;
+        }
+        return true;
+    }
+</script>
+

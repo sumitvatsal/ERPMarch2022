@@ -1,0 +1,364 @@
+﻿
+@{
+    ViewBag.Title = "Account";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<link href="~/css/bower_components/select2/dist/css/select2.min.css" rel="stylesheet" />
+
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.select2').select2();
+    })
+
+</script>
+<section class="content">
+    <div class="box box-solid">
+        <div class="et">
+            <div class="box-header with-border">
+                <h3 class="box-title">New Accounts</h3>
+
+            </div>
+        </div>
+        <div class="alert alert-success alert-dismissible centerSuccess" id="divsuccesmsg" style="display:none">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <h4>
+                <i class="icon fa fa-check"></i>
+                success! <span Id="spsuccessMsg"></span>
+            </h4>
+
+        </div>
+
+        <div class="box-body">
+            <div class="row">
+
+                <div class="content">
+
+
+
+                    <div class="row">
+                        <form role="form" id="form1" name="form1">
+                            <div class="col-sm-12">
+                                <div class="panel panel-default">
+                                    @*<div class="panel-heading">
+                                            <h4 class="panel-title"> New Opening Balance</h4>
+                                        </div>*@
+                                    <div class="panel-body">
+                                        <div class="panel-body">
+
+                                            <div class="row">
+                                                <div id="sandbox" class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label for="Head">Head Name <span class="requird">*</span></label>
+                                                    <input id="Head" type="text" class="form-control" value="" required>
+                                                </div>
+                                                <div id="sandbox" class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label for="Code">Head Code </label>
+                                                    <input id="Code" type="text" class="form-control" readonly value="">
+                                                </div>
+                                                @*// <input type="text" id="ddlHead1" ng-model="ddlHead1" valuefield="Coaid" textfield="Coaid" hidden />*@
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label for="Country" class="req">Parent Head</label>
+                                                    <select class="form-control" id="ddlHead" ng-model="ddlHead" valuefield="Id" textfield="Name" onchange="BindUnit()" blankRowValue="0" blankRowText="--Select--"></select>
+                                                </div>
+                                                @*<input type="text" id="txtCoa" hidden />*@
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label class="req" for="Salarydetails_unit">P Head Name  </label>
+                                                    <input class="form-control" readonly id="txtPHN" name="txtPHN" type="text" value="COA" ng-model="txtPHN" />
+                                                </div>
+
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="req" for="Salarydetails_unit">Head Level  </label>
+                                                    <input class="form-control" readonly id="txtHL" name="txtHL" type="text" value="1" ng-model="txtHL" />
+                                                </div>
+
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="req" for="Salarydetails_unit">Head Type  </label>
+                                                    <input class="form-control" readonly id="txtHT" name="txtHT" type="text" value="A" ng-model="txtHT" />
+                                                </div>
+
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="req" for="Salarydetails_unit">Is Transaction  </label>
+                                                    <input id="chktrans" name="chktrans" type="checkbox" />
+                                                </div>
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="req" for="Salarydetails_unit">Is Gl  </label>
+                                                    <input id="chkGl" name="chkGl" type="checkbox" />
+                                                </div>
+
+
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-5">
+                                                    <div class="form_sep">
+                                                        <input class="btn btn-info" id="btnSumit" type="button" value="Save">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="hdnID" />
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        Bind();
+
+       
+
+
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser, SchoolID]), "/api/Default", "getAccounts1", "ddlHead", false, "", "", "", "");
+        
+        var ID = getQuerystring("id");
+        if (typeof (ID) != "undefined") {
+            setControlValue("hdn", ID);//
+
+            GetValues(ID);
+
+        }
+
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                Head: "required",
+            },
+            messages: {
+                Head: "Please Enter Head Name",
+            }
+        })
+        //callServiceMethodForDDl("", "/api/StudentApi", "GetLeaveStatus", "ddlReqStatus", false, "", "", "", "");
+    });
+
+    $("#ddlHead").change(function () {
+        var ddlHead = getControlValue("ddlHead");
+        if (ddlHead != null && (ddlHead != -1) && (ddlHead != undefined)) {
+            var SelectedText = $('#ddlHead :selected').text();
+            $('#txtCoa').val(SelectedText);
+        }
+    });
+    function successMsg(p1, p2, p3, datas) {
+
+        $("#loader").fadeOut();
+
+        setTimeout(function () {
+            $('#example1').DataTable({
+
+                dom: 'lBfrtip',
+                bRetrieve: true,
+                bDestroy: true,
+                'columnDefs': [{
+                    "targets": -1,
+                    "orderable": false
+                }],
+            });
+        }, 1000);
+    }
+
+    $("#btnSumit").click(function () {
+        debugger;
+        var ID = getControlValue("ddlHead");
+        var Code = getControlValue("Code");
+        var Head = getControlValue("txtPHN");
+        var HT = getControlValue("txtHT")
+        var HL = getControlValue("txtHL")
+        var Head1 = getControlValue("Head")
+        var trans = getControlValue("chktrans")
+        var chk = getControlValue("chkGl")
+        var loginuser = (sessionStorage.getItem("userId"));
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+
+
+        Save(ID, Head, Head1, Code, HT, HL, trans, chk, loginuser, SchoolID);
+    });
+
+    function Save(ID, Head, Head1, Code, HT, HL, trans, chk, loginuser, SchoolID) {
+        debugger
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+            $.ajax({
+                url: "/api/AccountsAPI/SaveFinancial",
+                type: "Post",
+                data: JSON.stringify(["Accounts", ID, Head, Head1, Code, HT, HL, trans, chk, loginuser, SchoolID]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    $("#loader").fadeOut();
+                    if (data == 1) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Accounts Added Successfully ");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+
+                    }
+                    else if (data == 2) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Amount Updated Successfully ");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+
+                    }
+                    else if (data == -1) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Amount name already Exist");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+                    }
+                    else {
+                        alert("Some Error!!");
+                    }
+                    //$("#Head").val('');
+                    ResetModal();
+                    Bind();
+                    //location.reload();
+                    //Bind();
+                    //fillDataTable();
+                    //$('#myModal').modal('hide');
+
+                }
+            });
+
+        }
+    }
+
+    function ResetAll() {
+        setControlValue("ddlHead", "");
+        setControlValue("ddlHead1", "");
+        setControlValue("DC", "");
+        setControlValue("txtAmount", "");
+        $("#txtNote").val('');
+        setControlValue("txtNote", "");
+        fillDataTable();
+    }
+
+    function ResetModal() {
+        setControlValue("ddlHead", "");
+        setControlValue("Head", "");
+        $("#Code").val('');
+        Bind();
+        setControlValue("txtHT", "A");
+        setControlValue("txtHL", "1");
+        $("#Head").val('');
+        setControlValue("txtPHN", "COA");
+        setControlValue("chktrans", 0);
+        setControlValue("chkGl", 0);
+    }
+
+
+</script>
+
+<script>
+    function BindUnit() {
+        debugger
+        var productId = $('#ddlHead').val();
+
+        $.ajax({
+            type: 'Get',
+            url: '/api/Default/GetUnitByProductId1',
+            data: { ProductId: productId },
+            dataType: 'json',
+
+            success: function (unitValue) {
+                debugger;
+                var unitRecord = unitValue.split(',');
+                var unitName = unitRecord[2];
+                var unitId = unitRecord[0];
+                var Level = unitRecord[1];
+                var Type = unitRecord[3];
+                // unitValue = unitValue.replace("\\\"", "");
+                $('#txtPHN').val(unitName);
+                $('#Code').val(unitId);
+
+                $('#txtHT').val(Type);
+                $('#txtHL').val(Level);
+            }
+        });
+    }
+</script>
+<script>
+    function Bind() {
+
+
+        $.ajax({
+            type: 'Get',
+            url: '/api/Default/GetUnit',
+
+            dataType: 'json',
+
+            success: function (unitValue) {
+
+                $('#Code').val(unitValue);
+
+            }
+        });
+    }
+</script>
+
+
+
+

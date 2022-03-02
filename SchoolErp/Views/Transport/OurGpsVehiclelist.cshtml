@@ -1,0 +1,461 @@
+﻿
+@{
+    ViewBag.Title = "OurGpsVehiclelis";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+
+
+<section class="content" style="margin-right:300px">
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row">
+
+
+                <div class="col-lg-2">
+                    <div style="background-color:forestgreen">
+                        <!-- small box -->
+                        <div class="small-box ">
+                            <img src="/Images/Transport/moving-icon.png" />
+                            <div class="inner">
+                                <h3 ></h3>
+                                <p style="color:white;">MOVING</p><h3 style="color:white" id="MOVINGNO">0</h3>
+                            </div>
+
+                            <a onclick="GetNotRespondingVehiclelist1(0)" class="small-box-footer">View List <i class="fa fa-arrow-circle-right"></i></a>
+                            <input type="hidden" id="HiddenUserId" />
+                            <input type="hidden" id="HiddenPassword" />
+                            <input type="hidden" id="HiddenValidationKey" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 ">
+                    <!-- small box -->
+                    <div style="background-color:goldenrod;">
+                        <div class="small-box ">
+                            <img src="/Images/Transport/stop-icon.png" />
+                            <div class="inner">
+
+                                <h3 ></h3>
+                                <p style="color:white;">IDLE</p><h3 style="color:white" id="IDLENO">0</h3>
+
+                            </div>
+
+                            <a onclick="GetNotRespondingVehiclelist1(1)" class="small-box-footer">View List <i class="fa fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 ">
+                    <div style="background-color:darkred">
+                        <!-- small box -->
+                        <div class="small-box ">
+                            <img src="/Images/Transport/not-report.png" />
+                            <div class="inner">
+                                <h3 ></h3>
+                                <p style="color:white">NR</p><h3 style="color:white" id="NRNO">0</h3>
+                            </div>
+
+                            <a onclick="GetNotRespondingVehiclelist1(2)" class="small-box-footer">View List <i class="fa fa-arrow-circle-right"></i></a>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="col-lg-2 ">
+                    <!-- small box -->
+                    <div style="background-color:orangered">
+                        <div class="small-box ">
+
+                            <img src="/Images/Transport/not-report.png" />
+                            <div class="inner">
+                                <h3 ></h3>
+                                <p style="color:white">NGF</p><h3 style="color:white" id="NGFNO">0</h3>
+                            </div>
+
+                            <a onclick="GetNotRespondingVehiclelist1(3)" class="small-box-footer">View List <i class="fa fa-arrow-circle-right"></i></a>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="col-lg-2">
+                    <!-- small box -->
+                    <div style="background-color:royalblue">
+                        <div class="small-box ">
+                            <img src="/Images/Transport/not-report.png" />
+                            <div class="inner">
+                                <h3 ></h3>
+                                <p style="color:white">BD</p><h3 style="color:white" id="BDNO">0</h3>
+                            </div>
+
+                            <a onclick="GetNotRespondingVehiclelist1(4)" class="small-box-footer">View List <i class="fa fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 ">
+                    <!-- small box -->
+                    <div style="background-color:silver">
+                        <div class="small-box">
+                            <img src="/Images/Transport/bus-total.png" />
+                            <div class="inner">
+
+                                <h3 ></h3>
+                                <p style="color:white">Total </p><h3 style="color:white" id="TotalNO">0</h3>
+                            </div>
+
+                            <a  class="small-box-footer" onclick="Reloadpage()">Reload Page <i class="fa fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- general form elements -->
+            <div  class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">View Vehicle List</h3>
+                </div>
+                <div class="box-body">
+                    <div class="form-group">
+                        <div></div>
+                        <div>
+
+                            <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                <thead>
+                                    <tr style="font:bold;color:dodgerblue;">
+
+                                        @*<th>Sno</th>*@
+                                        <th>RegdNo </th>
+                                        <th>Status</th>
+                                        <th>Ignition</th>
+                                        <th>Power</th>
+                                        <th>DayDistance(KMs)</th>
+                                        <th>Speed </th>
+                                        <th>CurrentLocation</th>
+                                        <th>ReportedAT</th>
+                                        <th>View </th>
+
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyVehicleDetails"></tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            
+
+
+        </div>
+        <!-- /.row -->
+
+
+    </div>
+</section>
+<script src="~/js/PDFExcelDatatable/buttons.colVis.min.js"></script>
+
+<script src="~/js/bootstrap.min.js"></script>
+<script src="~/js/custom.js"></script>
+<script src="~/js/general.js"></script>
+<script src="~/js/jquery.easing.1.3.js"></script>
+<script src="~/js/jquery-jtemplates_uncompressed.js"></script>
+<!-- DataTables -->
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+       
+        //$(document)[0].oncontextmenu = function () { return false; }
+
+        //$(document).mousedown(function (e) {
+        //    if (e.button == 2) {
+        //        alert('Sorry, this functionality is disabled!');
+        //        return false;
+        //    } else {
+        //        return true;
+        //    }
+        //});
+        //document.onkeypress = function (event) {
+
+        //    if (event.keyCode == 123) {
+        //        alert('Sorry\nNo F12 is allowed. Be creative!');
+        //        return false;
+        //    }
+        //}
+        //document.onmousedown = function (event) {
+
+        //    if (event.keyCode == 123) {
+        //        alert('Sorry\nNo F12 is allowed. Be creative!');
+        //        return false;
+        //    }
+        //}
+        //document.onkeydown = function (event) {
+
+        //    if (event.keyCode == 123) {
+        //        alert('Sorry\nNo F12 is allowed. Be creative!');
+        //        return false;
+        //    }
+        //    else if (event.ctrlKey &&
+        //        (event.keyCode === 67 ||
+        //            event.keyCode === 86 ||
+        //            event.keyCode === 85 ||
+        //            event.keyCode === 117)) {
+        //        alert('Sorry\nNo CTRL+U is allowed. Be creative!');
+        //        return false;
+        //    }
+
+        //}  
+        @*Run Function in every 30 sec/reload ststus api*@
+        //var timerID = setInterval(function () {
+        //    loadallVehicledetails();
+        //}, 30 * 1000); 
+
+        loadallVehicledetails();
+    })
+    function loadallVehicledetails() {
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        $.ajax({
+            type: "POST",
+            url: "/api/TransportApi/GETMiGpsloginDetails",
+            data: JSON.stringify([SchoolID]),
+            contentType: "application/json;charset=utf-8",
+            success: function (logindetails) {
+                if (logindetails.UserId == "1") {
+                    alert("School not Ragestered in Gps Tracking System ")
+
+                }
+                else {
+
+
+                    $("#HiddenPassword").val(logindetails.Password);
+                    $("#HiddenValidationKey").val(logindetails.ValidationKey);
+                    var UserId = logindetails.UserId;
+                    var Password = logindetails.Password;
+                    var ValidationKey = logindetails.ValidationKey;
+                    var parameters =
+                    {
+                        UserId: UserId,
+                        Password: Password,
+                        ValidationKey: ValidationKey
+
+                    }
+                    var dll = JSON.stringify(parameters)
+                    $.ajax({
+                        type: "POST",
+                        url: "/api/TransportApi/ValidateUser",
+                        data: dll,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (datas)
+                        {
+
+                    //    }
+                    //});
+                    //$.ajax({
+
+                    //    type: "GET",
+                    //    url: "http://gps.migps.in/api/MiGpsApi/ValidateUser",
+                    //    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    //    data: 'UserId=' + UserId + '&Password=' + Password + '&ValidationKey=' + ValidationKey,
+                    //    success: function (datas) {
+                            $("#HiddenUserId").val(datas.Id);
+                            var ID = datas.Id;
+                            var ValidationKey = logindetails.ValidationKey;
+
+                            var param =
+                            {
+                                ID: ID,
+                                ValidationKey: ValidationKey
+                            }
+                            var dlll = JSON.stringify(param)
+                            $.ajax({
+                                type: "POST",
+                                url: "/api/TransportApi/GetStatusCount",
+                                data: dlll,
+                                contentType: 'application/json; charset=utf-8',
+                                success: function (data)
+                                {
+
+                            //    }
+
+                            //});
+                            //$.ajax({
+                            //    type: "GET",
+                            //    url: "http://gps.migps.in/api/MiGpsApi/GetStatusCount",
+                            //    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            //    data: 'UserId=' + ID + '&ValidationKey=' + ValidationKey,
+                            //    success: function (data) {
+                                    $("#MOVINGNO").text(data.Moving);
+                                    $("#IDLENO").text(data.Idle);
+                                    $("#NRNO").text(data.NR);
+                                    $("#NGFNO").text(data.NGF);
+                                    $("#BDNO").text(data.BD);
+                                    $("#TotalNO").text(data.Total);
+                                    //data.Delay
+
+                                }
+                            });
+
+                        }
+                    });
+
+                }
+
+            }
+        });
+
+
+    }
+    function Reloadpage()
+    {
+
+        window.location.reload();
+
+    }
+    function GetNotRespondingVehiclelist1(id) {
+     
+        @*clear datatable in another click *@
+        var table = $('#example1').DataTable({
+            searching: true
+        });
+
+        table.clear();
+        table.destroy();
+
+        if (id == "0") {
+            var Status = "MOV";
+        }
+        else if (id == "1") {
+            var Status = "IDLE";
+        }
+        else   if (id == "2") {
+           
+                var Status = "NR";
+            }
+        
+        else if (id == "3")
+        {
+            var Status = "NGF";
+        }
+        else if (id == "4") {
+            var Status = "BD";
+        }
+         var UserId = $("#HiddenUserId").val();
+      
+        var ValidationKey = $("#HiddenValidationKey").val();
+
+        var parameters =
+        {
+            Status: Status,
+            UserId: UserId,
+            ValidationKey: ValidationKey
+
+        }
+        var dll = JSON.stringify(parameters)
+
+
+        $.ajax({
+            type: "POST",
+            url: "/api/TransportApi/GetVehicleList",
+            data: dll,
+            contentType: 'application/json; charset=utf-8',
+            success: function (datas)
+            {
+                //data
+
+
+         
+
+        //$.ajax({
+        //    type: "GET",
+        //    url: "http://api.migps.in/api/MiGpsApi/GetVehicleList",
+        //    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        //    data: 'UserId=' + UserId + '&Status=' + Status + '&ValidationKey=' + ValidationKey,
+        //    success: function (datas)
+        //    {
+                
+
+              
+                for (i = 0; i < datas.length; i++)
+                {
+                    if (datas[i].IgnitionStatus == 1)
+                    {
+                      
+                        var Ignition = "ON";
+
+                    }
+                    else  
+                    {
+                        var Ignition = '<img src="/Images/Transport/VehicleIgnitionOff.png" />';
+                    }
+                    if (datas[i].PowerStatus == 1)
+                    {
+                        var Powerst = '<img src="/Images/Transport/VehiclePowerON.png"/> ';
+                    }
+                    else
+                    {
+                        var Powerst = ' <img src="/Images/Transport/VehiclePowerOff.png" />' ;
+                    }
+                    //DeviceNumber
+                    //DeviceMobileNo
+                    var row = '<tr><td style="font:bold;color:dodgerblue;"   title="' + "IMEI =" + " " + datas[i].DeviceNumber + " " + "SIM =" + datas[i].DeviceMobileNo + '" > ' + datas[i].RegdNo + ' </td> <td> ' + datas[i].AvailableStatus + ' </td> <td> ' + Ignition + ' </td> <td> ' + Powerst + ' </td> <td>' + datas[i].DayDistance + '</td> <td>' + datas[i].Speed + '</td> <td>' + datas[i].Location + '</td> <td>' + datas[i].RDateTime.toString('dd/mm/yyyy HH:mm:ss ') + '</td> <td>' + '<i onclick="viewvehicleLocation(\'' + datas[i].RegdNo + '\')" class="fa fa-map-marker" style="font-size:40px;color:red" />'
+                    $("#example1").append(row);
+                }
+               
+                
+
+              
+
+
+
+            }
+
+
+            
+
+
+        });
+
+    }
+    function viewvehicleLocation(regno)
+    {
+        var RegdNo = regno.toString(); 
+        $.ajax({
+            type: "POST",
+            url: "/api/TransportApi/GETVehicleidfromNo",
+            data: JSON.stringify([RegdNo]),
+            contentType:"application/json;charset=utf-8",
+            success: function (success)
+            {
+                var id = success;
+               
+                var ValidationKey = $("#HiddenValidationKey").val();
+                window.location.href = "/Transport/ShowVehicleCurrentLocation?id=" + id + "&RegNo=" + RegdNo + "&ValidationKey=" + ValidationKey;
+
+            }
+        });
+      
+      
+
+    }
+   
+
+      
+
+  
+   
+
+   
+
+
+</script>
+<style type="text/css">
+   
+
+      
+</style>
+<!-- Content Wrapper. Contains page content -->
+<!-- Content Wrapper. Contains page content -->

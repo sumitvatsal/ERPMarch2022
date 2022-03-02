@@ -1,0 +1,362 @@
+﻿
+@{
+    ViewBag.Title = "EditProfile";
+    Layout = "~/Views/Shared/_LayoutParents.cshtml";
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section class="content">
+    <div class="row">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Edit Profile Details</h4>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">Father Details</h4>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="form-group">
+                                            <label for="reg_input_name" class="req">Father Name </label>
+                                             <input type="text" class="form-control" readonly="readonly" id="txtFaName" >
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="reg_input_name">Date of Birth </label>
+                                            <div class="input-group date">
+                                                <div class="input-group-addon">
+                                                    <i class="fa fa-calendar"></i>
+                                                </div>
+                                                <input type="text" class="form-control dtpicker" id="txtFaDOB" >
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="reg_input_name">Nationality</label>
+                                            <select class="form-control" id="ddlFNationality">
+                                                <option>----Select----</option>
+                                                <option>Indian</option>
+                                                <option>Others</option>
+                                            </select>
+                                        </div>
+                                         
+                                        <div class="form-group">
+                                            <label for="Gender" class="req">Qualfication </label>
+                                            <select class="form-control" id="ddlFQual" valuefield="Id" textfield="Name" blankrowvalue="-1" blankrowtext="----Select----" ></select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Occupation/Job</label>
+                                            <input type="text" class="form-control" id="txtFaJob" />
+                                        </div>
+
+                                        <div class="form-group">
+                                             <label>Office Address</label>
+                                            <textarea class="form-control" rows="4" placeholder="Enter ..." id="txtFOfficeAddrs"></textarea>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Designation</label>
+                                            <input type="text" class="form-control" id="txtFaDesig"  />
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Annual Income</label>
+                                            <input type="text" class="form-control" id="txtFaIncome" />
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Mobile</label>
+                                            <input type="text" class="form-control" id="txtFaMobile" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Email</label>
+                                            <input type="text" class="form-control" id="txtFaEmail" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Aadhaar No.</label>
+                                            <input type="text" class="form-control" id="txtFAdhaar" />
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">Mother Details</h4>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="form-group">
+                                            <label for="reg_input_name" class="req">Mother Name </label>
+                                            <input type="text" class="form-control" readonly="readonly" id="txtMaName">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="reg_input_name">Date of Birth </label>
+                                            <div class="input-group date">
+                                                <div class="input-group-addon">
+                                                    <i class="fa fa-calendar"></i>
+                                                </div>
+                                                <input type="text" class="form-control dtpicker" id="txtMaDOB">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="reg_input_name">Nationality</label>
+                                            <select class="form-control" id="ddlMaNationality" >
+                                                <option>----Select----</option>
+                                                <option>Indian</option>
+                                                <option>Others</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="Gender" class="req">Qualfication </label>
+                                            <select class="form-control" id="ddlMaQual" valuefield="Id" textfield="Name" blankrowvalue="-1" blankrowtext="----Select----" ></select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Occupation/Job</label>
+                                            <input type="text" class="form-control" id="txtMaJob" />
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Office Address</label>
+                                            <textarea class="form-control" rows="4" placeholder="Enter ..." id="txtMaOfficeAddrs"></textarea>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Designation</label>
+                                            <input type="text" class="form-control" id="txtMaDesig" />
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Annual Income</label>
+                                            <input type="text" class="form-control" id="txtMaIncome" />
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Mobile</label>
+                                            <input type="text" class="form-control" id="txtMaMobile" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Email</label>
+                                            <input type="text" class="form-control" id="txtMaEmail" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Aadhaar No.</label>
+                                            <input type="text" class="form-control" id="txtMAdhaar" />
+                                        </div>
+                                     
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12"> 
+                                 <div class="box-footer">
+                                    <input type="button" onclick="updateParentProfileDetails()" class="btn btn-primary" value="Save" />
+                                 </div>
+                            </div>
+                        </div>
+                         
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#txtFaDOB').datepicker({
+            autoclose: true
+        });
+        $('#txtMaDOB').datepicker({
+            autoclose: true
+        });
+
+        //callServiceMethodForDDl("", "/api/EmployeeAPI", "getAllQualfication", "ddlFQual", false, "", "", "", "");
+        //callServiceMethodForDDl("", "/api/EmployeeAPI", "getAllQualfication", "ddlMaQual", false, "", "", "", "");
+
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllQualficationbySchool", "ddlFQual", false, "", "", "", "");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllQualficationbySchool", "ddlMaQual", false, "", "", "", "");
+
+        var docLength = 0;
+
+        var Id = sessionStorage.getItem("stdID");
+      
+        if (typeof (Id) != "undefined") {
+            var pro = {
+                val:Id
+            }
+            $("#loader").fadeIn();
+            $.ajax({
+                url: "/api/StudentApi/FindStudentByID",// "~/Masters/GetDeptMethod",
+                type: "Post",
+                data: JSON.stringify(pro), //{ Name: name,ddlAcademicYr
+                //// Address: address, DOB: dob },
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    var path1 = data.PicPath.replace(/\\/g, "/");
+                    $("#profileImg").attr("src", path1);
+                    setControlValue("hdnID", data.ID);
+                 
+
+                    setControlValue("txtFaName", data.FatherName);
+                    setControlValue("txtMaName", data.MotherName);
+                  //  setControlValue("spGname", data.GuardianName);
+                    setControlValue("txtFaDOB", ChangeDateformat(data.FDOB));
+                    setControlValue("txtMaDOB", ChangeDateformat(data.MDOB));
+                  //  setControlValue("spGDob", "-");
+                    setControlValue("ddlFNationality", data.FNationality);
+                    setControlValue("ddlMaNationality", data.MNationality);
+                    //        setControlValue("spGNationality", data.GNationality);
+                    setTimeout(function () {
+                        setControlValue("ddlFQual", data.FQualificationID);
+                        setControlValue("ddlMaQual", data.MQualificationID);
+                    }, 2000)
+
+                 //   setControlValue("spGQual", data.GQualification);
+                    setControlValue("txtFaJob", data.FJob);
+                    setControlValue("txtMaJob", data.MJob);
+                  //  setControlValue("spGJob", data.GJob);
+                    setControlValue("txtFOfficeAddrs", data.FOfficeAddress);
+                    setControlValue("txtMaOfficeAddrs", data.MOfficeAddress);
+                   // setControlValue("spGOAdd", data.GOfficeAddress);
+                    setControlValue("txtFaDesig", data.FDesig);
+                    setControlValue("txtMaDesig", data.MDesig);
+                    //setControlValue("spGDesig", data.GDesig);
+                    setControlValue("txtFaIncome", data.FIncome);
+                    setControlValue("txtMaIncome", data.MIncome);
+                  //  setControlValue("spGIncome", data.GIncome);
+                    setControlValue("txtFaMobile", data.FMobile);
+                    setControlValue("txtMaMobile", data.Mmobile);
+                   // setControlValue("spGMobile", data.Gmobile);
+                    setControlValue("txtFaEmail", data.Fmail);
+                    setControlValue("txtMaEmail", data.Mmail);
+                    //setControlValue("spGMail", data.Gmail);
+                    setControlValue("txtFAdhaar", data.FAdharNo);
+                    setControlValue("txtMAdhaar", data.MAdharNo);
+                  //  setControlValue("spGAdhar", data.GAdharNo);
+
+                  
+                    $("#loader").fadeOut();
+                }
+            });
+
+        }
+        else {
+
+        }
+    });
+    function ChangeDateformat(dt) {
+        var date = "";
+        if (dt != null) {
+            var formattedDate = new Date(dt);
+            var d = formattedDate.getDate();
+            var m = formattedDate.getMonth();
+            m += 1;  // JavaScript months are 0-11
+            var y = formattedDate.getFullYear();
+
+            date = m + "/" + d + "/" + y;
+        }
+
+        return date;
+    }
+
+    function updateParentProfileDetails()
+    {
+        $("#loader").fadeIn();
+        var Student = {
+            ID:  sessionStorage.getItem("stdID"),
+             FNationality: $('#ddlFNationality').find(":selected").val(),
+            FatherName: $("#txtFaName").val(),
+            FDOB: $("#txtFaDOB").val(),
+            FQualification: getControlValue("ddlFQual"),
+            FJob: getControlValue("txtFaJob"),
+            FOfficeAddress: getControlValue("txtFOfficeAddrs"),
+            FDesig: getControlValue("txtFaDesig"),
+            FIncome: $("#txtFaIncome").val(),
+            FMobile: $("#txtFaMobile").val(),
+            Fmail: $("#txtFaEmail").val(),
+            FAdharNo: $("#txtFAdhaar").val(),
+            MotherName: $("#txtMaName").val(),
+            MDOB: getControlValue("txtMaDOB"),
+            MNationality: getControlValue("ddlMaNationality"),
+            MJob: $("#txtMaJob").val(),
+            MOfficeAddress: getControlValue("txtMaOfficeAddrs"),
+            MQualification: getControlValue("ddlMaQual"),
+            MDesig: $("#txtMaDesig").val(),
+            MIncome: getControlValue("txtMaIncome"),
+            Mmobile: getControlValue("txtMaMobile"),
+            Mmail: getControlValue("txtMaEmail"),
+            MAdharNo: $("#txtMAdhaar").val(),
+        };
+
+        var ddl = JSON.stringify(Student)
+
+
+        callServiceMethod(ddl, "/api/ParentsAPI", "updateParentProfileDetails", false, "", "", false, "", true, updateParentProfileDetails_scs, "", "", "");
+
+    }
+
+    function updateParentProfileDetails_scs(p1, p2, p3, datas)
+    {
+        $("#loader").fadeOut();
+        swal({
+            title: datas,
+            text: "",
+            icon: "success",
+            button: "Ok!",
+        });
+        //alert(datas);
+    }
+</script>
+
+
+
+
+
+
+
+ 

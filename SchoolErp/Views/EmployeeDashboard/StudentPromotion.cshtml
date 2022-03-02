@@ -1,0 +1,1006 @@
+﻿@{
+    ViewBag.Title = "StudentPromotion";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+
+<script type="text/javascript">
+
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<section class="content">
+    <div class="box box-primary">
+        <div class="employee-attendance-search">
+            <form role="form" id="form1" name="form1">
+                <div class="box-header with-border">
+                    <h3 class="box-title" style="font-size:x-large;color:hsl(89, 43%, 51%);"><i class="fa fa-search"></i>Search Student for Promotion  </h3>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+
+                        @*<div class="col-sm-4">
+                                <div class="form-group field-empinfosearch-emp_designation_id">
+                                    <label for="Country" class="req">School<span class="requird">*</span></label>
+                                    <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name"></select>
+
+                                    <div class="help-block"></div>
+                                </div>
+                            </div>*@
+
+                        <div class="col-sm-4">
+                            <div class="form-group field-empinfosearch-emp_department_id">
+                                <label class="control-label" for="empinfosearch-emp_department_id" style="color:black;font-size:large;font:bold;  ">Class </label>
+                                <input class="form-control" id="ddlCourse" name="ddlCourse" style="color:black;font-size:x-large;font:bold;  " valuefield="Id" textfield="CourseName" blankRowValue="0" readonly />
+                                <input id="hiddenclassid" type="hidden" />
+                                <div class="help-block"></div>
+                                <label id="hiddenSchoolID" />
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group field-empinfosearch-emp_designation_id">
+                                <label class="control-label" for="empinfosearch-emp_designation_id" style="color:black;font-size:large;font:bold; ">Section </label>
+                                <input class="form-control" id="ddlSection" name="ddlSection" style="color:black;font-size:x-large;font:bold;" valuefield="Id" textfield="SectionName" blankRowValue="0" readonly />
+                                <input id="hiddensectionid" type="hidden" />
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group field-empinfosearch-emp_designation_id">
+                                @*<span required>*</span>*@
+                                <label class="control-label" for="empinfosearch-emp_designation_id" style="color:black;font-size:large;font:bold; ">Academic Year <span class="requird">*</span>  </label>
+                                <select class="form-control" id="dllacademicyear" name="dllacademicyear" style="color:black;font-size:large;font:bold;" valuefield="ID" textfield="SectionName" blankRowValue="-1" blankRowText="----Select----"></select>
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="row">
+
+
+                        <div class="col-sm-4">
+                            <div class="form-group field-empinfosearch-searchinput">
+                                <label class="control-label" for="empinfosearch-emp_designation_id"> </label>
+                                <input type="text" id="txtStudentName" name="txtStudentName" class="form-control" placeholder="Enter Student First/Last Name.">
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label" for="empinfosearch-emp_designation_id"> </label>
+                                <input type="text" id="txtStudentRegNo" class="form-control" placeholder="Enter Student Registration No">
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-4">
+
+                        </div>
+
+                    </div>
+                    <div class="box-footer">
+                        <input type="button" value="Search" id="SearchClassSectionStudent" class="btn btn-primary" />
+                        @*<a class="btn btn-default" href="javascript:void(0)" onclick="clearResetData()">Reset</a>&nbsp;&nbsp;&nbsp;&nbsp;
+                            <input type="button" id="create_pdf" value="Export Pdf" onclick="pdfExport()" class="btn btn-primary" />
+
+                            <a href="#" class="btn btn-primary" id="create_Excel" onClick="$('#example1').tableExport({ type: 'excel', escape: 'false' });"> Export Excel</a>*@
+                    </div>
+                    <input type="hidden" id="hiddenlegth" />
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+
+
+    <div class="row" id="SearchDiv">
+        <div id="showSearchStudent">
+
+            <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" class="flipswitch" id="CheckAll" /></th>
+                        <th>Reg No</th>
+                        <th>Photo</th>
+                        <th>Name</th>
+                        <th>Class</th>
+                        <th>Section</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyEmployeeDetails"></tbody>
+
+
+            </table>
+        </div>
+    </div>
+    <div class="box-footer" id="savechangesButtonpanel">
+
+
+
+        <div class="form-group">
+            <form role="form" id="form2" name="form2">
+                <div class="form-group">
+
+                    <table>
+                        <tr>
+
+                            <td>
+                                <div class="form-group cntrl">
+                                    <p style="color:hsl(89, 43%, 51%);font-size:medium;" class="box-title"><img src="~/Images/NotPromoteStudent.png" style="width :45px;height:65px;" />PROMOTE From </p>
+                                </div>
+                            </td>
+
+
+                            <td>
+                                <div class="form-group cntrl">
+                                    <p style="color:hsl(89, 43%, 51%);font-size:medium; " class="box-title">  <img src="~/Images/StudentPromote.png" style="width :45px;height:65px;" />PROMOTE To   </p>
+
+                                </div>
+                            </td>
+
+                        </tr>
+
+                    </table>
+                </div>
+            </form>
+            <form id="form3" name="form3" role="form">
+                <table>
+                    <tr>
+
+                        <td>
+                            <div class="form-group cntrl">
+                                <label class="control-label" for="empinfosearch-emp_department_id" style="color:black;font-size:large;font:bold;  ">Class </label>
+                                <input class="form-control" id="ddlCourse2" name="ddlCourse2" style="color:black;font-size:x-large;font:bold;width:250px;  " valuefield="Id" textfield="CourseName" blankRowValue="0" readonly />
+                                <input id="hiddenclassid2" type="hidden" />
+
+                            </div>
+                        </td>
+                        <td>
+
+
+                            <img src="~/Images/arrowimage.jpg" style="width:50px;height:40px;" />
+
+                        </td>
+                        <td>
+
+                            <div class="form-group cntrl">
+                                <label class="control-label" for="empinfosearch-emp_designation_id" style="color:black;font-size:large;font:bold; ">Class<span class="requird">*</span>  </label>
+                                <select class="form-control" id="dllclassto" name="dllclassto" style="color:black;font-size:large;font:bold;width:250px;" valuefield="ID" blankRowValue="-1" blankRowText="----Select----"></select>
+
+                            </div> @*dllclassto*@
+                        </td>
+
+
+                    </tr>
+                    <tr>
+
+                        <td>
+                            <div class="form-group cntrl">
+                                <label class="control-label" for="empinfosearch-emp_designation_id" style="color:black;font-size:large;font:bold; ">Section </label>
+                                <input class="form-control" id="ddlSection2" name="ddlSection2" style="color:black;font-size:x-large;font:bold;width:250px;" valuefield="Id" textfield="SectionName" blankRowValue="0" readonly />
+
+                            </div>
+                        </td>
+                        <td>
+
+
+                            <img src="~/Images/arrowimage.jpg" style="width:50px;height:70px;" />
+
+                        </td>
+                        <td>
+
+                            <div class="form-group cntrl">
+                                <label class="control-label" for="empinfosearch-emp_designation_id" style="color:black;font-size:large;font:bold; ">Section<span class="requird">*</span>  </label>
+                                <select class="form-control" id="dllSectionto" name="dllSectionto" style="color:black;font-size:large;font:bold;width:250px;" valuefield="ID" blankRowValue="-1" blankRowText="----Select----"></select>
+
+                            </div>
+                            <div class="form-group cntrl" id="streamdiv">
+                                <label class="control-label" for="empinfosearch-emp_designation_id" style="color:black;font-size:large;font:bold; ">Stream </label>
+                                <select class="form-control" id="dllstream" name="dllstream" style="color:black;font-size:large;font:bold;width:250px;" valuefield="ID" blankRowValue="-1" blankRowText="(optional for 1 to 10)"></select>
+
+                            </div>
+                        </td>
+
+
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="form-group cntrl">
+
+                                <label class="control-label" for="empinfosearch-emp_designation_id" style="color:black;font-size:large;font:bold; ">Academic Year <span class="requird">*</span>  </label>
+                                <select class="form-control" id="dllacademicyear2" name="dllacademicyear2" style="color:black;font-size:large;font:bold;width:250px;" valuefield="ID" blankRowValue="-1" blankRowText="----Select----"></select>
+
+                            </div>
+                        </td>
+                        <td>
+                            <img src="~/Images/arrowimage.jpg" style="width:50px;height:40px;" />
+                        </td>
+                        <td>
+                            <div class="form-group cntrl">
+                                <label class="control-label" for="empinfosearch-emp_designation_id" style="color:black;font-size:large;font:bold; ">Academic Year <span class="requird">*</span>  </label>
+                                <select class="form-control" id="dllacademicyearto" name="dllacademicyearto" style="color:black;font-size:large;font:bold;width:250px;" valuefield="ID" blankRowValue="-1" blankRowText="----Select----"></select>
+                            </div>
+                        </td>
+
+                    </tr>
+                </table>
+                <div class="box-footer">
+                    <input type="button" value="Save Changes" id="PromoteStudentClick" class="btn btn-primary" />
+                    @*<a class="btn btn-default" href="javascript:void(0)" onclick="clearResetData()">Reset</a>&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="button" id="create_pdf" value="Export Pdf" onclick="pdfExport()" class="btn btn-primary" />
+
+            <a href="#" class="btn btn-primary" id="create_Excel" onClick="$('#example1').tableExport({ type: 'excel', escape: 'false' });"> Export Excel</a>*@
+                </div>
+            </form>
+        </div>
+
+       
+      
+    </div>
+    <div id="loader" style="display:none"></div>
+    <div class="alert alert-success centerSuccess" id="divSucesEmail" style="display:none">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h4>
+            <i class="icon fa fa-check"></i>
+            <span Id="sentEmailMsg"></span>
+        </h4>
+
+    </div>
+</section>
+<link href="@Url.Content("~/Content/themes/base/jquery-ui.css")" rel="stylesheet" />
+<script src="~/js/jquery.validate.min.js"></script>
+
+<script src="~/js/custom.js"></script>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<link rel="stylesheet" href="~/css/bower_components/select2/dist/css/select2.min.css">
+<script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>
+<style>
+    .cntrl {
+        width: 300px;
+    }
+
+    .Pcntrl {
+        width: 250px;
+    }
+
+    .txtArea {
+        width: 400px;
+    }
+
+    .dvImgPreview {
+        background-position: center center;
+        background-size: cover;
+        -webkit-box-shadow: 0 0 1px 1px rgba(0, 0, 0, .3);
+        min-height: 30px;
+        min-width: 30px;
+        height: 100px;
+        width: 100px;
+        max-height: 100px;
+        max-width: 100px;
+    }
+   
+
+
+</style>
+<style>
+    body {
+        font-family: arial;
+    }
+
+    .flipswitch {
+        position: relative;
+        background: white;
+        width: 120px;
+        height: 40px;
+        -webkit-appearance: initial;
+        border-radius: 3px;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        outline: none;
+        font-size: 14px;
+        font-family: Trebuchet, Arial, sans-serif;
+        font-weight: bold;
+        cursor: pointer;
+        border: 1px solid #ddd;
+    }
+
+        .flipswitch:after {
+            position: absolute;
+            top: 5%;
+            display: block;
+            line-height: 32px;
+            width: 45%;
+            height: 90%;
+            background: #fff;
+            box-sizing: border-box;
+            text-align: center;
+            transition: all 0.3s ease-in 0s;
+            color: black;
+            border: #888 1px solid;
+            border-radius: 3px;
+        }
+
+        .flipswitch:after {
+            left: 2%;
+            content: "PASS";
+            background-color: hsl(89, 43%, 51%);
+        }
+
+        .flipswitch:checked:after {
+            left: 53%;
+            content: "FAIL";
+            background-color:#ff6961;
+        }
+</style>
+<script type="text/javascript">
+    $("#SearchDiv").hide();
+    $("#savechangesButtonpanel").hide();
+    getclasssection();
+    getacademicyear();
+    getclasesTo();
+  
+    function getclasssection() {
+        $("#loader").fadeIn();
+        var details =
+        {
+
+            SchoolID: sessionStorage.getItem("SchoolID"),
+            EmployeeID: sessionStorage.getItem("EmpId"),
+        }
+
+        var dll = JSON.stringify(details);
+
+        $.ajax({
+            type: "POST",
+            url: "/api/StudentApi/GetClassName",
+            data: dll,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                if (data != null)
+                {
+                    $("#ddlCourse").val(data.ClassName);
+                    $("#ddlSection").val(data.SectionName);
+
+                    $("#hiddenclassid").val(data.ClassID);
+                    $("#hiddensectionid").val(data.SectionID);
+
+                    $("#ddlCourse2").val(data.ClassName);
+                    $("#ddlSection2").val(data.SectionName);
+
+                    $("#hiddenclassid2").val(data.ClassID);
+                    $("#hiddensectionid2").val(data.SectionID);
+
+                   
+                }
+
+
+            }
+
+
+
+        });
+
+    }
+
+    //<select class="form-control" id="dllacademicyear" name="dllacademicyear" valuefield="Id"
+    // textfield="SectionName" blankRowValue="0" blankRowText="----Select----" ></select>
+    function getacademicyear() {
+        $("#loader").fadeIn();
+        var SchoolID = sessionStorage.getItem("SchoolID");
+
+        var dll = JSON.stringify([SchoolID]);
+        $.ajax({
+            type: "POST",
+            url: "/api/StudentApi/getacademicyearr",
+            data: dll,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                if (data != null) {
+                    $("#loader").fadeIn();
+                    for (i = 0; i < data.length; i++) {
+                        $("#dllacademicyear").append('<option value="' + data[i].ID + '">' + data[i].AcademicYear + '</option>');
+                        $("#dllacademicyear2").append('<option value="' + data[i].ID + '">' + data[i].AcademicYear + '</option>');
+                        $("#dllacademicyearto").append('<option value="' + data[i].ID + '">' + data[i].AcademicYear + '</option>');
+                    }
+                    $("#loader").fadeOut();
+
+                }
+                else
+                {
+                   
+                }
+
+            }
+
+        });
+
+    }
+
+
+    function getclasesTo() {
+        $("#loader").fadeIn();
+        var SchoolID = sessionStorage.getItem("SchoolID");
+
+        var dll = JSON.stringify([SchoolID]);
+        $.ajax({
+            type: "POST",
+            url: "/api/StudentApi/GetClassesbySchoolIDselect",
+            data: dll,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                if (data != null) {
+                    $("#loader").fadeIn();
+                    $("#dllclassto").empty();
+                    $("#dllSectionto").empty();
+                    $("#dllstream").empty();
+                    for (i = 0; i < data.length; i++) {
+                        $("#dllclassto").append('<option value="' + data[i].Id + '">' + data[i].CourseName + '</option>');
+                       
+                    }
+                  
+                    $("#loader").fadeOut();
+
+                }
+                else {
+                  
+                }
+
+            }
+
+        });
+
+    }
+
+    $("#dllclassto").change(function () {
+        $("#dllSectionto").empty();
+        //
+        $("#loader").fadeIn();
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        var ClassID = $("#dllclassto").val();
+        checkstream(SchoolID, ClassID)
+        var dll = JSON.stringify([ClassID, SchoolID]);
+        $.ajax({
+            type: "POST",
+            url: "/api/StudentApi/GetSectionsbyschoolSelect",
+            data: dll,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                if (data != null) {
+                    $("#loader").fadeIn();
+                    for (i = 0; i < data.length; i++) {
+                        $("#dllSectionto").append('<option value="' + data[i].Id + '">' + data[i].SectionName + '</option>');
+
+                    }
+                    $("#loader").fadeOut();
+                    
+                }
+                else {
+                    
+                }
+
+            }
+
+        });
+       
+
+        //
+    });
+
+
+    function checkstream(val0 ,val1)
+    {
+        var SchoolID = val0;
+        var ClassID = val1;
+        var dllstream = JSON.stringify([SchoolID, ClassID])
+        $.ajax({
+            type: "POST",
+            url: "/api/StudentApi/getstreambyclass",
+            data: dllstream,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                if (data != null) {
+                    $("#dllstream").empty();
+                    $("#loader").fadeIn();
+
+                    for (i = 0; i < data.length; i++) {
+                        //stream show hide
+                        if (data[i].ID == -2)
+                        {
+                            $("#streamdiv").hide();
+                            $("#dllstream").append('<option value="' + data[i].ID + '">' + data[i].Stream + '</option>');
+                        }
+                        else
+                        {
+                            $("#streamdiv").show();
+                            $("#dllstream").append('<option value="' + data[i].ID + '">' + data[i].Stream + '</option>');
+                        }
+                      
+
+                    }
+                    $("#loader").fadeOut();
+
+                }
+                else {
+                    $("#loader").fadeOut();
+                }
+
+            }
+
+        });
+      
+    }
+
+    //UNCHECKED = PASS
+    //CHECKED=FAIL 
+
+    $("#SearchClassSectionStudent").click(function () {
+       
+        $("#SearchDiv").show();
+        $("#streamdiv").hide();
+        
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+          
+            $("#CheckAll").prop("checked", false);
+            var SearchDetails =
+            {
+
+
+
+                SchoolID: sessionStorage.getItem("SchoolID"),
+                ClassID: $("#hiddenclassid").val(),
+                SectionID: $("#hiddensectionid").val(),
+                AcademicYear: $("#dllacademicyear").val(),
+                StudentFirstLastName: $("#txtStudentName").val(),
+                StudentRegistrationNo: $("#txtStudentRegNo").val(),
+                AcademicYearName: $("#dllacademicyear option:selected").text(),
+                ClassName: $("#ddlCourse").val(),
+                SectionName: $("#ddlSection").val()
+            }
+
+
+            var dll = JSON.stringify(SearchDetails);
+            $.ajax({
+                type: "POST",
+                url: "/api/StudentApi/getStudentListofClass",
+                data: dll,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                 
+                    if (data != null)
+                    {
+                       
+                       
+                        var avi = data.length;
+                        $("#hiddenlegth").val(data.length);
+                        //example1, 
+                        var name = data;
+                        $('#tbodyEmployeeDetails').empty();
+                        jQuery.each(name, function (i, datas) {
+                            $("#tbodyEmployeeDetails").append("<tr><td  style='width:80px;' ><input type='checkbox' class='flipswitch' id='checkboxx" + i + "' stuclassis=" + datas.ClassID + " stusectionid=" + datas.SectionID + " stuacademicyear=" + datas.AcademicYear + " stuid=" + datas.ID + " stuname=" + datas.StudentFirstLastName + " stuClassname=" + datas.ClassName + " stusectionname=" + datas.SectionName + " stustream=" + datas.Stream+" />	</td><td>" + datas.StudentRegistrationNo + " </td><td><img src=" + datas.StudentImage+" /></td><td>" + datas.StudentFirstLastName + "" + "</td><td>" + datas.ClassName + "</td><td>" + datas.SectionName + "</td><tr>")
+                        });
+                        setTimeout(function () {
+                         
+                        },2000)
+                      
+                    }
+                    if (data.length!=0)
+                    {
+                        $("#savechangesButtonpanel").show();
+                       
+                        $("#dllacademicyear2").val($("#dllacademicyear").val());
+                        $("#dllacademicyear2").prop("disabled", "disabled");
+                        //jQuery("#dllclassto option:contains('" + $("#ddlCourse2").val() + "')").remove();
+                        //jQuery("#dllacademicyearto option:contains('" + $("#dllacademicyear option:selected").html() + "')").remove();
+                        //schrool
+                        document.getElementById('SearchDiv').scrollIntoView();
+                        setTimeout(function () {
+                            $("#loader").fadeOut();
+                          
+                        }, 2000)
+                        //$("#form2").scrollIntoView();
+                      
+                    }
+                    else {
+
+                        $("#savechangesButtonpanel").hide();
+                        setTimeout(function () {
+                            $("#loader").fadeOut();
+                           
+                        },2000)
+                         }
+
+                }
+            })
+
+        }
+
+
+
+
+
+
+    });
+
+
+    function loaderIN() {
+        $("#loader").fadeIn();
+    }
+    function loaderOUT() {
+        $("#loader").fadeOut();
+    }
+
+    function loadsearch() {
+        $("#SearchDiv").show();
+        $("#streamdiv").hide();
+
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+         
+            $("#CheckAll").prop("checked", false);
+            var SearchDetails =
+            {
+
+
+
+                SchoolID: sessionStorage.getItem("SchoolID"),
+                ClassID: $("#hiddenclassid").val(),
+                SectionID: $("#hiddensectionid").val(),
+                AcademicYear: $("#dllacademicyear").val(),
+                StudentFirstLastName: $("#txtStudentName").val(),
+                StudentRegistrationNo: $("#txtStudentRegNo").val(),
+                AcademicYearName: $("#dllacademicyear option:selected").text(),
+                ClassName: $("#ddlCourse").val(),
+                SectionName: $("#ddlSection").val()
+            }
+
+
+            var dll = JSON.stringify(SearchDetails);
+            $.ajax({
+                type: "POST",
+                url: "/api/StudentApi/getStudentListofClass",
+                data: dll,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+
+                    if (data != null) {
+                        var avi = data.length;
+                        $("#hiddenlegth").val(data.length);
+                        //example1, 
+                        var name = data;
+                        $('#tbodyEmployeeDetails').empty();
+                        jQuery.each(name, function (i, datas) {
+                            $("#tbodyEmployeeDetails").append("<tr><td  style='width:80px;' ><input type='checkbox' class='flipswitch' id='checkboxx" + i + "'  stuclassis=" + datas.ClassID + " stusectionid=" + datas.SectionID + " stuacademicyear=" + datas.AcademicYear + " stuid=" + datas.ID + " stuname=" + datas.StudentFirstLastName + " stuClassname=" + datas.ClassName + " stusectionname=" + datas.SectionName + " stustream=" + datas.Stream +" /> 	</td><td>" + datas.StudentRegistrationNo + " </td><td><img src=" + datas.StudentImage + " /></td><td>" + datas.StudentFirstLastName + "" + "</td><td>" + datas.ClassName + "</td><td>" + datas.SectionName + "</td><tr>")
+                        });
+                      
+                    }
+                    if (data.length != 0) {
+                        $("#savechangesButtonpanel").show();
+
+                        $("#dllacademicyear2").val($("#dllacademicyear").val());
+                        $("#dllacademicyear2").prop("disabled", "disabled");
+                        //jQuery("#dllclassto option:contains('" + $("#ddlCourse2").val() + "')").remove();
+                        //jQuery("#dllacademicyearto option:contains('" + $("#dllacademicyear option:selected").html() + "')").remove();
+                        //schrool
+                        document.getElementById('SearchDiv').scrollIntoView();
+                        //$("#form2").scrollIntoView();
+                        setTimeout(function () {
+                            $("#loader").fadeOut();
+                        }, 2000)
+
+                    }
+                    else {
+                        $("#savechangesButtonpanel").hide();
+                        setTimeout(function () {
+                            $("#loader").fadeOut();
+                        }, 2000)
+                    }
+
+                }
+            })
+
+        }
+    }
+
+    $("#PromoteStudentClick").click(function () {
+        var dlls = "";
+        if ($("#form3").valid())
+        {
+            loaderIN();
+            $("#PromoteStudentClick").hide();
+           
+           
+         
+         
+            var StudentArray = new Array();
+            $('#example1  tbody input[type="checkbox"]').each(function () {
+                
+                if ($(this).is(":checked"))
+                    {                  
+                    var PromoteDetails =
+                    {
+                        //fail checked
+                     StudentID: $(this).attr("stuid"),
+                     StudentName: $(this).attr("stuname"),
+                     ClassName: $(this).attr("stuClassname"),
+                     SectionNmae: $(this).attr("stusectionname"),
+                     SchoolID : sessionStorage.getItem("SchoolID"),
+                     ClassID: $("#hiddenclassid").val(),
+                     SectionID: $("#hiddensectionid").val(),
+                     StreamID: "-2",
+                    //Academicyear: $("#dllacademicyear2").val(),
+                     Academicyear: $("#dllacademicyearto").val(),
+                     Result: "F",
+                     CurrentClassID :$(this).attr("stuclassis"),
+                     CurrentSectionID :$(this).attr("stusectionid"),
+                     CurrentAcademicYear :$(this).attr("stuacademicyear"),
+                     Stream: $(this).attr("stustream")
+                     
+
+                    }
+                    }
+                    else if ($(this).is(":not(:checked"))
+                   {          
+                    var PromoteDetails =
+                    {
+                        //pass checked
+                        StudentID: $(this).attr("stuid"),
+                        StudentName: $(this).attr("stuname"),
+                        ClassName: $(this).attr("stuClassname"),
+                        SectionNmae: $(this).attr("stusectionname"),
+                        SchoolID: sessionStorage.getItem("SchoolID"),                       
+                        ClassID: $("#dllclassto").val(),
+                        SectionID: $("#dllSectionto").val(),
+                        StreamID: $("#dllstream").val(),
+                        Academicyear: $("#dllacademicyearto").val(),
+                        Result: "P",
+                        CurrentClassID :$(this).attr("stuclassis"),
+                        CurrentSectionID :$(this).attr("stusectionid"),
+                        CurrentAcademicYear :$(this).attr("stuacademicyear"),
+                        Stream: $(this).attr("stustream")
+                      
+                    }
+                }
+                StudentArray.push(PromoteDetails);
+                dlls = JSON.stringify(StudentArray);
+               
+            });
+            if (dlls != "") {
+                $.ajax({
+                    type: "POST",
+                    url: "/api/StudentApi/PromoteStudent",
+                    data: dlls,
+                    contentType: "application/json;charset=utf-8",
+                    dataType: "json",
+                    async: false,
+                    success: function (data) {
+                        if (data != "") {
+
+                            loadsearch();
+                            getclasesTo();
+                           
+                            setTimeout(function ()
+                            {
+                                  loaderOUT();
+                                $("#divSucesEmail").fadeIn();
+                                $("#sentEmailMsg").html("Students Promoted Successfully");
+                                $("#divSucesEmail").fadeOut();
+                                $("#PromoteStudentClick").show();
+                            },3000)
+                          
+                          
+                        }
+
+                    }
+
+                });
+
+
+            }
+            else
+            {
+                setTimeout(function () {
+                    loaderOUT();
+                    $("#PromoteStudentClick").show();
+                }, 3000)
+
+                alert("No Student Details")
+
+            }
+         
+          
+          
+        }
+
+    });
+
+
+
+    $(document).ready(function () {
+
+        $("#CheckAll").change(function ()
+        {
+            var length = $("#hiddenlegth").val();
+            if (this.checked)
+            {
+               
+                for (var i = 0; i < length; i++) {
+                    $("#checkboxx" + i + "").prop('checked', true);
+                }
+              
+
+            }
+            else
+            {
+                for (var i = 0; i < length; i++) {
+                    $("#checkboxx" + i + "").prop('checked', false);
+                  
+                }
+               
+
+            }
+
+        })
+    });
+
+   
+    
+
+    //val
+
+
+
+
+
+
+
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules:
+            {
+                //txtStudentName:"required",
+                dllacademicyear:
+                {
+                    selectcheck: true
+                }
+
+            },
+            messages: {
+                //txtStudentName:"Please Enter Student Name",
+                dllacademicyear: "Please Select Academic Year"
+
+            }
+
+
+        });
+        jQuery.validator.addMethod('selectcheck', function (value) {
+            if (value == "-1") {
+                return (value != '-1');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Academic Year");
+    });
+
+</script>
+
+
+<script>
+    $(document).ready(function () {
+        //val   dllacademicyearto, dllSectionto, dllclassto
+        $("#form3").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+
+                dllclassto: {
+                   
+                    selectdllclassto: true 
+                },
+                dllSectionto: {
+                    selectdllSectionto: true
+                },
+                dllacademicyearto: {
+                    selectdllacademicyearto: true
+                },
+
+
+            },
+            messages: {
+                dllclassto: "Please Select Class",
+                dllSectionto: "Please Select Section",
+                dllacademicyearto: "Please Select Academic Year"
+
+            }
+        });
+      
+        jQuery.validator.addMethod('selectdllclassto', function (value) {
+            if (value == "-1") {
+                return (value != '-1');
+            }
+            else if (value == "? undefined : undefined ?") {
+                return (value != '?undefined:undefined?');
+
+            }
+            else {
+                return true;
+            }
+        }, "please select class");
+
+
+        jQuery.validator.addMethod('selectdllSectionto', function (value) {
+            if (value == "-1") {
+                return (value != "-1");
+            }
+            else if (value == "?undefined :undefined?") {
+                return (value != '?undefined:undefined?');
+            }
+            else {
+                return true;
+            }
+        }, "please select section");
+
+
+        jQuery.validator.addMethod('selectdllacademicyearto', function (value) {
+            if (value == "-1") {
+                return (value != '-1');
+            }
+            else if (value == "?undefined:undefined?") {
+                return (value != '?undefined:undefined?');
+
+            }
+            else {
+                return true;
+            }
+        },"please select Academic Year");
+      
+
+    });
+
+</script>

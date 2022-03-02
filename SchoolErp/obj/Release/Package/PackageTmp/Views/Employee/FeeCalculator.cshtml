@@ -1,0 +1,388 @@
+﻿
+@{
+    ViewBag.Title = "FeeCalculator";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<div class="col-md-6">
+    <div class="form-group">
+        <label>Multiple</label>
+        <select class="form-control select2" id="ddlSelectedMonth" onchange="getDddlValue()" multiple="multiple" data-placeholder="Select a State" style="width: 100%;" tabindex="-1" aria-hidden="true">
+            <option value="0">January</option>
+            <option value="1">Febuary</option>
+            <option value="2">March</option>
+            <option value="3">April</option>
+            <option value="4">May</option>
+            <option value="5">June</option>
+            <option value="6">July</option>
+            <option value="7">August</option>
+            <option value="8">September</option>
+            <option value="9">October</option>
+            <option value="10">November</option>
+            <option value="11">December</option>
+        </select>
+    </div>
+    <div>
+        <input type="button" value="Save" onclick="savePayemnt()" />
+
+    </div>
+</div>
+
+<div class="col-md-6">
+
+    <table id="tblAppend" border="1" style="width:100%"></table>
+    <table id="tblAppendTotal" class="hide" border="1" style="width:100%">
+        <tr>
+            <td> Total Paid</td>
+            <td id="txtTotalPaid"></td>
+        </tr>
+        <tr>
+            <td> Paid Amount</td>
+            <td><input type="text" onblur="checkAmountPayemnt()" id="txtPaidAmount" /></td>
+        </tr>
+    </table>
+    <input type="text" id="txtDueBal"  />
+</div>
+<style type="text/css">
+    .hide {
+        display: none;
+    }
+</style>
+<link href="~/css/bower_components/select2/dist/css/select2.min.css" rel="stylesheet" />
+
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+
+<script type="text/javascript">
+    var i = 0;
+    $(document).ready(function () {
+       
+            $('.select2').select2();
+        })
+
+        function getDddlValue()
+        {
+
+        
+                     var totalAmt = 0;
+                    // var month = "2";
+                  //   var dues = "1000"
+                    // $("#tblAppend").html("");
+                    var ddlval = $("#ddlSelectedMonth").val().length;
+                    ;
+                    for (i =i; i < ddlval; i++) {
+                        var currentMonth = $("#ddlSelectedMonth").val()[i];
+                        $("#txtTotalPaid").html("");
+                        $.ajax({
+                            type: "POST",
+                            url: "/Employee/getFeeDetailsWithDues",
+                            contentType: "application/json; charset=utf-8",
+                            data: "{'month':'" + $("#ddlSelectedMonth").val()[i] + "'}",
+                            success: function (data) {
+                             
+                               // $("#tblAppend").html("");
+                              //  $("#txtTotalPaid").html("");
+                              
+                                if (data.length == "0")
+                                {
+                                    for (var i = 0; i < ddlval; i++) {
+
+                                    
+                                        if (currentMonth == $("#ddlSelectedMonth").val()[i]) {
+                                            $("#tblAppend").append("<tr><td id=" + getMonthString($("#ddlSelectedMonth").val()[i]) + ">" + getMonthString($("#ddlSelectedMonth").val()[i]) + "</td><td id='" + getMonthString($("#ddlSelectedMonth").val()[i]) + "_amt'>2000</td><td style='display:none'><input type='text' monnrrhUId='" + $("#ddlSelectedMonth").val()[i] + "' month='" + getMonthString($("#ddlSelectedMonth").val()[i]) + "' value='2000' /></td></tr>");
+                                            $("#tblAppend tr input[type=text]").each(function () {
+                                                totalAmt += parseInt($(this).val());
+                                            })
+                                            $("#tblAppendTotal").removeAttr("class");
+                                            $("#txtTotalPaid").html(totalAmt);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                  
+                                    for (var i = 0; i < data.length; i++) {
+                                         
+                                        if (currentMonth == data[i].monthId) {
+                                            $("#txtDueBal").val(data[0].duesAmount.toString().replace("-", ""));
+                                            $("#tblAppend").append("<tr><td id=" + getMonthString(i) + ">" + getMonthString($("#ddlSelectedMonth").val()[i]) + "</td><td id='" + getMonthString($("#ddlSelectedMonth").val()[i]) + "_amt'>" + data[0].duesAmount.toString().replace("-", "") + "</td><td style='display:none'><input type='text' monnrrhUId='" + $("#ddlSelectedMonth").val()[i] + "' month='" + getMonthString($("#ddlSelectedMonth").val()[i]) + "' value='" + data[0].duesAmount.toString().replace("-", "") + "' /></td></tr>");
+
+
+
+                                            $("#tblAppend tr input[type=text]").each(function () {
+                                                totalAmt += parseInt($(this).val());
+                                            })
+
+
+
+
+                                            $("#tblAppendTotal").removeAttr("class");
+                                            $("#txtTotalPaid").html(totalAmt);
+                                        }
+                                    }
+                                }
+                            },
+                            failure: function (response) {
+                                alert(response.d);
+                            }
+                        });
+
+                        i = i + 1;
+                        break;
+
+                    }
+             
+
+
+            //var totalAmt = 0;
+            //var month = "2";
+            //var dues = "1000"
+
+            //if (month != "" && dues != "") {
+            //    $("#tblAppend").html("");
+            //    var ddlval = $("#ddlSelectedMonth").val().length;
+            //    for (var i = 0; i < ddlval; i++) {
+            //        $("#txtTotalPaid").html("");
+            //        $("#tblAppend").append("<tr><td id=" + getMonthString(i) + ">" + getMonthString($("#ddlSelectedMonth").val()[i]) + "</td><td id='" + getMonthString($("#ddlSelectedMonth").val()[i]) + "_amt'>2000</td></tr>");
+            //        if (month == $("#ddlSelectedMonth").val()[i]) {
+
+            //            $("#" + getMonthString(month) + "_amt").html(dues);
+            //            totalAmt += parseInt($("#" + getMonthString($("#ddlSelectedMonth").val()[i]) + "_amt").html());
+            //        }
+            //       // totalAmt += parseInt($("#" + getMonthString(i) + "_amt").html());
+            //        $("#tblAppendTotal").removeAttr("class");
+            //        $("#txtTotalPaid").html(totalAmt);
+
+            //    }
+
+            //}
+                //$("#tblAppend").html("");
+                //var ddlval = $("#ddlSelectedMonth").val().length;
+                //for (var i = 0; i < ddlval; i++) {
+                //    $("#txtTotalPaid").html("");
+                //    $("#tblAppend").append("<tr><td id=" + getMonthString(i) + ">" + getMonthString($("#ddlSelectedMonth").val()[i]) + "</td><td id='" + getMonthString($("#ddlSelectedMonth").val()[i]) + "_amt'>2000</td></tr>");
+                //   totalAmt += parseInt($("#" + getMonthString(i) + "_amt").html());
+                //   $("#tblAppendTotal").removeAttr("class");
+                //   $("#txtTotalPaid").html(totalAmt);
+
+                //}
+
+       //     else {
+
+                //$("#tblAppend").html("");
+                //var ddlval = $("#ddlSelectedMonth").val().length;
+                //for (var i = 0; i < ddlval; i++) {
+                //    $("#txtTotalPaid").html("");
+                //    $("#tblAppend").append("<tr><td id=" + getMonthString(i) + ">" + getMonthString($("#ddlSelectedMonth").val()[i]) + "</td><td id='" + getMonthString($("#ddlSelectedMonth").val()[i]) + "_amt'>2000</td><td style='display:none'><input type='text' monnrrhUId='" + $("#ddlSelectedMonth").val()[i] + "' month='" + getMonthString($("#ddlSelectedMonth").val()[i]) + "' value='2000' /></td></tr>");
+                //    totalAmt += parseInt($("#" + getMonthString($("#ddlSelectedMonth").val()[i]) + "_amt").html());
+                //    $("#tblAppendTotal").removeAttr("class");
+                //    $("#txtTotalPaid").html(totalAmt);
+
+                //}
+           // }
+
+
+            checkAmountPayemnt();
+
+
+
+        }
+
+
+        function getMonthString(num) {
+          //  var numm = parseInt(num + 1)
+            var month;    //Create a local variable to hold the string
+            switch (parseInt(num)) {
+                case 0:
+                    month = "January";
+                    break;
+                case 1:
+                    month = "February";
+                    break;
+                case 2:
+                    month = "March";
+                    break;
+                case 3:
+                    month = "April";
+                    break;
+                case 4:
+                    month = "May";
+                    break;
+                case 5:
+                    month = "June";
+                    break;
+                case 6:
+                    month = "July";
+                    break;
+                case 7:
+                    month = "August";
+                    break;
+                case 8:
+                    month = "September";
+                    break;
+                case 9:
+                    month = "October";
+                    break;
+                case 10:
+                    month = "November";
+                    break;
+                case 11:
+                    month = "December";
+                    break;
+                default:
+                    month = "Invalid month";
+            }
+            return month;
+        }
+
+        function savePayemnt()
+        {
+            debugger;
+            var totalamt = '';
+            var paidamt = '';
+            var remainAmt = '';
+            var dueamount = '';
+            var Items = new Array();
+            $("#tblAppend tr input[type=text]").each(function () {
+              //  alert($(this).val());
+                totalamt = $("#txtTotalPaid").html();
+                paidamt = $("#txtPaidAmount").val();
+                monthlyamt = $(this).val();
+
+                var obj = new Object();
+                obj.monthlyamt = $(this).val();
+                obj.Month = $(this).attr("month");
+                obj.MonthId = $(this).attr("monnrrhUId");
+                dueamount = remainAmt;
+                if (remainAmt == "") {
+                    remainAmt = parseInt(paidamt) - parseInt(monthlyamt);
+                    obj.amount = $(this).val()
+                   
+                }
+                else if ($(this).val() > remainAmt)
+                {
+                    obj.amount = remainAmt.toString();
+                    dueamount = parseInt(remainAmt) - parseInt(monthlyamt)
+                 //   alert(remainAmt);
+                }
+                else {
+                    remainAmt = parseInt(remainAmt) - parseInt(monthlyamt);
+                    obj.amount = $(this).val()
+                }
+                //    alert(obj.amount);
+
+                if (remainAmt.toString().indexOf("-") == "0") {
+                    obj.duesAmount = remainAmt.toString();
+                }
+                else {
+                    if (dueamount.toString().indexOf("-") == "0") {
+                        //   alert(remainAmt);
+                        obj.duesAmount = dueamount.toString();
+                    }
+                    else {
+                        obj.duesAmount = "0";
+                    }
+                }
+
+
+
+                Items.push(obj);
+
+            });
+
+            $.ajax({
+                type: "POST",
+                url: "/Employee/saveFeeDetails",
+                contentType: "application/json; charset=utf-8",
+                data: "{'fee':" + JSON.stringify(Items) + "}",
+                success: function (response) {
+                   // $("#name1").text("Name:- " + response.d.Name);
+                  //  $("#surname1").text("Surname:- " + response.d.Surname);
+                },
+                failure: function (response) {
+                    alert(response.d);
+                }
+            });
+
+       //  callServiceMethod("{fee:" + JSON.stringify(Items) + "}", "FeeManagement.aspx", "saveFeeDetails", false, "", "", false, "", false, "", "", "", "");
+
+
+        }
+
+        function checkAmountPayemnt()
+        {
+            var totalPaidAmount = $("#txtPaidAmount").val();
+            var totalAmt = $("#txtTotalPaid").html();
+            if (parseFloat(totalPaidAmount) > parseFloat(totalAmt)) {
+                var remanamt = parseInt(totalPaidAmount) - parseInt(totalAmt);
+                alert("Please Select Next Month Because you paid Advance Fees");
+            }
+            else {
+
+            }
+        }
+
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $.ajax({
+            type: "POST",
+            url: "/Employee/getFeeDetails",
+            contentType: "application/json; charset=utf-8",
+            data: "",
+            success: function (data) {
+                setTimeout(function () {
+                     for (var i = 0; i < data.length; i++) {
+
+                        for (var j = 0; j < $('#ddlSelectedMonth').children('option').length; j++) {
+                            if (j == data[i].monthId) {
+                                 $('#ddlSelectedMonth option').filter('[value="' + j + '"]').attr('disabled', "disabled");
+                            }
+                        }
+                    }
+                }, 500)
+            },
+            failure: function (response) {
+                alert(response.d);
+            }
+        });
+
+
+       
+        })
+</script>

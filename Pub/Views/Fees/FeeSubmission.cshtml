@@ -1,0 +1,561 @@
+﻿@model SchoolErp.Models.fees
+@{
+    ViewBag.Title = "FeeSubmission";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section class="content">
+    <form id="w0" action="/employee/emp-master/index" method="get">
+        <div class="box-body">
+            <div class="row">
+
+
+                <div class="col-sm-4" id="schoolhidden">
+                    <div class="form-group field-empinfosearch-emp_designation_id">
+                        <label for="Country" class="req">School<span class="requird">*</span></label>
+                        <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name"></select>
+
+                        <div class="help-block"></div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group ">
+
+                        <label class="control-label" for="empinfosearch-emp_designation_id">Class</label>
+                        <select class="form-control" id="ddlCourse" style="color:black;" name="ddlCourse" valuefield="Id" textfield="CourseName" blankRowValue="0" blankRowText="----Select----"></select>
+                        <div class="help-block"></div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+
+                        <label class="control-label" for="empinfosearch-emp_designation_id">Section</label>
+                        <select class="form-control" id="ddlSection" style="color:black;" name="ddlSection" valuefield="Id" textfield="SectionName" blankRowValue="0" blankRowText="----Select----"></select>
+
+                        <div class="help-block"></div>
+                    </div>
+                </div>
+
+
+            </div>
+
+
+
+
+
+
+
+
+        </div>
+        <div class="box-footer">
+            <input class="btn btn-primary" onclick="SEARCHSTUDENTINCLASSSECTION()" value="Search" type="button" />
+            <a class="btn btn-default" onclick="restClear()" href="javascript:void(0)">Reset</a>
+            @*<input type="button" id="create_pdf" value="Export Pdf" onclick="pdfExport()" class="btn btn-primary" />
+
+                <a href="#" class="btn btn-primary" onClick="$('#example1').tableExport({ type: 'excel', escape: 'false', defaultFileName: 'rahul', bootstrap: true });">Excel Exports</a>*@
+        </div>
+
+    </form>
+    <div class="row" style="overflow:auto">
+        <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">View Student Details</h3>
+                </div>
+                <div class="box-body">
+                    <div class="form-group">
+                        <div>
+
+                            <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                <thead>
+                                    <tr>
+                                        <th>School</th>
+                                        <th>Roll NO</th>
+                                        @*<th>School</th>*@
+                                        <th>UserID</th>
+                                        <th>Photo</th>
+                                        <th>Name</th>
+                                        <th>Class</th>
+                                        <th>Section</th>
+                                        <th>FatherName</th>
+                                        <th>Session</th>
+                                        <th>FeeSubmit</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyEmployeeDetails"></tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <script type="text/html" id="divEmployeeDetailsJTemplte">
+                {#foreach $T as Datashort}
+                <tr>
+                    @*<td>
+                            { $T.Datashort.School}
+                        </td>*@
+                    <td>
+                        { $T.Datashort.School}
+                    </td>
+                    <td>
+                        { $T.Datashort.RollNo}
+                    </td>
+                    <td>
+                        { $T.Datashort.SUserID}
+                    </td>
+                    <td>
+                        <img src="{ $T.Datashort.PicPath}" alt="#" />
+                    </td>
+                    <td>
+                        { $T.Datashort.FirstName}
+                    </td>
+                    @*<img src="~/Images/School/SchoolImage/3575048482shiva.jpg" />*@
+                    <td>
+                        { $T.Datashort.Class}
+                    </td>
+                    <td>
+                        { $T.Datashort.Section}
+                    </td>
+                    <td>
+                        { $T.Datashort.FatherName}
+                    </td>
+                    <td>
+                        { $T.Datashort.AcademicYear}
+                    </td>
+                    <td>
+                        @*<a href="#" style="width: 150px;float: right;margin-right: 8px" id="btnadd" class="btn btn-block btn-primary" onclick="openModal('{ $T.Datashort.ID }', '{$T.Datashort.ClassID}',{$T.Datashort.SectionID})">Submission</a>*@
+
+                        <a href="#" style="width: 150px;float: right;margin-right: 8px" id="btnadd" class="btn btn-block btn-primary" onclick="openModal('{ $T.Datashort.ID }', '{$T.Datashort.ClassID}','{$T.Datashort.SectionID}','{ $T.Datashort.RegNo }','{$T.Datashort.FatherName}', '{$T.Datashort.FirstName}','{$T.Datashort.SchoolID}','{$T.Datashort.AcademicYear}','{$T.Datashort.PUserID}')">Feesubmit</a>
+                </tr>
+                {#/for}
+            </script>
+            <div class="modal fade" id="myModal" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+
+                        @*<button type="button" class="btn btn-info"  value="Close" data-dismiss="modal" onclick="refreshControls()">&times;</button>*@
+                        <div align="right">
+                            <input class="btn btn-warning" data-dismiss="modal" align="right" onclick="refreshControls()" type="button" value="Close">
+                        </div>
+
+                        <h4 class="modal-title">Fee Submission</h4>
+
+                        <div class="modal-body">
+                            <form role="form" id="form1" name="form1">
+
+                                <section class="content">
+                                    <div class="box box-solid">
+                                        <div>
+                                            <div class="box-header with-border">
+                                                <h3 class="box-title"><i class="fa fa-search"></i> View Payable Details</h3>
+
+                                            </div>
+                                        </div>
+                                        <div class="row" style="overflow-x:scroll">
+                                            <div class="col-md-12">
+                                                <!-- general form elements -->
+                                                <div class="box box-primary">
+                                                    <div class="box-body">
+                                                        <div class="form-group">
+                                                            <div>
+
+                                                                <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>FeeHead</th>
+                                                                            <th>Total</th>
+                                                                            <th>Concession</th>
+                                                                            <th>NetTotal</th>
+                                                                            <th>Paid</th>
+                                                                            <th>Balance</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody id="tbodyEmployeeLeaveRequestDetails"></tbody>
+                                                                </table>
+                                                                <div class="form-group">
+                                                                    <label>Fee Head: <span class="requird">*</span></label>
+                                                                    <select id="ddlFeeCategories" class="form-control" valuefield="Cat_ID" textfield="feeCategory" blankRowValue="-1" blankRowText="----Select----" onchange="" aria-required="true"></select>
+
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label>Payment By <span class="requird">*</span></label>
+                                                                    <select class="form-control" name="ddlAccount" id="ddlAccount">
+                                                                        <option value="0">- Please select a PayMode-</option>
+                                                                        <option value="Cash">Cash</option>
+                                                                        <option value="Cash-Out-Sider">Cash-Out-Sider</option>
+                                                                        <option value="Cheque">Cheque</option>
+                                                                        <option value="Seat Holding Fee">Seat Holding Fee</option>
+                                                                        <option value="DD">DD</option>
+                                                                        <option value="challan">challan</option>
+                                                                        <option value="Direct_Transfer">Direct_Transfer</option>
+                                                                        <option value="Online">Online</option>
+                                                                        <option value="Paytm">Paytm</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label for="cars">Bank Name:</label>
+                                                                    <select class="form-control" name="ddlbank" id="ddlbank">
+                                                                        <option value="0"> --Select--</option>
+                                                                        <option value="Punjab National Bank"> Punjab National Bank</option>
+                                                                        <option value="State Bank Of India">State Bank Of India</option>
+                                                                        <option value="Syndicate Bank">Syndicate Bank</option>
+                                                                        <option value="Allahabad Bank">Allahabad Bank</option>
+                                                                        <option value="Axis Bank">Axis Bank</option>
+                                                                        <option value="Bank Of Baroda">Bank Of Baroda</option>
+                                                                        <option value="Maharastra Bank">Maharastra Bank</option>
+                                                                        <option value="Canara Bank">Canara Bank</option>
+                                                                        <option value="Oriental Bank Of Commerce">Oriental Bank Of Commerce</option>
+                                                                        <option value="State Bank Of Patiala">State Bank Of Patiala</option>
+                                                                        <option value="Vijaya Bank">Vijaya Bank</option>
+                                                                        <option value="Punjab & Sindh Bank"> Punjab & Sindh Bank</option>
+                                                                        <option value="ING Vysya Bank">ING Vysya Bank</option>
+                                                                        <option value="Bank Of India"> Bank Of India</option>
+                                                                        <option value="Indian Overseas Bank"> Indian Overseas Bank</option>
+                                                                        <option value=" Union Bank Of India"> Union Bank Of India</option>
+                                                                        <option value="ICICI Bank"> ICICI Bank</option>
+                                                                        <option value="HDFC Bank"> HDFC Bank</option>
+                                                                        <option value="Central Bank Of India"> Central Bank Of India</option>
+                                                                        <option value="Andhra Bank"> Andhra Bank</option>
+                                                                        <option value="UCO Bank">UCO Bank</option>
+                                                                        <option value="Corporation Bank"> Corporation Bank</option>
+                                                                        <option value="IDBI Bank">IDBI Bank</option>
+                                                                        <option value="Indian Bank">Indian Bank</option>
+                                                                        <option value="State Bank of Bikaner & Jaipur">State Bank of Bikaner & Jaipur</option>
+                                                                        <option value="OTHERS">OTHERS</option>
+                                                                    </select>
+
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label>	Branch:</label>
+                                                                    <input type="text" class="form-control" name="txtBranch" id="txtBranch" placeholder="Branch ...">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label>	Amount: <span class="requird">*</span></label>
+                                                                    @*<input type="text" class="form-control" name="txtAmount" id="txtAmount" placeholder="Amount ...">*@
+                                                                    <input type="number" id="txtAmount" class="form-control" name="quantity" min="1" max="5000">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label>	DD /Cheq. No.:</label>
+                                                                    <input type="text" class="form-control" name="txtcheq" id="txtcheq" placeholder="DD /Cheq. No ...">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label>Description:</label>
+                                                                    <textarea class="form-control" rows="2" placeholder="Remark ..." name="txtDesc" id="txtDesc"></textarea>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label>ManualNO..:</label>
+                                                                    <input type="text" class="form-control" name="txtmanual" id="txtmanual" placeholder="ManualNO ...">
+                                                                </div>
+                                                                <div class="box-footer">
+                                                                    <input class="btn btn-info" id="btnSumit" type="button" value="SaveReciept">
+
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </section>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                        </div>
+                    </div>
+                </div>
+                <!-- /.row -->
+                <!-- Modal -->
+            </div>
+            <div class="alert alert-success centerSuccess" id="divSucesEmail" style="display:none">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h4>
+                    <i class="icon fa fa-check"></i>
+                    <span Id="sentEmailMsg"></span>
+                </h4>
+
+            </div>
+            </div>
+        </div>
+
+</section>
+
+
+
+
+
+
+
+
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#schoolhidden").hide();
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+
+        callServiceMethodForDDl(JSON.stringify(["FeeCategory", "", "", 1, "", loginuser, typeuser]), "/api/FeesApi", "getList", "ddlFeeCategories", false, "", "", "", "");
+
+    });
+
+    $("#ddlCourse").change(function () {
+        var ddlCourse = getControlValue("ddlCourse");
+        if (ddlCourse != null && (ddlCourse != -1) && (ddlCourse != undefined)) {
+            var SchoolID = sessionStorage.getItem("SchoolID");
+            callServiceMethodForDDl(JSON.stringify([ddlCourse, SchoolID]), "/api/StudentApi", "GetSectionsbyschool", "ddlSection", false, "", "", "", "");
+
+        }
+
+
+
+    });
+
+
+    function SEARCHSTUDENTINCLASSSECTION() {
+        if ($("#w0").valid()) {
+            var SchoolID = $("#ddlSchoolName").val();
+            var ClassID = $("#ddlCourse").val();
+            var SectionID = $("#ddlSection").val();
+            var t = $('#example1').DataTable();
+            t.destroy();
+            callJTemplateServiceMethod(JSON.stringify([SchoolID, ClassID, SectionID]), "/api/StudentApi", "getAllStudentsbyclassSection",
+                "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+
+        }
+
+    }
+
+    function restClear() {
+        $("#ddlCourse").val(0);
+        $("#ddlSection").val(0);
+        location.reload();
+    }
+
+    $("#btnSumit").click(function () {
+        var ID = getControlValue("hdnID");
+        var StudentId = localStorage.getItem('StudentId');
+        var Amount = getControlValue("txtAmount")
+        var desc = getControlValue("txtDesc")
+        var Manual = getControlValue("txtmanual")
+        var ClassID = localStorage.getItem('ClassID');
+        var SectionID = localStorage.getItem('SectionID');
+        var RegNo = localStorage.getItem('RegNo');
+        var FatherName = localStorage.getItem('FatherName');
+        var FirstName = localStorage.getItem('FirstName');
+        var SchoolID = localStorage.getItem('SchoolID');
+        var AcademicYear = localStorage.getItem('AcademicYear');
+        var FeeHeadID = getControlValue("ddlFeeCategories");
+        var plusminus = 1;
+        //var DoCNO = "DAV";
+        var BankName = getControlValue("ddlbank");
+        var Branch = getControlValue("txtBranch");
+        var DDCheq = getControlValue("txtcheq");
+        var loginuser = localStorage.getItem('PUserID');
+        var paymentby = getControlValue("ddlAccount");
+
+        Save(ID, StudentId, Amount, desc, Manual, ClassID, SectionID, RegNo, FatherName, FirstName, SchoolID, AcademicYear, plusminus, FeeHeadID, BankName, Branch, DDCheq, loginuser, paymentby);
+    });
+    function Save(ID, StudentId, Amount, desc, Manual, ClassID, SectionID, RegNo, FatherName, FirstName, SchoolID, AcademicYear, plusminus, FeeHeadID, BankName, Branch, DDCheq, loginuser, paymentby) {
+        localStorage.removeItem('StudentId');
+        localStorage.removeItem('ClassID');
+        localStorage.removeItem('SectionID');
+        localStorage.removeItem('RegNo');
+        localStorage.removeItem('FatherName');
+        localStorage.removeItem('FirstName');
+        localStorage.removeItem('SchoolID');
+        localStorage.removeItem('AcademicYear');
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+            $.ajax({
+                url: "/api/FeesApi/SaveRecord",
+                type: "Post",
+                data: JSON.stringify(["FeeSubmission", ID, StudentId, Amount, desc, Manual, ClassID, SectionID, RegNo, FatherName, FirstName, SchoolID, AcademicYear, plusminus, FeeHeadID, BankName, Branch, DDCheq, loginuser, paymentby]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+
+                    $("#loader").fadeOut();
+                    $("#divSucesEmail").fadeIn();
+                    $("#sentEmailMsg").html(data.Msg);
+                    setTimeout(function () {
+                        $("#divSucesEmail").fadeOut();
+                        $("#sentEmailMsg").html("");
+                    }, 2000)
+
+                    if (data.ID != -1) {
+                        setControlValue("hdn", 0);
+                        setControlValue("txtCTName", "");
+                        $("#txtDesc").val("");
+                        setControlValue("txtDesc", "");
+                        $('#myModal').modal('hide');
+
+
+                    }
+
+                    fillDataTable();
+                }
+            });
+
+        }
+    }
+</script>
+
+<script type="text/javascript">
+    var loginuser;
+    var typeuser;
+    $(document).ready(function () {
+        var firstDayOfMonth = function () {
+            // your special logic...
+            return 1;
+        };
+
+        var d = new Date();
+        var currMonth = d.getMonth();
+        var currYear = d.getFullYear();
+        var startDate = new Date(currYear, currMonth, firstDayOfMonth());
+        $('#txtStartDate').datepicker('setDate', startDate);
+
+
+        ``
+        var currentTime = new Date()
+        var maxDate = new Date(currentTime.getFullYear(), currentTime.getMonth() + 1, +0)
+        $("#txtEndDate").datepicker('setDate', maxDate);
+        loginuser = (sessionStorage.getItem("userId"));
+        typeuser = sessionStorage.getItem("type");
+        var t = $('#example1').DataTable();
+        t.destroy();
+
+    })
+
+    function successMsg(p1, p2, p3, datas) {
+        setTimeout(function () {
+            $('#example1').DataTable({
+                bRetrieve: true,
+                bDestroy: true,
+                'columnDefs': [{
+                    "targets": -1,
+                    "orderable": false
+                }],
+            })
+        }, 1000);
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethod(JSON.stringify([SchoolID]), "/api/AccountsAPI", "countpaymentAllTypeBySchool", false, "", "", false, "", true, setPaymetnsSum, "", "", "");
+
+
+        callServiceMethodForDDl(JSON.stringify(["FeeCategory", "", "", 1, "", loginuser, typeuser]), "/api/FeesApi", "getList", "ddlFeeCategories", false, "", "", "", "");
+
+    }
+
+    function refreshControls() {
+
+        setControlValue("hdn", 0);
+        setControlValue("txtAmount", "");
+        $("#tbodyEmployeeLeaveRequestDetails").val("");
+        setControlValue("tbodyEmployeeLeaveRequestDetails", "");
+        $('#myModal').modal('hide');
+    }
+
+    function openModal(StudentId, ClassID, SectionID, RegNo, FatherName, FirstName, SchoolID, AcademicYear, PUserID) {
+        debugger;
+        localStorage.setItem('StudentId', StudentId);
+        localStorage.setItem('ClassID', ClassID);
+        localStorage.setItem('SectionID', SectionID);
+        localStorage.setItem('RegNo', RegNo);
+        localStorage.setItem('FirstName', FirstName);
+        localStorage.setItem('FatherName', FatherName);
+        localStorage.setItem('SchoolID', SchoolID);
+        localStorage.setItem('AcademicYear', AcademicYear);
+        localStorage.setItem('PUserID', PUserID);
+        var studentId = localStorage.getItem('StudentId');
+        $.ajax({
+            type: 'Get',
+            url: "/api/AccountsAPI/getAllPaymentDetails1",
+            dataType: 'html',
+            data: { StudentId: studentId },
+            success: function (data) {
+                $('#tbodyEmployeeLeaveRequestDetails').append(data);
+            }
+
+        });
+        $('#myModal').modal('show');
+
+    }
+
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                ddlCategory: {
+                    selectcheck: true
+                },
+
+                txtAmount: "required",
+                ddlFeeCategories: "required",
+                ddlAccount: "required",
+
+
+            },
+            messages: {
+
+
+                ddlFeeCategories: "Please Select Fee Category",
+                txtAmount: "Please Enter Amount",
+                ddlAccount: "Please Select Primary Date",
+
+
+
+            }
+        })
+    });
+
+</script>

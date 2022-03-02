@@ -1,0 +1,342 @@
+﻿
+@{
+    ViewBag.Title = "EmployeeIdentityCard";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<html>
+<head>
+    <style>
+        .spn {
+            color: #343F93;
+            font-weight: bold;
+        }
+    </style>
+    <link href="~/css/IdentityCard/style.css" rel="stylesheet" />
+ 
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet">
+    <script src="~/js/jquery.PrintArea.js"></script>
+</head>
+
+<body id="bdyEmployyeIdentityCard">
+    <div id="dvContents1" class="main">
+        <div class="main_box">
+            <div class="top_section">
+                <div class="logo leftborder">
+                    <div class="logo_img">
+                        <img id="imgSchoolImage" />
+                    </div>
+                    <div class="coll_name" id="divSchoolName"> name dfd dfsdf fd</div>
+                    <div style="clear:both"></div>
+                    <h2 id="schoolCompleteAddress">
+                       
+                    </h2>
+                </div>
+
+                <div class="side_imag"><img id="employeeImage" style="height:130px" src="img3/pic.jpg" /></div>
+                <div class="clear"></div>
+                <div class="padd20 leftborder">
+                    <div class="mid_left ">
+                        <div class="name" id="empName"></div>
+                        <div class="heading" id="empDesigNationEp">Center Head </div>
+                    </div>
+
+                    <div class="mid_right">
+                        <div class="heading" id="EmployeeId">Employee ID : FAT001 </div>
+                        <div class="heading" id="DateOfBirth">Date of Birth: 14-11-1979</div>
+                    </div>
+
+                    <div class="clear"></div>
+                </div>
+
+                <div class="leftborder2">
+                    <div class="mid_left">
+
+                        <div class="heading" id="EmpAddrsssCompleted">
+                            3-F, SNEH SAGAR SARITA,<br />
+                            NR RELIANCE TOWNSHIP, <br />
+                            PIPLOD, SURAT<br />
+                        </div>
+                    </div>
+                    <div class="mid_right"><img id="PrincipleSignature" style="height: 37px;width: 100px;float: right;margin-right: 63px;" src="img3/code.JPG" />   </div>
+                    <div class="clear"></div>
+                    <div class="bottomBorder">&nbsp;</div>
+                    <div class="clear"></div>
+                </div>
+            </div>
+
+ 
+ 
+    </div>
+  </div>
+<div style="width:600px;margin:10px auto;padding:15px;text-align: center">
+    <a href="javascript:void(0)" class="btn btn-primary" onclick="backbuttonclick()">Back</a>
+    <input type="button" class="btn btn-primary" value="Print" id="Print1" name="Print" onclick="printAdmitCard()" />
+</div>
+
+</body>
+</html>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var val = getQuerystring("imgNo");
+        $("#bdyEmployyeIdentityCard").each(function () {
+            var i = 1;
+            $("#dvContents" + i).attr("style", "display:none");
+            i++;
+           
+        });
+
+        setTimeout(function () { $("#dvContents" + val).removeAttr("style"); }, 1000)
+      
+        fetchSchoolDetails();
+    })
+    function fetchSchoolDetails()
+    {
+      
+
+            $.ajax({
+                url: "/api/EmployeeAPI/fetchSchoolDetails",// "~/Masters/GetDeptMethod",
+                type: "Post",
+                data: "", //{ Name: name,ddlAcademicYr
+                //// Address: address, DOB: dob },
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+
+                    $("#imgSchoolImage").attr("src", "" + data.LogoPic + "");
+                    setControlValue("schoolCompleteAddress", data.Address + ", " + data.City + "," + data.State + " ," + data.District + "-" + data.Pincode + ". Tel:" + data.Phone + " / " + data.Mobile);
+                    setControlValue("divSchoolName", data.School);
+                    //var path1 = data.PicPath.replace(/\\/g, "/");
+                    //$("#profileImg").attr("src", path1);
+                    //var logoPath = "/Images/Admin/AdmitCards/bg.png"
+                    //$('.main').attr("style", "background:#d3effb url(" + logoPath + ") center left 180px no-repeat !important;");
+                    //setControlValue("spName", data.FirstName + " " + data.MiddleName + " " + data.LastName);//data.Religion);
+                    //("spRegNo", data.PrincipalID);
+                    //setControlValue("spRegNo1", data.RegNo);
+                    //setControlValue("spClass", data.Class + "-" + data.Section);
+                    //setControlValue("spClass1", data.Class + "-" + data.Section);
+                    //setControlValue("spFirstNm", data.FirstName);
+                    //setControlValue("spMidNm", data.MiddleName);
+                    //setControlValue("spBatch", data.batch);
+                    //setControlValue("spSRNo", data.SRNo);
+                    //setControlValue("spStream", data.stream);
+
+                
+                    getPrincipleSignature(data.PrincipalID);
+
+                }
+            });
+
+       
+    }
+
+    function getPrincipleSignature(Id)
+    {
+        
+        $.ajax({
+            url: "/api/EmployeeAPI/getPrincipleSignature",// "~/Masters/GetDeptMethod",
+            type: "Post",
+            data: JSON.stringify([Id]), //{ Name: name,ddlAcademicYr
+            //// Address: address, DOB: dob },
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                
+                $("#PrincipleSignature").attr("src", "" + data.SchoolCode + "");
+      
+            }
+
+        });
+
+    }
+
+    function backbuttonclick()
+    {
+        location.href = "/Employee/ViewEmployeeDetails?Id=" + getQuerystring("id");
+    }
+
+</script>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var docLength = 0;
+
+        var Id = getQuerystring("id");
+        var imgID = getQuerystring("imgNo");
+        if (typeof (Id) != "undefined") {
+
+            $.ajax({
+                url: "/api/EmployeeAPI/fetchIdentityCardDetailsByEmpId",// "~/Masters/GetDeptMethod",
+                type: "Post",
+                data: JSON.stringify([Id]), //{ Name: name,ddlAcademicYr
+                //// Address: address, DOB: dob },
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    //var path1 = data.PicPath.replace(/\\/g, "/");
+                    //$("#profileImg").attr("src", path1);
+                    //var logoPath = "/Images/Admin/AdmitCards/bg.png"
+                    //$('.main').attr("style", "background:#d3effb url(" + logoPath + ") center left 180px no-repeat !important;");
+                    //setControlValue("spName", data.FirstName + " " + data.MiddleName + " " + data.LastName);//data.Religion);
+                    setControlValue("empName", data.FName + " " + data.MName + " " + data.LName);
+                    setControlValue("EmployeeId", "Employee ID : " + data.Employeecode + "");
+
+                   
+                    setControlValue("DateOfBirth", "Date of Birth: " + data.DOB + "");
+                    setControlValue("empDesigNationEp", data.Department + " (" + data.Designation+")");
+                    setControlValue("EmpAddrsssCompleted", data.PresentAddress + ", " + data.city + "," + data.State + " <br/> " + data.Pin + ". Tel:" + data.Phone + " / " + data.Mobile);
+                 //   setControlValue("employeeImage", data.ImageUpload);
+
+                    $("#employeeImage").attr("src", "" + data.ImageUpload + "")
+                    //setControlValue("spBatch", data.batch);
+                    //setControlValue("spSRNo", data.SRNo);
+                    //setControlValue("spStream", data.stream);
+
+                    //setControlValue("spLastNm", data.LastName);
+                    //setControlValue("spRollNo", data.RollNo);
+                    //setControlValue("spDOB", ChangeDateformat(data.DOB));
+                    //setControlValue("spGender", data.Gender);
+                    //setControlValue("spBloodGrp", data.BloodGroup);
+
+                    //setControlValue("spReligion", data.Religion);
+                    //setControlValue("spCategory", data.Category);
+                    //setControlValue("spAadhar", data.AadharNo);
+
+                    //setControlValue("spResAdd", data.PermanentAddress);
+                    //setControlValue("spCorpAdd", data.CorrespondAddress);
+                    //setControlValue("spResCity", data.PermCity);
+                    //setControlValue("spCorpCity", data.CorsCity);
+                    //setControlValue("spResdState", data.PermState);
+                    //setControlValue("spCorpState", data.CorsStateNm);
+                    //setControlValue("spResdPin", data.PermPincode);
+                    //setControlValue("spCorsPin", data.CorsPincode);
+                    //setControlValue("spSMSNo", data.SMSmobileNo);
+                    //setControlValue("spEmerNo", data.EmergencyNo);
+                    //setControlValue("spEmerPers", data.EmerContPerson);
+                    //setControlValue("spEmeRel", data.ContPersRelation);
+
+                    //setControlValue("spFName", data.FatherName);
+                    //setControlValue("spMName", data.MotherName);
+                    //setControlValue("spGname", data.GuardianName);
+                    //setControlValue("spFOAdd", data.FOfficeAddress);
+                    //setControlValue("spMOAdd", data.MOfficeAddress);
+                    //setControlValue("spGOAdd", data.GOfficeAddress);
+                    //setControlValue("spFMobile", data.FMobile);
+                    //setControlValue("spMMobile", data.Mmobile);
+                    //setControlValue("spGMobile", data.Gmobile);
+                    //setControlValue("spFMail", data.Fmail);
+                    //setControlValue("spMMail", data.Mmail);
+                    //setControlValue("spGMail", data.Gmail);
+
+                    //setControlValue("spAddress", data.sd.Address + "," + data.sd.City + "," + data.sd.Pincode);//
+                    //setControlValue("spState", data.sd.Board);
+                    //setControlValue("spBoard", data.sd.Board);
+                    //setControlValue("spDistrict", data.sd.District);
+                    //setControlValue("spEmail", data.sd.Email);
+                    //setControlValue("spGMail", data.sd.Mobile);
+                    //setControlValue("spPhone", data.sd.Phone);
+                    //setControlValue("spSchool", data.sd.School);
+
+                    //if (data.principalSign != null) {
+                    //    var path2 = data.principalSign.replace(/\\/g, "/");
+                    //    $("#SignImg").attr("src", path2);
+                    //}
+
+                    //if (data.sd.LogoPic != null) {
+                    //    var path3 = data.sd.LogoPic.replace(/\\/g, "/");
+                    //    $("#Imglogo").attr("src", path3);
+                    //}
+
+
+                }
+            });
+
+        }
+        else {
+
+        }
+
+        function ChangeDateformat(dt) {
+            var date = "";
+            if (dt != null) {
+                var formattedDate = new Date(dt);
+                var d = formattedDate.getDate();
+                var m = formattedDate.getMonth();
+                m += 1;  // JavaScript months are 0-11
+                var y = formattedDate.getFullYear();
+
+                date = m + "/" + d + "/" + y;
+            }
+
+            return date;
+        }
+
+
+    });
+    function printAdmitCard() {
+        var val = getQuerystring("imgNo");
+        //var contents = $("#dvContents").html();
+        //var frame1 = $('<iframe />');
+        //frame1[0].name = "frame1";
+        //frame1.css({ "position": "absolute", "top": "-1000000px" });
+        //$("body").append(frame1);
+        //var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+        //frameDoc.document.open();
+        ////Create a new HTML document.
+        //frameDoc.document.write('<html><head><title>DIV Contents</title>');
+        ////frameDoc.document.write('<style type="text/css">h1,h2,h3,h4,h5,h6{margin:0; padding:0;}.main{width:500px;background:#d3effb !important;margin:10px auto;border-radius:25px;padding:15px;border: 1px solid #a2b2b9;font-family: "Poppins", sans-serif;}h1{color:#005ca7;font-weight:bold;line-height:38px;font-size: 33px;text-align: center;}h2{	color:#000;font-size:18px;font-weight:bold;text-align:center;line-height:22px;}h3{color:#000;font-size:14px;line-height:22px;text-align: center;}.heading{color:#99256e;font-size:14px;font-weight:bold;line-height:6px;}.heading1{color:#3066a4;font-size:14px;font-weight:bold;}.main table{font-weight:bold;}.name-text{color:#1b2193;}.logo{}</style>');
+        //frameDoc.document.write('<link href="/css/style_admitCrd.css" rel="stylesheet" media="print"/>');
+        //frameDoc.document.write('<link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300" rel="stylesheet">');
+        //frameDoc.document.write('<link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet">');
+        //frameDoc.document.write('</head><body>');
+        ////Append the external CSS file.
+
+
+        ////Append the DIV contents.
+        //frameDoc.document.write(contents);
+        //frameDoc.document.write('</body></html>');
+        //frameDoc.document.close();
+        //setTimeout(function () {
+        //    window.frames["frame1"].focus();
+        //    window.frames["frame1"].print();
+        //    frame1.remove();
+        //    //window.location.href = "/Student/StudentProfile?id=" + id;
+        //}, 100);
+
+        var mode = 'iframe'; //popup
+        var close = mode == "popup";
+        var options = { mode: mode, popClose: close };
+        $("#dvContents" + val + "").printArea(options);
+    }
+</script>
+
+

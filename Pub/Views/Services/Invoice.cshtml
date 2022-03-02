@@ -1,0 +1,493 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Invoice</title>
+</head>
+<body>
+    <div> 
+    </div>
+</body>
+</html>
+
+
+@{
+    ViewBag.Title = "SaleQuotation";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<style type="text/css">
+    .imgIcon {
+        width: 0.5%;
+        height: 0.5%;
+    }
+
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 8px;
+            padding-bottom: 8px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+
+    .modal.modal-fullscreen .modal-dialog {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+        max-width: none;
+    }
+
+    .modal.modal-fullscreen .modal-content {
+        height: auto;
+        height: 100vh;
+        border-radius: 0;
+        border: none;
+    }
+
+    .modal.modal-fullscreen .modal-body {
+        overflow-y: auto;
+    }
+</style>
+<link href="~/css/bootstrap-timepicker.css" rel="stylesheet" />
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<link rel="stylesheet" href="pdf.css" />
+<script src="pdf.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.js"></script>
+
+<section class="content-header">
+    <h1>
+        <i class="fa fa-th-list"></i> Invoice List
+    </h1>
+</section>
+<section class="content">
+
+    <div class="box box-solid">
+        <div>
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    <i class="fa fa-search"></i> View Invoice  List
+                </h3>
+            </div>
+        </div>
+
+        <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>View</th>
+                    <th>PDF</th>
+                    <th>Customer</th>
+                    <th>Employee</th>
+                    <th>Dated</th>
+                    <th>Discount</th>
+                    <th>T.Discount</th>
+                    <th>TotalTax</th>
+                    <th>ShipingCost</th>
+                    <th>GrandTotal</th>
+                    <th>NetTotal</th>>
+                    <th>ExpiryDate</th>
+
+
+                </tr>
+            </thead>
+            <tbody id="tbodyEmployeeLeaveRequestDetails"></tbody>
+        </table>
+        <script type="text/html" id="tbodyEmployeeLeaveRequestDetailsJTemplte">
+            {#foreach $T as Datashort}
+            <tr>
+                <td>
+                    { $T.Datashort.Id}
+                </td>
+
+                <td>
+                    <i class="fa fa-fw fa-eye" style="cursor:pointer" onclick="ViewDetails('{ $T.Datashort.bill}','{ $T.Datashort.Today}','{ $T.Datashort.customer}','{ $T.Datashort.Address}','{ $T.Datashort.email}','{ $T.Datashort.phone}','{ $T.Datashort.Date}','{ $T.Datashort.ExpDate}','{ $T.Datashort.Product}','{ $T.Datashort.UnitPrice}','{ $T.Datashort.Quantity}','{ $T.Datashort.Discount}','{ $T.Datashort.netTotal}','{ $T.Datashort.TotalDiscount}','{ $T.Datashort.TotalTax}','{ $T.Datashort.Shiping}','{ $T.Datashort.GrandTotal}')" title="View"></i>
+                </td>
+
+                <td>
+                    <i class="fa fa-file-pdf-o" style="cursor:pointer" onclick="generateReceipt('{ $T.Datashort.Id }')" title="View"></i>
+                </td>
+
+                <td>
+                    { $T.Datashort.customer}
+                </td>
+                <td>
+                    { $T.Datashort.Employee}
+                </td>
+                <td>
+                    { $T.Datashort.Date}
+                </td>
+
+                <td>
+                    { $T.Datashort.Discount}
+                </td>
+                <td>
+                    { $T.Datashort.TotalDiscount}
+                </td>
+                <td>
+                    { $T.Datashort.TotalTax}
+                </td>
+                <td>
+                    { $T.Datashort.Shiping}
+                </td>
+                <td>
+                    { $T.Datashort.GrandTotal}
+                </td>
+                <td>
+                    { $T.Datashort.netTotal}
+                </td>
+                <td>
+                    { $T.Datashort.ExpDate}
+                </td>
+            </tr>
+            {#/for}
+        </script>
+        <input type="hidden" id="hdnID" />
+    </div>
+    <div id="myModal" class="modal fade modal-fullscreen" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title" style="text-align:center;">INVOICE DETAILS</h4>
+                    <hr style="height:2px;border-width:0;color:gray;background-color:gray">
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group col-md-4">
+                        <label class="col-sm-5 control-label">Quotation</label>
+                        <div class="col-sm-7">
+                            <a href="#" id="bill" font-weight: 900 style="color:Red;padding:4px;border-radius: 8px;"> </a>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-md-4">
+                        <label class="col-sm-5 control-label" style="text-align:inherit;">Date:</label>
+                        <div class="col-sm-7">
+                            <a href="#" id="Today" style="color:purple;padding:4px;border-radius: 8px;"></a>
+                        </div>
+                    </div>
+                    <hr style="width:100%">
+                </div>
+                <div class="modal-body">
+                    <div class="content">
+                        <div class="panel panel-white">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-12">
+
+
+                                        <div class="form-group col-md-4">
+                                            <label class="col-sm-5 control-label">Customer Name</label>
+                                            <div class="col-sm-1">
+                                                <p class="form-control-static" id="TO"></p>
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-4">
+                                            <label class="col-sm-5 control-label">From</label>
+                                            <div class="col-sm-1">
+                                                <p class="form-control-static" id="From"></p>
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-4">
+                                            <label class="col-sm-5 control-label">Phone</label>
+                                            <div class="col-sm-1">
+                                                <p class="form-control-static" id="phone"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+
+                                        <div class="form-group col-md-4">
+                                            <label class="col-sm-5 control-label">EmailAddress</label>
+                                            <div class="col-sm-1">
+                                                <p class="form-control-static" id="email"></p>
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-4">
+
+                                            <label class="col-sm-5 control-label">OrderDate</label>
+                                            <div class="col-sm-7">
+                                                <p class="form-control-static" id="Date"></p>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group col-md-4">
+                                            <label class="col-sm-5 control-label">DueDate</label>
+                                            <div class="col-sm-1">
+                                                <p class="form-control-static" id="dds"> </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+
+                                        <hr style="width:100%" color:gray;background-color:gray">
+
+                                        <div class="col-md-12">
+                                            <div class="form-group col-md-4">
+                                                <label class="col-sm-5 control-label">Product</label>
+                                                <div class="col-sm-1">
+                                                    <p class="form-control-static" id="Product"></p>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-4">
+                                                <label class="col-sm-5 control-label">Unit Price</label>
+                                                <div class="col-sm-1">
+                                                    <p class="form-control-static" id="UnitPrice"></p>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-4">
+                                                <label class="col-sm-5 control-label">Quantity</label>
+                                                <div class="col-sm-1">
+                                                    <p class="form-control-static" id="Quantity"></p>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group col-md-4">
+                                                <label class="col-sm-5 control-label">Discount (%)	</label>
+                                                <div class="col-sm-1">
+                                                    <p class="form-control-static" id="Discount"></p>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-4">
+                                                <label class="col-sm-5 control-label">SubTotal:</label>
+                                                <div class="col-sm-1">
+                                                    <p class="form-control-static" id="netTotal"></p>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-4">
+                                                <label class="col-sm-5 control-label">Fix Discount:</label>
+                                                <div class="col-sm-1">
+                                                    <p class="form-control-static" id="TotalDiscount"></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group col-md-4">
+                                                <label class="col-sm-5 control-label">Tax:</label>
+                                                <div class="col-sm-1">
+                                                    <p class="form-control-static" id="TotalTax"></p>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-4">
+                                                <label class="col-sm-5 control-label">Freight:	</label>
+                                                <div class="col-sm-1">
+                                                    <p class="form-control-static" id="Shiping"></p>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group col-md-4">
+                                                <label class="col-sm-5 control-label">GrandTotal:</label>
+                                                <div class="col-sm-1">
+                                                    <p class="form-control-static" id="GrandTotal"></p>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="alert alert-success centerSuccess" id="divSucesEmail" style="display:none">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h4>
+            <i class="icon fa fa-check"></i>
+            <span Id="sentEmailMsg"></span>
+        </h4>
+
+    </div>
+</section>
+<script src="~/js/bootstrap-timepicker.js"></script>
+<script src="html2pdf.bundle.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        setControlValue("hdnID", 0);
+        /*        setControlValue("hdnStatus", 1);*/
+        $('.dtpicker').datepicker({
+            //dateFormat: 'dd/mm/yy' ,
+            autoclose: true,
+            format: 'dd/mm/yyyy'
+        });
+
+        fillDataTable();
+
+        var ID = getQuerystring("id");
+        if (typeof (ID) != "undefined") {
+            setControlValue("hdn", ID);//
+
+            GetValues(ID);
+
+        }
+        //callServiceMethodForDDl("", "/api/StudentApi", "GetLeaveStatus", "ddlReqStatus", false, "", "", "", "");
+    });
+    function openModal() {
+        $('#myModal').modal('show');
+    }
+
+
+
+    function generateReceipt(Id) {
+        window.location.href = "/Services/ServiceRPT?Id=" + Id;
+    }
+    function fillDataTable() {
+        $("#loader").fadeIn();
+        var Territory = getControlValue("txTerritory");
+        var region = getControlValue("ddlRegin");
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        var t = $('#example1').DataTable();
+        t.destroy();
+
+        callJTemplateServiceMethod(JSON.stringify([Territory, region, loginuser, typeuser]), "/api/AccountsAPI", "ServiceList",
+            "tbodyEmployeeLeaveRequestDetails", "tbodyEmployeeLeaveRequestDetailsJTemplte", true, successMsg, "", "", "");
+    }
+
+    function successMsg(p1, p2, p3, datas) {
+
+        $("#loader").fadeOut();
+
+        setTimeout(function () {
+            $('#example1').DataTable({
+
+                dom: 'lBfrtip',
+                bRetrieve: true,
+                bDestroy: true,
+                'columnDefs': [{
+                    "targets": -1,
+                    "orderable": false
+                }],
+            });
+        }, 1000);
+    }
+
+    //
+    $("#btnSearch").click(function () {
+        fillDataTable();
+    });
+
+
+    function ViewDetails(bill, Today, customer, Address, email, phone, Date, dds, Product, UnitPrice, Quantity, Discount, netTotal, TotalDiscount, TotalTax, Shiping, GrandTotal) {
+        debugger;
+        setControlValue("bill", bill);
+        setControlValue("Today", Today);
+        setControlValue("TO", customer);
+        setControlValue("From", Address);
+        setControlValue("email", email);
+        setControlValue("phone", phone);
+        setControlValue("phone", phone);
+        setControlValue("phone", phone);
+        setControlValue("phone", phone);
+        setControlValue("Date", Date);
+        setControlValue("dds", dds);
+        setControlValue("Product", Product);
+        setControlValue("UnitPrice", UnitPrice);
+        setControlValue("Quantity", Quantity);
+        setControlValue("Discount", Discount);
+        setControlValue("netTotal", netTotal);
+        setControlValue("TotalDiscount", TotalDiscount);
+        setControlValue("TotalTax", TotalTax);
+        setControlValue("GrandTotal", GrandTotal);
+        setControlValue("Shiping", Shiping);
+
+
+        openModal();
+    }
+
+</script>
+<script>
+    function generatePDF(myModal) {
+        debugger;
+        const myModal = document.getElementById("myModal");
+        html2pdf(myModal)
+            .from(myModal)
+            .save();
+    }
+</script>
+

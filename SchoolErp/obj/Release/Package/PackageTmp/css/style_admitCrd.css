@@ -1,0 +1,155 @@
+﻿@charset "utf-8";
+/* CSS Document */
+    h1,h2,h3,h4,h5,h6{margin:0; padding:0;}
+.main
+{
+	width:500px;
+	/*background:#d3effb url(/Images/Admin/AdmitCards/bg.png) center left 180px no-repeat;*/
+	margin:10px auto;
+	border-radius:25px;
+	padding:15px;
+	    border: 1px solid #a2b2b9;
+	/*font-family: 'Open Sans Condensed', sans-serif;	 */
+	font-family: 'Poppins', sans-serif;
+		
+}
+h1
+{
+	color:#005ca7 !important;
+	
+	font-weight:bold;
+	line-height:20px;
+	    font-size: 20px;
+    text-align: center;
+	
+	}
+	h2
+{
+	color:#000 !important;
+	font-size:14px;
+	
+	font-weight:bold;
+	text-align:center;
+	line-height:18px;
+	}
+	h3
+{
+	color:#000 !important;
+	
+	font-size:13px;
+	 line-height:15px;
+	     text-align: center;
+	
+	}
+img#Imglogo{
+    width:120px
+}
+img#profileImg {
+    margin-right:30px;
+}
+	.heading
+	{
+		
+		color:#99256e !important;
+		font-size:12px;
+		font-weight:bold;
+		line-height:12px;
+	}
+	.heading1
+	{
+		
+		color:#3066a4 !important;
+		font-size:14px;
+		font-weight:bold;
+	}
+	
+	.main table
+	{
+		font-weight:bold;
+	}
+	.name-text
+	{
+		color:#1b2193 !important;
+            font-size: 18px;
+    line-height: 18px;
+	}
+
+.logo
+{
+}
+
+@media print {
+       h1,h2,h3,h4,h5,h6{margin:0; padding:0;}
+.main
+{
+	width:500px;
+	/*background:#d3effb url(/Images/Admin/AdmitCards/bg.png) center left 180px no-repeat;*/
+	margin:10px auto;
+	border-radius:25px;
+	padding:15px;
+	    border: 1px solid #a2b2b9;
+	/*font-family: 'Open Sans Condensed', sans-serif;	 */
+	font-family: 'Poppins', sans-serif;
+    -webkit-print-color-adjust: exact;
+		
+}
+h1
+{
+	color:#005ca7 !important;
+	
+	font-weight:bold;
+	line-height:20px;
+	    font-size: 20px;
+    text-align: center;
+	
+	}
+	h2
+{
+	color:#000;
+	font-size:14px;
+	
+	font-weight:bold;
+	text-align:center;
+	line-height:18px;
+	}
+	h3
+{
+	color:#000;
+	
+	font-size:13px;
+	 line-height:15px;
+	     text-align: center;
+	
+	}
+	
+	.heading
+	{
+		
+		color:#99256e !important;
+		font-size:14px;
+		font-weight:bold;
+		line-height:6px;
+	}
+	.heading1
+	{
+		
+		color:#3066a4 !important;
+		font-size:14px;
+		font-weight:bold;
+	}
+	
+	.main table
+	{
+		font-weight:bold;
+	}
+	.name-text
+	{
+		color:#1b2193 !important;
+	}
+
+.logo
+{
+}
+  
+
+}

@@ -1,0 +1,348 @@
+﻿
+@{
+    ViewBag.Title = "ViewEmployeeDetailsPrint";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<link href="~/css/style.css" rel="stylesheet" />
+<a href="/Employee/ViewEmployee" style="width: 101px;float: right;margin-top: 3px;margin-right: 20px;" class="btn btn-block btn-primary btn-sm">View Employee</a>
+<div style="clear:both"></div>
+<div class="main-container" id="dvContents">
+    <div class="container-fluid content-container">
+        <h2 class="heading">Employee Details</h2>
+        <div class="row">
+            <table style="width:80%">
+                <tr>
+                    <td style="width:23%">
+                        <div class="col-sm-2 profile-pic">
+                            <div class="profile-image"><img id="ImgEmployeePic" style="width: 150px;height: 151px;" src="" alt="#" /></div>
+                        </div>
+                    </td>
+                    <td>
+                        <input type="text" id="txtEmployeeId" style="display:none" />
+                        <h4 id="EmployeeFullName"></h4>
+                        <p>-<span id="spEmpDepartment"></span></p>
+                        <p id="spEmpEmailId"></p>
+                        <p><span class="phone1" id="spEmpMob"></span> &nbsp; <span class="phone2" id="spEmpPhone"></span></p>
+                        <p id="pEmployeeStatus"></p>
+                    </td>
+                </tr>
+               
+            </table>
+
+        </div>
+        <br />
+
+        <table id="customers" style="width:100%;border:1px solid gray;border-bottom:1px solid double" cellpadding="1" cellspacing="1">
+            <tr>
+                <td>Employee Code</td>
+                <td>: <span id="spEmployeeCode"></span></td>
+                <td>
+                    Joining Date
+                </td>
+                <td>
+                    : <span id="spJoiningDate"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>First Name</td>
+                <td><span id="spFName"></span></td>
+                <td>Middle Name</td>
+                <td>: <span id="spMname"></span></td>
+            </tr>
+            <tr>
+                <td>Last Name</td>
+                <td>: <span id="spLName"></span></td>
+                <td>DOB</td>
+                <td>: <span id="spDOB"></span></td>
+
+            </tr>
+
+            <tr>
+                <td>Gender</td>
+                <td>: <span id="spGender"></span></td>
+                <td>Religon</td>
+
+                <td>: <span id="spRelegon"></span></td>
+            </tr>
+            <tr>
+                <td>Mother Name</td>
+                <td>: <span id="spMotherName"></span></td>
+                <td>Father Name</td>
+                <td>: <span id="spFateherName"></span></td>
+            </tr>
+            <tr>
+                <td>Marital Status</td>
+                <td>: <span id="spMaritalStatus"></span></td>
+                <td>Country</td>
+                <td>: <span id="spCountry"></span></td>
+            </tr>
+            <tr>
+                <td>State</td>
+                <td>: <span id="spState"></span></td>
+                <td>City</td>
+                <td>: <span id="spCity"></span></td>
+            </tr>
+            <tr>
+                <td>Pin Code</td>
+                <td>: <span id="spPinCode"></span></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Present Address</td>
+                <td colspan="2">: <span id="spPresentAddress"></span></td>
+            </tr>
+            <tr>
+                <td>Permanent Address</td>
+                <td colspan="2">: <span id="spParmanentAddress"><a href="tel:9386945679">9386945679</a></span></td>
+            </tr>
+            <tr>
+                <td>Phone No</td>
+                <td>: <span id="spPhone"></span></td>
+                <td>Mobile No</td>
+                <td>: <span id="spMobileNo"></span></td>
+            </tr>
+            <tr>
+                <td>Email Address</td>
+                <td>: <span id="spEmailAddress"></span></td>
+                <td>Adhaar No</td>
+                <td>: <span id="spAdhaarNo"></span></td>
+            </tr>
+            <tr>
+                <td>Department</td>
+                <td>: <span id="spempDepartmentdd"></span></td>
+                <td>Designation</td>
+                <td>: <span id="spDesignationdd"></span></td>
+            </tr>
+           
+            <tr>
+                <td>Qualfication</td>
+                <td>: <span id="spQualfication"></span></td>
+                <td>Total Experience</td>
+                <td>: <span id="spTotalExperience"></span></td>
+            </tr>
+            <tr>
+                <td>UserId</td>
+                <td>: <span id="spUserId"></span></td>
+                <td>Password</td>
+                <td>: <span id="spPassword">*****</span></td>
+            </tr>
+            <tr>
+                <td>User Type</td>
+                <td>: <span id="spUserType">Employee</span></td>
+                <td>Staff</td>
+                <td>: <span id="spStaff"></span></td>
+            </tr>
+        </table>
+
+    </div>
+</div>
+     <div class="row">
+            <div class="col-sm-12">
+                <table class="table table-bordered table-striped tbl20 htmlTempletes">
+                    <thead>
+                        <tr>
+                            <th>Document Name</th>
+                            <th>PdF</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyEmployeeDocuments"></tbody>
+
+                </table>
+                <script type="text/html" id="tbodyEmployeeDocumentsJTemplte">
+                    {#foreach $T as Datashort}
+                    <tr>
+                        <td>
+                            { $T.Datashort.Name}
+                        </td>
+                        <td>
+                            <a href="{ $T.Datashort.Id}" download>Download</a>
+                        </td>
+
+                    </tr>
+                    {#/for}
+                </script>
+            </div>
+
+        </div>
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+<style>
+    #customers {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #customers td, #customers th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        #customers tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #customers tr:hover {
+            background-color: #ddd;
+        }
+
+        #customers th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #4CAF50;
+            color: white;
+        }
+</style>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var Id = getQuerystring("Id");
+        if (typeof (Id) != "undefined") {
+            callServiceMethod(JSON.stringify([Id]), "/api/EmployeeAPI", "ViewEmployeeDetailsById", false, "", "", false, "", true, editEmployeeDetailsById_scs, "", "", "");
+            callJTemplateServiceMethod(JSON.stringify([Id]), "/api/EmployeeAPI", "getEmployeeDocuemnts",
+                   "tbodyEmployeeDocuments", "tbodyEmployeeDocumentsJTemplte", false, "", "", "", "");
+        }
+
+    })
+
+
+    function editEmployeeDetailsById_scs(p1, p2, p3, datas) {
+        if (datas.ImageUpload == null || datas.ImageUpload=="" ) {
+            datas.ImageUpload = "/Images/Employee/EmployyeImage/No_Photo_Available.jpg";
+        }
+
+
+        $("#ImgEmployeePic").attr("src", datas.ImageUpload);
+
+
+        setControlValue("spEmpDepartment", datas.Department + " (" + datas.Designation + ")");
+        setControlValue("txtEmployeeId", datas.Id);
+        setControlValue("spEmployeeCode", datas.Employeecode);
+        setControlValue("spJoiningDate", datas.JoiningDate);
+        setControlValue("spFName", datas.FName);
+        setControlValue("spMname", datas.MName);
+        setControlValue("spLName", datas.LName);
+        setControlValue("spDOB", datas.DOB);
+        setControlValue("spGender", datas.Gender);
+        setControlValue("spRelegon", datas.Religon);
+
+        setControlValue("spMotherName", datas.MotherName);
+        setControlValue("spFateherName", datas.FatherName);
+        setControlValue("spMaritalStatus", datas.MaritalStaus);
+        setControlValue("spCountry", datas.Country);
+        setControlValue("spState", datas.State);
+        setControlValue("spCity", datas.city);
+        setControlValue("spPinCode", datas.Pin);
+        setControlValue("spPresentAddress", datas.PresentAddress);
+        setControlValue("spParmanentAddress", datas.PermanentAddress);
+        setControlValue("spPhone", datas.Phone);
+        setControlValue("spMobileNo", datas.Mobile);
+        setControlValue("spEmailAddress", "<a href='malto:" + datas.Email + "'>" + datas.Email + "</a>");
+        setControlValue("spAdhaarNo", datas.AdhaarNo);
+        setControlValue("spempDepartmentdd", datas.Department);
+        setControlValue("spDesignationdd", datas.Designation);
+        setControlValue("spQualfication", datas.qualfication);
+        setControlValue("spTotalExperience", datas.TotalExperience);
+        setControlValue("spStaff", datas.UserType);
+        setControlValue("EmployeeFullName", datas.FName + " " + datas.MName + " " + datas.LName);
+        //setControlValue("txtMiddleName", datas.MName);
+        //setControlValue("txtLastName", datas.LName);
+        //setControlValue("txtDOB", datas.DOB);
+        //setControlValue("ddlGender", datas.Gender);
+        setControlValue("spEmpEmailId", "<a href='malto:" + datas.Email + "'>" + datas.Email + "</a>");
+        setControlValue("spUserId", datas.UserName);
+        //setControlValue("spPassword", datas.Password); //encripted from md5 so cannot decrept to show //
+        setControlValue("spEmpMob", "<i class='fa fa-mobile'></i> " + datas.Mobile + "");
+        setControlValue("spEmpPhone", "<i class='fa fa-mobile'></i> " + datas.Phone + "");
+        if (datas.Status == "Activate") {
+            setControlValue("pEmployeeStatus", " <button type='button' style='background-color: #00a65a;border-color: #008d4c;border-radius: 3px;-webkit-box-shadow: none;box-shadow: none;width:200px;padding: 5px 10px;font-size: 12px;line-height: 1.5;'  >" + datas.Status + "</button>");
+        }
+        else {
+            setControlValue("pEmployeeStatus", " <button type='button'  style='background-color: #dd4b39;border-color: #d73925;border-radius: 3px;-webkit-box-shadow: none;box-shadow: none;width:200px;padding: 5px 10px;font-size: 12px;line-height: 1.5;'>" + datas.Status + "</button>");
+        }
+         printPreview();
+         
+         
+    }
+
+    function editEmployee() {
+        window.location.href = "/Employee/AddEmployee?Id=" + getControlValue("txtEmployeeId");
+    }
+
+    function printPreview() {
+
+           var contents = $("#dvContents").html();
+           var frame1 = $('<iframe />');
+           frame1[0].name = "frame1";
+           frame1.css({ "position": "absolute", "top": "-1000000px" });
+           $("body").append(frame1);
+           var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+           frameDoc.document.open();
+           //Create a new HTML document.
+           frameDoc.document.write('<html><head><title>DIV Contents</title> ');
+           frameDoc.document.write('<style type="text/css">  #customers {font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;border-collapse: collapse;width: 100%;}#customers td, #customers th { border: 1px solid #ddd;padding: 8px;}#customers tr:nth-child(even) {background-color: #f2f2f2;}#customers tr:hover {background-color: #ddd;}#customers th {padding-top: 12px;padding-bottom: 12px;text-align: left;background-color: #4CAF50;color: white;} .btn-success {background-color: #00a65a;border-color: #008d4c;}.btn {border-radius: 3px;-webkit-box-shadow: none;box-shadow: none;border: 1px solid transparent;}.btn-block {display: block;width: 100%;}.btn-danger {background-color: #dd4b39;border-color: #d73925;}.btn {border-radius: 3px;box-shadow: none; border: 1px solid transparent;}.btn-block {display: block;width: 100%;}.btn-group-sm>.btn, .btn-sm {padding: 5px 10px;font-size: 12px; line-height: 1.5;border-radius: 3px;}</style>');
+           frameDoc.document.write('</head><body>');
+           //Append the external CSS file.
+           frameDoc.document.write('<link href="style.css" rel="stylesheet" type="text/css" />');
+           //Append the DIV contents.
+           frameDoc.document.write(contents);
+           frameDoc.document.write('</body></html>');
+           frameDoc.document.close();
+           setTimeout(function () {
+               window.frames["frame1"].focus();
+               window.frames["frame1"].print();
+               frame1.remove();
+           }, 500);
+
+    }
+
+</script>
+
+
+

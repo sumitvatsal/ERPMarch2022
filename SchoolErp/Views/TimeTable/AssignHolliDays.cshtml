@@ -1,0 +1,566 @@
+﻿
+@{
+    ViewBag.Title = "AssignHolliDays.cshtml";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<style type="text/css">
+    .imgIcon {
+        width: 0.5%;
+        height: 0.5%;
+    }
+
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 8px;
+            padding-bottom: 8px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+<link href="~/css/bootstrap-timepicker.css" rel="stylesheet" />
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<link rel="stylesheet" href="~/css/bower_components/select2/dist/css/select2.min.css">
+<script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>
+<section class="content-header">
+    <h1>
+        <i class="fa fa-plus-square"></i>Assign Holidays
+    </h1>
+   
+</section>
+<section class="content">
+
+    <div class="box box-solid">
+
+        <form id="form1" name="form1">
+            <div class="box-body">
+                <div class="row" id="HiddenSchoolAcademic">
+
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label for="Country" class="req">School<span class="requird">*</span></label>
+                            <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name"></select>
+
+                        </div>
+                    </div>
+
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label class="control-label">Academic Year <span class="requird">*</span></label>
+                            <select id="tc_academic_year" class="form-control" name="tc_academic_year" aria-required="true" valuefield="ID" textfield="StartYear">
+                                @*<option value="">--- Select Academic Year ---</option>
+                                    <option value="1" selected="">2016-17</option>*@
+                            </select>
+
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label class="control-label">Name <span class="requird">*</span></label>
+                            <input type="text" id="tc_name" name="tc_name" class="form-control" maxlength="150" aria-required="true">
+
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group">
+
+                            <label class="control-label">Description <span class="requird">*</span></label>
+                            <input class="form-control" name="txtDesc" id="txtDesc" type="text" ng-model="txtDesc" maxlength="150" aria-required="true" />
+                        </div>
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label class="control-label">Start Date <span class="requird">*</span></label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" id="tc_from_date" name="tc_from_date" class="form-control dtpicker" readonly="" size="10">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label class="control-label">End Date <span class="requird">*</span></label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" id="tc_To_date" name="tc_To_date" class="form-control dtpicker" readonly="" size="10">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-sm-4" id="labelTotalDays">
+                        <div class="form-group">
+                            <label class="control-label">Total Holidays Days : </label>
+                            <span style="color:red ; font-size:x-large" id="lblDays"></span>
+                            <!-- /.input group -->
+                        </div>
+                    </div>
+                </div>
+            </div><!--box-body-->
+
+            <div class="box-footer">
+                <button type="button" class="btn btn-primary" id="btnCreate">Create</button>	<a class="btn btn-default" onclick="clearfields();">Cancel</a>
+                <input type="hidden" id="hdnID" />
+            </div>
+
+        </form>
+    </div>
+
+    <div class="box box-solid">
+        <div class="box-header with-border">
+            <h3 class="box-title"><i class="fa fa-eye"></i> List</h3>
+        </div>
+        <div class="box-body table-responsive">
+
+            <div id="w2" class="grid-view">
+                <table class="table table-striped table-bordered" id="example1">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>School</th>
+                            <th>Name</th>
+
+
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                         
+                            <th>Academic Year</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyEmployeeDetails">
+                        @*<tr data-key="4">
+                            <td>1</td>
+                            <td><a href="/timetable/timetable-configuration/view-weekly-tt?id=4" data-pjax="0">tt</a></td>
+                            <td>2016-17</td>
+                            <td>Secondary</td>
+                            <td>Year7</td>
+                            <td>Year7-Sec1</td>
+                            <td>Dec 1, 2017</td>
+                            <td>Dec 31, 2017</td>
+                            <td>Weekly Format</td>
+                            <td class="text-center"><a class="toggle-column" href="/timetable/timetable-configuration/toggle?id=4" title="Inactive" data-method="post" data-pjax="0"><span class="glyphicon glyphicon-ok-circle fa-lg"></span></a></td>
+                            <td><a href="/timetable/timetable-configuration/view?id=4" title="View" data-target="#globalModal" data-toggle="modal"><span class="glyphicon glyphicon-eye-open"></span></a> <a href="/timetable/timetable-configuration/update?id=4" title="Update" data-target="#globalModal" data-toggle="modal"><span class="glyphicon glyphicon-pencil"></span></a> <a href="/timetable/timetable-configuration/delete?id=4" title="Delete" data-confirm="Are you sure you want to delete this item?" data-method="post"><span class="glyphicon glyphicon-trash"></span></a></td>
+                            </tr>*@
+                    </tbody>
+                </table>
+            </div>
+            <script type="text/html" id="divEmployeeDetailsJTemplte">
+                {#foreach $T as Datashort}
+                <tr>
+                    <td style="width:10%;">
+                        { $T.Datashort.count}
+                    </td>
+                    <td>
+                        {$T.Datashort.School}
+                    </td>
+                    <td>
+                        {$T.Datashort.Name}
+                    </td>
+                    <td>
+                        {$T.Datashort.DateFrom}
+                    </td>
+                    <td>
+                        {$T.Datashort.DateTo}
+                    </td>
+                    <td>
+                        {$T.Datashort.AcademicYear}
+                    </td>
+                  
+                   
+                    <td>
+                        <i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" onclick="Edit({ $T.Datashort.ID }, '{ $T.Datashort.Name}', '{ $T.Datashort.DateFrom}', '{ $T.Datashort.DateTo}', '{ $T.Datashort.Description}', { $T.Datashort.days })" title="Edit"></i>
+                        @*<i class="fa fa-fw fa-eye" style="cursor:pointer" onclick="ViewDetails({ $T.Datashort.ID},'{ $T.Datashort.con.Name}',{ $T.Datashort.con.Status},'{ $T.Datashort.StatusNm}','{ $T.Datashort.Course}','{ $T.Datashort.fromDT}','{ $T.Datashort.ToDt}','{ $T.Datashort.WeekDaysNm}','{ $T.Datashort.timingNm}')" title="View"></i>*@
+                        <i class="fa fa-fw fa-trash" style="cursor:pointer" onclick="Delete({ $T.Datashort.ID})" title="Delete"></i>
+                    </td>
+                </tr>
+                {#/for}
+            </script>
+        </div>
+    </div>
+
+
+    <div class="alert alert-success centerSuccess" id="divSucesEmail" style="display:none">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h4>
+            <i class="icon fa fa-check"></i>
+            <span Id="sentEmailMsg"></span>
+        </h4>
+
+    </div>
+</section>
+<script src="~/js/bootstrap-timepicker.js"></script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+      
+      
+        //
+        $('#labelTotalDays').hide();
+        $('#HiddenSchoolAcademic').hide();
+        var startDt;
+        var endDt;
+        $('#tc_To_date').on('change', function () {
+            startDt = $('#tc_from_date').val();
+            endDt = $('#tc_To_date').val();
+            if (new Date(startDt) > new Date(endDt)) {
+                alert("start date should be less than end date")
+                $('#labelTotalDays').hide();
+            }
+            else {
+               
+                var Startdate = new Date(startDt);
+                var EndDate = new Date(endDt);
+                var millisecondsPerDay = 1000 * 60 * 60 * 24;
+                var millisBetween = EndDate.getTime() - Startdate.getTime();
+                var days = (millisBetween / millisecondsPerDay) + 1;
+                $('#lblDays').html(Math.floor(days));
+                if (days != null) {
+                    $('#labelTotalDays').show();
+                }
+            }
+           
+            //alert(Math.floor(days));
+            // Round down.
+            //alert(Math.floor(days));
+        });
+        //startDt = $('#tc_from_date').val();
+        //endDt = $('#tc_To_date').val();
+      
+
+        $("#tc_weekday").select2({});
+        
+
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+
+      
+        var SchoolID = getControlValue("ddlSchoolName");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TimeTableApi", "GetAcademicYearBySchoolActive", "tc_academic_year", false, "", "", "", "");
+        var SchoolID = getControlValue("ddlSchoolName");
+        callJTemplateServiceMethod(JSON.stringify([SchoolID]),"/api/AccountsAPI","getAllHolidaysDetails",
+            "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+
+
+       
+      
+       
+       // callServiceMethodForDDl("", "/api/StudentApi", "GetClasses", "ddlCourse", false, "", "", "", "");
+        
+        //callServiceMethodForDDl("", "/api/TimeTableApi", "GetAcademicYear", "tc_academic_year", false, "", "", "", "");
+
+
+
+            
+        
+        $('.dtpicker').datepicker({
+            autoclose: true
+            //,
+            //dateFormat: 'dd/mm/yy' 
+        });
+
+        
+       
+
+        $('#tc_weekday').val([]);
+        //
+        //callServiceMethodForDDl("", "/api/StudentApi", "GetLeaveStatus", "ddlReqStatus", false, "", "", "", "");
+    });
+
+    function successMsg(p1, p2, p3, datas) {
+        setTimeout(function () {
+            //$('#example1').DataTable();
+        }, 1000);
+    }
+
+    function Edit(ID, Name, DateFrom, DateTo, Description,days) {
+        setControlValue("hdnID", ID);
+        setControlValue("tc_name", Name);
+        setControlValue("tc_from_date", DateFrom);
+        setControlValue("tc_To_date", DateTo);
+        setControlValue("txtDesc", Description);
+        setControlValue("lblDays", days);
+        $('#labelTotalDays').show()
+    }
+    function openModal()
+    {
+        $('#myModal').modal('show');
+    }
+
+   
+
+    
+
+   
+
+    //
+    $("#btnCreate").click(function () {
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+            var ID = getControlValue("hdnID");
+            if (ID == 0) {
+                ID = "0";
+            }
+            var Days = getControlValue("lblDays");
+            var SchoolID = getControlValue("ddlSchoolName");
+            var AcademicYear = getControlValue("tc_academic_year");
+            var Name = getControlValue("tc_name");
+            var Description = getControlValue("txtDesc");
+            var DateFrom = getControlValue("tc_from_date");
+            var DateTo = getControlValue("tc_To_date");         
+           
+            $.ajax({
+                //url: "/api/TimeTableApi/SaveTimin",
+                url: "/api/AccountsAPI/SaveHolidays",
+                type: "Post",
+                data: JSON.stringify([Name, Description, DateFrom, DateTo, AcademicYear, SchoolID, ID, Days]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    $("#loader").fadeOut();
+                    $("#divSucesEmail").fadeIn();
+                    $("#sentEmailMsg").html(data);
+                    setTimeout(function () {
+                        $("#divSucesEmail").fadeOut();
+                        $("#sentEmailMsg").html("");
+                    }, 2000)
+                    $('#labelTotalDays').hide();
+                    clearfields();
+                    var SchoolID = getControlValue("ddlSchoolName");
+                    callJTemplateServiceMethod(JSON.stringify([SchoolID]), "/api/AccountsAPI", "getAllHolidaysDetails",
+                        "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+                    //if (data.ID == 1 /*&& data.ID != undefined*/) {
+                    //    //setControlValue("hdn", CT_id);
+                    //    //setControlValue("hdnID", 0);
+                    //    //setControlValue("PeriodName", "");
+                    //    //setControlValue("sTime", "");
+                    //    //setControlValue("eTime", "");
+                    //    //$('#myModal').modal('hide');
+                    //    alert("Holiday Assigned Successfully");
+                      
+                    //}
+
+                    //fillDataTable(CT_id);
+                }
+            });
+
+           
+          
+           
+        }
+    });
+
+
+    function clearfields()
+    {
+       
+        $('#hdnID').val("");
+        $('#tc_name').val("");
+        $('#txtDesc').val("");
+        $('#tc_from_date').val("");
+        $('#tc_To_date').val("");
+        $('#labelTotalDays').hide()
+        //$scope.tc_name = null;
+        //$scope.txtDesc = null;
+        //$scope.tc_from_date = null;
+        //$scope.tc_To_date = null
+        //    ; 
+
+    }
+
+
+    //ank
+    
+    function Delete(id)
+    {
+        var result = window.confirm('Are you sure to delete this record?');
+        if (result == true) {
+            $.ajax({
+
+                url: "/api/AccountsAPI/DeleteHolidays",
+                type: "Post",
+                data: JSON.stringify([id]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    $("#sentEmailMsg").html(data);
+                    var SchoolID = getControlValue("ddlSchoolName");
+                    callJTemplateServiceMethod(JSON.stringify([SchoolID]), "/api/AccountsAPI", "getAllHolidaysDetails",
+                        "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+
+                }
+            });
+        }
+    }
+
+
+
+  
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules : {
+
+                tc_name: "required",
+                tc_from_date:"required",         
+                tc_To_date:"required",
+
+            },
+            messages: {
+
+                tc_name: "Please Enter Name Of Holiday ",              
+                tc_from_date: "Please Enter Holidays Start Date",
+                tc_To_date :"Please Enter Holidays End Date"
+
+
+            }
+        })
+        jQuery.validator.addMethod('selectcheck', function (value) {
+            if (value == "-1") {
+                return (value != '-1');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+        jQuery.validator.addMethod('selectcheck1', function (value) {
+            if (value == "-1") {
+                return (value != '-1');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+        jQuery.validator.addMethod('selectcheck2', function (value) {
+            if (value == "-1") {
+                return (value != '-1');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else if (value == null) {
+                return (value != null);
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+        jQuery.validator.addMethod('selectcheck3', function (value) {
+            if (value == "-1") {
+                return (value != '-1');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+        jQuery.validator.addMethod('selectcheck4', function (value) {
+            if (value == "-1") {
+                return (value != '-1');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+
+
+    });
+</script>

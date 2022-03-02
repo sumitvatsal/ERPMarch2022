@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="smartvidhyaCom1Model.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityType Name="Accounts">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="HeadCode" Type="bigint" Nullable="false" />
+    <Property Name="HeadName" Type="nvarchar" MaxLength="100" Nullable="false" />
+    <Property Name="ParentHead" Type="bigint" />
+    <Property Name="PHeadName" Type="nvarchar" MaxLength="100" />
+    <Property Name="HeadLevel" Type="int" Nullable="false" />
+    <Property Name="HeadType" Type="nvarchar" MaxLength="1" Nullable="false" />
+    <Property Name="IsTransaction" Type="bit" Nullable="false" />
+    <Property Name="IsGL" Type="bit" Nullable="false" />
+    <Property Name="IsBudget" Type="bit" Nullable="false" />
+    <Property Name="IsDepreciation" Type="bit" Nullable="false" />
+    <Property Name="CustomerId" Type="bigint" />
+    <Property Name="SupplierId" Type="bigint" />
+    <Property Name="DepreciationRate" Type="float" Nullable="false" />
+    <Property Name="InsertDate" Type="datetime" Nullable="false" />
+    <Property Name="InsertUserId" Type="nvarchar" MaxLength="20" Nullable="false" />
+    <Property Name="UpdateDate" Type="datetime" />
+    <Property Name="UpdateUserId" Type="nvarchar" MaxLength="20" />
+    <Property Name="DeleteDate" Type="datetime" />
+    <Property Name="DeleteUserId" Type="nvarchar" MaxLength="20" />
+    <Property Name="IsActive" Type="int" Nullable="false" />
+    <Property Name="EmployeeId" Type="bigint" />
+    <Property Name="ExpenseTypeId" Type="bigint" />
+    <Property Name="BankId" Type="bigint" />
+  </EntityType>
+  <EntityType Name="SaleDetails">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="ProductId" Type="bigint" Nullable="false" />
+    <Property Name="ProductName" Type="nvarchar" MaxLength="250" />
+    <Property Name="Description" Type="nvarchar" MaxLength="500" />
+    <Property Name="UnitId" Type="bigint" Nullable="false" />
+    <Property Name="UnitName" Type="nvarchar" MaxLength="250" />
+    <Property Name="Quantity" Type="float" Nullable="false" />
+    <Property Name="PurchasePrice" Type="float" Nullable="false" />
+    <Property Name="UnitPrice" Type="float" Nullable="false" />
+    <Property Name="Discount" Type="float" Nullable="false" />
+    <Property Name="Total" Type="float" Nullable="false" />
+    <Property Name="SaleId" Type="bigint" Nullable="false" />
+  </EntityType>
+  <EntityType Name="Sales">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="CustomerId" Type="bigint" Nullable="false" />
+    <Property Name="Date" Type="datetime" Nullable="false" />
+    <Property Name="Discount" Type="float" Nullable="false" />
+    <Property Name="TotalDiscount" Type="float" Nullable="false" />
+    <Property Name="Vat" Type="float" Nullable="false" />
+    <Property Name="TotalTax" Type="float" Nullable="false" />
+    <Property Name="ShippingCost" Type="float" Nullable="false" />
+    <Property Name="GrandTotal" Type="float" Nullable="false" />
+    <Property Name="NetTotal" Type="float" Nullable="false" />
+    <Property Name="PaidAmount" Type="float" Nullable="false" />
+    <Property Name="Due" Type="float" Nullable="false" />
+    <Property Name="Change" Type="float" Nullable="false" />
+    <Property Name="Details" Type="nvarchar" MaxLength="4000" />
+    <Property Name="PaymentAccount" Type="bigint" />
+    <Property Name="VNo" Type="bigint" Nullable="false" />
+  </EntityType>
+  <Association Name="FK_Accounts_Accounts">
+    <End Role="Accounts" Type="Self.Accounts" Multiplicity="0..1" />
+    <End Role="Accounts1" Type="Self.Accounts" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Accounts">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Accounts1">
+        <PropertyRef Name="ParentHead" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_SaleDetails_Sales">
+    <End Role="Sales" Type="Self.Sales" Multiplicity="1" />
+    <End Role="SaleDetails" Type="Self.SaleDetails" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Sales">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="SaleDetails">
+        <PropertyRef Name="SaleId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <EntityContainer Name="smartvidhyaCom1ModelStoreContainer">
+    <EntitySet Name="Accounts" EntityType="Self.Accounts" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="SaleDetails" EntityType="Self.SaleDetails" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="Sales" EntityType="Self.Sales" Schema="dbo" store:Type="Tables" />
+    <AssociationSet Name="FK_Accounts_Accounts" Association="Self.FK_Accounts_Accounts">
+      <End Role="Accounts" EntitySet="Accounts" />
+      <End Role="Accounts1" EntitySet="Accounts" />
+    </AssociationSet>
+    <AssociationSet Name="FK_SaleDetails_Sales" Association="Self.FK_SaleDetails_Sales">
+      <End Role="Sales" EntitySet="Sales" />
+      <End Role="SaleDetails" EntitySet="SaleDetails" />
+    </AssociationSet>
+  </EntityContainer>
+</Schema>

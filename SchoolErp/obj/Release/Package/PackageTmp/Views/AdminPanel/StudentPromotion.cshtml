@@ -1,0 +1,294 @@
+﻿
+@{
+    ViewBag.Title = "StudentPromotion";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section class="content">
+
+
+    <div class="box box-solid">
+        <div class="et">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-search"></i>Student Promotion/Demotion</h3>
+
+            </div>
+        </div>
+
+        <div class="box-body">
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group ">
+                        <label class="control-label" for="empinfosearch-emp_designation_id">Class</label>
+                        <select class="form-control" id="ddlCourse" name="ddlCourse" valuefield="Id" textfield="CourseName" blankRowValue="0" blankRowText="----Select----"></select>
+                        <div class="help-block"></div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label class="control-label" for="empinfosearch-emp_designation_id">Section</label>
+                        <select class="form-control" id="ddlSection" valuefield="Id" textfield="SectionName" blankRowValue="0" blankRowText="----Select----"></select>
+
+                        <div class="help-block"></div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label class="control-label" for="empinfosearch-emp_designation_id">
+                            Academic Year
+
+                        </label>
+                        <select id="ddl_academic_year" class="form-control" valuefield="ID" textfield="StartYear" blankRowValue="-1" blankRowText="----Select----" onchange="getMothsForThisYear(this.value)" aria-required="true"></select>
+                        <div class="help-block"></div>
+                    </div>
+
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group ">
+                        <label class="control-label" for="empinfosearch-emp_designation_id">Student Name</label>
+                        <input type="text" id="txtStudentName" class="form-control" placeholder="Enter Student First/Last Name">
+                        <div class="help-block"></div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label class="control-label" for="empinfosearch-emp_designation_id">Registration No</label>
+                        <input type="text" id="txtRegNo" class="form-control" placeholder="">
+                        <div class="help-block"></div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label class="control-label" for="empinfosearch-emp_designation_id">SR No</label>
+                        <input type="text" id="txtSRNo" class="form-control" placeholder="">
+                        <div class="help-block"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="box-footer">
+            <input class="btn btn-primary" onclick="fillDataTable()" value="Search" type="button" />
+            @*<a class="btn btn-default" onclick="restClear()" href="javascript:void(0)">Reset</a>
+                <input type="button" id="create_pdf" value="Export Pdf" onclick="pdfExport()" class="btn btn-primary" />
+
+                <a href="#" class="btn btn-primary" onClick="$('#example1').tableExport({ type: 'excel', escape: 'false', defaultFileName :'rahul'});">Excel Exports</a>*@
+        </div>
+
+    </div>
+
+
+
+    <div class="box box-solid">
+        <!-- general form elements -->
+        <div class="box ">
+            <div class="box-body">
+                <div class="form-group">
+
+                    <div id="divSRDetails" style="overflow-x: auto;">
+                        <table id="example1" style="max-width:1800px" class="table table-bordered table-striped tbl20 htmlTempletes">
+                            <thead id="tblempheaderDetails">
+                                <tr>
+                                    <th style="width:5%;">#</th>
+                                    <th style="width:10%;">Reg.No</th>
+                                    <th>Student Name</th>
+                                    <th style="width:12%;">Action</th>
+                                    <th style="width:25%;">Remarks</th>
+                                    @*<th>Status</th>*@
+                                    @*<th style="width:5%;">Edit</th>*@
+                                </tr>
+                            </thead>
+                            <tbody id="tbodySRDetails"></tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <script type="text/html" id="divSRDetailsJTemplte">
+            {#foreach $T as Datashort}
+            <tr>
+                <td>
+                    { $T.Datashort.count}
+                </td>
+                <td>
+                    { $T.Datashort.std.RegNo}
+                </td>
+                <td>
+                    <a href="#" onclick="RedirectToView({ $T.Datashort.std.ID})">{ $T.Datashort.fullStName}</a>
+                </td>
+                <td>
+                    <select  class="form-control" stdID="{ $T.Datashort.std.ID}"  AcademicYr="{ $T.Datashort.std.AcademicYear}" classID="{ $T.Datashort.std.ClassID}" 
+                            sect="{ $T.Datashort.std.SectionID}" id="ddlAction_{ $T.Datashort.std.ID}">
+                        <option value="Promote" selected="selected">Promote</option>
+                        <option value="Demote">Demote</option>
+                    </select>
+                    @*<select class="form-control"   stdID="{ $T.Datashort.std.Id}" AcademicYr="{ $T.Datashort.std.AcademicYear}" classID="{ $T.Datashort.std.ClassID}" 
+                            sect="{ $T.Datashort.std.SectionID}" id="ddlAction_{ $T.Datashort.std.Id}">
+                        
+                        <option value="Promote" selected="selected">Promote</option>
+                        <option value="Demote">Demote</option>
+                    </select>*@
+                </td>
+                <td>
+                    <input type="text" class="form-control" id="txtRemarks_{ $T.Datashort.std.Id}" />
+                </td>
+
+                @*<td>
+                    <span class='badge bg-yellow' id="spStatus_{ $T.Datashort.std.Id}"></span>
+                </td>*@
+                @*<td>
+                                <i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" onclick="Edit({ $T.Datashort.tsr.ID }, { $T.Datashort.std.ID },'{ $T.Datashort.RegNo}', '{ $T.Datashort.fullStName}', '{ $T.Datashort.std.FatherName}',
+                '{ $T.Datashort.std.MotherName}', '{ $T.Datashort.SDOB}', '{ $T.Datashort.jDate}', '{ $T.Datashort.std.FJob}', '{ $T.Datashort.std.FOfficeAddress}','{ $T.Datashort.std.MJob}','{ $T.Datashort.std.PicPath}')" title="Click here to Enter SR No. here"></i>
+                            </td>*@
+            </tr>
+            {#/for}
+        </script>
+        <div class="box-footer">
+            <input type="button" value="Submit" id="Promote" onclick="PromoteDemote()" class="btn btn-primary btn-create" />
+            @*<input type="button" value="Change Attendence" id="updateAtttendence" onclick="changeAttendence()" class="btn btn-primary btn-create" />*@
+            @*<button type="submit" id="save" class="btn btn-primary btn-create">Save</button>*@
+        </div>
+
+    </div>
+
+    <div id="divActualGridClone"></div>
+</section>
+<link href="~/js/PDFExcelDatatable/buttons.dataTables.min.css" rel="stylesheet" />
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        callServiceMethodForDDl("", "/api/TimeTableApi", "GetAcademicYear", "ddl_academic_year", false, "", "", "", "");
+        callServiceMethodForDDl("", "/api/StudentApi", "GetClasses", "ddlCourse", false, "", "", "", "");
+    })
+   
+    $("#ddlCourse").change(function () {
+        var ddlCourse = getControlValue("ddlCourse");
+        if (ddlCourse != null && (ddlCourse != -1) && (ddlCourse != undefined)) {
+
+            callServiceMethodForDDl(JSON.stringify([ddlCourse]), "/api/StudentApi", "GetSections", "ddlSection", false, "", "", "", "");
+        }
+    });
+
+
+    function fillDataTable() {
+
+        var name = getControlValue("txtStudentName");
+        var RegNo = getControlValue("txtRegNo");
+        var course = getControlValue("ddlCourse");
+        var section = getControlValue("ddlSection");
+        var year = getControlValue("ddl_academic_year");
+        var srNo = getControlValue("txtSRNo");
+
+        var Student = {
+            FirstName: name,
+            RegNo: RegNo,
+            ClassID: course,
+            SectionID: section,
+            AcademicYear: year,
+            SRNo: srNo
+        }
+
+        var ScholarRegister = {
+            std: Student,
+            type: "StudentPromotion"
+        }
+        var Items = new Array();
+        Items.push(ScholarRegister);
+        callJTemplateServiceMethod(JSON.stringify(ScholarRegister), "/api/StudentApi", "getList",
+            "tbodySRDetails", "divSRDetailsJTemplte", true, successMsg, "", "", "");
+    }
+
+    function successMsg(p1, p2, p3, datas) {
+        setTimeout(function () {
+           // $('#example1').DataTable();
+        }, 1000);
+    }
+
+    function PromoteDemote() {
+        $("#loader").fadeIn();
+        debugger;
+        var srDlist = new Array();
+        $("#tbodySRDetails").find('tr').each(function (i) {
+            debugger;
+            var $tds = $(this).find('td'),
+                stdID = $tds.eq(3).find('select').attr("stdID"),
+                classID = $tds.eq(3).find('select').attr("classID"),
+                SectionID = $tds.eq(3).find('select').attr("sect"),
+                AcYear = $tds.eq(3).find('select').attr("AcademicYr"),
+                action = $tds.eq(3).find('select').val(),
+                Remarks = $tds.eq(4).find('input[type=text]').val();
+            var ScholarRegisterDetail = {
+                Student_ID: stdID,
+                ActionTaken: action,
+                ClassID: classID,
+                SectionID: SectionID,
+                AcademicYear: AcYear,
+                Remarks: Remarks
+            }
+            srDlist.push(ScholarRegisterDetail);
+
+        });
+        var ScholarRegister = {
+            SRdetailsList: srDlist,
+            type: "StudentPromotion"
+        }
+
+        var ddl = JSON.stringify(ScholarRegister)
+        callServiceMethod(ddl, "/api/StudentApi", "SaveDetails", false, "", "", false, "", true, TakeEmployeeAttendence_scs, "", "", "");
+        //var employye = {
+    }
+
+    function TakeEmployeeAttendence_scs(p1, p2, p3, datas) {
+        $("#loader").fadeOut();
+        // alert(datas);
+
+
+        swal({
+            title: datas.Msg,
+            text: "",
+            icon: "success",
+            button: "Ok!",
+        });
+
+
+        //setTimeout(function () {
+        //    location.reload();
+
+        //}, 2000)
+    }
+</script>

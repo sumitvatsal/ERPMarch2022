@@ -1,0 +1,547 @@
+﻿@{
+    ViewBag.Title = "SchoolDetails";
+    Layout = "~/Views/Shared/_LayoutSchoolAdmin.cshtml";
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<section class="content">
+    <div class="row">
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Edit School Details</h4>
+                    </div>
+                    <form role="form" id="form1" name="form1">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body">
+                                            <div class="form-group">
+                                                <label for="reg_input_name" class="req">School Name </label>
+                                                <input type="text" class="form-control" name="txtSchoolName" id="txtSchoolName">
+                                                <input type="text" style="display:none" class="form-control" id="txtSchoolId">
+                                                <input type="text" style="display:none" class="form-control" id="txtPrincipleId">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="reg_input_name">School Code </label>
+                                                <input type="text" class="form-control" id="txtSchoolCode" readonly="readonly">
+
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="reg_input_name">School Board </label>
+                                                <input type="text" class="form-control" id="txtBoard" name="txtBoard">
+
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="reg_input_name">Website</label>
+                                                <input type="text" class="form-control" id="txtWebsite" name="txtWebsite">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="Email" class="req">Email </label>
+                                                <input type="text" class="form-control" id="txtEmailAddress" name="txtEmailAddress" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="Fax" class="req">Fax No</label>
+                                                <input type="text" class="form-control" id="txtFaxNo" name="txtFaxNo" />
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="col-sm-6">
+                                                    <label for="reg_input_name">School Logo</label>
+                                                    <input type="file" class="form-control" onchange="setSchoolLogo(this.value)" id="txtSchoolLogo">
+                                                    <span id="sptxtSchoolLogo" style="display:none"></span>
+                                                </div>
+
+                                                @*<div class="col-sm-6"><img src="" style="width: 156px;height: 130px;" id="ImgSchoologo" /></div>*@
+                                            </div>
+
+                                            @*<div class="form-group">
+
+
+                                                    <div class="col-sm-6">
+                                                        <label for="reg_input_name">Principle Signature</label>
+                                                        <input type="file" class="form-control" onchange="setPrincipleLogo(this.value)" id="txtPrincipleSignature">
+                                                        <span id="sptxtPrincipleSignature" style="display:none"></span>
+                                                    </div>
+
+                                                    <div class="col-sm-6"><img src="" style="width: 156px;height: 130px;" id="ImgPrinciplesign" /></div>
+                                                </div>*@
+
+
+
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body">
+                                            <div class="form-group">
+                                                <label for="reg_input_name">Address</label>
+                                                <textarea class="form-control" id="txtAddress" name="txtAddress" cols="5" rows="5"></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="State" class="req">Country </label>
+                                                <select class="form-control" id="txtCountry" name="txtCountry" style="color:black;" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--"></select>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="State" class="req">State </label>
+                                                <select class="form-control" id="txtState" name="txtState" style="color:black;" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--"></select>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="State" class="req">City </label>
+                                                <select class="form-control" id="txtCity" style="color:black;" name="txtCity" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--"></select>
+
+                                            </div>
+                                            @*<div class="form-group">
+                                                    <label for="City" class="req">City </label>
+                                                    <input type="text" class="form-control" id="txtCity" />
+                                                </div>*@
+                                            <div class="form-group">
+                                                <label for="District" class="req">District </label>
+                                                <input type="text" class="form-control" id="txtDistrict" name="txtDistrict" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="Pincode" class="req">Pincode </label>
+                                                <input type="text" class="form-control" id="txtPincode" name="txtPincode" />
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="Mobile" class="req">Mobile no </label>
+                                                <input type="text" class="form-control" id="txtMobileNo" name="txtMobileNo" />
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="Phone" class="req">Phone No </label>
+                                                <input type="text" class="form-control" id="txtPhoneNo" name="txtPhoneNo" />
+                                            </div>
+                                            <div class="form-group">
+
+                                                <label for="Phone" class="req">Fee Due Date( Day ) </label>
+                                                <input type="number" class="form-control" max="28" min="1" id="txtFeeDuedate" name="txtFeeDuedate" />
+                                            </div>
+                                            <div>
+                                                <input type="button" onclick="updateSchoolDetails()" class="btn btn-primary" value="Save" />
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script type="text/javascript">
+
+    callServiceMethodForDDl("", "/api/MasterAPI", "getAllCountry", "txtCountry", false, "", "", "", "");
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+
+
+            $("#txtFeeDuedate").keyup(function () {
+                if ($(this).val() > 28) {
+                    alert("NO day above 28");
+                    $(this).val("28");
+
+                }
+            });
+
+
+
+
+        $("#txtCountry").on("change", function () {
+            var stateid = $("#txtCountry").val();
+        callServiceMethodForDDl(JSON.stringify([stateid]), "/api/StudentApi", "getAllstatebyCountryId", "txtState", false, "", "", "", "");
+    });
+
+        $('#txtState').change(function () {
+            var state = getControlValue("txtState");
+        callServiceMethodForDDl(JSON.stringify([state]), "/api/EmployeeAPI", "getCityByStateId", "txtCity", false, "", "", "", "");
+    });
+
+        $('#txtState').change(function () {
+            var state = getControlValue("txtState");
+        callServiceMethodForDDl(JSON.stringify([state]), "/api/EmployeeAPI", "getCityByStateId", "txtCity", false, "", "", "", "");
+    });
+
+
+
+
+    //callServiceMethodForDDl("", "/api/MasterAPI", "getAllCountry", "txtCountry", false, "", "", "", "");
+
+    //callServiceMethodForDDl("", "/api/Default", "getAllState", "txtState", false, "", "", "", "");
+
+
+
+
+
+
+    // var name = GetParameterValues('Name');
+    var id = GetParameterValues('Id');
+    //alert("Hello " + name + " your ID is " + id);
+        function GetParameterValues(param) {
+            var url = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+            for (var i = 0; i < url.length; i++) {
+                var urlparam = url[i].split('=');
+                if (urlparam[0] == param) {
+                    return urlparam[1];
+    }
+}
+}
+
+callServiceMethod(JSON.stringify([id]), "/api/Default", "getSchoolDetailsBySchoolID", false, "", "", false, "", true, getSchollDetails_scs, "", "", "");
+
+});
+
+
+
+    $("#txtSchoolLogo").change(function () {
+        var files = !!this.files ? this.files : [];
+
+        var iSize = (files[0].size / 1024);
+        iSize = (Math.round(iSize * 100) / 100)
+        var ext = $('#txtSchoolLogo').val().split('.').pop().toLowerCase();
+        if ($.inArray(ext, ['png', 'jpg', 'jpeg']) == -1) {
+            $("#inputFile").val("");
+        $("#txtSchoolLogo").val("");
+        alert('invalid extension,please upload jpg,jpeg,png !');
+
+        return;
+    }
+        if (iSize > 1000) {
+            $("#inputFile").val("");
+        $("#txtSchoolLogo").val("");
+        alert("Image size must be less than 1 Mb");
+
+        return;
+    }
+});
+
+
+
+
+    function getSchollDetails_scs(p1, p2, p3, datas) {
+
+
+
+            setControlValue("txtSchoolId", datas.ID)
+        setControlValue("txtSchoolName", datas.School);
+        setControlValue("txtSchoolCode", datas.SchoolCode);
+        setControlValue("txtBoard", datas.Board);
+        setControlValue("txtWebsite", datas.Website);
+        setControlValue("txtEmailAddress", datas.Email);
+        setControlValue("txtFaxNo", datas.Fax);
+        $("#ImgSchoologo").attr("src", datas.LogoPic);
+
+        $("#ImgPrinciplesign").attr("src", datas.principleSign);
+
+        setControlValue("sptxtSchoolLogo", datas.LogoPic);
+        setControlValue("sptxtPrincipleSignature", datas.principleSign);
+        setControlValue("txtAddress", datas.Address);
+        ////var a = datas.Country;
+        ////callServiceMethodForDDl(JSON.stringify([a]), "/api/MasterAPI", "getCountryByIdd", "txtCountry", false, "", "", "", "");
+
+        //$("#txtCountry").val(datas.Country);
+        setControlValue("txtCountry", datas.Country);
+        //$("#txtCountry").val(datas.Country);
+        callServiceMethodForDDl(JSON.stringify([datas.Country]), "/api/StudentApi", "getAllstatebyCountryId", "txtState", false, "", "", "", "");
+        setControlValue("txtState", datas.State);
+        callServiceMethodForDDl(JSON.stringify([datas.State]), "/api/EmployeeAPI", "getCityByStateId", "txtCity", false, "", "", "", "");
+        setControlValue("txtCity", datas.City);
+        setControlValue("txtDistrict", datas.District);
+        setControlValue("txtPincode", datas.Pincode);
+        setControlValue("txtMobileNo", datas.Mobile);
+        setControlValue("txtPhoneNo", datas.Phone);
+        setControlValue("txtPrincipleId", datas.PrincipalID);
+        $("#txtFeeDuedate").val(datas.Feedueday);
+
+        //var a = datas.Country;
+        //callServiceMethodForDDl(JSON.stringify([a]), "/api/MasterAPI", "getCountryByIdd", "txtCountry", false, "", "", "", "");
+
+        ////setControlValue("txtCountry", datas.Country);
+        //$("#txtCountry").val(datas.Country);
+
+    }
+
+    function updateSchoolDetails() {
+        if ($("#form1").valid()) {
+
+
+            $("#loader").fadeIn();
+        var school = {
+            ID: sessionStorage.getItem("SchoolID"),
+        School: getControlValue("txtSchoolName"),
+        SchoolCode: getControlValue("txtSchoolCode"),
+        Board: getControlValue("txtBoard"),
+        Website: getControlValue("txtWebsite"),
+        Email: getControlValue("txtEmailAddress"),
+        Fax: getControlValue("txtFaxNo"),
+        LogoPic: getControlValue("sptxtSchoolLogo"),
+        //principleSign: getControlValue("sptxtPrincipleSignature"),
+        Address: getControlValue("txtAddress"),
+        Country: getControlValue("txtCountry"),
+        State: getControlValue("txtState"),
+        City: getControlValue("txtCity"),
+        District: getControlValue("txtDistrict"),
+        Pincode: getControlValue("txtPincode"),
+        Mobile: getControlValue("txtMobileNo"),
+        Phone: getControlValue("txtPhoneNo"),
+        Feedueday: $("#txtFeeDuedate").val()
+    };
+
+    var ddl = JSON.stringify(school)
+    callServiceMethod(ddl, "/api/Default", "SaveSchoolDetailsEdit", false, "", "", false, "", true, saveSchoolDetails_scs, "", "", "");
+}
+}
+    function saveSchoolDetails_scs(p1, p2, p3, datas) {
+            $("#loader").fadeOut();
+        if (datas == "-1") {
+            $("#divSuccessMsg").fadeIn();
+        $("#divSuccessMsg").html("<strong>Success!</strong> Entered school name already exist!!");
+            setTimeout(function () {
+            $("#divSuccessMsg").fadeOut();
+        }, 2000);
+    }
+        else {
+            var data = datas.split('***');
+        setControlValue("txtSchoolId", data[0]);
+        saveImageDocuments(datas);
+    }
+}
+    function saveImageDocuments(datas) {
+        var datda = datas.split('***');
+        var data = new FormData();
+
+        var files = $("#txtSchoolLogo").get(0).files;
+        // var files2 = $("#fileUpload2").get(0).files;
+
+        // Add the uploaded image content to the form data collection
+        if (files.length > 0) {
+            data.append("UploadedImage", files[0]);
+        }
+        data.append("Id", datda[0]);
+
+
+
+
+        for (var i = 0; i < $("#divDocumentUpload input[type=file]").length; i++) {
+            files = $("#FileUpload" + i + "").get(0).files;
+        data.append("UploadedImage" + i + "", files[0]);
+        data.append("UploadedImageId" + i + "", $("#FileUpload" + i + "").attr("rahul"));
+    }
+
+        $.ajax({
+            type: "POST",
+        url: "/api/Default/SaveSchoolImage",
+        contentType: false,
+        processData: false,
+        data: data,
+            success: function (data) {
+            $("#loader").fadeOut();
+
+        $("#divSuccessMsg").fadeIn();
+                $("#divSuccessMsg").html("<strong>Success!</strong> " + data);
+        alert("School Details Updated Successfully");
+                setTimeout(function () {
+            $("#divSuccessMsg").fadeOut();
+
+        }, 2000)
+        //callServiceMethod(JSON.stringify([id]), "/api/Default", "getSchoolDetailsBySchoolID", false, "", "", false, "", true, getSchollDetails_scs, "", "", "");
+
+    }
+});
+
+        //ajaxRequest.done(function (xhr, textStatus) {
+            //    alert("rahul");
+            //    // Do other operation
+            //});
+        }
+
+        function setSchoolLogo(val) {
+            $("#ImgSchoologo").attr("src", "/Images/Admin/AdmitCards/" + val.split('\\')[2]);
+
+        }
+    function setPrincipleLogo(val) {
+            $("#ImgPrinciplesign").attr("src", "/Images/Admin/" + val.split('\\')[2]);
+        }
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                txtSchoolName: "required",
+                txtSchoolCode: "required",
+                txtBoard: "required",
+                //   txtWebsite: "required",
+                // txtFaxNo: "required",
+                //txtSchoolLogo: "required",
+                txtAddress: "required",
+                //txtPincode: "required",
+                //txtMobileNo: "required",
+                //txtPhoneNo: "required",
+                txtPincode: {
+                    required: true,
+                    number: true
+                },
+                txtFeeDuedate: {
+                    required: true,
+                    number: true
+                },
+                txtMobileNo: {
+                    required: true,
+                    number: true
+                },
+
+                txtPhoneNo: {
+                    required: true,
+                    number: true
+                },
+
+                txtEmailAddress: {
+                    required: true,
+                    email: true
+                },
+                txtDistrict: {
+                    required: true,
+
+                },
+
+
+                txtCountry: {
+                    selectcheck1: true
+                },
+                txtState: {
+                    selectcheck2: true
+                },
+                txtCity: {
+                    selectcheck3: true
+                },
+
+
+
+
+
+            },
+            messages: {
+
+
+                txtSchoolName: "Please Enter School Name",
+                txtSchoolCode: "Please Enter School Code",
+                txtBoard: "Please Enter Board ",
+                txtFeeDuedate: "please Enter Fee Due Day",
+                // txtWebsite: "Please Enter Last Name",
+
+                // txtFaxNo: "Please Select DOB",
+                txtAddress: "Please Enter Address Details",
+
+                txtEmailAddress: "Please Enter Email Address",
+                txtPincode: "Please Enter PinCode",
+                txtMobileNo: "Please Enter Mobile No.",
+                txtPhoneNo: "Please Enter Phone No.",
+
+                txtCountry: "Please Select Country",
+                txtState: "Please Select State",
+                txtCity: "Please Select City",
+                txtDistrict: "Please Enter District",
+
+            }
+        })
+
+        jQuery.validator.addMethod('selectcheck1', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+
+        jQuery.validator.addMethod('selectcheck2', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select State");
+        jQuery.validator.addMethod('selectcheck3', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select City");
+    });
+
+
+
+
+
+
+
+
+
+</script>
+

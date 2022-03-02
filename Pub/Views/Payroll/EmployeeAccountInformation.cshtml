@@ -1,0 +1,480 @@
+﻿
+@{
+    ViewBag.Title = "EmployeeAccountInformation";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section class="content" ng-app="myApp" ng-controller="salryhead">
+    <div class="box box-solid">
+        <div class="et">
+            <div class="box-header with-border">
+                <h3 class="box-title"> Salary Grade Assign</h3>
+
+            </div>
+        </div>
+
+
+        <div class="box-body">
+            <div class="row">
+
+                <div class="content">
+
+
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">Grade Master</h4>
+
+                                </div>
+                                <form role="form" id="form1" name="form1">
+                                    <div class="panel-body">
+                                        <div class="panel-body">
+                                            <div class="alert alert-success alert-dismissible" style="display:none">
+                                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                                <h4>
+                                                    <i class="icon fa fa-check"></i>
+                                                    success! <span ng-bind="successMsg"></span>
+                                                </h4>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="Country" class="req">School<span class="requird">*</span></label>
+                                                <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name" ></select>
+
+
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="text" id="txtGradeId" style="display:none" />
+                                                <label class="req" for="Salarydetails_designationid">Designation <span class="requird">*</span></label>
+                                                <select class="form-control" name="ddlDesignation" style="color:black;" id="ddlDesignation" valuefield="Id" textfield="Name" blankRowValue="0" onchange="getGrades(this.value)" blankRowText="----Select----" style="width: 100%;"></select>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <input type="text" ng-model="txtGradeId" style="display:none" /> 
+                                                <label class="req" for="Salarydetails_unit">Grade Name <span class="requird">*</span></label>
+                                                <select class="form-control" name="ddlGradeSelect"  style="color:black;" id="ddlGradeSelect" onchange="getSalryDetails(this.value)" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="----Select----" style="width: 100%;"></select>
+                                            </div>
+                                            <div id="showUsingGrade" style="display:none">
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label class="req" for="Salarydetails_designationid">Earning</label>
+                                                        <table id="gridEarning" class="table table-bordered table-striped tbl20 grid">
+                                                            <thead>
+                                                                <tr><th>School</th>
+                                                                    <th>Head Name</th>
+                                                                    <th>value</th>
+                                                                    <th></th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="tbodyEmployeeEarning"></tbody>
+
+                                                        </table>
+                                                        <script type="text/html" id="tbodyEmployeeEarningJTemplte">
+                                                            {#foreach $T as Datashort}
+                                                            <tr>
+                                                                <td>
+                                                                    { $T.Datashort.School}
+                                                                </td>
+                                                                <td style="width:155px">
+                                                                    { $T.Datashort.Name}
+                                                                </td>
+                                                                <td>
+                                                                    { $T.Datashort.Extra10}
+                                                                </td>
+                                                                <td>  { $T.Datashort.Code}  </td>
+                                                            </tr>
+                                                            {#/for}
+                                                        </script>
+
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label class="req" for="Salarydetails_designationid">Deduction</label>
+                                                        <table id="griddeduction" class="table table-bordered table-striped tbl20  grid">
+                                                            <thead>
+                                                                <tr><th>School</th>
+                                                                    <th>Head Name</th>
+                                                                    <th>value</th>
+                                                                    <th>Amt./Per</th>
+
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="tbodyEmployeeDeduction"></tbody>
+
+                                                        </table>
+                                                        <script type="text/html" id="tbodyEmployeeDeductionJTemplte">
+                                                            {#foreach $T as Datashort}
+                                                            <tr>
+                                                                <td>
+                                                                    { $T.Datashort.School}
+                                                                </td>
+                                                                <td style="width:155px">
+                                                                    { $T.Datashort.Name}
+                                                                </td>
+                                                                <td>
+                                                                    { $T.Datashort.Extra10}
+                                                                </td>
+                                                                <td>
+                                                                    { $T.Datashort.Code}
+                                                                </td>
+                                                            </tr>
+                                                            {#/for}
+                                                        </script>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="clearfix"></div>
+                                            <div class="form-group">
+                                                <label class="req" for="Salarydetails_unit">Select Employee <span class="requird">*</span></label>
+                                                <select class="form-control select2" name="ddelSelectEmployee" onchange="getValueSelected(this.value)" id="ddelSelectEmployee" valuefield="Id" textfield="Name" blankRowValue="" blankRowText="" style="width: 100%;" rahulbharti multiple="multiple" data-placeholder="Select a Employee" style="width: 100%;"></select>
+
+                                            </div>
+
+                                            <div class="form-group">
+
+                                                <label><input id="chkStatus" checked="checked" ng-model="chkstatus" type="checkbox" /> Status</label>
+
+                                            </div>
+
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-5">
+                                                <div class="form_sep">
+                                                    <input class="btn btn-info" id="btnsumit" onclick="saveEmployeeGrade()" type="button" value="Save">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </f orm>
+</div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="alert alert-success centerSuccess" id="divSucesEmail" style="display:none">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h4>
+            <i class="icon fa fa-check"></i>
+            <span Id="sentEmailMsg"></span>
+        </h4>
+
+    </div>
+</section>
+<link href="~/css/bower_components/select2/dist/css/select2.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.select2').select2();
+     
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        var SchoolID = $("#ddlSchoolName").val();
+
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllDesignationBySchoolID", "ddlDesignation", false, "", "", "", "");
+    })
+    $("#ddlSchoolName").change(function () {
+        var SchoolID = $("#ddlSchoolName").val();
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllDesignationBySchoolID", "ddlDesignation", false, "", "", "", "");
+    })
+    function getGrades(val)
+    {
+        var SchoolID = $("#ddlSchoolName").val();
+        
+        callServiceMethodForDDl(JSON.stringify([val, SchoolID]), "/api/PayrollAPI", "getAllEmployeeByDesignationBySchool", "ddelSelectEmployee", false, "", "", "", "");
+        var SchoolID = $("#ddlSchoolName").val();
+        callServiceMethodForDDl(JSON.stringify([val, SchoolID]), "/api/PayrollAPI", "getAllGradeByDesignationbyschool", "ddlGradeSelect", false, "", "", "", "");
+    }
+
+    function getSalryDetails(val)
+    {
+        var salry;
+        
+          salry = {
+            Type: "Earning",
+              Id: val,
+            SchoolID: $("#ddlSchoolName").val()
+        }
+          callJTemplateServiceMethod(JSON.stringify(salry), "/api/PayrollAPI", "getEmployeePayrollHeadByGradId",
+                   "tbodyEmployeeEarning", "tbodyEmployeeEarningJTemplte", false, "", "", "", "");
+     
+        salry = {
+            Type: "Deduction",
+            Id: val,
+            SchoolID: $("#ddlSchoolName").val()
+        }
+        callJTemplateServiceMethod(JSON.stringify(salry), "/api/PayrollAPI", "getEmployeePayrollHeadByGradId",
+                 "tbodyEmployeeDeduction", "tbodyEmployeeDeductionJTemplte", true, getSalryDetails_scs, "", "", "");
+    }
+
+    function getSalryDetails_scs(p1, p2, p3, datas)
+    {
+        
+        $("#showUsingGrade").fadeIn(1500);
+    }
+    
+
+    function saveEmployeeGrade()
+    {
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+            var empgrad = {
+                Id: getControlValue("txtGradeId"),
+                Designation: getControlValue("ddlDesignation"),
+                GradeId: getControlValue("ddlGradeSelect"),
+                EmployeeId: getControlValue("ddelSelectEmployee"),
+                Status: getControlValue("chkStatus"),
+                SchoolID: $("#ddlSchoolName").val()
+
+
+            }
+            var ddl = JSON.stringify(empgrad)
+
+
+            callServiceMethod(ddl, "/api/PayrollAPI", "saveEmployeeGrade", false, "", "", false, "", true, saveEmployeeGrade_scs, "", "", "");
+        }
+
+
+    }
+
+    function saveEmployeeGrade_scs(p1, p2, p3, datas)
+    {
+        clearallfields();
+        $("#loader").fadeOut();
+        $("#divSucesEmail").fadeIn();
+        $("#sentEmailMsg").html(datas);
+        setTimeout(function () {
+            $("#divSucesEmail").fadeOut();
+            $("#sentEmailMsg").html("");
+        }, 2000)
+   // alert(datas)
+
+    }
+
+
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var Id = getQuerystring("Id");
+        if (typeof (Id) != "undefined") {
+            $("#loader").fadeIn();
+            callServiceMethod(JSON.stringify([Id]), "/api/PayrollAPI", "editGradeAssignById", false, "", "", false, "", true, editGradeAssignById_scss, "", "", "");
+        }
+    })
+
+        function editGradeAssignById_scss(p1,p2,p3,datas)
+    {
+            $("#loader").fadeOut();
+            setControlValue("ddlDesignation", datas.Designation);
+            getGrades(datas.Designation);
+            setTimeout(function () {
+                setControlValue("ddlGradeSelect", datas.GradeId);
+                getSalryDetails(datas.GradeId);
+            }, 1000);
+            setControlValue("txtGradeId", datas.Id);
+            setTimeout(function () {
+                //getGrades(datas.Id);
+                fetchmultpledesg(datas.EmployeeId);
+            }, 2000);
+            setControlValue("chkStatus", datas.Status);
+            setControlValue("ddlSchoolName", datas.SchoolID)
+         // $("#ddelSelectEmployee").select2("val", datas.EmployeeId);
+        }
+
+
+        function fetchmultpledesg(val) {
+            var selectedValues = new Array();
+            selectedValues.push(val);
+        
+            $("#ddelSelectEmployee").val(selectedValues).trigger("change");
+         
+           
+        //  solution  //var a = val;
+
+            //$("#ddelSelectEmployee").val(a).trigger("change");
+        }
+
+    //5/7/2019 Employee name not appear when edit a assign grade
+
+    //function getValueSelected(val) {   
+    //     $(".select2-selection--multiple").find("li").first().remove()
+    //   // alert($(".select2-selection--multiple").find("li").remove());
+    //}
+
+    function clearallfields() {
+      
+        $("#ddlDesignation").val(0);
+        $("#ddlGradeSelect").val(0);
+        $("#ddelSelectEmployee option[value] ").remove();
+     
+        $("#showUsingGrade").fadeOut(1500);
+
+    }
+</script>
+
+<style type="text/css">
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    .grid td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    .grid {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        .grid td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        .grid tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .grid tr:hover {
+            background-color: #ddd;
+        }
+
+        .grid th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                ddlDesignation: {
+                    selectcheck: true
+                },
+                ddlGradeSelect: {
+                    selectcheck1: true
+                },
+                ddelSelectEmployee: {
+                    selectcheck2: true
+                },
+
+               
+
+
+
+            },
+            messages: {
+
+                ddlGradeSelect: "Please Select Grade",
+                ddlDesignation: "Please Select Designation",
+                ddelSelectEmployee:"Please Seelct Employee"
+
+
+            }
+        })
+        jQuery.validator.addMethod('selectcheck', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else if (value == null)
+            {
+                return (value != null);
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+
+        jQuery.validator.addMethod('selectcheck1', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else if (value == null) {
+                return (value != null);
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+
+        jQuery.validator.addMethod('selectcheck2', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else if (value == null) {
+                return (value != null);
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+
+
+    });
+</script>

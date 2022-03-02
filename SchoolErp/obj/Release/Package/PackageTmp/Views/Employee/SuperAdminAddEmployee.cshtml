@@ -1,0 +1,1022 @@
+﻿
+@{
+    ViewBag.Title = "SuperAdminAddEmployee";
+  //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutSuperAdmin.cshtml";
+    
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section class="content" >
+    <div class="row">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Employee Registration</h4>
+                    </div>
+                    <form role="form" id="form1" name="form1">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">Employee Details</h4>
+                                        </div>
+                                        <div class="panel-body">
+                                            <div class="row">
+
+                                                <div class="form-group col-sm-4">
+                                                    <input class="form-control" id="txtEmployeeId" style="display:none" type="text" />
+
+
+
+                                                    <label for="reg_input_name" class="req">Role Type <span class="requird">*</span></label>
+                                                    <select class="form-control" id="RoleType" ng-model="RoleType" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--">
+                                                        <option value="1">Admin</option>
+                                                        <option value="3">Employee</option>
+
+                                                    </select>
+
+                                                </div>
+
+
+                                                <div class="form-group col-sm-4">
+                                                    <input class="form-control" id="txtEmployeeId" style="display:none" type="text" />
+
+
+
+                                                    <label for="reg_input_name" class="req">Employee Code <span class="requird">*</span></label>
+                                                    <input size="84" maxlength="45" class="form-control" name="txtEmployeeCode" id="txtEmployeeCode" ng-model="txtEmployeeCode" type="text" />
+
+                                                </div>
+                                                <div class="form-group col-sm-4">
+
+
+                                                    <label for="Country" class="req">School<span class="requird">*</span></label>
+                                                    <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name"></select>
+
+                                                </div>
+
+
+                                                <div class="form-group col-sm-4">
+
+                                                    <label for="reg_input" class="req">Department <span class="requird">*</span></label>
+                                                    <select class="form-control" id="txtDepartment" name="txtDepartment" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" ng-model="txtDepartment"></select>
+                                                </div>
+                                                <div class="form-group col-sm-4">
+                                                    <label for="reg_input_name" class="req">Designation <span class="requird">*</span></label>
+                                                    <div id="batch_div">
+
+                                                        <select class="form-control" id="ddlDesgination" name="ddlDesgination" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" ng-model="ddlDesgination"></select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-sm-4">
+                                                    <label for="reg_input_name" class="req">Qualification <span class="requird">*</span></label>
+                                                    <select class="form-control" id="ddlQualfication" name="ddlQualfication" ng-model="ddlQualfication" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--"></select>
+                                                </div>
+                                                <div class="form-group col-sm-4">
+                                                    <label>Joining Date <span class="requird">*</span></label>
+                                                    <div class="input-group date">
+                                                        <div class="input-group-addon">
+                                                            <i class="fa fa-calendar"></i>
+                                                        </div>
+                                                        <input type="text" class="form-control pull-right" name="txtJoiningDate" id="txtJoiningDate" ng-model="txtJoiningDate" />
+                                                    </div>
+                                                    <!-- /.input group -->
+                                                </div>
+                                            </div>
+
+                                            @*<div class="row">
+                                                <div class="form-group col-sm-6">
+                                                    <label for="reg_input_name" class="req">Designation <span class="requird">*</span></label>
+                                                    <div id="batch_div">
+
+                                                        <select class="form-control" id="ddlDesgination" name="ddlDesgination" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" ng-model="ddlDesgination"></select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-sm-6">
+                                                    <label for="reg_input_name" class="req">Qualification <span class="requird">*</span></label>
+                                                    <select class="form-control" id="ddlQualfication" name="ddlQualfication" ng-model="ddlQualfication" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--"></select>
+                                                </div>
+                                            </div>*@
+                                            <div class="row">
+                                                <div class="form-group col-sm-6">
+                                                    <label for="reg_input_name" class="req">Total Experience <span class="requird">*</span></label>
+                                                    <input class="form-control" name="txtTotalExperience" onkeypress="return priceonly(event,this)" ng-model="txtTotalExperience" id="txtTotalExperience" type="text" maxlength="3">
+                                                </div>
+                                                <div class="form-group col-sm-6">
+                                                    <label for="usertype" class="req">Staff Type <span class="requird">*</span></label>
+                                                    <select class="form-control" name="ddlStaffType" data-required="true" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" id="ddlStaffType"></select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">Personal Details</h4>
+                                        </div>
+                                        <div class="panel-body">
+                                            <div class="form-group">
+                                               
+
+                                                <label for="reg_input_name" class="req">First Name <span class="requird">*</span></label>
+                                                <input maxlength="45" class="form-control" name="txtfirstName" ng-model="txtfirstName" id="txtfirstName" type="text">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="reg_input_name">Middle Name </label>
+                                                <input maxlength="45" class="form-control"  id="txtMiddleName" ng-model="txtMiddleName" type="text">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="reg_input_name">Last Name <span class="requird">*</span></label>
+                                                <input size="84" maxlength="45" class="form-control" name="txtLastName" id="txtLastName" ng-model="txtLastName" type="text">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Date of Birth <span class="requird">*</span></label>
+                                                <div class="input-group date">
+                                                    <div class="input-group-addon">
+                                                        <i class="fa fa-calendar"></i>
+                                                    </div>
+                                                    <input type="text" class="form-control" name="txtDOB" id="txtDOB" ng-model="txtDOB" />
+                                                </div>
+                                                <!-- /.input group -->
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="Gender" class="req">Gender <span class="requird">*</span></label>
+                                                <select class="form-control" data-required="true" id="ddlGender" name="ddlGender" ng-model="ddlGender" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--"></select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="Marital" class="req">Marital Status <span class="requird">*</span></label>
+                                                <select class="form-control" data-required="true" id="ddlMarried" name="ddlMarried" ng-model="ddlMarried" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--"></select>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="Religion" class="req">Religion <span class="requird">*</span></label>
+                                                <select class="form-control" data-required="true" id="ddlReligion" name="ddlReligion" ng-model="ddlReligion" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--"></select>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="reg_input_name">Mother Name <span class="requird">*</span></label>
+                                                <input class="form-control" id="txtMotherName" name="txtMotherName" ng-model="txtMotherName" type="text">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="reg_input_name">Father Name <span class="requird">*</span></label>
+                                                <input size="84" class="form-control" id="txtFatherName" name="txtFatherName" ng-model="txtFatherName" type="text">
+                                            </div>
+
+
+
+
+
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">Contact Details</h4>
+                                        </div>
+                                        <div class="panel-body">
+                                            <div class="form-group">
+                                                <label for="Country" class="req">Country <span class="requird">*</span></label>
+                                                <select class="form-control" ng-model="ddlCountry" name="ddlCountry" onchange="getAllStatebyId(this.value)" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" id="ddlCountry"></select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="Country" class="req">State <span class="requird">*</span></label>
+                                                <select class="form-control" id="ddlState" name="ddlState" onchange="getCityByStateId(this.value)" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--"></select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="reg_input_currency" class="req">City <span class="requird">*</span></label>
+                                                <select class="form-control" id="ddlCity" name="ddlCity" ng-model="ddlCity" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--"></select>
+                                            </div>
+                                            <div class="form_sep">
+                                                <label for="reg_input_name" class="req">Present Address</label>
+                                                <textarea class="form-control" ng-model="txtPermanentAddress1" id="txtPermanentAddress1"></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="reg_input_name">Permanent Address</label>
+                                                <textarea class="form-control" id="txtPermanentAddress2" ng-model="txtPermanentAddress2"></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="reg_input_currency" class="req">Pin <span class="requird">*</span></label>
+                                                <input class="form-control" id="txtPincode" onkeypress="return priceonly(event,this)"  name="txtPincode" type="text" maxlength="6">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="reg_input_currency">Phone </label>
+                                                <input class="form-control" id="txtPhoneNo" onkeypress="return numbersonly(event)"  ng-model="txtPhoneNo" type="text" maxlength="30">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="reg_input_currency" class="req">Mobile <span class="requird">*</span></label>
+                                                <input class="form-control" id="txtMobileNo" onkeypress="return numbersonly(event)" name="txtMobileNo" type="text" maxlength="10">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="reg_input_currency" class="req">Email <span class="requird">*</span></label>
+                                                <input class="form-control" id="txtEmailId" name="txtEmailId" type="text" maxlength="256">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="reg_input_currency" class="req">Adhaar Number </label>
+                                                <input class="form-control" id="txtAdhaarNumber" type="text" maxlength="30">
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">Document Details</h4>
+                                        </div>
+                                        <div class="panel-body">
+                                            <div>
+                                                <div class="form-group col-lg-6">
+                                                    <label for="reg_input_logo">Upload Photo</label>
+                                                    <input id="ImageUpload" type="file">
+                                                </div>
+                                                <div class="form-group col-lg-6 dvImgPreview" id="dvPreviewF">
+                                                    <img src="" id="EmployyeImage" />
+                                                </div>
+                                            </div>
+                                            <div id="divDocumentUpload"></div>
+                                            <div class="form-group col-lg-6"></div>
+                                            <div class="form-group col-lg-6">
+                                                <div class="form-group">
+                                                    <input class="btn btn-info" id="btnSave" onclick="saveEmployeeDetails()" type="button" value="Save">
+                                                 </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">User Login Details</h4>
+                                        </div>
+                                        <div class="panel-body">
+                                            <div class="form-group">
+                                                <label for="reg_input_currency" class="req">UserName <span class="requird">*</span></label>
+                                                <input class="form-control" id="txtUserNam" name="txtUserNam" type="text" ng-model="txtUserNam" maxlength="256">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="reg_input_currency" class="req">Password <span class="requird">*</span></label>
+                                                <input class="form-control" id="txtPassword" name="txtPassword" type="text" ng-model="txtPassword" maxlength="256">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">Account Details</h4>
+                                        </div>
+                                        <div class="panel-body">
+                                            <div class="form-group">
+                                                <label for="reg_input_currency" class="req">Payment Mode</label>
+                                                <select id="ddlPamentType" class="form-control">
+                                                    <option value="Cash">Cash</option>
+                                                    <option value="Check">Check</option>
+                                                    <option value="Bank Transfer">Bank Transfer</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="reg_input_currency" class="req">Account Number</label>
+                                                <input class="form-control" id="txtAccountNumber" type="text">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="reg_input_currency" class="req">Ifsc Code</label>
+                                                <input class="form-control" id="txtIfscCode" type="text">
+                                            </div>
+
+
+                                            <div class="form-group">
+                                                <label for="reg_input_currency" class="req">Bank Name</label>
+                                                <select id="ddlBankName" class="form-control">
+                                                    <option disabled="" value="0" selected="">Select Bank</option>
+                                                    <option value="ALLAHABAD BANK">ALLAHABAD BANK</option>
+                                                    <option value="ANDHRA BANK">ANDHRA BANK</option>
+                                                    <option value="AXIS BANK">AXIS BANK</option>
+                                                    <option value="BANK OF BARODA">BANK OF BARODA</option>
+                                                    <option value="BANK OF INDIA">BANK OF INDIA</option>
+                                                    <option value="BANK OF MAHARASHTRA">BANK OF MAHARASHTRA</option>
+                                                    <option value="CANARA BANK">CANARA BANK</option>
+                                                    <option value="CENTRAL BANK OF INDIA">CENTRAL BANK OF INDIA</option>
+                                                    <option value="CITI BANK">CITI BANK</option>
+                                                    <option value="DENA BANK">DENA BANK</option>
+                                                    <option value="FEDERAL BANK">FEDERAL BANK</option>
+                                                    <option value="HDFC BANK">HDFC BANK</option>
+                                                    <option value="ICICI BANK LIMITED">ICICI BANK LIMITED</option>
+                                                    <option value="INDIAN OVERSEAS BANK">INDIAN OVERSEAS BANK</option>
+                                                    <option value="indusind-bank">INDUSIND BANK</option>
+                                                    <option value="KOTAK MAHINDRA BANK LIMITED">KOTAK MAHINDRA BANK LIMITED</option>
+                                                    <option value="PUNJAB AND SIND BANK">PUNJAB AND SIND BANK</option>
+                                                    <option value="PUNJAB NATIONAL BANK">PUNJAB NATIONAL BANK</option>
+                                                    <option value="STATE BANK OF INDIA">STATE BANK OF INDIA</option>
+                                                    <option value="SYNDICATE BANK">SYNDICATE BANK</option>
+                                                    <option value="UCO BANK">UCO BANK</option>
+                                                    <option value="UNION BANK OF INDIA">UNION BANK OF INDIA</option>
+                                                    <option value="YES BANK">YES BANK</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="reg_input_currency" class="req">Pf No</label>
+                                                <input class="form-control" id="txtPfNo" type="text">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="reg_input_currency" class="req">PAN No</label>
+                                                <input class="form-control" id="txtPanNo" type="text">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="reg_input_currency" class="req">ESI No</label>
+                                                <input class="form-control" id="txtESINo" type="text">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="alert alert-success centerSuccess" id="divSuccessMsg" style="display:none">
+                           
+                        </div>
+
+                        </form>
+</div>
+                </div>
+            </div>
+        </div>
+</section>
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+
+
+
+ 
+
+<!-- DataTables -->
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        var Id = getQuerystring("id");
+        if (typeof (Id) != "undefined") {
+
+        }
+        else {
+            var SchoolID = $("#ddlSchoolName").val();
+            callServiceMethod(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getRegCode", false, "", "", false, "", true, getEmployeeUniquCode, "", "", "");
+
+        }
+
+        function getEmployeeUniquCode(p1, p2, p3, datas) {            var perfix = datas.Prefix;            var suffix = datas.Suffix;            var last = datas.LastSeries;            var first = datas.StartSeries;            var sep = datas.Seprator;            var incrmentNo = datas.DocNo;            var School = datas.SchoolID;            var empCode;            var incseries;            var str;            var len;            var newcode;            if (last == "") {                empCode = perfix + sep + School + sep + suffix + sep + first;            }            else {                str = first;                len = str.length;                newcode = parseInt(last) + parseInt(incrmentNo);                // alert(pad(newcode, len));                //    incseries = parseInt(pad(newcode, len)) + parseInt(incrmentNo);                empCode = perfix + sep + School + sep + suffix + sep + pad(newcode, len);            }            setControlValue("txtEmployeeCode", empCode);            var content = empCode.replace("/", "").replace("/", "").replace("/", "");            setControlValue("txtUserNam", content);            setControlValue("txtPassword", content);        }
+
+
+        $('#txtJoiningDate').datepicker({
+            autoclose: true
+        });
+        $('#txtDOB').datepicker({
+            autoclose: true
+        });
+        $("#ddlSchoolName").change(function () {
+            var SchoolID = $("#ddlSchoolName").val();
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllDepartmentsBySchoolID", "txtDepartment", false, "", "", "", "");
+            var SchoolID = $("#ddlSchoolName").val();
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllDesignationBySchoolID", "ddlDesgination", false, "", "", "", "");
+            var SchoolID = $("#ddlSchoolName").val();
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllQualficationbySchool", "ddlQualfication", false, "", "", "", "")
+            var Id = getQuerystring("id");
+            if (typeof (Id) != "undefined") {
+
+            }
+            else {
+
+                var SchoolID = $("#ddlSchoolName").val();
+                callServiceMethod(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getRegCode", false, "", "", false, "", true, getEmployeeUniquCode, "", "", "");
+
+            }
+
+           
+        });
+
+       
+        callServiceMethodForDDl("", "/api/EmployeeAPI", "getAllCountry", "ddlCountry", false, "", "", "", "");
+        callServiceMethodForDDl("", "/api/EmployeeAPI", "getAllGender", "ddlGender", false, "", "", "", "");
+        callServiceMethodForDDl("", "/api/EmployeeAPI", "getAllMaritalStatus", "ddlMarried", false, "", "", "", "");
+        callServiceMethodForDDl("", "/api/EmployeeAPI", "getAllReligon", "ddlReligion", false, "", "", "", "");
+        callServiceMethodForDDl("", "/api/EmployeeAPI", "getAllStaff", "ddlStaffType", false, "", "", "", "");
+
+
+        callServiceMethod("", "/api/EmployeeAPI", "getAllDocumentForEmployee", false, "", "", false, "", true, bindDocumentUpload, "", "", "");
+        //callServiceMethodForDDl("", "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+       
+        
+
+    }); 
+
+
+   
+    function bindDocumentUpload(p1,p2,p3,datas)
+    {
+        for (var i = 0; i < datas.length; i++)
+        {
+            $("#divDocumentUpload").append("<div class='form-group col-lg-12'><div class='form-group col-lg-6'><label for='reg_input_logo'>" + datas[i].Name + "</label><input rahul=" + datas[i].Id + " id='FileUpload" + i + "' type='file'></div></div>")
+        }
+ 
+    }
+
+    function getAllStatebyId(val)
+    {
+        
+        
+        callServiceMethodForDDl(JSON.stringify([val]), "/api/EmployeeAPI", "getAllstatebyCountryId", "ddlState", false, "", "", "", "");
+
+    }
+
+    function getCityByStateId(val)
+    {
+        callServiceMethodForDDl(JSON.stringify([val]), "/api/EmployeeAPI", "getCityByStateId", "ddlCity", false, "", "", "", "");
+
+    }
+    
+
+
+    function saveEmployeeDetails() {
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+            var employye = {
+
+                Id: getControlValue("txtEmployeeId"),
+                Employeecode: getControlValue("txtEmployeeCode"),
+                JoiningDate: getControlValue("txtJoiningDate"),
+                Department: getControlValue("txtDepartment"),
+                Designation: getControlValue("ddlDesgination"),
+                qualfication: getControlValue("ddlQualfication"),
+                TotalExperience: getControlValue("txtTotalExperience"),
+                UserType: getControlValue("ddlStaffType"),
+                FName: getControlValue("txtfirstName"),
+                MName: getControlValue("txtMiddleName"),
+                LName: getControlValue("txtLastName"),
+                DOB: getControlValue("txtDOB"),
+                Gender: getControlValue("ddlGender"),
+                Email: getControlValue("txtEmailId"),
+                UserName: getControlValue("txtUserNam"),
+                Password: getControlValue("txtPassword"),
+                Country: getControlValue("ddlCountry"),
+                State: getControlValue("ddlState"),
+                city: getControlValue("ddlCity"),
+                PresentAddress: getControlValue("txtPermanentAddress1"),
+                PermanentAddress: getControlValue("txtPermanentAddress2"),
+                Pin: getControlValue("txtPincode"),
+                Phone: getControlValue("txtPhoneNo"),
+                Mobile: getControlValue("txtMobileNo"),
+                AdhaarNo: getControlValue("txtAdhaarNumber"),
+
+                MotherName: getControlValue("txtMotherName"),
+                FatherName: getControlValue("txtFatherName"),
+                Religon: getControlValue("ddlReligion"),
+                MaritalStaus: getControlValue("ddlMarried"),
+
+                PaymentMode: getControlValue("ddlPamentType"),
+                AccountNumber: getControlValue("txtAccountNumber"),
+                IfscCode: getControlValue("txtIfscCode"),
+                BankName: getControlValue("ddlBankName"),
+                PfNo: getControlValue("txtPfNo"),
+                PANNo: getControlValue("txtPanNo"),
+                EsiNo: getControlValue("txtESINo"),
+                School: getControlValue("ddlSchoolName"),
+                UserType1: getControlValue("RoleType")
+
+
+            }
+
+            var ddl = JSON.stringify(employye)
+
+
+            callServiceMethod(ddl, "/api/EmployeeAPI", "saveEmployeeDetails", false, "", "", false, "", true, saveEmployeeDetails_scs, "", "", "");
+        }
+
+
+    }
+    
+    function saveEmployeeDetails_scs(p1, p2, p3, datas)
+    {
+        var data = datas.split('***');
+        setControlValue("txtEmployeeId", data[0]);
+        saveImageDocuments(datas)
+    }
+
+    function saveImageDocuments(datas)
+    {
+        var datda = datas.split('***');
+        var data = new FormData();
+
+        var files = $("#ImageUpload").get(0).files;
+       // var files2 = $("#fileUpload2").get(0).files;
+
+        // Add the uploaded image content to the form data collection
+        if (files.length > 0) {
+            data.append("UploadedImage", files[0]);
+        }
+        data.append("Id", datda[0]);
+        data.append("EmployeeCode", datda[1])
+
+        
+        for (var i = 0; i < $("#divDocumentUpload input[type=file]").length; i++)
+        {
+         files = $("#FileUpload"+i+"").get(0).files;
+         data.append("UploadedImage" + i + "", files[0]);
+         data.append("UploadedImageId" + i + "", $("#FileUpload" + i + "").attr("rahul"));
+        }
+        
+        $.ajax({
+            type: "POST",
+            url: "/api/EmployeeAPI/EmployeeUploadFile",
+            contentType: false,
+            processData: false,
+            data: data,
+            success: function (data)
+            {
+                $("#loader").fadeOut();
+
+                $("#divSuccessMsg").fadeIn();
+                $("#divSuccessMsg").html("<strong>Success!</strong> " + data);
+                setTimeout(function () {
+                    $("#divSuccessMsg").fadeOut();
+                    
+                },2000)
+
+                
+               
+            }
+        });
+
+        //ajaxRequest.done(function (xhr, textStatus) {
+        //    alert("rahul");
+        //    // Do other operation
+        //});
+    }
+
+
+    //function getUploadImg()
+    //{
+    //    alert($("#ImageUpload").val());
+
+        
+    //        var files = !!this.files ? this.files : [];
+    //        if (!files.length || !window.FileReader) return; // Check if File is selected, or no FileReader support
+    //        if (/^image/.test(files[0].type)) { //  Allow only image upload
+    //            var ReaderObj = new FileReader(); // Create instance of the FileReader
+    //            ReaderObj.readAsDataURL(files[0]); // read the file uploaded
+    //            ReaderObj.onloadend = function () { // set uploaded image data as background of div
+    //                $("#dvPreviewF").show();
+    //                $("#dvPreviewF").css("background-image", "url(" + this.result + ")");
+    //            }
+    //        } else {
+    //            alert("Upload an image");
+    //        }
+        
+
+
+        
+    //   // $("#EmployyeImage").attr("src", getControlValue("ImageUpload"));
+    //}
+
+    $("#ImageUpload").change(function () {
+        var files = !!this.files ? this.files : [];
+        if (!files.length || !window.FileReader) return; // Check if File is selected, or no FileReader support
+        if (/^image/.test(files[0].type)) { //  Allow only image upload
+            var ReaderObj = new FileReader(); // Create instance of the FileReader
+            ReaderObj.readAsDataURL(files[0]); // read the file uploaded
+            ReaderObj.onloadend = function () { // set uploaded image data as background of div
+                $("#dvPreviewF").show();
+                $("#dvPreviewF").css("background-image", "url(" + this.result + ")");
+            }
+        } else {
+            alert("Upload an image");
+        }
+    });
+    
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var Id = getQuerystring("Id");
+        if (typeof (Id) != "undefined") {
+            $("#loader").fadeIn();
+            callServiceMethod(JSON.stringify([Id]), "/api/EmployeeAPI", "editEmployeeDetailsById", false, "", "", false, "", true, editEmployeeDetailsById_scs, "", "", "");
+        }
+        else {
+         //   callServiceMethod("", "/api/EmployeeAPI", "getEmployeeCode", false, "", "", false, "", true, getEmployeeUniquCode, "", "", "");
+
+        }
+
+    })
+
+
+    function editEmployeeDetailsById_scs(p1,p2,p3,datas)
+    {
+        
+       
+            setControlValue("txtEmployeeId", datas.Id);
+            setControlValue("txtEmployeeCode", datas.Employeecode);
+            setControlValue("txtJoiningDate", datas.JoiningDate);
+  
+
+            setControlValue("txtfirstName", datas.FName);
+            setControlValue("txtMiddleName", datas.MName);
+            setControlValue("txtLastName", datas.LName);
+            setControlValue("txtDOB", datas.DOB);
+            setControlValue("ddlGender", datas.Gender);
+            setControlValue("txtEmailId", datas.Email);
+            setControlValue("txtUserNam", datas.UserName);
+            setControlValue("txtPassword", datas.Password);
+   
+            getAllStatebyId(datas.Country);
+            getCityByStateId(datas.State)
+            setTimeout(function () {
+            setControlValue("txtDepartment", datas.Department);
+            setControlValue("ddlDesgination", datas.Designation);
+            setControlValue("ddlQualfication", datas.qualfication);
+            setControlValue("txtTotalExperience", datas.TotalExperience);
+                setControlValue("ddlCountry", datas.Country);
+                setControlValue("ddlState", datas.State);
+                setControlValue("ddlCity", datas.city);
+                setControlValue("ddlReligion", datas.Religon);
+                setControlValue("ddlMarried", datas.MaritalStaus);
+                setControlValue("ddlStaffType", datas.UserType);
+                setControlValue("ddlSchoolName", datas.School);
+                $("#loader").fadeOut();
+            },2000)
+               
+            setControlValue("txtPermanentAddress1", datas.PresentAddress);
+            setControlValue("txtPermanentAddress2", datas.PermanentAddress);
+            setControlValue("txtPincode", datas.Pin);
+            setControlValue("txtPhoneNo", datas.Phone);
+            setControlValue("txtMobileNo", datas.Mobile);
+            setControlValue("txtAdhaarNumber", datas.AdhaarNo);
+            setControlValue("txtMotherName", datas.MotherName);
+            setControlValue("txtFatherName", datas.FatherName);
+          
+            //setControlValue("ImageUpload", );
+         //   $("#ImageUpload").val(datas.ImageUpload);
+
+            $("#dvPreviewF").show();
+            $("#dvPreviewF").css("background-image", "url(" + datas.ImageUpload + ")");
+          
+                 setControlValue("ddlPamentType", datas.PaymentMode);
+                setControlValue("txtAccountNumber", datas.AccountNumber);
+                setControlValue("txtIfscCode", datas.IfscCode);
+                setControlValue("ddlBankName", datas.BankName);
+                setControlValue("txtPfNo", datas.PfNo);
+                setControlValue("txtPanNo", datas.PANNo);
+                setControlValue("txtESINo", datas.EsiNo);
+    
+    }
+
+    // function getEmployeeUniquCode(p1, p2, p3, datas) {
+    //    var perfix = datas.Prefix;
+    //    var suffix = datas.Suffix;
+    //    var last = datas.LastSeries;
+    //    var first = datas.StartSeries;
+    //    var sep = datas.Seprator;
+    //    var incrmentNo = datas.DocNo;
+    //    var empCode;
+    //    var incseries;
+
+    //    var str ;
+    //    var len;
+    //    var newcode ;
+
+  
+
+    //    if (last == "") {
+
+    //        empCode = perfix + sep + suffix + sep + first;
+    //      }
+    //    else {
+    //        str = first;
+    //        len = str.length;
+    //        newcode =  parseInt(last) + parseInt(incrmentNo);
+    //       // alert(pad(newcode, len));
+    //    //    incseries = parseInt(pad(newcode, len)) + parseInt(incrmentNo);
+    //        empCode = perfix + sep + suffix + sep + pad(newcode, len);
+      
+    //   }
+    //    setControlValue("txtEmployeeCode", empCode);
+
+    //}
+
+    function pad(n, width, z) {
+        z = z || '0';
+        n = n + '';
+        return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+    }
+
+    
+</script>
+
+ 
+<style type="text/css">
+    .oddTr {
+        background-color: #dddddd;
+    }
+    .dvImgPreview
+{
+    background-position: center center;
+background-size: cover;
+-webkit-box-shadow: 0 0 1px 1px rgba(0, 0, 0, .3);
+    min-height: 30px;
+    min-width: 30px;
+    height:100px;
+    width:100px;
+    max-height:100px;
+    max-width:100px;
+}
+</style>
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                txtDepartment: {
+                    selectcheck: true
+                },
+
+                ddlDesgination: {
+                    selectcheck1: true
+                },
+                ddlQualfication: {
+                    selectcheck2: true
+                },
+                ddlStaffType: {
+                    selectcheck3: true
+                },
+                ddlGender: {
+                    selectcheck4: true
+                },
+                ddlMarried: {
+                    selectcheck5: true
+                },
+                ddlReligion: {
+                    selectcheck6: true
+                },
+                ddlCountry: {
+                    selectcheck7: true
+                },
+                ddlState: {
+                    selectcheck8: true
+                },
+                ddlCity: {
+                    selectcheck9: true
+                },
+               
+                txtEmployeeCode:"required",
+                txtJoiningDate: "required",
+                txtTotalExperience: "required",
+                txtfirstName: "required",
+                txtLastName: "required",
+
+                txtDOB: "required",
+                txtMotherName: "required",
+                txtFatherName: "required",
+                txtPincode: {
+                    required: true,
+                    number: true
+                },
+
+                txtMobileNo: {
+                    required: true,
+                    number: true
+                },
+              
+                txtEmailId: {
+                    required: true,
+                    email: true
+                },
+               
+                txtUserNam: "required",
+                txtPassword: "required",
+
+            },
+            messages: {
+
+
+                txtJoiningDate: "Please Select Joining Date",
+                txtTotalExperience: "Please Enter Total Experience",
+                txtfirstName: "Please Enter First Name",
+                txtLastName: "Please Enter Last Name",
+
+                txtDOB: "Please Select DOB",
+                txtMotherName: "Please Enter Mother Name",
+                txtFatherName: "Please Enter Father Name",
+                txtEmailId: "Please Enter Email Address",
+                txtUserNam: "Please Enter User Name",
+                txtPassword: "Please Enter Password",
+
+                txtDepartment: "Please Select Department",
+
+                ddlDesgination:"Please Select Designation",
+                ddlQualfication: "Please Select Qualfication",
+                ddlStaffType: "Please Select Staff Category",
+                ddlGender: "Please Select Gender",
+                ddlMarried:"Please Select Married Status",
+                ddlReligion: "Please Select Relegion",
+                ddlCountry: "Please Select Country",
+                ddlState: "Please Select State",
+                ddlCity: "Please Select City",
+                txtEmployeeCode: "Please Enter Employee Code",
+
+
+
+            }
+        })
+        jQuery.validator.addMethod('selectcheck', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+
+        jQuery.validator.addMethod('selectcheck1', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+        jQuery.validator.addMethod('selectcheck2', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+        jQuery.validator.addMethod('selectcheck3', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+        jQuery.validator.addMethod('selectcheck4', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+        jQuery.validator.addMethod('selectcheck5', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+        jQuery.validator.addMethod('selectcheck6', function (value) {
+            if (value == "0" ) {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+        jQuery.validator.addMethod('selectcheck7', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+        jQuery.validator.addMethod('selectcheck8', function (value) {
+            if (value == "0" || value == null) {
+
+                if (value == "0") {
+                    return (value != '0');
+                }
+                if (value == null) {
+                    return (value != null);
+                }
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+        jQuery.validator.addMethod('selectcheck9', function (value) {
+            if (value == "0" || value == null) {
+                if (value == "0") {
+                    return (value != '0');
+                }
+
+                if (value == null) {
+                    return (value != null);
+                }
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+
+
+    });
+</script>

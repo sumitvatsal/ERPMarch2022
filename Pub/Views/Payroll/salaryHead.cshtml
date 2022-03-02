@@ -1,0 +1,288 @@
+﻿
+@{
+    ViewBag.Title = "salaryHead";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<section class="content" ng-app="myApp" ng-controller="salryhead">
+    <div class="box box-solid">
+        <div class="et">
+            <div class="box-header with-border">
+                <h3 class="box-title"> Salary Head</h3>
+
+            </div>
+        </div>
+
+
+        <div class="box-body">
+            <div class="row">
+
+                <div class="content">
+               
+                         
+
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">Salary Settings</h4>
+                                    </div>
+                                    <form role="form" id="form1" name="form1">
+                                        <div class="panel-body">
+                                            <div class="panel-body">
+
+
+                                                <div class="form-group">
+                                                    <label for="Country" class="req">School<span class="requird">*</span></label>
+                                                    <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name"></select>
+
+
+                                                </div>
+                                                <div class="alert alert-success centerSuccess" id="divsuccesmsg" style="display:none">
+                                                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                                    <h4>
+                                                        <i class="icon fa fa-check"></i>
+                                                        success! <span ng-bind="successMsg"></span>
+                                                    </h4>
+
+                                                </div>
+                                                <div class="form-group">
+                                                    <input type="text" ng-model="txtheadId" style="display:none" />
+                                                    <label class="req" for="Salarydetails_designationid">Type <span class="requird">*</span></label>
+                                                    <select class="form-control" name="ddlSalaryType" id="ddlSalaryType" aria-required="true" style="width: 100%;">
+                                                        <option value="Earning">Earning</option>
+                                                        <option value="Deduction">Deduction</option>
+                                                    </select>
+                                                </div>
+                                               
+                                              
+                                                <div class="form-group">
+                                                    <label class="req" for="Salarydetails_unit">Salary Head <span class="requird">*</span></label>
+                                                    <input class="form-control" name="txtSalaryHead" ng-model="txtSalaryHead" id="txtSalaryHead" type="text" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="req" for="Salarydetails_unit">Code <span class="requird">*</span></label>
+                                                    <input class="form-control" name="txtSalaryCode" ng-model="txtSalaryCode" id="txtSalaryCode" type="text" />
+                                                </div>
+                                                <div class="form-group">
+
+                                                    <label><input id="chkStatus" ng-model="chkstatus" type="checkbox" /> Active</label>
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <div class="form_sep">
+                                                        <input class="btn btn-info" id="btnsumit" ng-click="saveSalaryHead()" type="button" value="Save">
+                                                        <input type="button" ng-click="clearAllTexbox()" class="btn btn-info" value="Reset" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </form>
+                                 </div>
+                            </div>
+                            <div class="col-sm-8">
+                                      <div class="box box-primary">
+                                          <div class="box-header with-border">
+                                              <h3 class="box-title">View Salary Head</h3>
+                                          </div>
+                                          <div class="box-body">
+                                              <div class="form-group">
+
+                                                  <table id="example1" class="table table-bordered table-striped">
+                                                      <thead style="background-color:steelblue;color:white;">
+
+
+                                                          <tr>
+                                                              <th>School</th>
+                                                              <th>Type</th>
+                                                              <th>Salary Head</th>
+                                                              <th>Code</th>
+                                                              <th>Status</th>
+                                                              <th>Action</th>
+
+
+                                                          </tr>
+                                                      </thead>
+                                                      <tbody>
+                                                          <tr ng-repeat="employee in employees" ng-class-odd="'oddTr'">
+                                                             <td>
+                                                                 {{employee.School}}
+                                                             </td>
+                                                              <td>
+                                                                  {{employee.Type}}
+
+                                                              </td>
+                                                              <td>
+                                                                  {{employee.Name}}
+
+                                                              </td>
+                                                              <td>{{employee.Code}}</td>
+                                                               <td>
+                                                                  <button type="button" style="width: 120px;" class="{{employee.Extra10}}">{{employee.Status}}</button>
+                                                              </td>
+                                                              <td>
+                                                                  <i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" ng-click="editsalryheadById(employee)"></i>
+                                                                  &nbsp;
+                                                                  <i class="fa fa-fw fa-trash" style="cursor:pointer" ng-click="deletesalaryHeadById(employee)"></i>
+
+                                                              </td>
+
+                                                           
+
+                                                          </tr>
+
+
+                                                      </tbody>
+
+                                                  </table>
+
+
+
+
+                                              </div>
+                                          </div>
+                                      </div>
+                            </div>
+                        </div>
+                 
+                </div>
+
+</div>
+</div>
+  </div>
+</section>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+<script src="~/js/Payroll/Model.js"></script>
+<script src="~/js/Payroll/Controller.js"></script>
+<script src="~/js/Payroll/Service.js"></script>
+ <!-- Select2 -->
+<link href="~/css/bower_components/select2/dist/css/select2.min.css" rel="stylesheet" />
+
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>
+
+ <script type="text/javascript">
+     $(document).ready(function () {
+         $('.select2').select2();
+     })
+ 
+ </script>
+@*<style type="text/css">
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>*@
+<script type="text/javascript">
+    $(document).ready(function () {
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+               
+
+                txtSalaryHead: "required",
+                txtSalaryCode: "required",
+              
+
+            },
+            messages: {
+
+                txtSalaryHead: "Please Enter Salary Head",
+                txtSalaryCode: "Please Enter Salary Code",
+                //ddlSalaryType: "Please Select Salary Type"
+                
+
+            }
+        })
+        jQuery.validator.addMethod('selectcheck', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+
+
+    });
+</script>

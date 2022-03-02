@@ -1,0 +1,651 @@
+﻿
+@{
+    ViewBag.Title = "TimeTableConfigCreate";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<style type="text/css">
+    .imgIcon {
+        width: 0.5%;
+        height: 0.5%;
+    }
+
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 8px;
+            padding-bottom: 8px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+<link href="~/css/bootstrap-timepicker.css" rel="stylesheet" />
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<link rel="stylesheet" href="~/css/bower_components/select2/dist/css/select2.min.css">
+<script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>
+<section class="content-header">
+    <h1>
+        <i class="fa fa-plus-square"></i> Timetable Configuration
+    </h1>
+    @*<ul class="breadcrumb">
+        <li><a href="/"><i class="fa fa-home"></i>Home</a></li>
+        <li><a href="/academics/default/index">Academics</a></li>
+        <li class="active">Timetable</li>
+        <li><a href="/timetable/timetable-configuration/index">Timetable Configuration</a></li>
+        <li class="active">Timetable Configuration</li>
+    </ul>*@
+</section>
+<section class="content">
+
+    <div class="box box-solid">
+
+        <form id="form1" name="form1">
+            <div class="box-body">
+                <div class="row">
+
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label for="Country" class="req">School<span class="requird">*</span></label>
+                            <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name"></select>
+
+                        </div>
+                    </div>
+
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label">Academic Year <span class="requird">*</span></label>
+                                <select id="tc_academic_year" style="color:black;" class="form-control" name="tc_academic_year" aria-required="true" valuefield="ID" textfield="StartYear" blankRowValue="-1" blankRowText="----Select----">
+                                    @*<option value="">--- Select Academic Year ---</option>
+                        <option value="1" selected="">2016-17</option>*@
+                                </select>
+
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label">Class <span class="requird">*</span></label>
+                                <select class="form-control" id="ddlCourse" style="color:black;" name="ddlCourse" valuefield="Id" textfield="CourseName" blankRowValue="-1" blankRowText="----Select----" aria-required="true"></select>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label">Section <span class="requird">*</span></label>
+
+                                <select class="form-control" name="ddlSection" style="color:black;" id="ddlSection" valuefield="Id" textfield="SectionName" blankRowValue="-1" blankRowText="----Select----"></select>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label">Name <span class="requird">*</span></label>
+                                <input type="text" id="tc_name" name="tc_name" class="form-control" maxlength="150" aria-required="true">
+
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label">Start Date <span class="requird">*</span></label>
+                                <div class="input-group date">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" id="tc_from_date" name="tc_from_date" class="form-control dtpicker"    readonly="" size="10" >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label">End Date <span class="requird">*</span></label>
+                                <div class="input-group date">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" id="tc_To_date" name="tc_To_date" class="form-control dtpicker"    readonly="" size="10">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label">Weekday <span class="requird">*</span></label>
+                                <input type="hidden" value="">
+                                <select class="form-control select2" id="tc_weekday" name="tc_weekday"  valuefield="DayID" textfield="WeekDay" multiple="multiple"></select>
+                                @*<select id="tc_weekday" multiple="multiple" size="4">
+                        <option value="1">Monday</option>
+                        <option value="2">Tuesday</option>
+                        <option value="3">Wednesday</option>    
+                        <option value="4">Thursday</option>
+                        <option value="5">Friday</option>
+                        <option value="6">Saturday</option>
+                        <option value="7">Sunday</option>
+                    </select><div><button type="button" class="multiselect dropdown-toggle form-control btn btn-default" data-toggle="dropdown" title="None Selected"><span class="multiselect-selected-text">None Selected</span> <b class="caret"></b></button><ul class="multiselect-container dropdown-menu"><li class="multiselect-item filter" value="0"><div class="input-group"><span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span><input class="form-control multiselect-search" type="text" placeholder="Search"><span class="input-group-btn"><button class="btn btn-default multiselect-clear-filter" type="button"><i class="glyphicon glyphicon-remove-circle"></i></button></span></div></li><li class="multiselect-item multiselect-all"><a tabindex="0" class="multiselect-all"><label class="checkbox"><input type="checkbox" value="multiselect-all"> Select all</label></a></li><li><a tabindex="0"><label class="checkbox"><input type="checkbox" value="1"> Monday</label></a></li><li><a tabindex="0"><label class="checkbox"><input type="checkbox" value="2"> Tuesday</label></a></li><li><a tabindex="0"><label class="checkbox"><input type="checkbox" value="3"> Wednesday</label></a></li><li><a tabindex="0"><label class="checkbox"><input type="checkbox" value="4"> Thursday</label></a></li><li><a tabindex="0"><label class="checkbox"><input type="checkbox" value="5"> Friday</label></a></li><li><a tabindex="0"><label class="checkbox"><input type="checkbox" value="6"> Saturday</label></a></li><li><a tabindex="0"><label class="checkbox"><input type="checkbox" value="7"> Sunday</label></a></li></ul></div>*@
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label">Class Timing <span class="requird">*</span></label>
+                                <select class="form-control" id="tc_classtiming" style="color:black;" valuefield="ID" name="tc_classtiming" textfield="timingNm" blankRowValue="-1" blankRowText="----Select----"></select>
+
+                            </div>
+                        </div>
+                    </div>
+                </div><!--box-body-->
+
+            <div class="box-footer">
+                <button type="button" class="btn btn-primary" id="btnCreate">Create</button>	<a class="btn btn-default" onclick="clearallfields()" href="javascript:void(0)">Cancel</a>
+            </div>
+
+        </form>
+    </div>
+
+    <div class="alert alert-success centerSuccess" id="divSucesEmail" style="display:none">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h4>
+            <i class="icon fa fa-check"></i>
+            <span Id="sentEmailMsg"></span>
+        </h4>
+
+    </div>
+</section>
+<script src="~/js/bootstrap-timepicker.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        //
+        $("#tc_weekday").select2({});
+        //callServiceMethodForDDl("", "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+
+        var SchoolID = getControlValue("ddlSchoolName");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+        var SchoolID = getControlValue("ddlSchoolName");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TimeTableApi", "GetAcademicYearBySchool", "tc_academic_year", false, "", "", "", "");
+
+        $("#ddlSchoolName").change(function () {
+            var SchoolID = getControlValue("ddlSchoolName");
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+        });
+
+        $("#ddlSchoolName").change(function () {
+            var SchoolID = getControlValue("ddlSchoolName");
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TimeTableApi", "GetAcademicYearBySchool", "tc_academic_year", false, "", "", "", "");
+        });
+
+       // callServiceMethodForDDl("", "/api/StudentApi", "GetClasses", "ddlCourse", false, "", "", "", "");
+        callServiceMethodForDDl("", "/api/TimeTableApi", "GetWeekdays", "tc_weekday", false, "", "", "", "");
+        //callServiceMethodForDDl("", "/api/TimeTableApi", "GetAcademicYear", "tc_academic_year", false, "", "", "", "");
+
+        callServiceMethodForDDl(JSON.stringify(["status", "", "", 1, 0, loginuser, typeuser]), "/api/TimeTableApi", "getClassTimings", "tc_classtiming", false, "", "", "", "");
+
+        $("#ddlCourse").change(function () {
+            var SchoolID = getControlValue("ddlSchoolName");
+            var ddlCourse = getControlValue("ddlCourse");
+            if (ddlCourse != null && (ddlCourse != -1) && (ddlCourse != undefined)) {
+                callServiceMethodForDDl(JSON.stringify([ddlCourse, SchoolID]), "/api/StudentApi", "GetSectionsbyschool", "ddlSection", false, "", "", "", "");
+            }
+        });        
+        
+        $('.dtpicker').datepicker({
+            autoclose: true
+            //,
+            //dateFormat: 'dd/mm/yy' 
+        });
+
+        var ID=getQuerystring("id");
+        if (typeof (ID) != "undefined") {
+            setControlValue("hdn", ID);//
+            setControlValue("hdnID", 0);
+            GetValues(ID);
+
+        }
+
+        $('#tc_weekday').val([]);
+        //
+        //callServiceMethodForDDl("", "/api/StudentApi", "GetLeaveStatus", "ddlReqStatus", false, "", "", "", "");
+    });
+
+    $("#tc_from_date").on("change", function () {
+        var startdate = $("#tc_from_date").datepicker('getDate');
+        var enddate = $("#tc_To_date").datepicker('getDate');
+        var startdateval = $("#tc_from_date").val();
+        var enddateval = $("#tc_To_date").val();
+        if (startdateval != "" && enddateval != "") {
+            if (startdate > enddate) {
+                alert("StartDate should be less than EndDate");
+                $("#tc_from_date").val("");
+            }
+            else {
+
+            }
+
+        }
+        //else if (startdateval == "") {
+        //    alert("Please fill Start Date first");
+        //    $("#tc_To_date").val("");
+
+
+       // }
+
+    });
+
+    
+    $("#tc_To_date").on("change", function () {
+        var startdate = $("#tc_from_date").datepicker('getDate');
+        var enddate = $("#tc_To_date").datepicker('getDate');
+        var startdateval = $("#tc_from_date").val();
+        var enddateval = $("#tc_To_date").val();
+        if (startdateval != "" && enddateval != "") {
+            if (startdate > enddate) {
+                alert("Enddate should be grater than Start Date");
+                $("#tc_To_date").val("");
+            }
+            else {
+
+            }
+
+        }
+        else if (startdateval=="")
+        {
+            alert("Please fill Start Date first");
+            $("#tc_To_date").val("");
+        
+
+        }
+
+    });
+
+    function openModal()
+    {
+        $('#myModal').modal('show');
+    }
+
+    function GetValues(ID)
+    {
+        $.ajax({
+            url: "/api/TimeTableApi/GetClassTiming",// "~/Masters/GetDeptMethod",
+            type: "Post",
+            data: JSON.stringify([ID]), //{ Name: name,ddlAcademicYr
+            //// Address: address, DOB: dob },
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                if(data.ID!=-1)
+                {
+                    setControlValue("hdn", data.ID);
+                    setControlValue("CTName", data.ct.Name);
+                    setControlValue("CTName1", data.ct.Name);
+                    setControlValue("Desc", data.ct.Description);
+
+                    fillDataTable(data.ID);
+                }
+            }
+        });
+    }
+
+    function fillDataTable(x)
+    {
+        setTimeout(function () {
+            callJTemplateServiceMethod(JSON.stringify([x]), "/api/TimeTableApi", "GetClassTimingDet",
+           "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+
+        }, 800);
+    }
+
+    function successMsg(p1, p2, p3, datas) {
+        //setTimeout(function () {
+        //    $('#example1').DataTable();
+        //}, 1000);
+    }
+
+    //
+    $("#btnCreate").click(function () {
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+            var status=1;
+            var tc_academic_year = getControlValue("tc_academic_year");
+            var ddlCourse = getControlValue("ddlCourse");
+            var ddlSection = getControlValue("ddlSection");
+            var tc_name = getControlValue("tc_name");
+            var tc_from_date = getControlValue("tc_from_date");
+            var tc_To_date = getControlValue("tc_To_date");
+            var tc_weekday = getControlValue("tc_weekday");
+           
+            //var languages = "";
+            //if (tc_weekday != null && tc_weekday != undefined && tc_weekday != "") {
+            //    var lang_lenth = tc_weekday.length;
+
+            //    var i = 0;
+            //    for (i; i < lang_lenth; i++) {
+            //        if (i == 0) {
+            //            languages = tc_weekday[i];
+            //        }
+            //        else {
+            //            languages = languages + "," + tc_weekday[i];
+            //        }
+            //    }
+            //} 
+            var tc_classtiming = getControlValue("tc_classtiming");
+            //if ($("#is_break").is(':checked'))
+            //{
+            //    status = 1;
+            //}
+            var status = "1";
+            var SchoolID = getControlValue("ddlSchoolName");
+            if (tc_name != undefined && tc_name != null && tc_name != "")
+            {
+                SaveDetails(0, tc_academic_year, ddlCourse, ddlSection, tc_name, tc_from_date, tc_To_date, tc_weekday, tc_classtiming, status, SchoolID);
+
+
+            }
+        }
+    });
+
+    function SaveDetails(id, year, course, section, name, fromDT, toDt, weekdays, ct_id, status, SchoolID)
+    {
+       
+            //var brk=true;
+            //status == 1 ? brk = true : brk = false;
+            var Items = new Array();
+            var Config = {
+                ID: id,
+                Name: name,
+                AcademicYear: year,
+                ClassID: course,
+                SectionID:section,
+                StartDT: fromDT,
+                EndDt: toDt,
+                WeekDays: weekdays,
+                CT_ID: ct_id,
+                Status: status,
+                SchoolID: SchoolID
+
+            }
+            var Student = {
+                ID: id,        
+                con: Config,
+                ViewType: "TimeTableConfigCreate"
+            }
+            Items.push(Student);
+
+            $.ajax({
+                url: "/api/TimeTableApi/SaveTiming",
+                type: "Post",
+                data: JSON.stringify(Items),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    $("#loader").fadeOut();
+                    $("#divSucesEmail").fadeIn();
+                    $("#sentEmailMsg").html(data.Msg);
+                    setTimeout(function () {
+                        $("#divSucesEmail").fadeOut();
+                        $("#sentEmailMsg").html("");
+                    }, 2000)
+                 
+                    if (data.ID != -1 /*&& data.ID != undefined*/) {
+                        //setControlValue("hdn", CT_id);
+                        //setControlValue("hdnID", 0);
+                        //setControlValue("PeriodName", "");
+                        //setControlValue("sTime", "");
+                        //setControlValue("eTime", "");
+                        //$('#myModal').modal('hide');
+                        window.location.href = "/TimeTable/CreateTimeTable?id=" + data.ID;
+                    }
+
+                    //fillDataTable(CT_id);
+                }
+            });
+        
+    }
+    //ank
+    function GetSchoolByID() {
+
+        $.ajax({
+            url: "/api/Default/getAllSchoolNameByID",
+            type: "Post",
+            data: JSON.stringify(Items),
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+            }
+        })
+    }
+    function Edit(id,name,stime,etime,status,isbreak)
+    {
+        setControlValue("hdnID", id);
+        setControlValue("PeriodName", name);
+        setControlValue("sTime", stime);
+        setControlValue("eTime", etime);
+        $('#is_break').prop('checked', isbreak);
+
+        //status==1?$('#is_break').prop('checked', true):$('#cbActive').prop('checked', false);
+        openModal();
+    }
+
+    function Delete(id)
+    {
+        var result = window.confirm('Are you sure to delete this record?');
+        if (result == true) {
+            $.ajax({
+                url: "/api/TimeTableApi/DeleteRecord",
+                type: "Post",
+                data: JSON.stringify([id,"ClassTimingDetails"]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    $("#divSucesEmail").fadeIn();
+                    $("#sentEmailMsg").html(data.Msg);
+                    setTimeout(function () {
+                        $("#divSucesEmail").fadeOut();
+                        $("#sentEmailMsg").html("");
+                    }, 2000)
+                    fillDataTable(getControlValue("hdn"));
+                }
+            });
+        }
+    }
+
+    function CreateTT()
+    {
+        getControlValue("sTime");
+        window.location.href = "/TimeTable/CreateTimeTable?id=" + id;
+    }
+
+    function clearallfields()
+    {
+
+        $("#tc_academic_year").val(-1);
+        $("#ddlCourse").val(-1);
+        $("#ddlSection").val(-1);
+        $("#tc_classtiming").val(-1);
+        callServiceMethodForDDl("", "/api/TimeTableApi", "GetWeekdays", "tc_weekday", false, "", "", "", "");
+        $("#tc_from_date").val("");
+        $("#tc_To_date").val("");
+        $("#tc_name").val("");
+       
+        
+    }
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                tc_academic_year: {
+                    selectcheck: true
+                },
+
+                ddlCourse: {
+                    selectcheck1: true
+                },
+                ddlSection: {
+                    selectcheck2: true
+                },
+                
+                //tc_weekday: {
+                //    selectcheck3: true
+                //},
+                tc_classtiming: {
+                    selectcheck4: true
+                },
+                
+                tc_weekday :"required",
+                tc_name: "required",
+
+                tc_from_date:"required",
+
+
+              
+                tc_To_date:"required",
+
+
+
+            },
+            messages: {
+
+                ddlCourse: "Please Select Class",
+                ddlSection: "Please Select Section",
+                tc_academic_year: "Please Select Academic Year",
+                tc_weekday: "Please Select Week Day",
+                tc_classtiming: "Please Select Class Timing",
+                tc_from_date: "Please Enter Start Date ",
+                tc_To_date:"Please Enter End Date ",
+                tc_name: "Please Enter Name"
+
+            }
+        })
+        jQuery.validator.addMethod('selectcheck', function (value) {
+            if (value == "-1") {
+                return (value != '-1');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+        jQuery.validator.addMethod('selectcheck1', function (value) {
+            if (value == "-1") {
+                return (value != '-1');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+        jQuery.validator.addMethod('selectcheck2', function (value) {
+            if (value == "-1") {
+                return (value != '-1');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else if (value == null) {
+                return (value != null);
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+        jQuery.validator.addMethod('selectcheck3', function (value) {
+            if (value == "-1") {
+                return (value != '-1');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+        jQuery.validator.addMethod('selectcheck4', function (value) {
+            if (value == "-1") {
+                return (value != '-1');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Classtiming");
+
+
+    });
+</script>

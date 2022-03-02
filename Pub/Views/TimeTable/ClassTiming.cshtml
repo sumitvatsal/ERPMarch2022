@@ -1,0 +1,752 @@
+﻿
+@{
+    ViewBag.Title = "ClassTiming";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<style type="text/css">
+    .imgIcon {
+        width: 0.5%;
+        height: 0.5%;
+    }
+
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Class Timing </h3>
+                </div>
+                <div class="box-body">
+                    <div class="form-group">
+                        <a href="#" style="width: 150px;float: right;margin-right: 8px" id="btnadd" class="btn btn-block btn-primary" onclick="openModal()">Add</a>
+                        <div style="height:40px"></div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <div class="form-group">
+                                        <label for="Country" class="req">School<span class="requird">*</span></label>
+                                        <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name" ></select>
+
+                                    </div></div></div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <div class="form-group">
+                                                <label>Name:</label>
+                                                <input type="text" class="form-control" id="txtName" placeholder="Enter ...">
+                                                <!-- /.input group -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <div class="form-group">
+                                                <label>Description:</label>
+                                                <input type="text" class="form-control" id="txtMName" placeholder="Enter ...">
+                                                <!-- /.input group -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Status:</label>
+                                            <select class="form-control dropdown-toggle" id="ddlReqStatus">
+                                                <option value="-1">----Select----</option>
+                                                <option value="1">Active</option>
+                                                <option value="0">DeActive</option>
+                                            </select>
+                                            <!-- /.input group -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    <div class="form-group">
+                        <div>
+
+                            <table id="example1" class="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th style="width:8%;">Sr no.</th>
+                                        <th style="display:none">School</th>
+                                        <th style="display:none">Name</th>
+                                        <th>Classname</th>
+                                        <th style="display:none">SectionName</th>
+                                         <th style="display:none" >Description</th>
+                                        <th>Status</th>
+                                        <th style="width:10%;">Action</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyEmployeeDetails"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <script type="text/html" id="divEmployeeDetailsJTemplte">
+                {#foreach $T as Datashort}
+                <tr>
+                    <td style="width:10%;">
+                        { $T.Datashort.CountID}
+                    </td>
+                    @*<td style="width:10%; display:none">
+            { $T.Datashort.School}
+        </td>*@
+                    @*<td>
+            <a href="#" title="View Details" onclick="GoToAddPeriods({ $T.Datashort.ID})">{ $T.Datashort.ct.Name}</a>
+
+        </td>*@
+                    <td>
+                        { $T.Datashort.classname}
+
+                    </td>
+                    <td style="display:none">
+                        { $T.Datashort.ct.ClassId}
+
+                    </td>
+                    <td style="display:none">
+                        { $T.Datashort.ct.SectionId}
+
+                    </td>
+                    <td style="display:none">
+
+                        { $T.Datashort.SectionName}
+                    </td>
+                    <td style="display:none">
+                        { $T.Datashort.ct.Description}
+                    </td>
+                    <td style="width:15%;">
+                        <span class="{ $T.Datashort.style}" title="{ $T.Datashort.action}" onclick="EditStatus({ $T.Datashort.ID},'{ $T.Datashort.ct.Name}','{ $T.Datashort.ct.Description}',{ $T.Datashort.ct.Status},{ $T.Datashort.ct.SchoolID })">{ $T.Datashort.StatusNm} </span>
+                    </td>
+                    <td>
+                        @*<a style="display:none" href="#" title="Edit Details" onclick="GoToAddPeriods({ $T.Datashort.ID})">{ $T.Datashort.ct.Name}</a>
+            <i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" onclick="GoToAddPeriods({ $T.Datashort.ID})">{ $T.Datashort.ct.Name} title="Edit"></i>*@
+                        <a href="#" title="Edit Details" class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" onclick="GoToAddSectionId({$T.Datashort.ct.ClassId},{ $T.Datashort.ID})"></a>
+                        <i class="fa fa-fw fa-trash" style="display:none" onclick="Delete({ $T.Datashort.ID})" title="Delete"></i>
+                    </td>
+                </tr>
+                {#/for}
+            </script>
+            <input id="hdn" type="hidden" />
+
+        </div>
+        <!-- /.row -->
+
+    </div>
+
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" onclick="refreshControls()">&times;</button>
+                    <h4 class="modal-title">Allocate</h4>
+                </div>
+                <div class="modal-body">
+                    @*<div class="col-md-12">
+                            <div class="col-md-4"></div>
+                            <div class="col-md-4">
+                                <img id="ImgEmployeeImg" style="height: 183px;width: 218px;" alt="" />
+
+
+                            </div>
+                            <div class="col-md-4"></div>
+                            <div style="clear:both"></div>
+                        </div>*@
+                    <form role="form" id="form1" name="form1">
+                        <div class="col-md-12">
+                            <div class="box-body">
+                                <div class="form-group">
+                                    <label for="Country" class="req">School<span class="requird">*</span></label>
+                                    <select class="form-control" id="ddlSchoolName1" ng-model="ddlSchoolName1" valuefield="Id" textfield="Name"></select>
+
+                                </div>
+                                <div class="form-group">
+                                    <div class="form-group field-assignment-assignment_course_id required">
+                                        <label class="control-label" for="assignment-assignment_course_id">Class <span class="requird">*</span></label>
+                                        <select class="form-control" id="ddlCourse" name="ddlCourse" valuefield="Id" textfield="CourseName" blankRowValue="-1" blankRowText="----Select----" aria-required="true"></select>
+                                        <div class="help-block"></div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="form-group field-assignment-assignment_course_id required">
+                                        <label class="control-label" for="assignment-assignment_course_id">Section <span class="requird">*</span></label>
+                                        <select class="form-control" id="ddlSection" name="ddlSection" valuefield="Id" textfield="SectionName" blankRowValue="-1" blankRowText="----Select----" aria-required="true"></select>
+                                        <div class="help-block"></div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Name: <span class="requird">*</span></label>
+                                    <input type="text" class="form-control" name="txtCTName" id="txtCTName" placeholder="Enter ...">
+                                </div>
+                                <div class="form-group">
+                                    <label>Description:</label>
+                                    <textarea class="form-control" rows="2" placeholder="Enter ..." name="txtDesc" id="txtDesc"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <input type="checkbox" checked="checked" id="cbActive" />&nbsp;Active
+                                    <!-- /.input group -->
+                                </div>
+                                <div class="box-footer">
+                                    <input type="button" class="btn btn-primary" value="Save Changes" id="Apply" name="Save" />
+                                    <input type="hidden" id="hdnID" />
+                                </div>
+                                <!-- /.form group -->
+                            </div>
+                            <!-- /.box-body -->
+                           
+
+                        </div>
+                    </form>
+
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="alert alert-success centerSuccess" id="divSucesEmail" style="display:none">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h4>
+            <i class="icon fa fa-check"></i>
+            <span Id="sentEmailMsg"></span>
+        </h4>
+
+    </div>
+</section>
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+       
+        $("#btnadd").click(function () {
+            var SchoolID = (sessionStorage.getItem("SchoolID"));
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+           
+        });
+        //var empID=getQuerystring("id");
+        //if (typeof (empID) != "undefined") {
+        setControlValue("hdn", 0);
+        //    //CTstudentLeavesCheck(empID);
+        //    //var empid=sessionStorage.getItem("EmpId");
+
+        fillDataTable();
+        $("#ddlCourse").change(function () {
+            debugger;
+            var ddlCourse = getControlValue("ddlCourse");
+            if (ddlCourse != null && (ddlCourse != -1) && (ddlCourse != undefined)) {
+                var SchoolID = sessionStorage.getItem("SchoolID");
+               
+                callServiceMethodForDDl(JSON.stringify([SchoolID, ddlCourse]), "/api/TimeTableApi", "GetSectionbySCHOOLidbyclass", "ddlSection", false, "", "", "", "");
+            }
+
+        });
+        //}
+        //
+        //callServiceMethodForDDl("", "/api/StudentApi", "GetLeaveStatus", "ddlReqStatus", false, "", "", "", "");
+    });
+    var loginuser = (sessionStorage.getItem("userId"));
+    var typeuser = sessionStorage.getItem("type");
+    function fillDataTable() {
+        var t = $('#example1').DataTable();
+        t.destroy();
+        callJTemplateServiceMethod(JSON.stringify(["default","","","","", loginuser, typeuser]), "/api/TimeTableApi", "getClassTimings",
+            "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+
+    }
+
+    function successMsg(p1, p2, p3, datas) {
+        setTimeout(function () {
+            $('#example1').DataTable({
+                bRetrieve: true,
+                bDestroy: true,
+                'columnDefs': [{
+                    "targets": -1,
+                    "orderable": false
+
+                }],
+
+            });
+        }, 1000);
+    }
+
+    function Approve(id) {
+        var ar = new Array();
+        var Student = {
+            leaveID: id,
+            statusNm: "approve",
+            MidName: getControlValue("hdnEmpid"),
+        }
+        ar.push(Student);
+        var result = window.confirm('Are you sure to approve this request?');
+        if (result == true) {
+            ActionTaken(ar);
+            fillDataTable();
+        };
+
+    }
+
+    function ApproveChecked() {
+        var ar = new Array();
+        var count = 0;
+        $('#example1 tbody input[type=checkbox]').each(function () {
+            if ($(this).is(':checked')) {
+                count++;
+                var Student = {
+                    leaveID: $(this).attr("stdID"),
+                    statusNm: "approve",
+                    MidName: getControlValue("hdnEmpid"),
+                }
+                ar.push(Student);
+            }
+        });
+        if (count > 0) {
+
+            var result = window.confirm('Are you sure to approve these requests?');
+            if (result == true) {
+                ActionTaken(ar);
+                fillDataTable();
+            };
+        }
+        ShowHideBtns();
+    }
+
+    function ActionTaken(ar) {
+        $.ajax({
+            url: "/api/StudentApi/Approve_Reject_Leave",// "~/Masters/GetDeptMethod",
+            type: "Post",
+            data: JSON.stringify(ar), //{ Name: name,ddlAcademicYr
+            //// Address: address, DOB: dob },
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                alert(data.statusNm);
+            }
+        });
+    }
+
+    function Reject(id) {
+        var ar = new Array();
+        var Student = {
+            leaveID: id,
+            MidName: getControlValue("hdnEmpid"),
+            statusNm: "reject"
+        }
+        ar.push(Student);
+        var result = window.confirm('Are you sure to reject this request?');
+        if (result == true) {
+            ActionTaken(ar);
+            fillDataTable();
+        };
+    }
+
+    function RejectChecked() {
+        var ar = new Array();
+        var count = 0;
+        $('#example1 tbody input[type=checkbox]').each(function () {
+            if ($(this).is(':checked')) {
+                count++;
+                var Student = {
+                    leaveID: $(this).attr("stdID"),
+                    statusNm: "reject",
+                    MidName: getControlValue("hdnEmpid"),
+                }
+                ar.push(Student);
+            }
+        });
+
+        if (count > 0) {
+            var result = window.confirm('Are you sure to reject these requests?');
+            if (result == true) {
+                ActionTaken(ar);
+                fillDataTable();
+            };
+
+        }
+        ShowHideBtns();
+    }
+
+    function performAction(action, leaveID) {
+        alert(action);
+        if (action != -1) {
+            if (action == 5) {
+                Approve(leaveID);
+            }
+            else if (action == 6) {
+                Reject(leaveID);
+            }
+        }
+    }
+
+    $("#Apply").click(function () {
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+            var status = 0;
+            var txt = getControlValue("txtDesc");
+            var name = getControlValue("txtCTName");
+            var id = getControlValue("hdn");
+            var SchoolID = $("#ddlSchoolName1").val()
+            var ClassId = $("#ddlCourse").val()
+            var SectionId = $("#ddlSection").val()
+            
+
+            
+            if ($("#cbActive").is(':checked')) {
+                status = 1;
+            }
+            if (name != undefined && name != undefined) {
+                SaveDetails(id, name, txt, status, SchoolID,ClassId, SectionId);
+
+
+            }
+        }
+
+
+    });
+
+    $("#CheckAll").click(function () {
+        $('#example1 tbody input[type="checkbox"]').prop('checked', this.checked);
+        ShowHideBtns();
+
+    });
+
+    function ShowHideBtns() {
+        var count = 0;
+        $('#example1 tbody input[type=checkbox]').each(function () {
+            if ($(this).is(':checked')) {
+                count++;
+            }
+        });
+        if (count > 0) {
+            $('#ActionBtns').fadeIn();
+        }
+        else {
+            $('#ActionBtns').fadeOut();
+        }
+    }
+    $('#ddlReqStatus').on('change', function () {
+        var midName = getControlValue("txtMName");
+        var Lname = getControlValue("ddlReqStatus");
+        var name = getControlValue("txtName");
+        var SchoolName = getControlValue("ddlSchoolName");
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        if (Lname != "-1") {
+            searchCriteria("status", name, midName, Lname, SchoolName, loginuser, typeuser);
+        }
+        else {
+            fillDataTable();
+        }
+    });
+    
+    $('#txtName').on('keyup', function () {
+        var midName = getControlValue("txtMName");
+        var Lname = getControlValue("ddlReqStatus");
+        var name = getControlValue("txtName");
+        //var rollno = getControlValue("txtRollno");
+        var SchoolName = getControlValue("ddlSchoolName");
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        if (name != "" && name != null) {
+            searchCriteria("name", name, midName, Lname, SchoolName, loginuser, typeuser);
+        }
+        else {
+            fillDataTable();
+        }
+    });
+
+    $('#txtMName').on('keyup', function () {
+        var midName = getControlValue("txtMName");
+        var Lname = getControlValue("ddlReqStatus");
+        var name = getControlValue("txtName");
+        //var rollno = getControlValue("txtRollno");
+        var SchoolName = getControlValue("ddlSchoolName");
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        if (midName != "" && midName != null) {
+            searchCriteria("desc", name, midName, Lname, SchoolName, loginuser, typeuser);
+        }
+        else {
+            fillDataTable();
+        }
+    });
+    $('#ddlSchoolName').on('change', function () {
+        var midName = getControlValue("txtMName");
+        var Lname = getControlValue("ddlReqStatus");
+        var name = getControlValue("txtName");
+        var SchoolName = getControlValue("ddlSchoolName");
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        if (SchoolName != "" && SchoolName != null) {
+            searchCriteria("School", name, midName, Lname, SchoolName, loginuser, typeuser);
+        }
+        else {
+            fillDataTable();
+        }
+
+    });
+    function searchCriteria(type, value, value1, value2, value3, value4, value5) {
+        setTimeout(function () {
+            var t = $('#example1').DataTable();
+            t.destroy();
+            callJTemplateServiceMethod(JSON.stringify([type, value, value1, value2, value3, value4, value5]), "/api/TimeTableApi", "getClassTimings",
+                "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg1, "", "", "");
+
+        }, 800);
+    }
+
+    function successMsg1(p1, p2, p3, datas) {
+        setTimeout(function () {
+            $('#example1').DataTable({
+                bRetrieve: true,
+                bDestroy: true,
+                'columnDefs': [{
+                    "targets": -1,
+                    "orderable": false
+                }],
+            });
+        }, 1000);
+    }
+    function refreshControls() {
+
+        setControlValue("hdn", 0);
+        setControlValue("txtCTName", "");
+        $("#txtDesc").val("");
+        setControlValue("txtDesc", "");
+        $('#myModal').modal('hide');
+    }
+    function openModal() {
+        $('#myModal').modal('show');
+    }
+
+    function Edit(id, name, desc, status, SchoolID) {
+        setControlValue("hdn", id);
+        setControlValue("txtCTName", name);
+        $("#txtDesc").val(desc);
+        //setControlValue("txtDesc", desc);
+       
+        setControlValue("ddlSchoolName1", SchoolID);
+
+        status == 1 ? $('#cbActive').prop('checked', true) : $('#cbActive').prop('checked', false);
+        openModal();
+    }
+    function EditStatus(id, name, desc, status, SchoolID) {
+        var st = 0;
+        status == 0 ? st = 1 : st = 0;
+        SaveDetails(id, name, desc, st, SchoolID)
+    }
+    
+    function SaveDetails(id, name, txt, status, SchoolID, ClassId, SectionId) {
+        var Items = new Array();
+        var classTiming = {
+            Name: name,
+            Description: txt,
+            Status: status,
+            SchoolID: SchoolID,
+            ClassId: ClassId,
+            SectionId:SectionId
+        }
+        var Student = {
+            ID: id,
+            ct: classTiming,
+            ViewType: "ClassTiming"
+
+        }
+        Items.push(Student);
+
+        $.ajax({
+            url: "/api/TimeTableApi/SaveTiming",
+            type: "Post",
+            data: JSON.stringify(Items),
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+
+                $("#loader").fadeOut();
+                $("#divSucesEmail").fadeIn();
+                $("#sentEmailMsg").html(data.Msg);
+                setTimeout(function () {
+                    $("#divSucesEmail").fadeOut();
+                    $("#sentEmailMsg").html("");
+                }, 2000)
+
+                if (data.ID != -1) {
+                    setControlValue("hdn", 0);
+                    setControlValue("txtCTName", "");
+                    $("#txtDesc").val("");
+                    setControlValue("txtDesc", "");
+                    $('#myModal').modal('hide');
+
+                }
+
+                fillDataTable();
+            }
+        });
+    }
+
+    function Delete(id) {
+        var result = window.confirm('Are you sure,you want to delete this record?');
+        if (result == true) {
+            $.ajax({
+                url: "/api/TimeTableApi/DeleteRecord",
+                type: "Post",
+                data: JSON.stringify([id, "ClassTiming"]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    $("#divSucesEmail").fadeIn();
+                    $("#sentEmailMsg").html(data.Msg);
+                    setTimeout(function () {
+                        $("#divSucesEmail").fadeOut();
+                        $("#sentEmailMsg").html("");
+                    }, 2000)
+
+                    fillDataTable();
+                }
+            });
+        }
+    }
+    
+    function GoToAddSectionId(ClassId, ID) {
+      
+        window.location.href = "/TimeTable/SectionDetails?ClassId=" + ClassId + "&ID=" + ID;
+    }
+    function GoToAddPeriods(id) {
+        window.location.href = "/TimeTable/ClassTimingDetails?id=" + id ;
+    }
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+
+                txtCTName: "required",
+
+
+
+            },
+            messages: {
+
+                txtCTName: "Please Enter Class Timing Name"
+
+
+
+            }
+        })
+
+
+
+    });
+</script>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName1", false, "", "", "", "");
+        //callServiceMethodForDDl("", "/api/Default", "getAllSchoolName", "ddlSchoolName1", false, "", "", "", "");
+        //callServiceMethodForDDl("", "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+
+                txtLeaveType: "required",
+
+
+            },
+            messages: {
+
+                txtLeaveType: "Please Enter Leave Name",
+
+
+            }
+        })
+
+
+    });
+</script>

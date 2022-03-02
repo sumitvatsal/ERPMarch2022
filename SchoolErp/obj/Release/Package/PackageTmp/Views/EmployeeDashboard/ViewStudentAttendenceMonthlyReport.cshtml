@@ -1,0 +1,385 @@
+﻿
+@{
+    ViewBag.Title = "ViewStudentAttendenceMonthlyReport";
+    // Layout = "~/Views/Shared/_LayoutEmployee.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section class="content">
+    <div class="box box-solid">
+
+        <div class="employee-attendance-search">
+
+            <form id="w1" action="index" method="get">
+                <div class="box-header with-border">
+                    <h3 class="box-title"><i class="fa fa-search"></i> Search Attendence Reports </h3>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group field-empinfosearch-emp_department_id">
+                                <label class="control-label" for="empinfosearch-emp_department_id">Class</label>
+                                <input type="text" id="lblClass" class="form-control" readonly="readonly"/>
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group field-empinfosearch-emp_designation_id">
+                                <label class="control-label" for="empinfosearch-emp_designation_id">Section </label>
+                                <input type="text" id="lblSections" class="form-control" readonly="readonly" />
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group field-employeeattendance-ea_date required">
+                                <label class="control-label" for="employeeattendance-ea_date">Attendence Date</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+
+                                    <input type="text" id="txtCurrentDate" class="form-control hasDatepicker" readonly="readonly" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group field-empinfosearch-searchinput">
+
+                                <input type="text" id="txtStudentName" class="form-control" placeholder="Enter Student First/Last Name.">
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="button" id="create_pdf" value="Export Pdf" onclick="pdfExport()" class="btn btn-primary" />
+
+                            <a href="#" class="btn btn-primary" onClick="$('#example1').tableExport({ type: 'excel', escape: 'false' });">Excel Exports</a>
+                        </div>
+
+                    </div>
+                    <div class="box-footer">
+                        <input type="button" value="Search" onclick="searchMonthlyReports()" class="btn btn-primary" />
+                        <a class="btn btn-default" href="#">Reset</a>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+
+
+    <div class="row">
+        <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">View Attendence Reports</h3>
+                </div>
+                <div class="box-body">
+                    <div class="form-group">
+                       
+                     
+                        <div style="height:40px"></div>
+                        <div>
+
+
+                            <div id="divmonthlyAttendenceReport" style="overflow-x: auto;">
+                                <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                    <thead id="mothsHead">
+
+                                    </thead>
+                                    <tbody id="tbodyEmployeeDetails"></tbody>
+                                </table>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<style type="text/css">
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+                                    background-color: #e1e4e8;
+                                }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+            width: 35px;
+        }
+</style>
+<!-- DataTables -->
+<link href="~/js/PDFExcelDatatable/buttons.dataTables.min.css" rel="stylesheet" />
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+ <script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+ 
+ <script src="~/js/jsExcel/tableExport.js"></script>
+<script src="~/js/jsExcel/jquery.base64.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script>
+<script src="~/js/jsExcel/html2canvas.js"></script>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+ 
+        var m = new Date().getMonth() + 1;
+        var y = new Date().getFullYear();
+
+        var totalDayInMonth = daysInMonth(m, y);
+        var employye = {
+
+            DesigId: sessionStorage.getItem("EmpId"),
+            Month: m,
+            Year: y,
+            SchoolID: sessionStorage.getItem("SchoolID")
+        }
+        $("#loader").fadeIn();
+        var ddl = JSON.stringify(employye)
+        callServiceMethod(ddl, "/api/StudentApi", "getAllStudentNameForThisclass1", false, "", "", false, "", true, successMsg_scs, totalDayInMonth, "0", "");
+    })
+
+     
+
+    
+</script>
+<script type="text/javascript">
+    var table;
+    $(document).ready(function () {
+        
+        $('#txtCurrentDate').datepicker({
+            autoclose: true,
+            minViewMode: 1,
+            format: 'mm/yyyy',
+
+        });
+
+
+        var m = new Date().getMonth()+1;  
+        var y = new Date().getFullYear();
+        $('#txtCurrentDate').val(m + "/" + y);
+
+    });
+
+    function daysInMonth(month, year) {
+        return new Date(year, month, 0).getDate();
+    }
+
+    function searchMonthlyReports()
+    {
+        // alert();
+        $("#tbodyEmployeeDetails").html(" ");
+            var totalDayInMonth = daysInMonth(getControlValue("txtCurrentDate").split('/')[0], getControlValue("txtCurrentDate").split('/')[1]);
+        var employye = {
+
+            DesigId: sessionStorage.getItem("EmpId"),
+            Month: getControlValue("txtCurrentDate").split('/')[0],
+           // Employeecode: getControlValue("txtStudentRegNo"),
+            FName: getControlValue("txtStudentName"),
+            Year: getControlValue("txtCurrentDate").split('/')[1],
+            SchoolID: sessionStorage.getItem("SchoolID")
+             
+        }
+        var ddl = JSON.stringify(employye)
+        callServiceMethod(ddl, "/api/StudentApi", "getAllStudentNameForThisclass1", false, "", "", false, "", true, successMsg_scs, totalDayInMonth, "", "");
+    }
+
+    function successMsg_scs(p1, p2, p3, datas) {
+      
+      
+
+        var th;
+        var thead = "<tr>";
+        var cthead;
+        for (var day = 0; day <= p1; day++) {
+            if (day == "0") {
+                th += "<th style='width:200px'> Student Name </th>";
+            }
+            else {
+                th += "<th>" + day + "</th>";
+            }
+        }
+        cthead = thead + th + "</tr>";
+        $("#mothsHead").html(cthead);
+
+
+
+        var tbody = "<tr>";
+        var tbodtr = "</tr>";
+        var tbodtdr = '';
+        var tbodytd = '';
+        var totalTbody = '';
+        for (var student = 0; student < datas.length; student++) {
+            if (student == 0) {
+                tbodytd = '<tr>';
+            }
+            else {
+                tbodytd = tbodytd + '<tr>';
+            }
+            tbodytd += "<td>" + datas[student].FirstName + "</td>";
+            for (var day1 = 1; day1 <= p1; day1++) {
+                tbodytd += "<td id='" + datas[student].ID + "_" + day1 + "'>-</td>";
+            }
+
+        }
+        tbodytd += "</tr>";
+        $("#tbodyEmployeeDetails").append(tbodytd);
+
+        for (var student = 0; student < datas.length; student++) {
+
+            for (var i = 0; i < datas[student].attendenceList.length; i++) {
+                if (datas[student].attendenceList[i].AttendenceType == "P") {
+
+
+                    setControlValue(datas[student].ID + "_" + datas[student].attendenceList[i].AttendenceDate, "<span class='badge bg-green'>" + datas[student].attendenceList[i].AttendenceType + "</span>");
+                }
+                else if (datas[student].attendenceList[i].AttendenceType == "L") {
+
+
+                    setControlValue(datas[student].ID + "_" + datas[student].attendenceList[i].AttendenceDate, "<span class='badge bg-yellow'>" + datas[student].attendenceList[i].AttendenceType + "</span>");
+                }
+                else {
+
+
+                    setControlValue(datas[student].ID + "_" + datas[student].attendenceList[i].AttendenceDate, "<span class='badge bg-red'>" + datas[student].attendenceList[i].AttendenceType + "</span>");
+                }
+
+            }
+
+
+        }
+
+  
+            setTimeout(function () {
+
+
+                $('#example1').DataTable({
+                    dom: 'lBfrtip',
+                    "ordering": false,
+                    "bInfo": false,
+                    paging: false,
+                    searching: false,
+                    bRetrieve: true,
+                    bDestroy: true,
+                   
+                });
+                //  $('#example1').data.reload();
+
+            }, 1000);
+        
+            $("#loader").fadeOut();
+    }
+
+</script>
+
+<script type="text/javascript">
+
+
+
+    function pdfExport() {
+        $("#loader").fadeIn();
+         var pdf = new jsPDF('p', 'pt', 'a2');
+
+         source = $('#divmonthlyAttendenceReport')[0];
+         pdf.text("Attendence Reports", 5 + 360, 20);
+         specialElementHandlers = {
+
+             '#bypassme': function (element, renderer) {
+                return true
+             }
+         };
+         margins = {
+             top: 40,
+             bottom: 60,
+             left: 10,
+             width: 1000
+         };
+
+         pdf.fromHTML(
+         source, // HTML string or DOM elem ref.
+         margins.left, // x coord
+         margins.top, { // y coord
+             'width': "1800", // max width of content on PDF
+             'elementHandlers': specialElementHandlers
+         },
+
+         function (dispose) {
+          pdf.save('AttendenceReports.pdf');
+         }, margins);
+
+         $("#loader").fadeOut();
+     }
+
+</script>

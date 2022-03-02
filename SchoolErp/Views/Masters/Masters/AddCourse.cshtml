@@ -1,0 +1,335 @@
+﻿
+@{
+    ViewBag.Title = "AddCourse";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<section class="content" ng-app="myApp" ng-controller="addCourses">
+    <div class="row" id="divAddCourses">
+        <form role="form" id="form1" name="form1">
+            <!-- left column -->
+            <div class="col-md-6">
+                <!-- general form elements -->
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">
+                            New Class
+                        </h3>
+                    </div>
+                    <!-- /.box-header -->
+                    <!-- form start -->
+
+                    <div class="alert alert-success centerSuccess" id="divsuccesmsg" style="display:none">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                        <h4>
+                            <i class="icon fa fa-check"></i>
+                            success! <span ng-bind="successMsg"></span>
+                        </h4>
+
+                    </div>
+                    <div class="box-body">
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label for="Country" class="req">School<span class="requird">*</span></label>
+                                <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name" ></select>
+
+                            </div>
+
+                            <div class="form-group error">
+                                <input class="form-control" id="txtCourseId" style="display:none" ng-model="txtCourseId" type="text">
+
+                                <label for="reg_input_name" class="req">Class Name <span class="requird">*</span></label>
+                                <input class="form-control" name="txtCourseName" id="txtCourseName" ng-model="txtcourseName" type="text">
+                            </div>
+                            <div class="form-group">
+                                <label for="reg_input_name">Description</label>
+                                <textarea class="form-control" id="txtDesc" ng-model="txtdesc"></textarea>
+                            </div> <div class="form-group">
+                                <label for="reg_input_name">Code  <span class="requird">*</span></label>
+                                <input class="form-control" name="txtCoursecoursecode" id="txtCoursecoursecode" ng-model="txtCoursecoursecode" type="text">
+                            </div>
+                            <div class="form-group">
+                                <label for="reg_input_name" class="req">Minimum Attendance Percentage</label>
+                                <input class="form-control" id="txtcourseminimumattendance" name="txtcourseminimumattendance" type="text"   max="100" min="1" onkeypress="return priceonly(event,this)" ng-model="txtcourseminimumattendance"  maxlength="3">
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+                <!-- /.box-body -->
+
+
+
+            </div>
+            <!-- /.box -->
+            <div class="col-md-6">
+                <div class="box box-primary">
+                    <div class="box-body">
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label for="reg_input_name">Attendance Type</label>
+                                <select class="form-control" ng-model="ddlAttendenceType" id="ddlAttendenceType" name="ddlAttendenceType">
+                                    <option value="">Please Select</option>
+                                    <option value="Daily">Daily</option>
+                                    <option value="Subject Wise">Subject Wise</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="reg_input_name" class="req">Total Working Days</label>
+                                <input class="form-control" onkeypress="return numbersonly(event)" max="366" min="1" ng-model="txtcoursetotalworkingdays" id="txtcoursetotalworkingdays" type="text">
+                            </div>
+                            @*<div class="form-group">
+                                <label for="Country" class="req">School<span class="requird">*</span></label>
+                                <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name"></select>
+                                <label class="req" for="Syllabus_syllabus_name">Syllabus Name</label>
+                                <select class="form-control" ng-model="ddlSyllabus" id="ddlSyllabus">
+                                    @*<option value="">Select Syllabus</option>
+                                    <option value="GPA">GPA</option>
+                                    <option value="CCE">CCE</option>*@
+                               @*</select>
+                            </div>*@
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="chkstatus" ng-model="chkstatus"> Active
+                                </label>
+                            </div>
+
+                            <div class="box-footer">
+                                @*<button type="submit" class="btn btn-primary">Submit</button>*@
+                                <input type="button" ng-click="saveCourse()" class="btn btn-primary" value="Save" />
+                                <input type="button" ng-click="clearAllTexbox()" class="btn btn-primary" value="Reset" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+       </form>
+</div>
+            <!--/.col (left) -->
+
+
+            <div class="col-md-12">
+                <!-- general form elements -->
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">View Class</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="form-group">
+
+                            <table id="example1" class="table table-bordered table-striped" style="width:100%">
+                                <thead style="background-color:steelblue;color:white;">
+                                    <tr>
+                                        <th>School</th>
+                                        <th>Class</th>
+                                        <th>Class Code</th>
+                                        <th>Attendence Type</th>
+                                        <th>Minimum Attendence</th>
+                                        <th>Total Working Day</th>
+                                        @*<th>Syllabus</th>*@                                        
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="employee in employees" ng-class-odd="'oddTr'">
+                                        <td>
+                                            {{employee.School}}
+                                        </td>
+                                        <td>
+                                            {{employee.Name}}
+
+                                        </td>
+                                         <td>
+                                            {{employee.Code}}
+
+                                        </td> 
+                                        <td>
+                                            {{employee.AttendenceType}}
+
+                                        </td> 
+                                        <td>
+                                            {{employee.MiniumuAttendePer}}
+
+                                        </td> 
+                                        <td>
+                                            {{employee.TotlWorkingDay}}
+
+                                        </td> 
+                                        @*<td>
+                                            {{employee.Syllabus}}
+
+                                        </td>*@ 
+                                        <td>
+                                            {{employee.Statusshow}}
+                                        </td>
+                                      
+                                        <td>
+                                            <i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" ng-click="editcourseById(employee)"></i>
+                                            &nbsp;
+                                            <i class="fa fa-fw fa-trash" style="cursor:pointer" ng-click="deleteCourseById(employee)"></i>
+
+                                        </td> 
+ 
+                                          
+
+                                    </tr>
+
+                                   
+                                </tbody>
+                                 
+                            </table>
+
+
+                           
+
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+            <!-- /.row -->
+</section>
+<script src="~/js/angular.min.js"></script>
+
+
+
+
+<script src="~/js/Angular/Module.js"></script>
+<script src="~/js/Angular/Service.js"></script>
+<script src="~/js/Angular/controller.js"></script>
+
+
+  <!-- DataTables -->
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+       
+        callServiceMethodForDDl("", "/api/MasterAPI", "getAllCountry", "ddlCountry", false, "", "", "", "");
+
+        $("#txtcoursetotalworkingdays").keyup(function () {
+            if ($(this).val() > 365) {
+                alert("NO day above 365");
+                $(this).val("365");
+
+            }
+        });
+        $("#txtcourseminimumattendance").keyup(function () {
+            if ($(this).val() > 100) {
+                alert("NO persent above 100");
+                $(this).val("100");
+
+            }
+        });
+        
+
+
+    });
+
+</script>
+<style type="text/css">
+    .oddTr {
+        background-color: #dddddd;
+    }
+</style>
+@*<script>
+  $(function () {
+ 
+    $('#example2').DataTable({
+      'paging'      : true,
+      'lengthChange': false,
+      'searching'   : false,
+      'ordering'    : true,
+      'info'        : true,
+      'autoWidth'   : false
+    })
+  })
+</script>*@
+<script type="text/javascript">
+    $(document).ready(function () {
+
+
+
+
+
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        //callServiceMethodForDDl("", "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                ddlAttendenceType: {
+                    selectcheck: true
+                },
+
+                txtCourseName: "required",
+                txtCoursecoursecode: "required",
+              
+
+            },
+            messages: {
+                ddlAttendenceType: "Please Select Attendence Type",
+                txtCourseName: "Please Enter Class Name",
+                txtCoursecoursecode: "Please Enter Class Code"
+                
+            }
+        })
+        jQuery.validator.addMethod('selectcheck', function (value) {
+            if (value == "") {
+                return (value != '');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select  Attendence Type ");
+
+
+
+    });
+</script>

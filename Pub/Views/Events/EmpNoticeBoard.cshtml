@@ -1,0 +1,391 @@
+﻿
+@{
+    ViewBag.Title = "EmpNoticeBoard";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section class="content">
+    <div class="box box-solid">
+        <div class="box-header with-border">
+            <h3 class="box-title"><i class="fa fa-plus-square"></i> View Notice</h3>
+        </div>
+        
+        
+        </div>
+    <div class="box box-solid">
+        <div class="box-body">
+            <div class="col-md-12">
+                <!-- general form elements -->
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">View Notice Board Details</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="form-group">
+
+                            <div>
+
+                                <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                    <thead style="background-color:steelblue;color:white;">
+                                        <tr>
+                                            @*<th>School</th>*@
+                                            <th>Title</th>
+                                            <th>Description</th>
+                                            <th>User Type</th>
+                                            <th>Date</th>
+                                            <th>Notice File</th>
+                                            <th>Status</th>
+                                            @*<th>Action</th>*@
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyEmployeeDetails"></tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <script type="text/html" id="divEmployeeDetailsJTemplte">
+                    {#foreach $T as Datashort}
+                    <tr>
+                        @*<td>
+                            { $T.Datashort.School}
+                        </td>*@
+                        <td>
+                            { $T.Datashort.Title}
+                        </td>
+                        <td>
+                            { $T.Datashort.Desc}
+                        </td>
+                        <td>
+                            { $T.Datashort.userType}
+                        </td>
+                        <td>
+                            { $T.Datashort.noticeda}
+                        </td>
+                        <td>
+                            <a href="{ $T.Datashort.NoticeFile}" class="{ $T.Datashort.blanValue}" download>Download</a>
+                        </td>
+                        <td>
+                            <a href="#" id="EmpStatus_{ $T.Datashort.Id}" style="background-color:{ $T.Datashort.Status}"> { $T.Datashort.Status}</a>
+                        </td>
+                        @*<td>
+                            <i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" onclick="editNoticeBoardDetails({ $T.Datashort.Id})"></i>
+                            &nbsp;
+                            <i class="fa fa-fw fa-trash" style="cursor:pointer" onclick="deleteNoticeBoardDetails({ $T.Datashort.Id})"></i>
+                        </td>*@
+
+                    </tr>
+                    {#/for}
+                </script>
+
+
+            </div>
+        </div>
+    </div>
+    
+    <div class="alert alert-success centerSuccess" id="divSuccessMsg" style="display:none">
+
+    </div>
+</section>
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        //callServiceMethodForDDl("", "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        //  $('#txtNoticeDate').datepicker();
+        $('#txtNoticeDate').datepicker('setDate', 'today').on('change', function () {
+            $('.datepicker').hide();
+        });
+        var t= $('#example1').DataTable();
+        t.destroy();
+        $("#loader").fadeIn();
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callJTemplateServiceMethod(JSON.stringify([loginuser, typeuser]), "/api/EventsAPI", "getAllNoticeBoardsForEmployeeBySchool",
+                 "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+            //callJTemplateServiceMethod("", "/api/EventsAPI", "getAllNoticeBoards",
+            //     "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+      
+    })
+
+    function successMsg(p1, p2, p3, datas)
+    {        
+        if (datas.length > 0) {
+           
+            for (var i = 0; i < datas.length; i++) {
+
+                $("#EmpStatus_" + datas[i].Id).attr("style", "background-color:" + datas[i].color + ";color:white;padding: 4px;border-radius: 8px;")
+            }
+        }
+        setTimeout(function () {
+            $('#example1').DataTable({
+                //destroy: true,
+                dom: 'lBfrtip',
+                bRetrieve: true,
+                bDestroy: true,
+                scrollX:true,                
+                'columnDefs': [{
+                    "targets": [-2],
+                    "orderable": false
+                }],
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        exportOptions: {
+                            columns: ':visible'
+                        }
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        exportOptions: {
+                            columns: [0,  2,3,4, 5]
+                        },
+                        title: 'Employee List',
+                        customize: function(doc) {
+                            doc.styles.title = {
+                                color: '',
+                                fontSize: '20',
+                                background: 'blue',
+                                alignment: 'center'
+                            }   
+                        }  
+                    },
+                    'colvis'
+                ]
+            });
+        }, 1000);
+        $("#loader").fadeOut();
+    }
+    function saveNoticeBoardDetails()
+    {if ($("#form1").valid()) {
+        $("#loader").fadeIn();
+        var notice = {
+            Id: getControlValue("txtNoticeId"),
+            Title: getControlValue("txtNoticeTitle"),
+            NoticeDate: getControlValue("txtNoticeDate"),
+            Desc: getControlValue("txtNoticeDescription"),
+            userType: $("input[name='Notice']:checked").val(),
+            //  NoticeFile: getControlValue(""),
+            Status: getControlValue("chkStatus"),
+            SchoolID: getControlValue("ddlSchoolName")
+            
+
+        }
+        var ddl = JSON.stringify(notice)
+        callServiceMethod(ddl, "/api/Default", "saveNoticeBoardDetails", false, "", "", false, "", true, saveNoticeBoardDetails_scs, "", "", "");
+    }
+    }
+
+    function saveNoticeBoardDetails_scs(p1, p2, p3, datas)
+    {
+        if (datas != "")
+        {            
+            if(getControlValue("fileUpload")!="")
+            {
+                var data = new FormData();
+                var files = $("#fileUpload").get(0).files;
+                if (files.length > 0) {
+                    data.append("UploadedImage", files[0]);
+                }
+                data.append("Id", datas);
+  
+                $.ajax({
+                    type: "POST",
+                    url: "/api/Default/NoticeBoardFileUpload",
+                    contentType: false,
+                    processData: false,
+                    data: data,
+                    success: function (data) {
+                        $("#loader").fadeOut();
+                        $("#divSuccessMsg").fadeIn();
+
+                        if (getControlValue("txtNoticeId") != "") {
+                            $("#divSuccessMsg").html("<strong>Success!</strong> " + data);
+                        }
+                        else {
+                            $("#divSuccessMsg").html("<strong>Success!</strong> Notice details saved successfully");
+                        }
+                        setTimeout(function () {
+                            $("#divSuccessMsg").fadeOut();
+                        }, 2000)
+                       
+                        var t= $('#example1').DataTable();
+                        t.destroy();
+                        var loginuser = (sessionStorage.getItem("userId"));
+                        var typeuser = sessionStorage.getItem("type");
+                        callJTemplateServiceMethod(JSON.stringify([loginuser, typeuser]), "/api/EventsAPI", "getAllNoticeBoardsForEmployeeBySchool",
+               "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+                    }
+                });
+            }
+            else
+            {
+                $("#loader").fadeOut();
+                $("#divSuccessMsg").fadeIn();
+                if (getControlValue("txtNoticeId") != "") {
+                    $("#divSuccessMsg").html("<strong>Success!</strong> Notice details updated successfully");
+                }
+                else {
+                    $("#divSuccessMsg").html("<strong>Success!</strong> Notice details saved successfully");
+                }
+
+                setTimeout(function () {
+                    $("#divSuccessMsg").fadeOut();
+                }, 2000)
+                var t= $('#example1').DataTable();
+                t.destroy();
+                var loginuser = (sessionStorage.getItem("userId"));
+                var typeuser = sessionStorage.getItem("type");
+                callJTemplateServiceMethod(JSON.stringify([loginuser, typeuser]), "/api/EventsAPI", "getAllNoticeBoardsForEmployeeBySchool",
+                    "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+            }
+        }
+    }
+    $("#fileUpload").change(function () {
+
+        var files = !!this.files ? this.files : [];
+
+        var iSize = (files[0].size / 1024);
+        iSize = (Math.round(iSize * 100) / 100)
+
+        if (iSize > 1000) {
+            alert("File size must be less than 1 Mb");
+            $("#inputFile").val("");
+            return;
+        }
+    });
+
+    function editNoticeBoardDetails(val)
+    {
+        debugger;     
+        
+        var ddl = JSON.stringify([val]);
+        callServiceMethod(ddl, "/api/EventsAPI", "editNoticeBoardDetailsById", false, "", "", false, "", true, editNoticeBoardDetails_scs, "", "", "");
+    }
+    function editNoticeBoardDetails_scs(p1,p2,p3,datas)
+    {
+        setControlValue("txtNoticeId",datas.Id);
+        setControlValue("txtNoticeTitle",datas.Title);
+        setControlValue("txtNoticeDate",datas.sNoticeDate);
+        setControlValue("txtNoticeDescription",datas.Desc);
+          if(datas.userType=="S")
+          {
+              $('input[name=Notice][value=S]').prop('checked', true);
+          }
+          else if(datas.userType=="E")
+          {
+              $('input[name=Notice][value=E]').prop('checked', true);
+          }
+          else
+          {
+              $('input[name=Notice][value=G]').prop('checked', true);
+          }
+        setControlValue("spfileUpload",datas.NoticeFile),
+            setControlValue("chkStatus", datas.Status),
+            setControlValue("ddlSchoolName", datas.SchoolID)
+    }
+
+    function deleteNoticeBoardDetails(val)
+    {
+        if(confirm('are you sure?'))
+        {
+            $("#loader").fadeIn();
+            var ddl = JSON.stringify([val]);
+            callServiceMethod(ddl, "/api/EventsAPI", "deleteNoticeBoardDetails", false, "", "", false, "", true, deleteNoticeBoardDetails_scs, "", "", "");
+        }
+    }
+    function deleteNoticeBoardDetails_scs(p1,p2,p3,datas)
+    {
+        $("#loader").fadeOut();
+
+        $("#divSuccessMsg").fadeIn();
+        $("#divSuccessMsg").html("<strong>Success!</strong>"+datas);
+        setTimeout(function () {
+            $("#divSuccessMsg").fadeOut();
+        }, 2000);
+
+        var t= $('#example1').DataTable();
+        t.destroy();
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callJTemplateServiceMethod(JSON.stringify([loginuser, typeuser]), "/api/EventsAPI", "getAllNoticeBoardsForEmployeeBySchool",
+            "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+    }
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                txtNoticeDate: {
+                    required: true,
+                    date: true
+                },            
+                txtNoticeTitle: "required",
+            },
+            messages: {
+                txtNoticeTitle: "Please Enter Notice Title",
+                txtNoticeDate: "Please Enter Notice Date",
+            }
+        })  
+    });
+
+    function clearAllTextboxes() {
+        setControlValue("txtNoticeId", "");
+        setControlValue("txtNoticeTitle", "");
+        setControlValue("txtNoticeDate", "");
+
+        $("#txtNoticeDescription").val("");
+        $("input[name='Notice']:checked").each(function () {
+            $(this).checked = false;
+        });
+        setControlValue("chkStatus", "");
+    }
+</script>
+<style type="text/css">
+    .hideCol {
+        display:none;
+    }
+</style>

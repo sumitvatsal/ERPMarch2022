@@ -1,0 +1,557 @@
+﻿
+@{
+    ViewBag.Title = "AssignSRno";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section class="content">
+
+
+    <div class="box box-solid">
+        <div class="et">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-search"></i> Assign SR No.</h3>
+
+            </div>
+        </div>
+
+        <div class="box-body">
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group ">
+                        <label class="control-label" for="empinfosearch-emp_designation_id">Student Name</label>
+                        <input type="text" id="txtStudentName" class="form-control" placeholder="Enter Student First/Last Name">
+                        <div class="help-block"></div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label class="control-label" for="empinfosearch-emp_designation_id">Registration No</label>
+                        <input type="text" id="txtRegNo" class="form-control" placeholder="">
+                        <div class="help-block"></div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label class="control-label" for="empinfosearch-emp_designation_id">
+                            Class of Admission
+                        </label>
+                        <select class="form-control" id="ddlCourse" name="ddlCourse" valuefield="Id" textfield="CourseName" blankRowValue="-1" blankRowText="----Select----" ></select>
+
+                        <div class="help-block"></div>
+                    </div>
+
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label class="control-label" for="empinfosearch-emp_designation_id">
+                            Admission Date
+                        </label>
+                        <input type="text" id="txtAdmissionDate" class="form-control dtpicker" placeholder="" readonly>
+                        <div class="help-block"></div>
+                    </div>
+
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label class="control-label" for="empinfosearch-emp_designation_id">
+                            DOB
+                        </label>
+                        <input type="text" id="txtDOB" class="form-control dtpicker" placeholder="" readonly>
+                        <div class="help-block"></div>
+                    </div>
+
+                </div>
+               
+            </div>
+        </div>
+        <div class="box-footer">
+            <input class="btn btn-primary" onclick="fillDataTable()" value="Search" type="button" />
+            @*<a class="btn btn-default" onclick="restClear()" href="javascript:void(0)">Reset</a>
+                <input type="button" id="create_pdf" value="Export Pdf" onclick="pdfExport()" class="btn btn-primary" />
+
+                <a href="#" class="btn btn-primary" onClick="$('#example1').tableExport({ type: 'excel', escape: 'false', defaultFileName :'rahul'});">Excel Exports</a>*@
+        </div>
+
+    </div>
+
+
+
+    <div class="box box-solid">
+        <!-- general form elements -->
+        <div class="box ">
+            <div class="box-body">
+                <div class="form-group">
+
+                    <div id="divSRDetails" style="overflow-x: auto;">
+                        <table id="example1" style="max-width:1800px" class="table table-bordered table-striped tbl20 htmlTempletes">
+                            <thead id="tblempheaderDetails">
+                                <tr>
+                                    <th style="width:5%;">#</th>
+                                    <th style="width:10%;">Reg.No</th>
+                                    <th>Student Name</th>
+                                    <th style="width:12%;">DOB</th>
+                                    <th style="width:14%;">Admission Date</th>
+                                    <th>Father Name</th>
+                                    <th style="width:5%;">Edit</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodySRDetails"></tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <script type="text/html" id="divSRDetailsJTemplte">
+            {#foreach $T as Datashort}
+            <tr>
+                <td>
+                    { $T.Datashort.count}
+                </td>
+                <td>
+                    { $T.Datashort.std.RegNo}
+                </td>
+                <td>
+                    <a href="#" onclick="RedirectToView({ $T.Datashort.std.ID})">{ $T.Datashort.fullStName}</a>
+                </td>
+                <td>
+                    { $T.Datashort.SDOB}
+                </td>
+                <td>
+                    { $T.Datashort.jDate}
+                </td>
+
+                <td>
+                    { $T.Datashort.std.FatherName}
+                </td>
+                <td>
+                    <i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" onclick="Edit({ $T.Datashort.tsr.ID }, { $T.Datashort.std.ID },'{ $T.Datashort.RegNo}', '{ $T.Datashort.fullStName}', '{ $T.Datashort.std.FatherName}',
+    '{ $T.Datashort.std.MotherName}', '{ $T.Datashort.SDOB}', '{ $T.Datashort.jDate}', '{ $T.Datashort.std.FJob}', '{ $T.Datashort.std.FOfficeAddress}','{ $T.Datashort.std.MJob}','{ $T.Datashort.std.PicPath}')" title="Click here to Enter SR No. here"></i>
+                </td>
+            </tr>
+            {#/for}
+        </script>
+
+
+    </div>
+
+    <div id="modal-dialog" style="display:none; width:1px;"></div>
+
+
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">
+                        <i class="fa fa-plus-square"></i> Student Details	<button type="button" class="close" data-dismiss="modal">
+                            <span aria-hidden="true">×</span><span class="sr-only">Close</span>
+                        </button>
+                    </h3>
+                </div> <!-- /.modal-header -->
+
+
+                <form id="class-timing-detail" role="form" name="form1">
+                    <input type="hidden" id="hdnID">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="col-sm-6">
+                                    <div class="dvImgPreview" id="dvPreview">@*<img id="profileImg" alt="#" />*@</div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group field-classtimingdetail-tctd_name required">
+                                        <label class="control-label" for="classtimingdetail-tctd_name">SR No <span class="requird">*</span></label>
+                                        <input type="text" id="txtSRNo" class="form-control" name="txtSRNo" maxlength="150" aria-required="true" placeholder="Enter SR No">
+
+                                        <div class="help-block"></div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <ul class="col-sm-6">
+                                    <li class="labels">
+                                        Name
+                                        :<b><span id="spStName"></span></b>
+                                        <input id="hdnStID" type="hidden" />
+                                        <input id="hdnSrID" type="hidden" />
+                                    </li>
+                                </ul>
+                                <ul class="col-sm-6">
+                                    <li class="labels">Registration No: <b><span id="spRegNo"></span></b> </li>
+                                </ul>
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <ul class="col-sm-6">
+                                    <li class="labels">
+                                        Class
+                                        :<b><span id="spClass"></span></b>
+                                        <input id="hdnID" type="hidden" />
+                                    </li>
+                                </ul>
+                                <ul class="col-sm-6">
+                                    <li class="labels">Admission Date: <b><span id="spAdmitDt"></span></b> </li>
+                                </ul>
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <ul class="col-sm-6">
+                                    <li class="labels">
+                                        DOB
+                                        :<b><span id="spDOB"></span></b>
+                                        <input id="hdnID" type="hidden" />
+                                    </li>
+                                </ul>
+                                <ul class="col-sm-6">
+                                    <li class="labels">Father Name: <b><span id="spFatherNm"></span></b> </li>
+                                </ul>
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <ul class="col-sm-6">
+                                    <li class="labels">
+                                        Father Occupation
+                                        :<b><span id="spFJob"></span></b>
+                                        <input id="hdnID" type="hidden" />
+                                    </li>
+                                </ul>
+                                <ul class="col-sm-6">
+                                    <li class="labels">Father Address(Office): <b><span id="spFOffice"></span></b> </li>
+                                </ul>
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <ul class="col-sm-6">
+                                    <li class="labels">
+                                        Mother Name
+                                        :<b><span id="spMotherNm"></span></b>
+                                        <input id="hdnID" type="hidden" />
+                                    </li>
+                                </ul>
+                                <ul class="col-sm-6">
+                                    <li class="labels">Mother Occupation: <b><span id="spMJob"></span></b> </li>
+                                </ul>
+
+                            </div>
+                        </div>
+                        @*<div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group field-classtimingdetail-tctd_name required">
+                                    <label class="control-label" for="classtimingdetail-tctd_name">SR No <span class="requird">*</span></label>
+                                    <input type="text" id="txtSRNo" class="form-control" name="txtSRNo" maxlength="150" aria-required="true" placeholder="Enter SR No">
+
+                                    <div class="help-block"></div>
+                                </div>
+                            </div>
+                        </div>*@
+                    </div><!--./modal-body-->
+
+                    <div class="modal-footer">
+                        <button type="button" id="btnCreate" class="btn btn-primary pull-left" disabled>Save</button>    	<button type="button" class="btn btn-default pull-right" data-dismiss="modal">Close</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+</section>
+<style type="text/css">
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+                                    background-color: #e1e4e8;
+                                }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+            width: 35px;
+        }
+    .dvImgPreview {
+        background-position: center center;
+        background-size: cover;
+        -webkit-box-shadow: 0 0 1px 1px rgba(0, 0, 0, .3);
+        min-height: 30px;
+        min-width: 30px;
+        height: 100px;
+        width: 100px;
+        max-height: 100px;
+        max-width: 100px;
+    }
+</style>
+<!-- DataTables -->
+<link href="~/js/PDFExcelDatatable/buttons.dataTables.min.css" rel="stylesheet" />
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+
+<script src="~/js/jsExcel/tableExport.js"></script>
+<script src="~/js/jsExcel/jquery.base64.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script>
+<script src="~/js/jsExcel/html2canvas.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        callServiceMethodForDDl("", "/api/StudentApi", "GetClasses", "ddlCourse", false, "", "", "", "");
+        //fillDataTable();
+        $('.dtpicker').datepicker({
+            autoclose: true
+            //,
+            //dateFormat: 'dd/mm/yy'
+        });
+    });
+
+    $('#txtSRNo').on('change', function () {
+
+        var srNo = $('#txtSRNo').val();
+        if (srNo != null || srNo != "") {
+            $.ajax({
+                type: 'GET',
+                url: '/api/StudentApi/CheckSRNos',
+                cache: false,
+                data: {
+                    srNo: srNo
+                },
+                success: function (data) {
+                    if (data) {
+                        alert("The entered SRno already exist!!");
+                        $('#txtSRNo').val("");
+                        $("#btnCreate").attr("disabled", true);
+                    }
+                    else {
+                        $("#btnCreate").removeAttr("disabled");                        
+                    }
+                }
+            });
+        }       
+    });
+
+    function fillDataTable() {
+
+        var name = getControlValue("txtStudentName");
+        var RegNo = getControlValue("txtRegNo");
+        var course = getControlValue("ddlCourse");
+        var admitDt = getControlValue("txtAdmissionDate");
+        var dob = getControlValue("txtDOB");
+
+        var Student = {
+            FirstName: name,
+            RegNo: RegNo,
+            ClassID: course
+        }
+
+        var ScholarRegister = {
+            std: Student,
+            type: "AssignSRno",
+            jDate: admitDt,
+            SDOB: dob,
+            StatusName: status
+        }
+        var Items = new Array();
+        Items.push(ScholarRegister);
+        callJTemplateServiceMethod(JSON.stringify(ScholarRegister), "/api/StudentApi", "getList",
+            "tbodySRDetails", "divSRDetailsJTemplte", true, successMsg, "", "", "");
+    }
+
+    function successMsg(p1, p2, p3, datas) {
+        setTimeout(function () {
+            $('#example1').DataTable();
+        }, 1000);
+    }
+
+    function openModal() {
+        $('#myModal').modal('show');
+    }
+
+    function OpenDialog(id) {
+
+        openModal();
+    }
+
+    function OpenDialog1() {
+        $("div#modal-dialog").dialog({
+            open: function () {
+
+            },
+            resizable: false,
+            width: 440,
+            height: 230,
+            modal: true,
+            title: "<span class='ui-icon ui-icon-pencil' style='float:left; margin:1px 5px 0 0'></span>" + "Hi",
+            buttons: {
+                'Save': function () {
+                },
+                'Close': function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+    }
+
+    function Edit(srID, stdID, RegNo, stName, FatherName, MotherName, dob, joinDt, fjob, foffice, mjob, PicPath) {
+        setControlValue("hdnStID", stdID);
+        setControlValue("hdnSrID", srID);
+        setControlValue("spStName", stName);
+        setControlValue("spRegNo", RegNo);
+        //setControlValue("spClass", data.RegNo);//Neeed to be filled
+        setControlValue("spAdmitDt", joinDt);
+        setControlValue("spDOB", dob);
+        setControlValue("spFatherNm", FatherName);
+        setControlValue("spFJob", fjob);
+        setControlValue("spFOffice", foffice);
+        setControlValue("spMotherNm", MotherName);
+        setControlValue("spMJob", mjob);
+        
+        var path1 = PicPath.replace(/\\/g, "/");
+        $("#dvPreview").css("background-image", "url(" + path1 + ")");
+
+        openModal();
+       // window.location.href = "/Student/StudentProfile?id=" + id;
+    }
+
+    $("#btnCreate").click(function () {
+        var is_break = 0;
+        var status = 1;
+        var srNo = getControlValue("txtSRNo");
+        var srID = getControlValue("hdnSrID");
+        var stName = getControlValue("spStName");
+        if (srNo!="") {
+            SaveDetails(srID, srNo, stName);
+        }
+    });
+
+    function SaveDetails(srID, srNo, stName) {           
+        $("#loader").fadeIn();
+        var tblScholarRegister = {
+            ID: srID,
+            SRno: srNo
+        }
+
+        var ScholarRegister = {
+            tsr: tblScholarRegister,
+            type: "AssignSRno",
+            fullStName: stName
+        }
+        //var Items = new Array();
+        //Items.push(ScholarRegister);
+
+            $.ajax({
+                url: "/api/StudentApi/SaveDetails",
+                type: "Post",
+                data: JSON.stringify(ScholarRegister),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+
+                    //$("#divsuccesmsg").fadeIn();
+
+                    //$("#spsuccessMsg").html(data.Msg);
+                    //setTimeout(function () {
+                    //    $("#divsuccesmsg").fadeOut();
+                    //    $("#spsuccessMsg").html("");
+                    //}, 2000)
+                    $("#loader").fadeOut();
+
+                    if (data.ID != -1) {
+                        setControlValue("hdnSrID", 0);
+                        setControlValue("txtSRNo", "");
+
+                        setControlValue("hdnStID", 0);
+                        setControlValue("spStName", "");
+                        setControlValue("spRegNo", "");
+                        setControlValue("spAdmitDt", "");
+                        setControlValue("spDOB", "");
+                        setControlValue("spFatherNm", "");
+                        setControlValue("spFJob", "");
+                        setControlValue("spFOffice", "");
+                        setControlValue("spMotherNm", "");
+                        setControlValue("spMJob", "");
+                        $("#dvPreview").css('background-image', 'none');
+
+                        $('#myModal').modal('hide');
+                    }
+
+                    fillDataTable();
+                }
+            });
+       
+    }
+</script>
+
+

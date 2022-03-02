@@ -1,0 +1,2510 @@
+﻿
+@{
+    ViewBag.Title = "NewStudentReg";
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/css/bower_components/jquery-ui/themes/base/jquery-ui.css" rel="stylesheet" />
+    <script src="~/js/jquery2.2.min.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/js/custom.js"></script>
+    <link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+    <script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+    <link rel="stylesheet" href="~/css/bower_components/select2/dist/css/select2.min.css">
+    <script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>
+    <style>
+        .cntrl {
+            width: 300px;
+        }
+
+        .Pcntrl {
+            width: 250px;
+        }
+
+        .txtArea {
+            width: 400px;
+        }
+        .tab-pane
+        {
+            background-color:white;
+            border:solid 1px gray;
+        }
+        .box-footer{
+            text-align:center;
+        }
+        .dvImgPreview {
+            background-position: center center;
+            background-size: cover;
+            -webkit-box-shadow: 0 0 1px 1px rgba(0, 0, 0, .3);
+            min-height: 30px;
+            min-width: 30px;
+            height: 100px;
+            width: 100px;
+            max-height: 100px;
+            max-width: 100px;
+        }
+        .disabled {
+  pointer-events: none;
+  color: grey;
+
+}
+        
+    </style>
+</head>
+<body>
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <section class="content">
+            <div class="col-md-12">
+                <div class="main-container">
+                    <div class="container-fluid content-container">
+                        <h2 class="heading">New Admission</h2>
+
+                        <ul class="nav nav-tabs tab-controller">
+                            <li id="liTab1" class="active"><a data-toggle="tab" href="#home">General Info</a></li>
+                            <li id="liTab2"><a data-toggle="tab" href="#menu2">Parents Details</a></li>
+                            <li id="liTab3"><a data-toggle="tab" href="#menu3">Other Details</a></li>
+                            <li id="liTab4"><a data-toggle="tab" href="#menu4">Uploads</a></li>
+                        </ul>
+
+                        <div class="tab-content profile-panel">
+                            <div id="home" class="tab-pane fade in active">
+                                <div class="panel-group">
+                                    <!--panel-->
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a class="toggler" href="#">Basic Info </a>
+                                            </h4>
+                                        </div>
+                                        <form role="form">
+                                            <div class="box-body">
+                                                <div class="row">
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <div class="form-group">
+                                                                <label class="control-label">Apply for Class</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <div class="form-group">
+                                                                <select class="form-control" id="ddlCourse" valuefield="Id" textfield="CourseName" blankRowValue="-1" blankRowText="----Select----"></select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <label class="control-label">Stream(if applicable)</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <select class="form-control" id="ddlStream" valuefield="Id" textfield="StreamName" blankRowValue="-1" blankRowText="----Select----"></select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <div class="form-group">
+                                                                <label class="control-label">First Name</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <div class="form-group">
+                                                                <input type="text" class="form-control" id="txtFirstName">
+                                                                <input type="hidden" id="hdnStudentID">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <div class="form-group">
+                                                                <label class="control-label">Middle Name</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <input type="text" class="form-control" id="txtMiddleName">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <label class="control-label">Last Name</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <input type="text" class="form-control" id="txtLastName">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <div class="form-group">
+                                                                <label class="control-label">DOB</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <div class="input-group date">
+                                                                <div class="input-group-addon">
+                                                                    <i class="fa fa-calendar"></i>
+                                                                </div>
+                                                                <input type="text" class="form-control dtpicker" id="txtDOB" readonly />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <label class="control-label">Gender</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <select class="form-control" id="ddlGender" valuefield="gender_id" textfield="GenderName" blankRowValue="-1" blankRowText="----Select----"></select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <label class="control-label">Blood Group</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <select class="form-control" id="ddlBloodGroup">
+                                                                <option>----Select----</option>
+                                                                <option>A+</option>
+                                                                <option>A-</option>
+                                                                <option>B+</option>
+                                                                <option>B-</option>
+                                                                <option>AB+</option>
+                                                                <option>AB-</option>
+                                                                <option>O+</option>
+                                                                <option>O-</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <label class="control-label">Birth Place</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <input type="text" class="form-control" id="txtBirthPlace">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <label class="control-label">Nationality</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <select class="form-control" id="ddlNationality">
+                                                                <option>----Select----</option>
+                                                                <option>Indian</option>
+                                                                <option>Others</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <label class="control-label">Mother Tongue</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <input type="text" class="form-control" id="txtMotherTongue">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <label class="control-label">Languages Known</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <select class="form-control select2" id="ddlLanguages" valuefield="LangID" textfield="Language" multiple="multiple"></select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <label class="control-label">Religion</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <select class="form-control" id="ddlReligion" valuefield="ReligionId" textfield="ReligionName" blankRowValue="-1" blankRowText="----Select----"></select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <label class="control-label">Category</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <select class="form-control" id="ddlCategory" valuefield="CatID" textfield="Category" blankRowValue="-1" blankRowText="----Select----"></select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <label class="control-label">Aadhaar No.</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <input type="text" class="form-control" id="txtAadhaar">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div><!--end panel-->
+                                <div class="panel-group">
+                                    <!--panel-->
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a class="toggler" href="#">Contact Details </a>
+                                            </h4>
+                                        </div>
+                                        <div class="panel">
+                                            <div class="panel-body info-panel">
+                                                <div class="container-fluid">
+                                                    <div class="row">
+                                                        <div class="row">
+                                                            <table>
+                                                                <tr>
+                                                                    <td colspan="3">
+                                                                        <table>
+                                                                            <tr>
+                                                                                <td></td>
+                                                                                <td></td>
+                                                                                <td>
+                                                                                    <div class="form-group cntrl">
+                                                                                        <div class="checkbox">
+                                                                                            <label>
+                                                                                                <input type="checkbox" id="cbSameAddress">
+                                                                                                Same as Residential Address
+                                                                                            </label>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td>
+                                                                                    <div class="form-group txtArea">
+                                                                                        <label>Residential Address</label>
+                                                                                        <textarea class="form-control" rows="3" placeholder="Enter ..." id="txtResidenceAddrs"></textarea>
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <div style="width:20px;"></div>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <div class="form-group txtArea">
+                                                                                        <label>Correspondence Address</label>
+                                                                                        <textarea class="form-control" rows="3" placeholder="Enter ..." id="txtCorrespondAddrs"></textarea>
+                                                                                    </div>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td>
+                                                                                    <div class="form-group cntrl">
+                                                                                        <label>City</label>
+                                                                                        <input type="text" class="form-control" id="txtResdCity">
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td></td>
+                                                                                <td>
+                                                                                    <div class="form-group cntrl">
+                                                                                        <label>City</label>
+                                                                                        <input type="text" class="form-control" id="txtCorspCity">
+                                                                                    </div>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td>
+                                                                                    <div class="form-group cntrl">
+                                                                                        <label>State</label>
+                                                                                        <select class="form-control" id="ddlResdState" valuefield="StateId" textfield="StateName" blankRowValue="-1" blankRowText="----Select----"></select>
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td></td>
+                                                                                <td>
+                                                                                    <div class="form-group cntrl">
+                                                                                        <label>State</label>
+                                                                                        <select class="form-control" id="ddlCorspState" valuefield="StateId" textfield="StateName" blankRowValue="-1" blankRowText="----Select----"></select>
+                                                                                    </div>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td>
+                                                                                    <div class="form-group cntrl">
+                                                                                        <label>Pincode</label>
+                                                                                        <input type="text" class="form-control" id="txtResdPin">
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td></td>
+                                                                                <td>
+                                                                                    <div class="form-group cntrl">
+                                                                                        <label>Pincode</label>
+                                                                                        <input type="text" class="form-control" id="txtCorspPin">
+                                                                                    </div>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td colspan="2">
+                                                                                    <div class="form-group cntrl">
+                                                                                        <label>Preferred Phone Number for school SMS</label>
+                                                                                        <input type="text" class="form-control" id="txtSMSMobile">
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td></td>
+
+                                                                            </tr>
+
+                                                                        </table>
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="box-footer">
+                                    <button type="button" class="btn btn-primary" id="btnSaveTab1">Next</button>
+                                </div>
+
+                            </div><!-- end tab 1-->
+
+                            <div id="menu2" class="tab-pane">
+                                <div class="panel-group">
+                                    <!--panel-->
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a class="toggler" href="#">Parents Info</a>
+                                            </h4>
+                                        </div>
+                                        <div class="panel">
+                                            <div class="panel-body info-panel">
+                                                <div class="container-fluid">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <form role="form">
+                                                                <div class="box">
+                                                                    <div class="box-header">
+                                                                        <h5 class="box-title">Father</h5>
+                                                                    </div>
+                                                                    <div class="box-body">
+                                                                        <div class="form-group">
+                                                                            <table>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <div class="form-group Pcntrl">
+                                                                                            <label>Name</label>
+                                                                                            <input type="text" class="form-control" id="txtFaName" style="width:200px;">
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <div class="form-group Pcntrl">
+                                                                                            <label>DOB</label>
+                                                                                            <div class="input-group date">
+                                                                                                <div class="input-group-addon">
+                                                                                                    <i class="fa fa-calendar"></i>
+                                                                                                </div>
+                                                                                                <input type="text" class="form-control dtpicker" id="txtFaDOB" style="width:150px;" readonly>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <div class="form-group Pcntrl">
+                                                                                            <label>Nationality</label>
+                                                                                            <select class="form-control" id="ddlFNationality" style="width:200px;">
+                                                                                                <option>----Select----</option>
+                                                                                                <option>Indian</option>
+                                                                                                <option>Others</option>
+                                                                                            </select>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <div class="form-group Pcntrl">
+                                                                                            <label>Qualification</label>
+                                                                                            <select class="form-control" id="ddlFQual" valuefield="QualificationId" textfield="QualificationName" blankRowValue="-1" blankRowText="----Select----" style="width:250px;"></select>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <div class="form-group Pcntrl">
+                                                                                            <label>Occupation/Job</label>
+                                                                                            <input type="text" class="form-control" id="txtFaJob" style="width:200px;">
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td rowspan="2">
+                                                                                        <div class="form-group Pcntrl">
+                                                                                            <label>Office Address</label>
+                                                                                            <textarea class="form-control" rows="4" placeholder="Enter ..." id="txtFOfficeAddrs"></textarea>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <div class="form-group Pcntrl">
+                                                                                            <label>Designation</label>
+                                                                                            <input type="text" class="form-control" id="txtFaDesig" style="width:200px;">
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <div class="form-group Pcntrl">
+                                                                                            <label>Annual Income</label>
+                                                                                            <input type="text" class="form-control" id="txtFaIncome" style="width:200px;">
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <div class="form-group Pcntrl">
+                                                                                            <label>Mobile</label>
+                                                                                            <input type="text" class="form-control" id="txtFaMobile" style="width:200px;">
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td colspan="2">
+                                                                                        <div class="form-group Pcntrl">
+                                                                                            <label>Email</label>
+                                                                                            <input type="text" class="form-control" id="txtFaEmail" style="width:350px;">
+                                                                                        </div>
+
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <div class="form-group Pcntrl">
+                                                                                            <label>Aadhaar No.</label>
+                                                                                            <input type="text" class="form-control" id="txtFAdhaar" style="width:200px;">
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td></td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <form role="form">
+                                                                <div class="box">
+                                                                    <div class="box-header">
+                                                                        <h5 class="box-title">Mother</h5>
+                                                                    </div>
+                                                                    <div class="box-body">
+                                                                        <div class="form-group">
+                                                                            <table>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <div class="form-group Pcntrl">
+                                                                                            <label>Name</label>
+                                                                                            <input type="text" class="form-control" id="txtMaName" style="width:200px;">
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <div class="form-group Pcntrl">
+                                                                                            <label>DOB</label>
+                                                                                            <div class="input-group date">
+                                                                                                <div class="input-group-addon">
+                                                                                                    <i class="fa fa-calendar"></i>
+                                                                                                </div>
+                                                                                                <input type="text" class="form-control dtpicker" id="txtMaDOB" style="width:150px;" readonly>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <div class="form-group Pcntrl">
+                                                                                            <label>Nationality</label>
+                                                                                            <select class="form-control" id="ddlMaNationality" style="width:200px;">
+                                                                                                <option>----Select----</option>
+                                                                                                <option>Indian</option>
+                                                                                                <option>Others</option>
+                                                                                            </select>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <div class="form-group Pcntrl">
+                                                                                            <label>Qualification</label>
+                                                                                            <select class="form-control" id="ddlMaQual" valuefield="QualificationId" textfield="QualificationName" blankRowValue="-1" blankRowText="----Select----" style="width:250px;"></select>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <div class="form-group Pcntrl">
+                                                                                            <label>Occupation/Job</label>
+                                                                                            <input type="text" class="form-control" id="txtMaJob" style="width:200px;">
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td rowspan="2">
+                                                                                        <div class="form-group Pcntrl">
+                                                                                            <label>Office Address</label>
+                                                                                            <textarea class="form-control" rows="4" placeholder="Enter ..." id="txtMaOfficeAddrs"></textarea>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <div class="form-group Pcntrl">
+                                                                                            <label>Designation</label>
+                                                                                            <input type="text" class="form-control" id="txtMaDesig" style="width:200px;">
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <div class="form-group Pcntrl">
+                                                                                            <label>Annual Income</label>
+                                                                                            <input type="text" class="form-control" id="txtMaIncome" style="width:200px;">
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <div class="form-group Pcntrl">
+                                                                                            <label>Mobile</label>
+                                                                                            <input type="text" class="form-control" id="txtMaMobile" style="width:200px;">
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td colspan="2">
+                                                                                        <div class="form-group Pcntrl">
+                                                                                            <label>Email</label>
+                                                                                            <input type="text" class="form-control" id="txtMaEmail" style="width:350px;">
+                                                                                        </div>
+
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <div class="form-group Pcntrl">
+                                                                                            <label>Aadhaar No.</label>
+                                                                                            <input type="text" class="form-control" id="txtMAdhaar" style="width:200px;">
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td></td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div><!--end panel-->
+
+                                <div class="panel-group">
+                                    <!--panel-->
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a class="toggler" href="#">Guardian Details </a>
+                                            </h4>
+                                        </div>
+                                        <div class="panel">
+                                            <div class="panel-body info-panel">
+                                                <div class="container-fluid">
+                                                    <div class="row">
+                                                        <table>
+                                                            <tr>
+                                                                <td>
+                                                                    <div class="form-group cntrl">
+                                                                        <label>Name</label>
+                                                                        <input type="text" class="form-control" id="txtGName" style="width:250px;">
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="form-group cntrl">
+                                                                        <label>Relation</label>
+                                                                        <input type="text" class="form-control" id="txtGRelation" style="width:250px;">
+
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="form-group cntrl">
+                                                                        <label>Nationality</label>
+                                                                        <select class="form-control" id="ddlGNationality" style="width:250px;">
+                                                                            <option>----Select----</option>
+                                                                            <option>Indian</option>
+                                                                            <option>Others</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <div class="form-group cntrl">
+                                                                        <label>Qualification</label>
+                                                                        <select class="form-control" id="ddlGQual" valuefield="QualificationId" textfield="QualificationName" blankRowValue="-1" blankRowText="----Select----" style="width:250px;"></select>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="form-group cntrl">
+                                                                        <label>Occupation/Job</label>
+                                                                        <input type="text" class="form-control" id="txtGJob" style="width:250px;">
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="form-group cntrl">
+                                                                        <label>Designation</label>
+                                                                        <input type="text" class="form-control" id="txtGDesig" style="width:250px;">
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <div class="form-group cntrl">
+                                                                        <label>Annual Income</label>
+                                                                        <input type="text" class="form-control" id="txtGIncome" style="width:250px;">
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="form-group cntrl">
+                                                                        <label>Mobile</label>
+                                                                        <input type="text" class="form-control" id="txtGMobile" style="width:250px;">
+                                                                    </div>
+                                                                </td>
+                                                                <td rowspan="2">
+                                                                    <div class="form-group cntrl">
+                                                                        <label>Address</label>
+                                                                        <textarea class="form-control" rows="4" placeholder="Enter ..." id="txtGOfficeAddrs"></textarea>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <div class="form-group cntrl">
+                                                                        <label>Aadhaar No.</label>
+                                                                        <input type="text" class="form-control" id="txtGadhaar" style="width:250px;">
+                                                                    </div>
+                                                                </td>
+                                                                <td rowspan="2">
+                                                                    <div class="form-group cntrl">
+                                                                        <label>Email</label>
+                                                                        <input type="text" class="form-control" id="txtGEmail" style="width:250px;">
+                                                                    </div>
+                                                                </td>
+
+                                                            </tr>
+
+                                                        </table>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div><!--end panel-->
+
+                                <div class="panel-group">
+                                    <!--panel-->
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a class="toggler" href="#">Emergency Contact Details</a>
+                                            </h4>
+                                        </div>
+                                        <div class="panel">
+                                            <div class="panel-body info-panel">
+                                                <div class="container-fluid">
+                                                    <div class="row">
+                                                        <table>
+                                                            <tr>
+                                                                <td>
+                                                                    <div class="form-group cntrl">
+                                                                        <label>Emergency Contact No.</label>
+                                                                        <input type="text" class="form-control" id="txtEmergNo" style="width:250px;">
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="form-group cntrl">
+                                                                        <label>Name of the Contact Person.</label>
+                                                                        <input type="text" class="form-control" id="txtEmergPer" style="width:250px;">
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="form-group cntrl">
+                                                                        <label>Relationship</label>
+                                                                        <input type="text" class="form-control" id="txtEmergRel" style="width:250px;">
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div><!--end panel-->
+                                <div class="box-footer">
+                                    <button type="button" class="btn btn-primary" id="btnSaveTab2">Next</button>
+                                </div>
+                            </div><!-- end tab 3-->
+
+
+                            <div id="menu3" class="tab-pane">
+                                <div class="panel-group">
+                                    <!--panel-->
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a class="toggler" href="#">Previous School Details </a>
+                                            </h4>
+                                        </div>
+                                        <div class="panel">
+                                            <div class="panel-body info-panel">
+                                                <div class="container-fluid">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <div class="box">
+                                                                <div class="box-header">
+                                                                    <h3 class="box-title">Details of Previous Study :-</h3>
+                                                                    <a class="btn btn-success btn-sm pull-right" href="#" id="AddRow" title="Add"><i class="fa fa-plus-square"></i></a>
+                                                                    <a class="btn btn-danger btn-sm pull-right" href="#" id="remove" title="Delete"><i class="fa fa-minus-square"></i></a>
+                                                                </div>
+                                                                <!-- /.box-header -->
+                                                                <!-- form start -->
+                                                                <form role="form">
+                                                                    <div class="box-body">
+                                                                        <div class="form-group">
+                                                                            <table id="tblPrevSchool">
+                                                                                <thead>
+                                                                                    <tr>
+                                                                                        <th class="text-center" style="width:10%;">Year</th>
+                                                                                        <th class="text-center" style="width:30%">School</th>
+                                                                                        <th class="text-center" style="width:10%;">Board</th>
+                                                                                        <th class="text-center" style="width:10%;">Standard</th>
+                                                                                        <th class="text-center" style="width:20%;">Grades/Marks obtained in Final Exams</th>
+                                                                                        <th class="text-center" style="width:10%;">Awards</th>
+                                                                                        <th class="text-center" style="width:10%;">TC No.</th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody id="PrevSchoolTBody">
+                                                                                    <tr id="row_0">
+                                                                                        <td>
+                                                                                            <div class="form-group ">
+                                                                                                <select class="form-control ddlPSYear" id="ddlPSYear_0" valuefield="year" textfield="year" blankRowValue="-1" blankRowText="--Select--" style="width:99%;"></select>
+                                                                                            </div>
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <div class="form-group ">
+                                                                                                <input type="text" class="form-control" id="txtPSName_0" style="width:99%;">
+                                                                                            </div>
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <div class="form-group ">
+                                                                                                <input type="text" class="form-control" id="txtPSBrd_0" style="width:99%;">
+                                                                                            </div>
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <div class="form-group ">
+                                                                                                <select class="form-control ddlPSClass" id="ddlPSClass_0" valuefield="Id" textfield="CourseName" blankRowValue="-1" blankRowText="--Select--" style="width:99%;"></select>
+                                                                                            </div>
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <div class="form-group ">
+                                                                                                <input type="text" class="form-control" id="txtPSMarks_0" style="width:99%;">
+                                                                                            </div>
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <div class="form-group ">
+                                                                                                <input type="text" class="form-control" id="txtAwards_0" style="width:99%;">
+                                                                                            </div>
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <div class="form-group ">
+                                                                                                <input type="text" class="form-control" id="txtTCno_0" style="width:99%;">
+                                                                                            </div>
+                                                                                        </td>
+                                                                                    </tr>
+
+                                                                                </tbody>
+                                                                            </table>
+
+                                                                        </div>
+
+
+                                                                    </div>
+                                                                    <!-- /.box-body -->
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div><!--end panel-->
+
+                                <div class="panel-group">
+                                    <!--panel-->
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a class="toggler" href="#">Health Details</a>
+                                            </h4>
+                                        </div>
+                                        <div class="panel">
+                                            <div class="panel-body info-panel">
+                                                <div class="container-fluid">
+                                                    <div class="row">
+                                                        <table>
+                                                            <tr>
+                                                                <td>
+                                                                    <div class="form-group cntrl">
+                                                                        <label>Height (in cm)</label>
+                                                                        <input type="text" class="form-control" id="txtHeight" style="width:250px;">
+                                                                        <input type="hidden" id="hdnHT" />
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="form-group cntrl">
+                                                                        <label>Weight (in Kg)</label>
+                                                                        <input type="text" class="form-control" id="txtWeight" style="width:250px;">
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>
+                                                                    <div class="form-group cntrl">
+                                                                        <label>Vision Left</label>
+                                                                        <input type="text" class="form-control" id="txtLVision" style="width:250px;">
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="form-group cntrl">
+                                                                        <label>Vision Right</label>
+                                                                        <input type="text" class="form-control" id="txtRVision" style="width:250px;">
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td colspan="2">
+                                                                    <div class="form-group txtArea">
+                                                                        <label>Any medication taken for any medical conditions or well being</label>
+                                                                        <textarea class="form-control" rows="4" placeholder="Enter ..." id="txtMedication"></textarea>
+                                                                    </div>
+                                                                </td>
+
+                                                            </tr>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div><!--end panel-->
+                                <div class="box-footer">
+                                    <button type="button" class="btn btn-primary" id="btnSaveTab3">Next</button>
+                                </div>
+                            </div><!-- end tab 4-->
+
+
+
+                            <div id="menu4" class="tab-pane">
+                                <div class="panel-group">
+                                    <!--panel-->
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a class="toggler" href="#">Image Upload </a>
+                                            </h4>
+                                        </div>
+                                        <div class="panel">
+                                            <div class="panel-body info-panel">
+                                                <div class="container-fluid">
+                                                    <div class="row">
+                                                        <form role="form">
+                                                            <div class="box-body">
+                                                                <div class="form-group">
+                                                                    <table class="table-responsive">
+                                                                        <tr>
+                                                                            <td>
+                                                                                <div class="form-group ">
+                                                                                    <label for="exampleInputFile">Student Image</label>
+                                                                                    <input class="form-control" type="file" id="InputChildPic">
+                                                                                    <input type="hidden" id="hdnInputC" />
+                                                                                </div>
+                                                                            </td>
+                                                                            <td>
+                                                                                <div class="form-group ">
+                                                                                    <label for="exampleInputFile">Father Image</label>
+                                                                                    <input class="form-control" type="file" id="InputFPic">
+                                                                                    <input type="hidden" id="hdnInputF" />
+                                                                                </div>
+                                                                            </td>
+                                                                            <td>
+                                                                                <div class="form-group ">
+                                                                                    <label for="exampleInputFile">Mother Image</label>
+                                                                                    <input class="form-control" type="file" id="InputMPic">
+                                                                                    <input type="hidden" id="hdnInputM" />
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td>
+                                                                                <div id="dvPreview" class="dvImgPreview" style="display:none;">
+                                                                                </div>
+                                                                            </td>
+                                                                            <td>
+                                                                                <div id="dvPreviewF" class="dvImgPreview" style="display:none;">
+                                                                                </div>
+                                                                            </td>
+                                                                            <td>
+                                                                                <div id="dvPreviewM" class="dvImgPreview" style="display:none;">
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </table>
+                                                                    <div class="box-footer">
+                                                                        <button type="button" class="btn btn-primary" id="btnUploadPics">Upload</button>
+                                                                    </div>
+                                                                </div>
+
+
+                                                            </div>
+                                                            <!-- /.box-body -->
+
+
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div><!--end panel-->
+
+                                <div class="panel-group">
+                                    <!--panel-->
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a class="toggler" href="#">Document Upload </a>
+                                            </h4>
+                                        </div>
+                                        <div class="panel">
+                                            <div class="panel-body info-panel">
+                                                <div class="container-fluid">
+                                                    <div class="row">
+                                                        <form role="form">
+                                                            <div class="box-body">
+                                                                <div class="form-group">
+
+                                                                    <table id="tblDocs">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th class="text-center" style="width:40%;">File</th>
+                                                                                <th class="text-center" style="width:50%">File Name</th>
+                                                                                <th class="text-center" style="width:10%"></th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr id="row_0">
+                                                                                <td>
+                                                                                    <div class="form-group ">
+                                                                                        <input class="form-control" type="file" id="File_0" style="width:50%;">
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <div class="form-group ">
+                                                                                        <select class="form-control" id="ddlDocs_0" valuefield="Value" textfield="Text" blankRowValue="-1" blankRowText="--Select--" style="width:90%;"></select>
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <div class="form-group ">
+                                                                                        <button type="button" class="btn btn-primary " id="btnAddFiles" disabled>+</button>
+                                                                                    </div>
+                                                                                </td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                    <div id="divDocuments">
+                                                                        <table id="example1" class="table table-bordered table-striped table-valign" style="width:60%;">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th>
+                                                                                        #
+                                                                                    </th>
+                                                                                    <th>
+                                                                                        Document Name
+                                                                                    </th>
+                                                                                    <th></th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody id="TBodyDocs"></tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div><!--end panel-->
+                                <div class="box-footer">
+                                    <button type="button" class="btn btn-primary " id="btnSubmit" disabled>Submit</button>
+                                </div>
+                            </div><!-- end tab 5-->
+                        </div>
+                    </div>
+                </div>
+
+
+
+            </div>
+            @*<div class="box-footer">
+                    <button type="button" class="btn btn-primary" id="btnSubmit" disabled>Final Submit</button>
+
+                </div>*@
+        </section>
+
+    }
+
+    
+    @*<script src="~/Scripts/jquery-1.10.2.min.js"></script>*@
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#ddlLanguages").select2({});
+
+            $('.dtpicker').datepicker({
+                autoclose: true,
+                format: 'dd/mm/yy'
+            });
+            var docLength = 0;
+
+            setControlValue("hdnStudentID", 0);
+            setControlValue("hdnInputC", "");
+            setControlValue("hdnInputM", "");
+            setControlValue("hdnInputF", "");
+
+            var Id = getQuerystring("id");
+            if (typeof (Id) != "undefined") {
+
+            }
+            else {
+                callServiceMethod("", "/api/StudentApi", "getRegCode", false, "", "", false, "", true, getEmployeeUniquCode, "", "", "");
+
+            }
+
+            $("#liTab2").addClass("disabled");
+            //$("#liTab3").addClass("disabled");
+            //$("#liTab4").addClass("disabled");
+
+            $('#cbSameAddress').change(function () {
+                if ($(this).is(":checked")) {
+                    $("#txtCorrespondAddrs").val(getControlValue("txtResidenceAddrs"));
+                    $("#txtCorspCity").val(getControlValue("txtResdCity"));
+                    $("#txtCorspPin").val(getControlValue("txtResdPin"));
+                    setControlValue("ddlCorspState", getControlValue("ddlResdState"));
+                }
+                else {
+                    $("#txtCorrespondAddrs").val("");
+                    $("#txtCorspCity").val("");
+                    $("#txtCorspPin").val("");
+                    setControlValue("ddlCorspState", -1);
+                }
+
+            });
+
+
+            callServiceMethodForDDl("", "/api/StudentApi", "GetCategories", "ddlCategory", false, "", "", "", "");
+            callServiceMethodForDDl("", "/api/StudentApi", "GetReligions", "ddlReligion", false, "", "", "", "");
+            callServiceMethodForDDl("", "/api/StudentApi", "GetClasses", "ddlCourse", false, "", "", "", "");
+            callServiceMethodForDDl("", "/api/StudentApi", "GetStates", "ddlResdState", false, "", "", "", "");
+            callServiceMethodForDDl("", "/api/StudentApi", "GetStates", "ddlCorspState", false, "", "", "", "");
+            callServiceMethodForDDl("", "/api/StudentApi", "GetQualification", "ddlFQual", false, "", "", "", "");
+            callServiceMethodForDDl("", "/api/StudentApi", "GetQualification", "ddlMaQual", false, "", "", "", "");
+            callServiceMethodForDDl("", "/api/StudentApi", "GetQualification", "ddlGQual", false, "", "", "", "");
+            callServiceMethodForDDl("", "/api/StudentApi", "GetClasses", "ddlPSClass_0", false, "", "", "", "");
+            callServiceMethodForDDl("", "/api/StudentApi", "GetYears", "ddlPSYear_0", false, "", "", "", "");
+            callServiceMethodForDDl("", "/api/StudentApi", "GetGenders", "ddlGender", false, "", "", "", "");
+            callServiceMethodForDDl("", "/api/StudentApi", "GetLanguages", "ddlLanguages", false, "", "", "", "");
+            callServiceMethodForDDl("", "/api/StudentApi", "GetStatus", "ddlStatus", false, "", "", "", "");
+
+            $("#ddlCourse").change(function () {
+                var ddlCourse = getControlValue("ddlCourse");
+                if (ddlCourse != null && (ddlCourse != -1) && (ddlCourse != undefined))
+                {
+                    callServiceMethodForDDl(JSON.stringify([ddlCourse]), "/api/StudentApi", "GetStreams", "ddlStream", false, "", "", "", "");
+                    //callServiceMethodForDDl(JSON.stringify([ddlCourse]), "/api/StudentApi", "GetSections", "ddlSection", false, "", "", "", "");
+                    //callServiceMethodForDDl(JSON.stringify([ddlCourse]), "/api/StudentApi", "GetBatches", "ddlBatch", false, "", "", "", "");
+                }
+
+            });
+            var arr = {};
+            $("#ddlLanguages").val(arr).trigger("change");
+
+            $.ajax({
+                url: "@Url.Content("~/api/StudentApi/GetEnclosures")",
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+
+                $.each(data, function (index, item) {
+                    $("#ddlDocs_0").append($("<option></option>").val(item.Value).html(item.Text));
+                });
+            },
+            error: function (result) {
+            }
+        });
+
+
+            //$('.select2').select2();
+
+            $("#InputChildPic").change(function () {
+            //    $("#dvPreview").html("");
+            //    var regex = /^([a-zA-Z0-9\s_\\.\-:])+(.jpg|.jpeg|.gif|.png|.bmp)$/;
+            //    if (regex.test($(this).val().toLowerCase())) {
+            //        if ($.browser.msie && parseFloat(jQuery.browser.version) <= 9.0) {
+            //            $("#dvPreview").show();
+            //            $("#dvPreview")[0].filters.item("DXImageTransform.Microsoft.AlphaImageLoader").src = $(this).val();
+            //        }
+            //        else {
+            //            if (typeof (FileReader) != "undefined") {
+            //                $("#dvPreview").show();
+            //                $("#dvPreview").append("<img />");
+            //                var reader = new FileReader();
+            //                reader.onload = function (e) {
+            //                    $("#dvPreview img").attr("src", e.target.result);
+            //                }
+            //                reader.readAsDataURL($(this)[0].files[0]);
+            //            } else {
+            //                alert("This browser does not support FileReader.");
+            //            }
+            //        }
+            //    } else {
+            //        alert("Please upload a valid image file.");
+                //    }
+
+                var files = !!this.files ? this.files : [];
+
+                var iSize = (files[0].size / 1024);
+                iSize = (Math.round(iSize * 100) / 100)
+
+                if (iSize > 100)
+                {
+                    alert("Image size exceeds 100Kb");
+                    return;
+                }
+                //if (iSize / 1024 > 1) {
+                //    if (((iSize / 1024) / 1024) > 1) {
+                //        iSize = (Math.round(((iSize / 1024) / 1024) * 100) / 100);
+                //       alert(iSize + "Gb");
+                //    }
+                //    else {
+                //        iSize = (Math.round((iSize / 1024) * 100) / 100)
+                //        alert(iSize + "Mb");
+                //    }
+                //}
+                //else {
+                //    iSize = (Math.round(iSize * 100) / 100)
+                //    alert(iSize + "kb");
+                //}
+
+                if (!files.length || !window.FileReader) return; // Check if File is selected, or no FileReader support
+                if (/^image/.test(files[0].type)) { //  Allow only image upload
+                    var ReaderObj = new FileReader(); // Create instance of the FileReader
+                    ReaderObj.readAsDataURL(files[0]); // read the file uploaded
+                    ReaderObj.onloadend = function () { // set uploaded image data as background of div
+                        $("#dvPreview").show();
+                        $("#dvPreview").css("background-image", "url(" + this.result + ")");
+                    }
+                } else {
+                    alert("Upload an image");
+                }
+            });
+            $("#InputFPic").change(function () {
+                var files = !!this.files ? this.files : [];
+
+                var iSize = (files[0].size / 1024);
+                iSize = (Math.round(iSize * 100) / 100)
+
+                if (iSize > 100) {
+                    alert("Image size exceeds 100Kb");
+                    return;
+                }
+
+                if (!files.length || !window.FileReader) return; // Check if File is selected, or no FileReader support
+                if (/^image/.test(files[0].type)) { //  Allow only image upload
+                    var ReaderObj = new FileReader(); // Create instance of the FileReader
+                    ReaderObj.readAsDataURL(files[0]); // read the file uploaded
+                    ReaderObj.onloadend = function () { // set uploaded image data as background of div
+                        $("#dvPreviewF").show();
+                        $("#dvPreviewF").css("background-image", "url(" + this.result + ")");
+                    }
+                } else {
+                    alert("Upload an image");
+                }
+            });
+
+            $("#InputMPic").change(function () {
+                var files = !!this.files ? this.files : [];
+
+                var iSize = (files[0].size / 1024);
+                iSize = (Math.round(iSize * 100) / 100)
+
+                if (iSize > 100) {
+                    alert("Image size exceeds 100Kb");
+                    return;
+                }
+
+                if (!files.length || !window.FileReader) return; // Check if File is selected, or no FileReader support
+                if (/^image/.test(files[0].type)) { //  Allow only image upload
+                    var ReaderObj = new FileReader(); // Create instance of the FileReader
+                    ReaderObj.readAsDataURL(files[0]); // read the file uploaded
+                    ReaderObj.onloadend = function () { // set uploaded image data as background of div
+                        $("#dvPreviewM").show();
+                        $("#dvPreviewM").css("background-image", "url(" + this.result + ")");
+                    }
+                } else {
+                    alert("Upload an image");
+                }
+            });
+
+            $("#btnSaveTab1").click(function () {
+
+                var ddlCourse = getControlValue("ddlCourse");
+                var ddlStream = $('#ddlStream').find(":selected").text();
+                var lang = $("#ddlLanguages").val();
+                var languages = "";
+                if (lang != null && lang != undefined && lang != "") {
+                    var lang_lenth = lang.length;
+
+                    var i = 0;
+                    for (i; i < lang_lenth; i++) {
+                        if (i == 0) {
+                            languages = lang[i];
+                        }
+                        else {
+                            languages = languages + "," + lang[i];
+                        }
+                    }
+                }
+
+                var Student = {
+                    ClassID: getControlValue("ddlCourse"),
+                    StreamID: getControlValue("ddlStream"),
+                    FirstName: $("#txtFirstName").val(),
+                    MiddleName: $("#txtMiddleName").val(),
+                    LastName: $("#txtLastName").val(),
+                    DOB: $("#txtDOB").val(),
+                    GenderID: getControlValue("ddlGender"),
+                    BloodGroup: getControlValue("ddlBloodGroup"),
+                    BirthPlace: $("#txtBirthPlace").val(),
+                    Nationality: getControlValue("ddlNationality"),
+                    MotherTongue: $("#txtMotherTongue").val(),
+                    Religion: getControlValue("ddlReligion"),
+                    CategoryID: getControlValue("ddlCategory"),
+                    Languages: languages,
+                    AadharNo: $("#txtAadhaar").val(),
+                    PermanentAddress: $("#txtResidenceAddrs").val(),
+                    CorrespondAddress: $("#txtCorrespondAddrs").val(),
+                    PermCity: $("#txtResdCity").val(),
+                    CorsCity: $("#txtCorspCity").val(),
+                    PermState: getControlValue("ddlResdState"),
+                    CorsState: getControlValue("ddlCorspState"),
+                    PermPincode: $("#txtResdPin").val(),
+                    CorsPincode: $("#txtCorspPin").val(),
+                    SMSmobileNo: $("#txtSMSMobile").val()
+                };
+
+                if (Student.FirstName != "" && Student.SMSmobileNo != "" && Student.SMSmobileNo != undefined && Student.ClassID != undefined && Student.SMSmobileNo != null && Student.ClassID != -1) {
+                    var DTO = JSON.stringify(Student);
+
+                    $.ajax({
+                        url: "@Url.Content("~/api/NewRegApi/SaveNewRegDet")",
+                        type: "Post",
+                        data: DTO,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data.ID != -1 && data.ID != undefined) {
+                                alert("Details saved successfully");
+                                $("#liTab2").removeClass("disabled");
+                                $("#liTab1").removeClass("active");
+                                $("#liTab2").addClass("active");
+                                $("#menu2").addClass("active");
+                                $("#home").removeClass("active");
+                            }
+                            $("#hdnStudentID").val(data.ID);
+                        },
+                        error: function () {
+
+                        }
+                    });
+                }
+                else { alert("Incomplete Feilds !!");}
+            });
+
+            $("#btnSaveTab2").click(function () {
+                var id = $("#hdnStudentID").val();
+                var lang = $("#ddlLanguages").val();
+                var lang_lenth = lang.length;
+                var languages = "";
+                var status;
+                var i = 0;
+                if (lang != null && lang != undefined && lang != "") {
+                    for (i; i < lang_lenth; i++) {
+                        if (i == 0) {
+                            languages = lang[i];
+                        }
+                        else {
+                            languages = languages + "," + lang[i];
+                        }
+                    }
+                }
+                var Student = {
+                    ID: id,
+                    ClassID: getControlValue("ddlCourse"),
+                    StreamID: getControlValue("ddlStream"),
+                    FirstName: $("#txtFirstName").val(),
+                    MiddleName: $("#txtMiddleName").val(),
+                    LastName: $("#txtLastName").val(),
+                    DOB: $("#txtDOB").val(),
+                    GenderID: getControlValue("ddlGender"),
+                    BloodGroup: getControlValue("ddlBloodGroup"),
+                    BirthPlace: $("#txtBirthPlace").val(),
+                    Nationality: getControlValue("ddlNationality"),
+                    MotherTongue: $("#txtMotherTongue").val(),
+                    Religion: getControlValue("ddlReligion"),
+                    CategoryID: getControlValue("ddlCategory"),
+                    Languages: languages,
+                    AadharNo: $("#txtAadhaar").val(),
+                    PermanentAddress: $("#txtResidenceAddrs").val(),
+                    CorrespondAddress: $("#txtCorrespondAddrs").val(),
+                    PermCity: $("#txtResdCity").val(),
+                    CorsCity: $("#txtCorspCity").val(),
+                    PermState: getControlValue("ddlResdState"),
+                    CorsState: getControlValue("ddlCorspState"),
+                    PermPincode: $("#txtResdPin").val(),
+                    CorsPincode: $("#txtCorspPin").val(),
+                    SMSmobileNo: $("#txtSMSMobile").val(),
+
+                    FNationality: $('#ddlFNationality').find(":selected").val(),
+                    FatherName: $("#txtFaName").val(),
+                    FDOB: $("#txtFaDOB").val(),
+                    FQualification: getControlValue("ddlFQual"),
+                    FJob: getControlValue("txtFaJob"),
+                    FOfficeAddress: getControlValue("txtFOfficeAddrs"),
+                    FDesig: getControlValue("txtFaDesig"),
+                    FIncome: $("#txtFaIncome").val(),
+                    FMobile: $("#txtFaMobile").val(),
+                    Fmail: $("#txtFaEmail").val(),
+                    FAdharNo: $("#txtFAdhaar").val(),
+                    MotherName: $("#txtMaName").val(),
+                    MDOB: getControlValue("txtMaDOB"),
+                    MNationality: getControlValue("ddlMaNationality"),
+                    MJob: $("#txtMaJob").val(),
+                    MOfficeAddress: getControlValue("txtMaOfficeAddrs"),
+                    MQualification: getControlValue("ddlMaQual"),
+                    MDesig: $("#txtMaDesig").val(),
+                    MIncome: getControlValue("txtMaIncome"),
+                    Mmobile: getControlValue("txtMaMobile"),
+                    Mmail: getControlValue("txtMaEmail"),
+                    MAdharNo: $("#txtMAdhaar").val(),
+
+                    GNationality: $('#ddlGNationality').find(":selected").val(),
+                    GuardianName: $("#txtGName").val(),
+                    Relation: $("#txtGRelation").val(),
+                    GQualification: getControlValue("ddlGQual"),
+                    GJob: getControlValue("txtGJob"),
+                    GDesig: getControlValue("txtGDesig"),
+                    GIncome: getControlValue("txtGIncome"),
+                    Gmobile: $("#txtGMobile").val(),
+                    GOfficeAddress: $("#txtGOfficeAddrs").val(),
+                    GAdharNo: $("#txtGadhaar").val(),
+                    Gmail: $("#txtGEmail").val(),
+                    EmergencyNo: $("#txtEmergNo").val(),
+                    EmerContPerson: getControlValue("txtEmergPer"),
+                    ContPersRelation: getControlValue("txtEmergRel"),
+                    PicPath: getControlValue("hdnInputC"),
+                    FPicPath: getControlValue("hdnInputF"),
+                    MPicPath: getControlValue("hdnInputM")
+                };
+
+                if (Student.FMobile == null && Student.Mmobile==null)
+                {
+                    alert("Father and mother mobile no are required");
+                    return;
+                }
+
+                    var DTO = JSON.stringify(Student);
+
+                    $.ajax({
+                        url: "@Url.Content("~/api/NewRegApi/EditStudentDet")",
+                    type: "Post",
+                    data: DTO,
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (data) {
+                        if (data.ID != -1 && data.ID != undefined) {
+                            alert("Details saved successfully");
+                            $("#liTab3").removeClass("disabled");
+                            $("#liTab2").removeClass("active");
+                            $("#liTab3").addClass("active");
+                            $("#menu3").addClass("active");
+                            $("#menu2").removeClass("active");
+                        }
+                    },
+                    error: function () {
+
+                    }
+                });
+
+
+            });
+
+            $("#btnSaveTab3").click(function () {
+                var id = $("#hdnStudentID").val();
+
+                var ar = new Array;
+                var x = 0;
+                $('#PrevSchoolTBody tr').each(function () {
+
+                    var year = getControlValue("ddlPSYear_" + x);
+                    var school = getControlValue("txtPSName_" + x);
+                    var brd = getControlValue("txtPSBrd_" + x);
+                    var cls = getControlValue("ddlPSClass_" + x);
+                    var mrks = getControlValue("txtPSMarks_" + x);
+                    var tc = getControlValue("txtTCno_" + x);
+                    if (year == "-1" || school == "" || brd == "" || cls == -1 || mrks == "")
+                    {
+
+                    }
+                    var TBLPrevSchoolDet=
+                        {
+                            PSYear:year,
+                            School: school,
+                            Board: brd,
+                            Class: cls,
+                        StudentID:id,
+                        Marks: mrks,
+                        TCNo: tc,
+                        Awards: getControlValue("txtAwards_" + x),
+                        Status: 17
+                        }
+                    ar.push(TBLPrevSchoolDet);
+                    x++;
+
+                });
+
+                var Student = {
+                    ID: id,
+                    ClassID: getControlValue("ddlCourse"),
+                    StreamID: getControlValue("ddlStream"),
+                    FirstName: $("#txtFirstName").val(),
+                    MiddleName: $("#txtMiddleName").val(),
+                    LastName: $("#txtLastName").val(),
+                    DOB: $("#txtDOB").val(),
+                    GenderID: getControlValue("ddlGender"),
+                    BloodGroup: getControlValue("ddlBloodGroup"),
+                    BirthPlace: $("#txtBirthPlace").val(),
+                    Nationality: getControlValue("ddlNationality"),
+                    MotherTongue: $("#txtMotherTongue").val(),
+                    Religion: getControlValue("ddlReligion"),
+                    CategoryID: getControlValue("ddlCategory"),
+                    AadharNo: $("#txtAadhaar").val(),
+                    PermanentAddress: $("#txtResidenceAddrs").val(),
+                    CorrespondAddress: $("#txtCorrespondAddrs").val(),
+                    PermCity: $("#txtResdCity").val(),
+                    CorsCity: $("#txtCorspCity").val(),
+                    PermState: getControlValue("ddlResdState"),
+                    CorsState: getControlValue("ddlCorspState"),
+                    PermPincode: $("#txtResdPin").val(),
+                    CorsPincode: $("#txtCorspPin").val(),
+                    SMSmobileNo: $("#txtSMSMobile").val(),
+
+                    FNationality: $('#ddlFNationality').find(":selected").val(),
+                    FatherName: $("#txtFaName").val(),
+                    FDOB: $("#txtFaDOB").val(),
+                    FQualification: getControlValue("ddlFQual"),
+                    FJob: getControlValue("txtFaJob"),
+                    FOfficeAddress: getControlValue("txtFOfficeAddrs"),
+                    FDesig: getControlValue("txtFaDesig"),
+                    FIncome: $("#txtFaIncome").val(),
+                    FMobile: $("#txtFaMobile").val(),
+                    Fmail: $("#txtFaEmail").val(),
+                    FAdharNo: $("#txtFAdhaar").val(),
+                    MotherName: $("#txtMaName").val(),
+                    MDOB: getControlValue("txtMaDOB"),
+                    MNationality: getControlValue("ddlMaNationality"),
+                    MJob: $("#txtMaJob").val(),
+                    MOfficeAddress: getControlValue("txtMaOfficeAddrs"),
+                    MQualification: getControlValue("ddlMaQual"),
+                    MDesig: $("#txtMaDesig").val(),
+                    MIncome: getControlValue("txtMaIncome"),
+                    Mmobile: getControlValue("txtMaMobile"),
+                    Mmail: getControlValue("txtMaEmail"),
+                    MAdharNo: $("#txtMAdhaar").val(),
+
+                    GNationality: $('#ddlGNationality').find(":selected").val(),
+                    GuardianName: $("#txtGName").val(),
+                    Relation: $("#txtGRelation").val(),
+                    GQualification: getControlValue("ddlGQual"),
+                    GJob: getControlValue("txtGJob"),
+                    GDesig: getControlValue("txtGDesig"),
+                    GIncome: getControlValue("txtGIncome"),
+                    Gmobile: $("#txtGMobile").val(),
+                    GOfficeAddress: $("#txtGOfficeAddrs").val(),
+                    GAdharNo: $("#txtGadhaar").val(),
+                    Gmail: $("#txtGEmail").val(),
+                    EmergencyNo: $("#txtEmergNo").val(),
+                    EmerContPerson: getControlValue("txtEmergPer"),
+                    ContPersRelation: getControlValue("txtEmergRel"),
+                    PicPath: getControlValue("hdnInputC"),
+                    FPicPath: getControlValue("hdnInputF"),
+                    MPicPath: getControlValue("hdnInputM"),
+                    prevlist_reg: ar,
+
+                    Height: getControlValue("txtHeight"),
+                    Weight: getControlValue("txtWeight"),
+                    VisionLeft: getControlValue("txtLVision"),
+                    VisionRight: $("#txtRVision").val(),
+                    MedicationDetails: $("#txtMedication").val()
+                };
+
+                if (Student.ID != "" && Student.ID != undefined && Student.ID != null) {
+                    var DTO = JSON.stringify(Student);
+
+                    $.ajax({
+                        url: "@Url.Content("~/api/NewRegApi/SaveOtherDetails")",
+                    type: "Post",
+                    data: DTO,
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (data) {
+                        if (data != -1)
+                        {
+                            alert("Record Saved Successfully");
+                            $("#liTab4").removeClass("disabled");
+                            $("#liTab3").removeClass("active");
+                            $("#liTab4").addClass("active");
+                            $("#menu4").addClass("active");
+                            $("#menu3").removeClass("active");
+                        }
+                    },
+                    error: function () {
+
+                    }
+                });
+            }
+            else { alert("Incomplete Feilds !!");}
+
+            });
+
+            $("#btnSaveTab4").click(function () {
+                var id = $("#hdnStudentID").val();
+                var FMobile = $("#txtFaMobile").val();
+                var MMobile = $("#txtMaMobile").val();
+                //var data = new FormData($('form')[0]);
+                var formData = new FormData();
+                var file = $('#InputChildPic')[0];
+                var file1 = $('#InputFPic')[0];
+                var file2 = $('#InputMPic')[0];
+                formData.append('file', file.files[0]);
+                formData.append('ID', id);
+                formData.append('RollNo', roll);
+                formData.append('type', "Student");
+
+                var fd = new FormData();
+                var docIDs = "";
+                var docTexts = "";
+                for (var x = 1; x <= docLength; x++)
+                {
+                    var doc = $('#input' + x)[0];
+                    var docID = $('#hdn' + x).val();
+                    var dox = $('#lbl' + x).text();
+                    fd.append('file', doc.files[0]);
+                    if (x == 1) {
+                        docIDs = docID;
+                        docTexts = dox;
+                    }
+                    else {
+                        docIDs = docIDs + "," + docID;
+                        docTexts =docTexts+","+ dox;
+                    }
+
+                }
+                fd.append('DocIDs', docIDs);
+                fd.append('docTexts', docTexts);
+                fd.append('ID', id);
+                fd.append('Susername', txtStUsername);
+                fd.append('Spwd', txtStPassword);
+                fd.append('PuserName', txtPUsername);
+                fd.append('Ppwd', txtPPassword);
+                fd.append('DocLength', docLength);//
+                fd.append('status', stats);
+                fd.append('type', "Docs");
+
+                    $.ajax({
+                    url: "@Url.Content("~/api/StudentApi/UploadDocs")",
+                    type: "Post",
+                    data: formData,
+                    enctype: 'multipart/form-data',
+                    contentType: false,
+                    processData: false,         // PREVENT AUTOMATIC DATA PROCESSING.
+                    cache: false,
+                    success: function (data) {
+
+                        var formData1 = new FormData();
+                        formData1.append('file', file1.files[0]);
+                        formData1.append('ID', id);
+                        formData1.append('FMobile', FMobile);
+                        formData1.append('type', "FParent");
+
+                        $.ajax({
+                            url: "@Url.Content("~/api/StudentApi/UploadDocs")",
+                        type: "Post",
+                        data: formData1,
+                        enctype: 'multipart/form-data',
+                        contentType: false,
+                        processData: false,         // PREVENT AUTOMATIC DATA PROCESSING.
+                        cache: false,
+                        success: function (data) {
+
+                            var formData2 = new FormData();
+                            formData2.append('file', file1.files[0]);
+                            formData2.append('ID', id);
+                            formData2.append('Mmobile', MMobile);
+                            formData2.append('type', "MParent");
+
+                            $.ajax({
+                                url: "@Url.Content("~/api/StudentApi/UploadDocs")",
+                            type: "Post",
+                            data: formData2,
+                            enctype: 'multipart/form-data',
+                            contentType: false,
+                            processData: false,         // PREVENT AUTOMATIC DATA PROCESSING.
+                            cache: false,
+                            success: function (data) {
+
+                                $.ajax({
+                                    url: "@Url.Content("~/api/StudentApi/UploadDocs")",
+                                type: "Post",
+                                data: fd,
+                                enctype: 'multipart/form-data',
+                                contentType: false,
+                                processData: false,         // PREVENT AUTOMATIC DATA PROCESSING.
+                                cache: false,
+                                success: function (data) {
+                                    if (data != '0' && data != undefined) {
+                                        alert("Images and documents uploaded successfully");
+                                        $("#SaveDocs").fadeOut();
+                                        if ($("#SaveDocs").val() != "Edit")
+                                        { $("#btnSubmit").fadeIn(); }
+
+                                    }
+                                },
+                                error: function () {
+
+                                }
+                            });
+                            },
+                            error: function () {
+
+                            }
+                        });
+
+                        },
+                        error: function () {
+
+                        }
+                        });
+
+
+                    },
+                    error: function () {
+
+                    }
+                });
+            });
+
+            $("#btnAddFiles").click(function () {
+                var id = $("#hdnStudentID").val();
+                var docText=$('#ddlDocs_0').find(":selected").text();
+                var doc = $("#ddlDocs_0").val();
+                var name = $("#txtFirstName").val();
+                var file = $('#File_0')[0];
+                var formData = new FormData();
+                formData.append('file', file.files[0]);
+                formData.append('ID', id);
+                formData.append('StName', name);
+                formData.append('doc', doc);
+                formData.append('docText', docText);
+                formData.append('type', "Docs");
+                $.ajax({
+                    type: "Post",
+                    url: "@Url.Content("~/api/NewRegApi/UploadDocs")",
+                    data: formData,
+                    enctype: 'multipart/form-data',
+                    contentType: false,
+                    processData: false,
+                    cache: false,
+                success: function (data) {
+                    if (data.ID != -1) {
+                        //alert("Student record finally saved");
+                        DocList(id);
+                        $("#btnSubmit").removeAttr("disabled");
+                    }
+                },
+                error: function () {
+
+                }
+            });
+        });
+        });
+
+        function DocList(id)
+        {
+            $.ajax({
+                url: "/api/NewRegApi/StDocList",
+                type: "Post",
+                data: JSON.stringify([id]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    if (data.ID != -1)
+                    {
+                        $("#TBodyDocs").html("");
+                        var html2 = '';
+                        $.each(data.rgDoclist, function (index, item) {
+                            if (index == 0) {
+                                html2 = '<tr>';
+                            }
+                            else {
+                                html2 = html2 + '<tr>';
+                            }
+                            var count = index + 1;
+                            html2 += "<td class='text-center'><label>" + count + " </label></td><td class='text-center'>" + item.docName.DocumentName + "</td><td><i class='fa fa-fw fa-trash del' style='cursor:pointer' onclick='Delete(" + item.rgDoc.ID + ")' title='Delete'></i></td></tr>";
+                        });
+                        $(html2).appendTo('#TBodyDocs');
+                    }
+                }
+            });
+        }
+
+        function Delete(id)
+        {
+            var stdID = $("#hdnStudentID").val();
+                //var result = window.confirm('Are you sure to unassign this period?');
+                //if (result == true) {
+                    $.ajax({
+                        url: "/api/NewRegApi/DeleteRecord",
+                        type: "Post",
+                        data: JSON.stringify([id]),
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            alert(data.StatusName);
+                            DocList(stdID);
+                        }
+                    });
+
+
+
+        }
+
+        $("#btnUploadPics").click(function () {
+            var spic = $('#InputChildPic').val();
+            var fpic = $('#InputFPic').val();
+            var mpic = $('#InputMPic').val();
+            if (spic == "" || fpic == "" || mpic == "")
+            {
+                alert("Photographs missing!!");
+                return;
+            }
+            var id = $("#hdnStudentID").val();
+            var name = $("#txtFirstName").val();
+            var Fname = $("#txtFaName").val();
+            var Mname = $("#txtMaName").val();
+            var file = $('#InputChildPic')[0];
+            var file1 = $('#InputFPic')[0];
+            var file2 = $('#InputMPic')[0];
+            var formData = new FormData();
+            formData.append('file', file.files[0]);
+            formData.append('ID', id);
+            formData.append('StName', name);
+            formData.append('type', "Student");
+                $.ajax({
+                    url: "@Url.Content("~/api/NewRegApi/UploadDocs")",
+                    type: "Post",
+                    data: formData,
+                    enctype: 'multipart/form-data',
+                    contentType: false,
+                    processData: false,         // PREVENT AUTOMATIC DATA PROCESSING.
+                    cache: false,
+                    success: function (data) {
+
+                        var formData1 = new FormData();
+                        formData1.append('file', file1.files[0]);
+                        formData1.append('ID', id);
+                        formData1.append('Fname', Fname);
+                        formData1.append('StName', name);
+                        formData1.append('type', "FParent");
+
+                        $.ajax({
+                            url: "@Url.Content("~/api/NewRegApi/UploadDocs")",
+                        type: "Post",
+                        data: formData1,
+                        enctype: 'multipart/form-data',
+                        contentType: false,
+                        processData: false,         // PREVENT AUTOMATIC DATA PROCESSING.
+                        cache: false,
+                        success: function (data) {
+
+                            var formData2 = new FormData();
+                            formData2.append('file', file1.files[0]);
+                            formData2.append('ID', id);
+                            formData2.append('Mname', Mname);
+                            formData2.append('StName', name);
+                            formData2.append('type', "MParent");
+
+                            $.ajax({
+                                url: "@Url.Content("~/api/NewRegApi/UploadDocs")",
+                            type: "Post",
+                            data: formData2,
+                            enctype: 'multipart/form-data',
+                            contentType: false,
+                            processData: false,         // PREVENT AUTOMATIC DATA PROCESSING.
+                            cache: false,
+                            success: function (data) {
+                                if(data.ID!=-1)
+                                {
+                                    alert("Images uploaded successfully.Kindly upload applicable documents");
+                                    $("#btnAddFiles").removeAttr("disabled");
+                                }
+                            },
+                            error: function () {
+
+                            }
+                        });
+
+                        },
+                        error: function () {
+
+                        }
+                        });
+
+
+                    },
+                    error: function () {
+
+                    }
+                });
+        });
+
+        $("#btnSubmit").click(function () {
+            var id = $("#hdnStudentID").val();
+            var rowLen = $("#TBodyDocs tr").length;
+            if (rowLen < 1)
+            {
+                alert("Please upload required documents!");
+                return;
+            }
+            var spic = $('#InputChildPic').val();
+            var fpic = $('#InputFPic').val();
+            var mpic = $('#InputMPic').val();
+            if (spic == "" || fpic == "" || mpic == "") {
+                alert("Photographs missing!!");
+                return;
+            }
+
+            var result = window.confirm('If submitted then no changes can be made. Are you sure you want to submit?');
+            if (result == true)
+            {
+                var status = 4;
+                $.ajax({
+                    type: "Post",
+                    url: "@Url.Content("~/api/NewRegApi/FinalSubmit")",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify([id, status, "NewStudentReg"]),
+                dataType: "json",
+                success: function (data) {
+                    if (data != -1 && data != undefined) {
+                        alert("Registration complete");
+                        $(".btn").hide();
+                        $(".del").hide();
+                        $(".form-control").attr("disabled", true);
+                    }
+                },
+                error: function () {
+
+                }
+            });
+
+            }
+
+        });
+
+        $("#AddRow").click(function () {
+            var year = getControlValue("ddlPSYear_0");
+            var school = getControlValue("txtPSName_0");
+            var brd = getControlValue("txtPSBrd_0");
+            var cls = getControlValue("ddlPSClass_0");
+            var mrks = getControlValue("txtPSMarks_0");
+            if (year == "-1" || school == "" || brd == "" || cls == -1 || mrks == "")
+            { return;}
+            var row = $("#PrevSchoolTBody tr").last().clone();
+            var oldId = Number(row.attr('id').slice(-1));
+            var id = 1 + oldId;
+
+            row.attr('id', 'row_' + id);
+            row.find('#ddlPSYear_' + oldId).attr('id', 'ddlPSYear_' + id);
+            row.find('#txtPSName_' + oldId).attr('id', 'txtPSName_' + id).val('');
+            row.find('#txtPSBrd_' + oldId).attr('id', 'txtPSBrd_' + id).val('');
+            row.find('#ddlPSClass_' + oldId).attr('id', 'ddlPSClass_' + id);
+            row.find('#txtPSMarks_' + oldId).attr('id', 'txtPSMarks_' + id).val('');
+            row.find('#txtAwards_' + oldId).attr('id', 'txtAwards_' + id).val('');
+            row.find('#txtTCno_' + oldId).attr('id', 'txtTCno_' + id).val('');
+
+            $('#PrevSchoolTBody').append(row);
+        });
+
+        $('#remove').on("click", function () {
+            if ($('#PrevSchoolTBody tr').length === 1) return;
+            $('#PrevSchoolTBody tr:last').remove();
+        });
+
+        var queryString = new Array();
+        $(function () {
+            if (queryString.length == 0) {
+                if (window.location.search.split('?').length > 1) {
+                    var params = window.location.search.split('?')[1].split('&');
+                    for (var i = 0; i < params.length; i++) {
+                        var key = params[i].split('=')[0];
+                        var value = decodeURIComponent(params[i].split('=')[1]);
+                        queryString[key] = value;
+                    }
+                }
+            }
+            if (queryString["id"] != null) {
+                //var data = "<u>Values from QueryString</u><br /><br />";
+                //data += "<b>Name:</b> " + queryString["name"] + " <b>Technology:</b> " + queryString["technology"];
+                //$("#lblData").html(data);
+                $("#hdnStudentID").val(queryString["id"]);
+                var id = queryString["id"];
+                //alert($("#hdnStudentID").val());
+
+                $.ajax({
+                    url:"@Url.Content("~/api/StudentApi/FindStudentByID")",// "~/Masters/GetDeptMethod",
+                type: "Post",
+                data: JSON.stringify([id]), //{ Name: name,ddlAcademicYr
+                //// Address: address, DOB: dob },
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+
+                    $("#SaveOffDet").hide();
+                    $("#SaveContacts").hide();
+                    //$("#SaveParents").hide();
+                    $("#SaveHTdet").hide();
+                    $("#SavePics").hide();
+                    //$("#SaveDocs").hide();
+                    $("#btnSubmit").hide();
+
+                    $("#UpdateOffDet").show();
+                    //$("#UpdateParents").show();
+                    $("#UpdateHTdet").show();
+                    //$("#UpdateDocs").show();
+
+                    setControlValue("ddlAcademicYr", data.AcademicYear);
+                    $('#txtRegNo').val(data.RegNo);
+                    $('#txtJoinDt').val(ChangeDateformat(data.JoiningDate));
+                    setControlValue("ddlCourse", data.ClassID);
+
+                    var ddlclass = getControlValue("ddlCourse");
+                    if (ddlclass != -1) {
+                        debugger;
+                        callServiceMethodForDDl(JSON.stringify([ddlclass]), "/api/StudentApi", "GetStreams", "ddlStream", false, "", "", "", "");
+                        callServiceMethodForDDl(JSON.stringify([ddlclass]), "/api/StudentApi", "GetSections", "ddlSection", false, "", "", "", "");
+                        callServiceMethodForDDl(JSON.stringify([ddlclass]), "/api/StudentApi", "GetBatches", "ddlBatch", false, "", "", "", "");
+                    }
+
+                    debugger;
+                    var i=1;
+                    $.each(data.prevlist, function (index, item) {
+                        $("#ddlPSYear" + i).val(item.PSYear);
+                        $("#txtPSName" + i).val(item.School);
+                        $("#txtPSBrd" + i).val(item.Board);
+                        $("#ddlPSClass" + i).val(item.Class);
+                        $("#txtPSMarks" + i).val(item.Marks);
+                        $("#txtPSAwards").val(item.Awards);//hdnprev1
+                        $("#hdnprev" + i).val(item.ID);
+                        if (i == 1)
+                        {
+                            $("#txtTCNo").val(item.TCNo);
+                        }
+                        i = i + 1;
+                    });
+
+                    setTimeout(function () {
+                        setControlValue("ddlSection", data.SectionID);
+                        setControlValue("ddlStream", -1);
+                        setControlValue("ddlBatch", -1);
+                        setControlValue("txtRollNo", data.RollNo);
+                    }, 2000);
+
+                    setControlValue("txtFirstName", data.FirstName);
+                    setControlValue("txtMiddleName", data.MiddleName);
+                    setControlValue("txtLastName", data.LastName);
+                    setControlValue("txtDOB", ChangeDateformat(data.DOB));
+                    setControlValue("ddlGender", data.GenderID);
+                    setControlValue("ddlBloodGroup", data.BloodGroup);
+                    setControlValue("txtBirthPlace", data.BirthPlace);
+                    setControlValue("ddlNationality", data.Nationality);
+                    setControlValue("txtMotherTongue", data.MotherTongue);
+                    setControlValue("txtSRNo", data.SRNo);
+                    setControlValue("txtBirthPlace", data.BirthPlace);
+
+                    if (data.Languages != null && data.Languages != "")
+                    {
+                        var selectedValues = new Array();
+                        var s = data.Languages.split(',');
+                        //for (var k = 0; k < s.length; k++)
+                        //{
+                        //    selectedValues[k] = s[k];
+                        //}
+                        //setControlValue("ddlLanguages", selectedValues);
+                        $("#ddlLanguages").val(s).trigger("change");
+                        //$("#ddlLanguages").select2('val', selectedValues);
+                    }
+
+                    //setControlValue("ddlLanguages", data.AcademicYear);
+                    setControlValue("ddlStatus", data.Status);
+                    setControlValue("ddlReligion", data.ReligionID);
+                    setControlValue("ddlCategory", data.CategoryID);
+                    setControlValue("txtAadhaar", data.AadharNo);
+                    setControlValue("txtResidenceAddrs", data.PermanentAddress);
+                    setControlValue("txtCorrespondAddrs", data.CorrespondAddress);
+                    setControlValue("txtResdCity", data.PermCity);
+                    setControlValue("txtCorspCity", data.CorsCity);
+
+                    setControlValue("ddlResdState", data.PermState);
+                    setControlValue("ddlCorspState", data.CorsState);
+                    setControlValue("txtResdPin", data.PermPincode);
+                    setControlValue("txtCorspPin", data.CorsPincode);
+                    setControlValue("txtSMSMobile", data.SMSmobileNo);
+
+                    setControlValue("txtFaName", data.FatherName);
+                    setControlValue("txtFaDOB", ChangeDateformat(data.FDOB));
+                    setControlValue("ddlFNationality", data.FNationality);
+                    setControlValue("ddlFQual", data.FQualificationID);
+                    setControlValue("txtFaJob", data.FJob);
+                    setControlValue("txtFOfficeAddrs", data.FOfficeAddress);
+                    setControlValue("txtFaDesig", data.FDesig);
+                    setControlValue("txtFaIncome", data.FIncome);
+                    setControlValue("txtFaMobile", data.FMobile);
+                    setControlValue("txtFaEmail", data.Fmail);
+                    setControlValue("txtFAdhaar", data.FAdharNo);
+
+                    setControlValue("txtMaName", data.MotherName);
+                    setControlValue("txtMaDOB", ChangeDateformat(data.MDOB));
+                    setControlValue("ddlMaNationality", data.MNationality);
+                    setControlValue("ddlMaQual", data.MQualificationID);
+                    setControlValue("txtMaJob", data.MJob);
+                    setControlValue("txtMaOfficeAddrs", data.MOfficeAddress);
+                    setControlValue("txtMaDesig", data.MDesig);
+                    setControlValue("txtMaIncome", data.MIncome);
+                    setControlValue("txtMaMobile", data.Mmobile);
+                    setControlValue("txtMaEmail", data.Mmail);
+                    setControlValue("txtMAdhaar", data.MAdharNo);
+
+                    setControlValue("txtGName", data.GuardianName);
+                    setControlValue("txtGRelation", data.Relation);
+                    setControlValue("ddlGNationality", data.GNationality);
+                    setControlValue("ddlGQual", data.GQualificationID);
+                    setControlValue("txtGJob", data.GJob);
+                    setControlValue("txtGDesig", data.GDesig);
+                    setControlValue("txtGIncome", data.GIncome);
+                    setControlValue("txtGMobile", data.Gmobile);
+                    setControlValue("txtGOfficeAddrs", data.GOfficeAddress);
+                    setControlValue("txtGadhaar", data.GAdharNo);
+                    setControlValue("txtGEmail", data.Gmail);
+                    setControlValue("txtEmergNo", data.EmergencyNo);
+                    setControlValue("txtEmergPer", data.EmerContPerson);
+                    setControlValue("txtEmergRel", data.ContPersRelation);
+
+                    setControlValue("txtStUsername", data.SUserID);
+                    setControlValue("txtStPassword", data.SPwd);
+                    setControlValue("txtPUsername", data.PUserID);
+                    setControlValue("txtPPassword", data.PPwd);
+
+                    setControlValue("txtHeight", data.ht.Height);
+                    setControlValue("txtWeight", data.ht.Weight);
+                    setControlValue("txtLVision", data.ht.VisionLeft);
+                    setControlValue("txtRVision", data.ht.VisionRight);
+                    setControlValue("txtMedication", data.ht.MedicationDetails);//
+                    setControlValue("hdnHT", data.ht.ID);
+                    setControlValue("hdnInputC", data.PicPath);
+                    setControlValue("hdnInputF", data.FPicPath);
+                    setControlValue("hdnInputM", data.MPicPath);
+
+                    if (data.PicPath != null) {
+                        $("#dvPreview").show();
+                        var path1 = data.PicPath.replace(/\\/g, "/");
+                        $("#dvPreview").css("background-image", "url(" + path1 + ")");
+                    }
+
+                    if (data.FPicPath != null) {
+                        $("#dvPreviewF").show();
+                        var path2 = data.FPicPath.replace(/\\/g, "/");
+                        $("#dvPreviewF").css("background-image", "url(" + path2 + ")");
+                    }
+
+                    if (data.MPicPath != null) {
+                        $("#dvPreviewM").show();
+                        var path3 = data.MPicPath.replace(/\\/g, "/");
+                        $("#dvPreviewM").css("background-image", "url(" + path3 + ")");
+                    }
+                    //data.Status == 1 ? $('#cbStatus').prop('checked', true) : $('#cbStatus').prop('checked', false)
+                    //$('#hdnDeptID').val(id);$.datepicker.parseDate("mm/dd/yy", minValue);
+                    //$("#submit").hide();
+                    //$("#btnUpdate").show();
+                    //$("#btnCancel").show();
+                },
+                error: function (result) {
+                    //alert("Error");
+                }
+            });
+                //setControlValue();
+            }
+
+            $("#UpdateOffDet").click(function () {
+
+                var Id = getControlValue("hdnStudentID");
+                var ddlCourse = getControlValue("ddlCourse");
+                var txtRegNo = $("#txtRegNo").val();
+                var ddlAcademicYr = $('#ddlAcademicYr').find(":selected").text();
+                //var ddlCourse = $('#ddlCourse').find(":selected").text();
+                var ddlStream = $('#ddlStream').find(":selected").text();
+                var ddlSection = $('#ddlSection').find(":selected").text();
+                var ddlBatch = $('#ddlBatch').find(":selected").text();
+                var txtRollNo = $("#txtRollNo").val();
+                var lang = $("#ddlLanguages").val();
+                var languages = "";
+                if (lang != null && lang != undefined && lang != "") {
+                    var lang_lenth = lang.length;
+
+                    var i = 0;
+                    for (i; i < lang_lenth; i++) {
+                        if (i == 0) {
+                            languages = lang[i];
+                        }
+                        else {
+                            languages = languages + "," + lang[i];
+                        }
+                    }
+                }
+
+
+                var Student = {
+                    ID: id,
+                    AcademicYear: $('#ddlAcademicYr').find(":selected").val(),
+                    RegNo: $("#txtRegNo").val(),
+                    JoiningDate: $("#txtJoinDt").val(),
+                    ClassID: getControlValue("ddlCourse"),
+                    SectionID: getControlValue("ddlSection"),
+                    BatchID: getControlValue("ddlBatch"),
+                    StreamID: getControlValue("ddlStream"),
+                    RollNo: $("#txtRollNo").val(),
+                    FirstName: $("#txtFirstName").val(),
+                    MiddleName: $("#txtMiddleName").val(),
+                    LastName: $("#txtLastName").val(),
+                    DOB: $("#txtDOB").val(),
+                    GenderID: getControlValue("ddlGender"),
+                    BloodGroup: getControlValue("ddlBloodGroup"),
+                    BirthPlace: $("#txtBirthPlace").val(),
+                    Nationality: getControlValue("ddlNationality"),
+                    MotherTongue: $("#txtMotherTongue").val(),
+                    Religion: getControlValue("ddlReligion"),
+                    //CasteID: getControlValue("ddlCaste"),
+                    CategoryID: getControlValue("ddlCategory"),
+                    Languages: languages,
+                    AadharNo: $("#txtAadhaar").val(),
+                    PermanentAddress: $("#txtResidenceAddrs").val(),
+                    CorrespondAddress: $("#txtCorrespondAddrs").val(),
+                    PermCity: $("#txtResdCity").val(),
+                    CorsCity: $("#txtCorspCity").val(),
+                    PermState: getControlValue("ddlResdState"),
+                    CorsState: getControlValue("ddlCorspState"),
+                    PermPincode: $("#txtResdPin").val(),
+                    CorsPincode: $("#txtCorspPin").val(),
+                    SMSmobileNo: $("#txtSMSMobile").val(),
+
+                    FNationality: $('#ddlFNationality').find(":selected").val(),
+                    FatherName: $("#txtFaName").val(),
+                    FDOB: $("#txtFaDOB").val(),
+                    FQualification: getControlValue("ddlFQual"),
+                    FJob: getControlValue("txtFaJob"),
+                    FOfficeAddress: getControlValue("txtFOfficeAddrs"),
+                    FDesig: getControlValue("txtFaDesig"),
+                    FIncome: $("#txtFaIncome").val(),
+                    FMobile: $("#txtFaMobile").val(),
+                    Fmail: $("#txtFaEmail").val(),
+                    FAdharNo: $("#txtFAdhaar").val(),
+                    MotherName: $("#txtMaName").val(),
+                    MDOB: getControlValue("txtMaDOB"),
+                    MNationality: getControlValue("ddlMaNationality"),
+                    MJob: $("#txtMaJob").val(),
+                    MOfficeAddress: getControlValue("txtMaOfficeAddrs"),
+                    MDesig: $("#txtMaDesig").val(),
+                    MIncome: getControlValue("txtMaIncome"),
+                    Mmobile: getControlValue("txtMaMobile"),
+                    Mmail: getControlValue("txtMaEmail"),
+                    MAdharNo: $("#txtMAdhaar").val(),
+
+                    GNationality: $('#ddlGNationality').find(":selected").val(),
+                    GuardianName: $("#txtGName").val(),
+                    Relation: $("#txtGRelation").val(),
+                    GQualification: getControlValue("ddlGQual"),
+                    GJob: getControlValue("txtGJob"),
+                    GDesig: getControlValue("txtGDesig"),
+                    GIncome: getControlValue("txtGIncome"),
+                    Gmobile: $("#txtGMobile").val(),
+                    GOfficeAddress: $("#txtGOfficeAddrs").val(),
+                    GAdharNo: $("#txtGadhaar").val(),
+                    Gmail: $("#txtGEmail").val(),
+                    EmergencyNo: $("#txtEmergNo").val(),
+                    EmerContPerson: getControlValue("txtEmergPer"),
+                    ContPersRelation: getControlValue("txtEmergRel"),
+                    SUserID:getControlValue("txtStUsername"),
+                    SPwd:    getControlValue("txtStPassword"),
+                    PUserID:    getControlValue("txtPUsername"),
+                    PPwd: getControlValue("txtPPassword")
+                };
+
+                if (Student.RegNo == null || Student.RegNo == "") {
+                    alert("Student Reg No field is empty!!");
+                    return;
+                }
+
+                if (Student.RegNo != "" && Student.RollNo != "" && Student.RegNo != undefined && Student.RollNo != undefined && Student.RegNo != null && Student.RollNo != null) {
+                    var DTO = JSON.stringify(Student);
+
+                    $.ajax({
+                        url: "@Url.Content("~/api/StudentApi/EditStudentDet")",
+                    type: "Post",
+                    //data: JSON.stringify([ddlCourse, txtRegNo, ddlAcademicYr, ddlStream, ddlStream, ddlSection, ddlBatch, txtRollNo]), //{ Name: name,
+                    // Address: address, DOB: dob },
+                    data: DTO,
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (data) {
+                        if (data != '0' && data != undefined) {
+                            alert("Details updated successfully");
+                        }
+                        $("#hdnStudentID").val(data);
+                        //alert(data);
+                        //$("#divContactDet").fadeIn();
+                        $("#divParents").fadeIn();
+                        $("#divGuardian").fadeIn();
+                        $("#divEmergency").fadeIn();
+                        $("#SaveParents").val("Edit");
+                        //$("#UpdateOffDet").fadeIn();
+                        $("#UpdateOffDet").fadeOut();
+                    },
+                    error: function () {
+
+                    }
+                });
+            }
+            else { alert("Incomplete Feilds !!");}
+
+
+        });
+
+            $("#UpdateHTdet").click(function () {
+                var id = $("#hdnStudentID").val();
+
+                var Student = {
+                    ID: id,
+
+                    RollNo: $("#txtRollNo").val(),
+                    PSID: $("#hdnprev1").val(),
+                    PSID2: $("#hdnprev2").val(),
+                    PSID3: $("#hdnprev3").val(),
+                    PSClass: $("#ddlPSClass1").val(),
+                    PSClass2: $("#ddlPSClass2").val(),
+                    PSClass3: $("#ddlPSClass3").val(),
+                    School: $("#txtPSName1").val(),
+                    PSYear: $('#ddlPSYear1').find(":selected").val(),
+                    Board: $("#txtPSBrd1").val(),
+                    Marks: $("#txtPSMarks1").val(),
+                    School2: $("#txtPSName2").val(),
+                    PSYear2: $('#ddlPSYear2').find(":selected").val(),
+                    Board2: $("#txtPSBrd2").val(),
+                    Marks2: $("#txtPSMarks2").val(),
+                    School3: $("#txtPSName3").val(),
+                    PSYear3: $('#ddlPSYear3').find(":selected").val(),
+                    Board3: $("#txtPSBrd3").val(),
+                    Marks3: $("#txtPSMarks3").val(),
+                    Awards: getControlValue("txtPSAwards"),
+                    HID: $("#hdnHT").val(),
+                    Height: getControlValue("txtHeight"),
+                    Weight: getControlValue("txtWeight"),
+                    VisionLeft: getControlValue("txtLVision"),
+                    VisionRight: $("#txtRVision").val(),
+                    MedicationDetails: $("#txtMedication").val(),
+                    TCNo: getControlValue("txtTCNo")
+                };
+
+                if (Student.ID != "" && Student.ID != undefined && Student.ID != null) {
+                    var DTO = JSON.stringify(Student);
+
+                    $.ajax({
+                        url: "@Url.Content("~/api/StudentApi/EditOtherDetails")",
+                    type: "Post",
+                    data: DTO,
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (data) {
+                        //$("#hdnStudentID").val(data);
+                        //alert(data);
+                        alert("Record Edited Successfully");
+                        $("#divPhotoUploads").fadeIn();
+                        $("#divDocsUpload").fadeIn();
+                        $("#SaveDocs").val("Edit");
+                        $("#SaveDocs").fadeIn();
+                        //$("#UpdateHTdet").fadeIn();
+                        $("#UpdateHTdet").fadeOut();
+                    },
+                    error: function () {
+
+                    }
+                });
+            }
+            else { alert("Incomplete Feilds !!");}
+
+        });
+
+
+            function ChangeDateformat(dt)
+            {
+                var date = "";
+                if (dt != null) {
+                    var formattedDate = new Date(dt);
+                    var d = formattedDate.getDate();
+                    var m = formattedDate.getMonth();
+                    m += 1;  // JavaScript months are 0-11
+                    var y = formattedDate.getFullYear();
+
+                    date = m + "/" + d + "/" + y;
+                }
+
+                return date;
+            }
+        });
+
+        function getEmployeeUniquCode(p1, p2, p3, datas) {
+            var perfix = datas.Prefix;
+            var suffix = datas.Suffix;
+            var last = datas.LastSeries;
+            var first = datas.StartSeries;
+            var sep = datas.Seprator;
+            var incrmentNo = datas.DocNo;
+            var empCode;
+            var incseries;
+
+            var str;
+            var len;
+            var newcode;
+
+
+
+            if (last == "") {
+
+                empCode = perfix + sep + suffix + sep + first;
+            }
+            else {
+                str = first;
+                len = str.length;
+                newcode = parseInt(last) + parseInt(incrmentNo);
+               // alert(pad(newcode, len));
+                //    incseries = parseInt(pad(newcode, len)) + parseInt(incrmentNo);
+                empCode = perfix + sep + suffix + sep + pad(newcode, len);
+
+            }
+            setControlValue("txtRegNo", empCode);
+
+        }
+
+        function pad(n, width, z) {
+            z = z || '0';
+            n = n + '';
+            return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+        }
+    </script>
+</body>
+</html>
+

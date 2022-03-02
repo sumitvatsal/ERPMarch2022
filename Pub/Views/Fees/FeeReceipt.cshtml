@@ -1,0 +1,405 @@
+﻿
+@{
+    ViewBag.Title = "FeeReceipt";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+
+<script type="text/jscript">
+    $(document).ready(function () {
+
+        $("#tbl").clone().insertAfter("#tt");
+
+    });
+</script>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head id="Head1" runat="server">
+    <title>Print Preview Fee Receipt </title>
+
+
+    <script type="text/javascript" src="../JavaScript/jquery.min.1.7.2.js">
+    </script>
+
+    <script type="text/javascript" src="../JavaScript/jquery.js">
+    </script>
+
+    <link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+    <script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+</head>
+<body class="body">
+
+    <form class="body" id="form1" runat="server">
+
+        <script type="text/javascript">
+            function PrintPanel() {
+                var panel = document.getElementById("<%=pnlContents.ClientID %>");
+                var printWindow = window.open('', '', 'height=400,width=800');
+                printWindow.document.write('<html><head><title>DIV Contents</title>');
+                printWindow.document.write('</head><body >');
+                printWindow.document.write(panel.innerHTML);
+                printWindow.document.write('</body></html>');
+                printWindow.document.close();
+                setTimeout(function () {
+                    printWindow.print();
+                }, 500);
+
+
+                return false;
+                window.close;
+            }
+        </script>
+
+
+        <script type="text/javascript">
+            function Print() {
+                //alert('sdfgsdfgsdf');
+                var printContent = document.getElementById("divPrint").innerText;
+                window.print(printContent);
+                printWindow.close();
+
+                //  window.close;
+            }
+        </script>
+
+        <a href="/Fees/FeeReceipt" download="FeeReceipt">
+            <img alt="" src="../Images/download.png" align="right" width="50px">
+        </a>
+        <img alt="" src="../Images/pr1.png" onclick="print()" align="right" width="20px" />
+
+
+
+
+        <asp:Panel ID="pnlContents" Width="100%" Height="100%" runat="server">
+
+
+            <div class="body" id="divPrint" align="center">
+                <table width="1100px" align="center" style="border-style: none; border-color: #C0C0C0; font-size: 10px; font-family: 'Times New Roman';">
+                    <tr>
+                        <td width="550px">
+                            <table id="tbl" width="550px" align="center" style="border-style: solid; border-color: #808080"
+                                   cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td colspan="6">
+                                        <table cellspacing="0" cellpadding="0" align="left">
+                                            <tr>
+                                                <td align="left">
+                                                    <img alt="" src="../Images/School.jpg" align="left" width="120px">
+                                                </td>
+                                                <td width="100%" align="center" valign="top">
+                                                    <h1>D.A.V Public School</h1>
+                                                    <br />
+                                                    <p>Nawada Road, Haridwar - Dehradun Rd,near Vidhan Sabha, Sec - IV, Defence Colony, Dehradun, Uttarakhand 248001.(MOB--0135 266 5059)</p>
+
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="6" align="center" style="border-bottom-style: ridge">
+                                        <strong>Fee Receipt </strong>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="left">
+                                        Reg No.
+                                    </td>
+                                    <td>
+                                        :
+                                    </td>
+                                    <td align="left">
+                                        <a runat="server" id="spRegNo"></a>
+                                    </td>
+                                    <td align="left">
+                                        Receipt No.
+                                    </td>
+                                    <td>
+                                        :
+                                    </td>
+                                    <td align="left">
+                                        <a runat="server" id="spreceipt"></a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="left">
+                                        Student Name
+                                    </td>
+                                    <td>
+                                        :
+                                    </td>
+                                    <td align="left">
+                                        <a runat="server" id="spFirstNm"></a>
+                                    </td>
+                                    <td align="left">
+                                        Receipt Date:
+                                    </td>
+                                    <td>
+                                        :
+                                    </td>
+                                    <td align="left">
+                                        <a runat="server" id="spdated"></a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="left">
+                                        Father's Name
+                                    </td>
+                                    <td>
+                                        :
+                                    </td>
+                                    <td align="left">
+                                        <a runat="server" id="spfather"></a>
+                                    </td>
+                                    <td align="left">
+                                        Section
+                                    </td>
+                                    <td>
+                                        :
+                                    </td>
+                                    <td align="left">
+                                        <a runat="server" id="spsection"></a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td align="left">
+                                        Class
+                                    </td>
+                                    <td>
+                                        :
+                                    </td>
+                                    <td align="left">
+                                        <a runat="server" id="spclass"></a>
+                                    </td>
+                                    <td align="left">
+                                        ManualNo
+                                    </td>
+                                    <td>
+                                        :
+                                    </td>
+                                    <td align="left">
+                                        <a runat="server" id="spmanual"></a>
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td colspan="6" width="10%" valign="top" style="border-style: none; height: 150px;"
+                                        align="left">
+                                        <table width="100%" style="border-style: solid none solid none; border-width: 2px;
+                                    border-color: #666666;">
+                                            <tr style="border-bottom-style: solid; border-color: #808080">
+                                                <td align="left">
+                                                    <strong>S.No.:------ 1</strong>
+                                                </td>
+                                                <td style="font-weight: bold;" align="right">
+                                                    <a runat="server" id="Atot"></a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2" align="left">
+                                                    <strong>
+                                                        Fee Head :---------- <a runat="server" id="spcategory"></a>
+                                                        <asp:Literal ID="Literal1" runat="server"></asp:Literal>
+                                                    </strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2" align="left">
+                                                    <strong> Paid Amount : --------- <a runat="server" id="spamount"></a></strong>
+                                                </td>
+                                            </tr>
+                                        </table>
+        
+                                      
+                  
+                                    </td>
+                     
+                                </tr>
+                                <tr>
+                                    <td colspan="6" style="border-style: none">
+                                        <table width="100%" style="border-style: solid none solid none; border-width: 2px;
+                                    border-color: #666666;">
+                                            <tr style="border-bottom-style: solid; border-color: #808080">
+                                                <td align="left">
+                                                    Received with Thanks Rs.:- <a runat="server" id="totalamt"></a>
+                                                </td>
+                                                <td style="font-weight: bold;" align="right">
+                                                    <a runat="server" id="Atot"></a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2" align="left">
+                                                    Fee Type :- <a runat="server" id="spfeetype"></a>
+                                                    <asp:Literal ID="Literal1" runat="server"></asp:Literal>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2" align="left">
+                                                    Remarks : - <a runat="server" id="spremarks"></a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="6" width="100%" valign="top" style="border-style: none">
+                                        <table style="border-style: none" valign="top" width="100%">
+                                            <tr>
+                                                <td valign="top" width="30%" align="right">
+                                                    Signature
+                                                    <br />
+                                                    <br />
+                                                    Accounts Officer
+                                                    <br />
+                                                    <a runat="server" id="Auser"></a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td valign="top" align="left" style="font-size: 10px">
+                                                    *Cheques are subject to realisation<br />
+                                                    *Note : Duplicate copy of feeReceipt can be obtained against a payment of Rs.100%
+                                                    <br />
+                                                    *Note : Fee/Amount once deposited will neither be refunded nor adjusted under any
+                                                    circumstances. In case of cheque being dishonored a sum of Rs.1000/- will be charged
+                                                    towards the bank processing charges
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                </table>
+
+
+
+            </div>
+        </asp:Panel>
+
+    </form>
+</body>
+</html>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var docLength = 0;
+        //
+
+
+        //var id = GetParameterValues('Id');
+
+        //function GetParameterValues(param) {
+        //    var url = window.location.href.slice(window.location.href.indexOf('?') + 1).split('=');
+        //    for (var i = 0; i < url.length; i++) {
+        //        var urlparam = url[i].split('=');
+        //        if (urlparam[0] == param) {
+        //            return urlparam[1];
+        //        }
+        //    }
+        //}
+        //alert(" your ID is " + id);
+        //
+
+        var voucherid = getQuerystring("VoucherID");
+        var par = {
+            val: voucherid
+        }
+
+
+        if (typeof (voucherid) != "undefined") {
+            $("#loader").fadeIn();
+            $.ajax({
+                url: "/api/FeesApi/FindStudentByVoucherID1",// "~/Masters/GetDeptMethod",
+                type: "Post",
+                data: JSON.stringify(par), //{ Name: name,ddlAcademicYr
+                //// Address: address, DOB: dob },
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    // var path1 = data.PicPath.replace(/\\/g, "/");
+                    //  $("#profileImg").attr("src", path1).height(50 + "%").width(50 + "%");
+                    //setControlValue("hdnID", data.ID);
+                    // setControlValue("spName", data.FirstName + " " + data.MiddleName + " " + data.LastName);//data.Religion);
+                    setControlValue("spRegNo", data.RegNo);
+                    setControlValue("spfather", data.FatherName);
+                    setControlValue("spreceipt", data.DocNo);
+                    setControlValue("spamount", data.Amount);
+                    setControlValue("spdated", data.dated);
+                    setControlValue("spsection", data.Section);
+                    setControlValue("spclass", data.Class);
+                    setControlValue("spremarks", data.Remarks);
+                    setControlValue("spFirstNm", data.FirstName);
+                    setControlValue("spamount", data.Amount);
+                    setControlValue("sproll", data.RollNo);
+                    setControlValue("totalamt", data.Amount);
+                    setControlValue("spcategory", data.FeeCategory);
+                    setControlValue("spmanual", data.ManualNo);
+                    setControlValue("spfeetype", data.Paymentby);
+
+
+                    //  printPreview(data.voucherid);
+                    $("#loader").fadeOut();
+                }
+            });
+
+        }
+        else {
+
+        }
+
+
+
+    });
+
+    function ChangeDateformat(dt) {
+        var date = "";
+        if (dt != null) {
+            var formattedDate = new Date(dt);
+            var d = formattedDate.getDate();
+            var m = formattedDate.getMonth();
+            m += 1;  // JavaScript months are 0-11
+            var y = formattedDate.getFullYear();
+
+            date = m + "/" + d + "/" + y;
+        }
+
+        return date;
+    }
+
+
+</script>
+

@@ -1,0 +1,344 @@
+﻿
+@{
+    ViewBag.Title = "ViewRoute";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+
+
+<section class="content">
+
+    <div class="row">
+        <form id="form1">
+            <div class="col-md-12">
+                <div class="panel">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">View Vehicle Root</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="box-body">
+                            <div class="row">
+
+
+                                <div class="col-md-12">
+
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="control-label  col-sm-4">
+                                                Vehicle No
+                                            </label>
+                                            <div class="col-sm-6">
+                                                <input type="hidden" name="txtId" id="txtId" placeholder="Vehicle No" class="form-control" />
+
+                                                <select class="form-control" id="ddlVehicle" style="color:black;" name="ddlVehicle" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" ng-model="txtDepartment"></select>
+
+
+
+
+
+
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <input type="button" value="Search" onclick="ShowHubDetails()" id="btnsubmit" @*onclick="return validate();"*@ class="btn btn-info ">
+
+                                        </div>
+
+
+                                    </div>
+
+
+
+
+                                </div>
+
+
+
+
+
+
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="row">
+
+
+        <div id="gmap">
+
+
+
+        </div>
+
+
+
+
+    </div>
+    <div id="right-panel">
+        <p>Total Distance: <span id="total"></span></p>
+    </div>
+
+    @*<input type="hidden" id="hiddenid" />
+        <input type="hidden" id="HubLat" />
+        <input type="hidden" id="HubLong" />
+        <input type="hidden" id="HubAddress1" />*@
+
+
+
+
+
+
+
+
+
+
+</section>
+<div class="alert alert-success centerSuccess" id="divSuccessMsg" style="display:none">
+
+</div>
+
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJs9f6yPQRmMsDkg7DiFtaeMjbik3kd0E&libraries=places"></script>
+@* Datatable classes*@
+
+
+<script src="~/js/bootstrap.min.js"></script>
+<script src="~/js/custom.js"></script>
+<script src="~/js/general.js"></script>
+<script src="~/js/jquery.easing.1.3.js"></script>
+<script src="~/js/jquery-jtemplates_uncompressed.js"></script>
+<!-- DataTables -->
+
+
+<script>
+    var points = new Array(); 
+    var stations = [];
+    var map = null;
+    function ShowHubDetails() {
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        var VehicleID = $("#ddlVehicle").val();
+        $.ajax({
+            type: "Post",
+            url: "/api/TransportApi/GetAllHublanlong",
+            data: JSON.stringify([SchoolID, VehicleID]),
+            contentType: 'application/json; charset=utf-8',
+            success: function (datas) {
+               
+              
+                stations = [];
+                for (var i = 0; i < datas.length; i++)
+                {
+                   var stations1 = [
+                       
+                       { lat: parseFloat(datas[i].HubLat), lng: parseFloat(datas[i].HubLong), name: datas[i].HubAddress  }
+
+
+                       
+                    ]
+                    stations= stations.concat(stations1);
+                 
+                }
+
+               
+                initMap();
+
+
+            }
+        });
+    }
+   
+    function initMap() {
+        var service = new google.maps.DirectionsService;
+        var map = new google.maps.Map(document.getElementById('gmap'));
+
+        // list of points
+       
+        //up in ajax
+
+        // Zoom and center map automatically by stations (each station will be in visible map area)
+        var lngs = stations.map(function (station) { return station.lng; });
+        var lats = stations.map(function (station) { return station.lat; });
+        map.fitBounds({
+            west: Math.min.apply(null, lngs),
+            east: Math.max.apply(null, lngs),
+            north: Math.min.apply(null, lats),
+            south: Math.max.apply(null, lats),
+        });
+
+        // Show stations on the map as markers
+      
+        for (var i = 0; i < stations.length; i++) {
+            var imageLandmrk = new google.maps.MarkerImage('../Images/Hub/HubICON.png', new google.maps.Size(35, 35));
+            var marker = new google.maps.Marker({
+                position: stations[i],
+                map: map,
+                title: stations[i].name
+            });
+            marker.setIcon(imageLandmrk);
+          
+        }
+
+        // Divide route to several parts because max stations limit is 25 (23 waypoints + 1 origin + 1 destination)
+        for (var i = 0, parts = [], max = 25 - 1; i < stations.length; i = i + max)
+            parts.push(stations.slice(i, i + max + 1));
+
+        // Service callback to process service results
+        var service_callback = function (response, status) {
+            if (status != 'OK') {
+                console.log('Directions request failed due to ' + status);
+                return;
+            }
+            var renderer = new google.maps.DirectionsRenderer;
+            renderer.setMap(map);
+            renderer.setOptions({ suppressMarkers: true, preserveViewport: true });
+            renderer.setDirections(response);
+        };
+
+        // Send requests to service to get route (for stations count <= 25 only one request will be sent)
+        for (var i = 0; i < parts.length; i++) {
+            // Waypoints does not include first station (origin) and last station (destination)
+            var waypoints = [];
+            for (var j = 1; j < parts[i].length - 1; j++)
+                waypoints.push({ location: parts[i][j], stopover: false });
+            // Service options
+            var service_options = {
+                origin: parts[i][0],
+                destination: parts[i][parts[i].length - 1],
+                waypoints: waypoints,
+                //travelMode: 'WALKING',
+                travelMode: 'DRIVING',
+                avoidHighways: false
+            };
+            // Send request
+            service.route(service_options, service_callback);
+        }
+    }
+    
+
+   
+   
+
+   
+   
+</script>
+
+
+<script type="text/javascript">
+    //$("#chkstatus").prop("checked", true);
+    $("#Schoolhidden").hide();
+    $(document).ready(function ()
+
+    {
+        $(document)[0].oncontextmenu = function () { return false; }
+
+        $(document).mousedown(function (e) {
+            if (e.button == 2) {
+                alert('Sorry, this functionality is disabled!');
+                return false;
+            } else {
+                return true;
+            }
+        });
+        document.onkeypress = function (event) {
+
+            if (event.keyCode == 123) {
+                alert('Sorry\nNo F12 is allowed. Be creative!');
+                return false;
+            }
+        }
+        document.onmousedown = function (event) {
+
+            if (event.keyCode == 123) {
+                alert('Sorry\nNo F12 is allowed. Be creative!');
+                return false;
+            }
+        }
+        document.onkeydown = function (event) {
+
+            if (event.keyCode == 123) {
+                alert('Sorry\nNo F12 is allowed. Be creative!');
+                return false;
+            }
+            else if (event.ctrlKey &&
+                (event.keyCode === 67 ||
+                    event.keyCode === 86 ||
+                    event.keyCode === 85 ||
+                    event.keyCode === 117)) {
+                alert('Sorry\nNo CTRL+U is allowed. Be creative!');
+                return false;
+            }
+
+        }  
+       
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TransportApi", "getAllVehiclebySchool", "ddlVehicle", false, "", "", "", "");
+
+       
+
+    })
+
+
+
+
+       
+
+    
+
+
+
+
+
+
+
+
+
+   
+</script>
+
+<style>
+    div#gmap {
+        width: 100%;
+        height: 850px;
+        border: double;
+    }
+</style>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#loader").fadeOut();
+
+        $("#form1").validate({
+
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+               
+               
+                ddlVehicle: {
+
+                    selectcheck: true
+
+                },
+
+            },
+            messages: {
+
+               
+                ddlVehicle: "Please select Vehicle",
+
+
+            }
+        })
+
+       
+        jQuery.validator.addMethod('selectcheck', function (value) {
+            return (value != "0");
+        }, "Please select Vehicle No");
+
+    });
+</script>

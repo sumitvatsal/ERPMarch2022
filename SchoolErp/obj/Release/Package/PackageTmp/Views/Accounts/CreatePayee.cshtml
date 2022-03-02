@@ -1,0 +1,653 @@
+﻿
+@{
+    ViewBag.Title = "CreatePayee";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    //Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<script type="text/javascript">
+ 
+        var sessionStorage_transfer = function (event) {
+            if (!event) { event = window.event; } // ie suq
+            if (!event.newValue) return;          // do nothing if no value to work with
+            if (event.key == 'getSessionStorage') {
+                // another tab asked for the sessionStorage -> send it
+                localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+                // the other tab should now have it, so we're done with it.
+                localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+            } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+                // another tab sent data <- get it
+                var data = JSON.parse(event.newValue);
+                for (var key in data) {
+                    sessionStorage.setItem(key, data[key]);
+                }
+            }
+        };
+        if (window.addEventListener) {
+            window.addEventListener("storage", sessionStorage_transfer, false);
+        } else {
+            window.attachEvent("onstorage", sessionStorage_transfer);
+        };
+
+
+        // Ask other tabs for session storage (this is ONLY to trigger event)
+        if (!sessionStorage.length) {
+            localStorage.setItem('getSessionStorage', 'foobar');
+            localStorage.removeItem('getSessionStorage', 'foobar');
+        };
+  
+</script>
+<section class="content">
+    <div class="box box-primary">
+        <div class="box-header with-border">
+            <h3 class="box-title"><i class="fa fa-plus-square"></i> Payee Details</h3>
+        </div>
+        <form ng-app="myApp" ng-controller="payeeControl" id="form1" name="form1">
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label for="Country" class="req">School<span class="requird">*</span></label>
+                            <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name"  ></select>
+
+                        </div>
+                    </div>
+
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label" for="exppayable-exp_pay_name">Payee <span class="requird">*</span></label>
+                                <input type="hidden" id="txtPayeeID" />
+                                <input type="text" id="txtPayeeName" class="form-control" name="txtPayeeName" maxlength="255" ng-model="txtPayeeName" placeholder="Payee name">
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label" for="exppayable-exp_pay_cat">Category <span class="requird">*</span></label>
+                                <select id="ddlCategory" class="form-control" name="ddlCategory" style="color:black;"  valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--"></select>
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label" for="exppayable-exp_pay_pri_date">Primary Date <span class="requird">*</span></label>
+                                <input type="text" id="txtPrimaryDate" name="txtPrimaryDate" placeholder="Select Primary Date" class="form-control datepicker" data-date-format="mm/dd/yyyy">
+                                @*<input type="text" id="taskDate" name="taskDate" placeholder="dd/mm/yyyy" class="form-control datepicker" data-date-format="dd/mm/yyyy">*@
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                     <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label" for="exppayable-exp_pay_final_date">Last Date <span class="requird">*</span></label>
+                                <input type="text" id="txtLastDate" name="txtLastDate" placeholder="Select Final Date" class="form-control datepicker" data-date-format="mm/dd/yyyy">
+
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label" for="exppayable-exp_pay_total_amt">Total Amount <span class="requird">*</span></label>
+                                <input type="text" id="txtTotalAmount" onkeypress="return priceonly(event,this)" class="form-control" name="txtTotalAmount" placeholder="Total Payable Amount" />
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                       
+                        <div class="col-sm-4">
+                            <div class="form-group ">
+                                <label class="control-label">Payment Type</label>
+                                <div id="exppayabledetails-exp_pay_dt_type">
+                                    <select id="ddlPaymentType" onchange="checkPaymentType(this.value)" class="form-control">
+                                        <option value="1">Pay Now</option>
+                                        <option value="2">Partial Pay</option>
+                                        <option value="3">Pay Later</option>
+                                    </select>
+                                </div>
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row pay-fields" style="display: block;">
+                        <div class="col-sm-4">
+                            <div class="form-group field-exppayabledetails-exp_pay_dt_amt">
+                                <label class="control-label" for="exppayabledetails-exp_pay_dt_amt">Paying Amount</label>
+                                <input type="text" id="txtPayeingAmount" onkeypress="return priceonly(event,this)" class="form-control" name="txtPayeingAmount" placeholder="Paying Amount">
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group field-exppayabledetails-exp_pay_dt_date">
+                                <label class="control-label" for="exppayabledetails-exp_pay_dt_date">Payment Date</label>
+                                <input type="text" id="txtPaymentDate" name="txtPaymentDate" placeholder="Select Payment Date" size="10" class="form-control datepicker" data-date-format="mm/dd/yyyy">
+
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group ">
+                                <label class="control-label" for="exppayabledetails-exp_pay_dt_mode">Payment Mode</label>
+                                <select id="ddlPaymentMode" class="form-control" name="ddlPaymentMode">
+                                    <option value="Cash">Cash</option>
+                                    <option value="Cheque">Cheque</option>
+                                </select>
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row cheque-inputs" style="display: none;">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label" for="exppayabledetails-exp_pay_dt_chq_no">Cheque No.</label>
+                                <input type="text" id="txtCheckNo" class="form-control" name="txtCheckNo" placeholder="Cheque Number">
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group field-exppayabledetails-exp_pay_dt_chq_date">
+                                <label class="control-label" for="exppayabledetails-exp_pay_dt_chq_date">Cheque Date</label>
+                                <input type="text" id="txtChequDate"  name="txtChequDate" placeholder="Select Cheque Date" class="form-control datepicker" data-date-format="mm/dd/yyyy" size="10">
+
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="control-label" for="exppayabledetails-exp_pay_dt_chq_bank">Bank</label>
+                                <select id="ddlBankName" class="form-control" name="ddlBankName">
+                                    <option disabled="" value="0" selected="">Select Bank</option>
+                                    <option value="ALLAHABAD BANK">ALLAHABAD BANK</option>
+                                    <option value="ANDHRA BANK">ANDHRA BANK</option>
+                                    <option value="AXIS BANK">AXIS BANK</option>
+                                    <option value="BANK OF BARODA">BANK OF BARODA</option>
+                                    <option value="BANK OF INDIA">BANK OF INDIA</option>
+                                    <option value="BANK OF MAHARASHTRA">BANK OF MAHARASHTRA</option>
+                                    <option value="CANARA BANK">CANARA BANK</option>
+                                    <option value="CENTRAL BANK OF INDIA">CENTRAL BANK OF INDIA</option>
+                                    <option value="CITI BANK">CITI BANK</option>
+                                    <option value="DENA BANK">DENA BANK</option>
+                                    <option value="FEDERAL BANK">FEDERAL BANK</option>
+                                    <option value="HDFC BANK">HDFC BANK</option>
+                                    <option value="ICICI BANK LIMITED">ICICI BANK LIMITED</option>
+                                    <option value="INDIAN OVERSEAS BANK">INDIAN OVERSEAS BANK</option>
+                                    <option value="indusind-bank">INDUSIND BANK</option>
+                                    <option value="KOTAK MAHINDRA BANK LIMITED">KOTAK MAHINDRA BANK LIMITED</option>
+                                    <option value="PUNJAB AND SIND BANK">PUNJAB AND SIND BANK</option>
+                                    <option value="PUNJAB NATIONAL BANK">PUNJAB NATIONAL BANK</option>
+                                    <option value="STATE BANK OF INDIA">STATE BANK OF INDIA</option>
+                                    <option value="SYNDICATE BANK">SYNDICATE BANK</option>
+                                    <option value="UCO BANK">UCO BANK</option>
+                                    <option value="UNION BANK OF INDIA">UNION BANK OF INDIA</option>
+                                    <option value="YES BANK">YES BANK</option>
+                                </select>
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row pay-fields" style="display: block;">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="control-label" for="exppayabledetails-exp_pay_dt_remarks">Remarks</label>
+                                <textarea id="txtRemarkss" class="form-control" name="txtRemarkss" maxlength="255"></textarea>
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @*<div class="col-sm-4">
+                <div class="form-group">
+                    <label> <input type="checkbox" id="chkStatus" /> Status</label>
+                    </div>
+                </div>*@
+            <div class="box-footer">
+                <input type="button" class="btn btn-primary" onclick="savePayeements()" value="Save" />
+                <a class="btn btn-default pull-right" href="/AdminPanel/Dashboard">Cancel</a>
+            </div>
+        </form>
+
+        <div class="alert alert-success centerSuccess" id="divSuccessMsg" style="display:none">
+
+        </div>
+    </div>
+</section>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        //callServiceMethodForDDl("", "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+
+
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+
+        $('#ddlPaymentMode').change(function () {
+            if ($('#ddlPaymentMode').val() == "Cash") {
+                $('.cheque-inputs').hide();
+            }
+            else {
+                $('.cheque-inputs').show();
+            }
+        });
+
+
+    });
+    function checkPaymentType(val) {
+        if (val >= 3) {
+            $('.pay-fields').hide();
+            $('.cheque-inputs').hide();
+        }
+        else {
+            $('.pay-fields').show();
+            if ($('#ddlPaymentMode').val() == "Cash") {
+                $('.cheque-inputs').hide();
+            }
+            else {
+                $('.cheque-inputs').show();
+            }
+        }
+    }
+</script>
+
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var date = new Date();
+        //$('#txtDateTODO').datepicker({ startDate: date });
+        $('#txtPrimaryDate').datepicker({
+            autoclose: true
+        });
+        $('#txtLastDate').datepicker({ startDate: date });
+        $('#txtPaymentDate').datepicker({
+            autoclose: true
+        });
+        $('#txtChequDate').datepicker({
+            autoclose: true
+        });
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/AccountsAPI", "getAllActiveCategoryBySchool", "ddlCategory", false, "", "", "", "");
+        //callServiceMethodForDDl("", "/api/AccountsAPI", "getAllActiveCategory", "ddlCategory", false, "", "", "", "");
+    });
+
+
+    function savePayeements() {
+        if ($("#form1").valid()) {
+            var payee = "";
+            if (getControlValue("ddlPaymentType") == "3") {
+                $("#loader").fadeIn();
+                payee = {
+
+                    Id: getControlValue("txtPayeeID"),
+                    Name: getControlValue("txtPayeeName"),
+                    Category: getControlValue("ddlCategory"),
+                    PrimaryDate: getControlValue("txtPrimaryDate"),
+                    LastDate: getControlValue("txtLastDate"),
+                    TotalAmount: getControlValue("txtTotalAmount"),
+                    PaymentType: getControlValue("ddlPaymentType"),
+                    PayingAmount: "0",
+
+                    DuesAmount: getControlValue("txtTotalAmount"),
+                    PaymentDate: getControlValue("txtPaymentDate"),
+                    PaymentMode: getControlValue("ddlPaymentMode"),
+                    Checqno: getControlValue("txtCheckNo"),
+                    ChequeDate: getControlValue("txtChequDate"),
+                    BankRemarks: getControlValue("ddlBankName"),
+                    Remarks: getControlValue("txtRemarkss"),
+                    // Status: getControlValue("chkStatus")
+                    SchoolID: getControlValue("ddlSchoolName")
+
+                }
+
+                var ddl = JSON.stringify(payee)
+                callServiceMethod(ddl, "/api/AccountsAPI", "savePayeementsDetails", false, "", "", false, "", true, savePayeements_scs, "", "", "");
+            }
+            else {
+                var duebal = 0;
+
+                if (getControlValue("txtTotalAmount") == getControlValue("txtPayeingAmount")) {
+
+                    if (getControlValue("ddlPaymentType") == "1") {
+                        duebal = 0;
+                    }
+                    else {
+                        alert("Please Select Pay Now Payment Type");
+                        return false;
+                    }
+                }
+
+
+
+                if (parseFloat(getControlValue("txtTotalAmount")) > parseFloat(getControlValue("txtPayeingAmount"))) {
+                    if (getControlValue("ddlPaymentType") == "2") {
+                        duebal = parseInt(getControlValue("txtTotalAmount")) - parseInt(getControlValue("txtPayeingAmount"));
+                    }
+                    else {
+                        alert("Please Select Partial Payment Type");
+                        return false;
+                    }
+                }
+
+
+                if (parseInt(getControlValue("txtPayeingAmount")) > parseInt(getControlValue("txtTotalAmount"))) {
+                    alert("Paying Amount should be less than  from total amount");
+                }
+                else {
+                    //    $("#loader").fadeIn();
+                    payee = {
+
+                        Id: getControlValue("txtPayeeID"),
+                        Name: getControlValue("txtPayeeName"),
+                        Category: getControlValue("ddlCategory"),
+                        PrimaryDate: getControlValue("txtPrimaryDate"),
+                        LastDate: getControlValue("txtLastDate"),
+                        TotalAmount: getControlValue("txtTotalAmount"),
+                        PaymentType: getControlValue("ddlPaymentType"),
+                        PayingAmount: getControlValue("txtPayeingAmount"),
+
+                        DuesAmount: duebal,
+                        PaymentDate: getControlValue("txtPaymentDate"),
+                        PaymentMode: getControlValue("ddlPaymentMode"),
+                        Checqno: getControlValue("txtCheckNo"),
+                        ChequeDate: getControlValue("txtChequDate"),
+                        BankRemarks: getControlValue("ddlBankName"),
+                        Remarks: getControlValue("txtRemarkss"),
+                        Status: getControlValue("chkStatus"),
+                        SchoolID: getControlValue("ddlSchoolName")
+
+
+                    }
+
+                    var ddl = JSON.stringify(payee)
+                    callServiceMethod(ddl, "/api/AccountsAPI", "savePayeementsDetails", false, "", "", false, "", true, savePayeements_scs, "", "", "");
+                    clearallfields();
+                }
+            }
+        }
+
+    }
+
+    function savePayeements_scs(p1, p2, p3, datas) {
+        $("#loader").fadeOut();
+
+        $("#divSuccessMsg").fadeIn();
+        $("#divSuccessMsg").html("<strong>Success!</strong> " + datas);
+        setTimeout(function () {
+            $("#divSuccessMsg").fadeOut();
+        }, 2000)
+    }
+</script>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                ddlCategory: {
+                    selectcheck: true
+                },
+
+                 //ddlPaymentType: {
+                 //    selectcheck1: true
+                 //},
+                //ddlQualfication: {
+                //    selectcheck2: true
+                //},
+                //ddlStaffType: {
+                //    selectcheck3: true
+                //},
+                //ddlGender: {
+                //    selectcheck4: true
+                //},
+                //ddlMarried: {
+                //    selectcheck5: true
+                //},
+                //ddlReligion: {
+                //    selectcheck6: true
+                //},
+                //ddlCountry: {
+                //    selectcheck7: true
+                //},
+                //ddlState: {
+                //    selectcheck8: true
+                //},
+                //ddlCity: {
+                //    selectcheck9: true
+                //},
+
+
+
+
+
+
+                txtPayeeName: "required",
+                txtPrimaryDate: "required",
+                txtLastDate: "required",
+                txtTotalAmount: "required",
+
+                //txtDOB: "required",
+                //txtMotherName: "required",
+                //txtFatherName: "required",
+                //txtPincode: {
+                //    required: true,
+                //    number: true
+                //},
+
+                //txtMobileNo: {
+                //    required: true,
+                //    number: true
+                //},
+
+                //txtEmailId: {
+                //    required: true,
+                //    email: true
+                //},
+
+                //txtUserNam: "required",
+                //txtPassword: "required",
+
+            },
+            messages: {
+
+
+                ddlCategory: "Please Select Expense Category",
+                txtPayeeName: "Please Enter Payee Name",
+                txtPrimaryDate: "Please Select Primary Date",
+                txtLastDate: "Please Select Last Date",
+
+                txtTotalAmount: "Please Enter Amount",
+                //txtMotherName: "Please Enter Mother Name",
+                //txtFatherName: "Please Enter Father Name",
+                //txtEmailId: "Please Enter Email Address",
+                //txtUserNam: "Please Enter User Name",
+                //txtPassword: "Please Enter Password",
+
+                //txtDepartment: "Please Select Department",
+
+                //ddlDesgination:"Please Select Designation",
+                //ddlQualfication: "Please Select Qualfication",
+                //ddlStaffType: "Please Select Staff Category",
+                //ddlGender: "Please Select Gender",
+                //ddlMarried:"Please Select Married Status",
+                //ddlReligion: "Please Select Relegion",
+                //ddlCountry: "Please Select Country",
+                //ddlState: "Please Select State",
+                //ddlCity:"Please Select City",
+
+
+            }
+        })
+        jQuery.validator.addMethod('selectcheck', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+
+        //jQuery.validator.addMethod('selectcheck1', function (value) {
+        //    if (value == "1") {
+        //        alert("rahul");
+        //    }
+        //    else if (value == "? undefined:undefined ?") {
+        //        return (value != '? undefined:undefined ?');
+        //    }
+        //    else {
+        //        return true;
+        //    }
+
+        // }, "Please Select Country");
+        //jQuery.validator.addMethod('selectcheck2', function (value) {
+        //    if (value == "0") {
+        //        return (value != '0');
+        //    }
+        //    else if (value == "? undefined:undefined ?") {
+        //        return (value != '? undefined:undefined ?');
+        //    }
+        //    else {
+        //        return true;
+        //    }
+
+        //}, "Please Select Country");
+        //jQuery.validator.addMethod('selectcheck3', function (value) {
+        //    if (value == "0") {
+        //        return (value != '0');
+        //    }
+        //    else if (value == "? undefined:undefined ?") {
+        //        return (value != '? undefined:undefined ?');
+        //    }
+        //    else {
+        //        return true;
+        //    }
+
+        //}, "Please Select Country");
+        //jQuery.validator.addMethod('selectcheck4', function (value) {
+        //    if (value == "0") {
+        //        return (value != '0');
+        //    }
+        //    else if (value == "? undefined:undefined ?") {
+        //        return (value != '? undefined:undefined ?');
+        //    }
+        //    else {
+        //        return true;
+        //    }
+
+        //}, "Please Select Country");
+        //jQuery.validator.addMethod('selectcheck5', function (value) {
+        //    if (value == "0") {
+        //        return (value != '0');
+        //    }
+        //    else if (value == "? undefined:undefined ?") {
+        //        return (value != '? undefined:undefined ?');
+        //    }
+        //    else {
+        //        return true;
+        //    }
+
+        //}, "Please Select Country");
+        //jQuery.validator.addMethod('selectcheck6', function (value) {
+        //    if (value == "0") {
+        //        return (value != '0');
+        //    }
+        //    else if (value == "? undefined:undefined ?") {
+        //        return (value != '? undefined:undefined ?');
+        //    }
+        //    else {
+        //        return true;
+        //    }
+
+        //}, "Please Select Country");
+        //jQuery.validator.addMethod('selectcheck7', function (value) {
+        //    if (value == "0") {
+        //        return (value != '0');
+        //    }
+        //    else if (value == "? undefined:undefined ?") {
+        //        return (value != '? undefined:undefined ?');
+        //    }
+        //    else {
+        //        return true;
+        //    }
+
+        //}, "Please Select Country");
+        //jQuery.validator.addMethod('selectcheck8', function (value) {
+        //    if (value == "0") {
+        //        return (value != '0');
+        //    }
+        //    else if (value == "? undefined:undefined ?") {
+        //        return (value != '? undefined:undefined ?');
+        //    }
+        //    else {
+        //        return true;
+        //    }
+
+        //}, "Please Select Country");
+        //jQuery.validator.addMethod('selectcheck9', function (value) {
+        //    if (value == "0") {
+        //        return (value != '0');
+        //    }
+        //    else if (value == "? undefined:undefined ?") {
+        //        return (value != '? undefined:undefined ?');
+        //    }
+        //    else {
+        //        return true;
+        //    }
+
+        //}, "Please Select Country");
+
+        //$("#ddlPaymentType").validate({
+        //    rules: {
+        //        select_field: {
+        //            required: {
+        //                depends: function (element) {
+        //                    if ('2' == $('#ddlPaymentType').val()) {
+        //                        //Set predefined value to blank.
+        //                       alert("rahul")
+        //                    }
+        //                    return true;
+        //                }
+        //            }
+        //        }
+        //    }
+        //});
+     
+    });
+
+    function clearallfields()
+    {
+        setControlValue("txtPayeeName","" );
+        setControlValue("ddlCategory", 0);
+        setControlValue("txtPrimaryDate", "");
+        setControlValue("txtLastDate", "");
+        setControlValue("txtTotalAmount", ""); 
+        setControlValue("txtPayeingAmount", ""); 
+        setControlValue("txtPaymentDate", ""); 
+     
+        setControlValue("txtCheckNo", "");
+        setControlValue("txtChequDate", "");
+        setControlValue("ddlBankName", 0);
+        document.getElementById('txtRemarkss').value = "";
+    }
+   
+
+</script>
+
+
+ 

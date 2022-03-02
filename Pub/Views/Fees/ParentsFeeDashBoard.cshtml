@@ -1,0 +1,451 @@
+﻿
+@{
+    ViewBag.Title = "ParentsFeeDashBoard.cshtml";
+    //Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutParents.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<style type="text/css">
+    .imgIcon {
+        width: 0.5%;
+        height: 0.5%;
+    }
+
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    .example td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+    .example {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+        .example td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        .example tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .example tr:hover {
+            background-color: #ddd;
+        }
+
+        .example th {
+            padding-top: 8px;
+            padding-bottom: 8px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+
+      /*#example2 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+    #example2 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+        #example2 td, #customers th {
+            border: 1px solid #ddd;
+        }
+
+        #example2 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example2 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example2 th {
+            padding-top: 8px;
+            padding-bottom: 8px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }*/
+</style>
+
+<section class="content-header">
+    <h1>
+        <i class="fa fa-eye"></i> Fee Payment |<small id="CTName"></small> <input type="hidden" id="TXTSCHOOL" />
+    </h1>
+    @*<ul class="breadcrumb">
+            <li><a href="/"><i class="fa fa-home"></i>Home</a></li>
+            <li><a href="/academics/default/index">Academics</a></li>
+            <li class="active">Timetable</li>
+            <li><a href="/timetable/class-timing/index">Class Timing</a></li>
+            <li class="active">gffd</li>
+        </ul>*@
+</section>
+<section class="content">
+    <div class="box box-solid">
+        <div class="box-body table-responsive">
+            <p class="text-right btn-view-group edusecArLangTextLeft">
+                <a class="btn btn-default btn-sm" href="/Fees/FeeStudentSearch"><i class="fa fa-chevron-circle-left"></i> Back</a>@*<a class="btn btn-info btn-sm" href="/timetable/class-timing/update?id=2" data-target="#globalModal" data-toggle="modal" data-backdrop="static"><i class="fa fa-pencil-square-o"></i> Update</a>										<a class="btn btn-danger btn-sm" href="/timetable/class-timing/delete?id=2" data-confirm="Are you sure you want to delete this item?" data-method="post"><i class="fa fa-trash-o"></i> Delete</a>*@
+            </p>
+
+            <table class="table table-bordered">
+                <colgroup>
+                    <col width="200px">
+                    <col width="250px">
+                    <col width="200px">
+                    <col width="250px">
+                </colgroup>
+                <tbody>
+                    <tr>
+                        <th>Name</th>
+                        <td><span id="CTName1"></span></td>
+                        <th>Father Name</th>
+                        <td><span id="spFatherNm"></span></td>
+                    </tr>
+                    <tr>
+                        <th>Class</th>
+                        <td><span id="spClass"></span></td>
+                        <th>Roll No</th>
+                        <td><span id="spRoll"></span></td>
+                    </tr>
+                    <tr>
+                        <th>Academic Year</th>
+                        <td colspan="3">
+                            <div class="form-group">
+                                <select id="ddl_academic_year" class="form-control" valuefield="ID" textfield="StartYear" blankRowValue="-1" blankRowText="----Select----" onchange="" aria-required="true"></select>
+                            </div>
+                        </td>                        
+                    </tr>
+                </tbody>
+            </table>
+  
+        </div>
+        <div class="col-md-12">
+            <div class="box box-solid">
+
+                
+                <div class="col-md-6">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><i class="fa fa-eye"></i> Previous Fee History </h3>
+                    </div>
+                    <div class="box-body table-responsive">
+
+                        <div id="w4" class="grid-view">
+                            <table class="table table-striped table-bordered example" id="example3">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Month</th>
+                                        <th>Fee</th>
+                                        <th>Payable Fee</th>
+                                        <th>Due Amount</th>
+                                        <th>Amount Paid</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyPrevFeeDetails"></tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-right"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            @*<table class="table table-striped table-bordered" style="width:60%;">
+                            <tr>
+
+                            </tr>
+                        </table>*@
+                        </div>
+                        <script type="text/html" id="divPrevFeeJTemplte">
+                            {#foreach $T as Datashort}
+                            <tr>
+                                <td style="width:10%;">
+                                    { $T.Datashort.count}
+                                    <input type="hidden" value="{ $T.Datashort.fcal.fldId}" />
+                                </td>
+                                <td>
+                                    { $T.Datashort.fcal.Months}
+                                    <input type="hidden" value="{ $T.Datashort.fcal.monthId}" />
+                                </td>
+                                <td class="PmonthlyAmnt">
+                                    { $T.Datashort.fcal.monthlyAmount}
+                                </td>
+                                <td>
+                                    { $T.Datashort.fcal.ActualPayableAmnt}
+                                </td>
+                                <td class="PduesAmount">
+                                    { $T.Datashort.fcal.duesAmount}
+                                </td>
+
+                                <td>
+                                    { $T.Datashort.fcal.PaidAmount}
+
+                                </td>
+                              
+
+                            </tr>
+                            {#/for}
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+    <input type="hidden" id="hdnID" />
+   <input type="hidden" id="hdnFSID"/>
+    <input type="hidden" id="hdnDueMonth" />
+    <input type="hidden" id="hdnDueMonth_nm" />
+    <input type="hidden" id="hdnDueAmnt" />
+    <input type="hidden" id="hdnDuePayable"/>
+</section>
+<div class="alert alert-success centerSuccess" id="divSucesEmail" style="display:none">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+    <h4>
+        <i class="icon fa fa-check"></i>
+        <span Id="sentEmailMsg" ng-bind="successMsg"></span>
+    </h4>
+
+</div>
+<style type="text/css">
+    .hide {
+        display: none;
+    }
+</style>
+<link href="~/css/bower_components/select2/dist/css/select2.min.css" rel="stylesheet" />
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+
+<script type="text/javascript">
+    var i = 0;
+    var PrevFeeArray = new Array();
+    setControlValue("hdnDueMonth", 0);
+    setControlValue("hdnDueMonth_nm","");
+    $(document).ready(function () {
+
+        $('.select2').select2();
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TimeTableApi", "GetAcademicYearBySchool", "ddl_academic_year", false, "", "", "", "");
+
+       
+
+        setControlValue("hdnID", 0);
+        setControlValue("hdnDiscount", 0);
+        var ID = getQuerystring("Id");
+        if (typeof (ID) != "undefined") {
+            setControlValue("hdnID", ID);//
+            GetValues(ID);
+            //fillDataTable();
+            fillPrevFeeTable();
+        }
+    });
+
+    $("#ddl_academic_year").change(function () {
+        fillPrevFeeTable();
+      //  getMonths_feeStructure();
+    });
+
+    //function getMonths_feeStructure() {
+    //    var ddlCourse = getControlValue("ddl_academic_year");
+    //    if (ddlCourse != null && (ddlCourse != -1) && (ddlCourse != undefined)) {
+    //        callServiceMethodForDDl(JSON.stringify([ddlCourse]), "/api/FeesApi", "GetMonthsBySession", "ddlSelectedMonth", false, "", "", "", "");
+
+    //        fillDataTable();
+    //    }
+    //}
+
+    function GetValues(ID) {
+        $("#loader").fadeIn();
+
+        var fee = {
+            val:ID
+        }
+        $.ajax({
+            url: "/api/StudentApi/FindStudentByID",
+            type: "Post",
+            data: JSON.stringify(fee),
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                setControlValue("CTName", data.FirstName + " " + data.MiddleName + " " + data.LastName);//data.Religion);
+                setControlValue("CTName1", data.FirstName + " " + data.MiddleName + " " + data.LastName);
+                setControlValue("spFatherNm", data.FatherName);
+                setControlValue("spRoll", data.RollNo);
+                    setControlValue("spClass", data.Class + "-" + data.Section);
+
+                    setControlValue("spRegNo", data.RegNo);
+                       setControlValue("TXTSCHOOL", data.SchoolID)
+
+                 //  fillDataTable();
+                 //   emptyTempTable();
+            }
+        });
+    }
+
+   
+
+    function successMsg(p1, p2, p3, datas) {
+        setTimeout(function () {
+            var arrr = {};
+            $("#ddlSelectedMonth").val(arrr).trigger("change");
+            //$('#ddlSelectedMonth option').filter('[value="0"]').attr('disabled', "disabled");
+            FreezeMonths();
+            var totalAmt = 0;
+            $("#tbodyEmployeeDetails tr input[type=hidden]").each(function () {
+                totalAmt += parseInt($(this).val());
+            });
+            $("#txtTotal").html(totalAmt);
+        }, 1000);
+        $("#loader").fadeOut();
+        
+    }
+
+    function fillPrevFeeTable() {
+       
+        var id = getControlValue("hdnID");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        var AcademicYear = getControlValue("ddl_academic_year");
+        callJTemplateServiceMethod(JSON.stringify(["PrevFeeDetailstudent", id, SchoolID, AcademicYear]), "/api/FeesApi", "getList",
+           "tbodyPrevFeeDetails", "divPrevFeeJTemplte", true, successPrevFeeMsg, "", "", "");
+    }
+
+    function successPrevFeeMsg(p1, p2, p3, datas) {
+        $("#loader").fadeOut();
+        setTimeout(function () {
+            var dueSum = 0; var duemonth;
+            $("#tbodyPrevFeeDetails").find('tr').each(function (i) {
+                var $tds = $(this).find('td'),
+                monthID = $tds.eq(1).find('input[type=hidden]').val(),
+                monthNm = $tds.eq(1).text();
+                monthAmnt = $tds.eq(2).text();
+                dues = $.trim($tds.eq(4).text());
+                payable = $.trim($tds.eq(3).text());
+                paid = $.trim($tds.eq(5).text());
+                id = $tds.eq(0).find('input[type=hidden]').val();
+                if (dues != "" && dues != "0" && i == ($('#tbodyPrevFeeDetails tr').length-1)) {
+                    dueSum = parseFloat(paid);
+                    duemonth = monthID;
+                    setControlValue("hdnDueMonth", duemonth);
+                    setControlValue("hdnDueAmnt", dueSum);
+                    setControlValue("hdnDuePayable", payable);
+                    setControlValue("hdnDueMonth_nm", monthNm);
+                    if (payable != null) {
+                      //  $("#paynow").show('');
+                        $(".paynow").show();
+                      //  setControlValue("paynow", "Pay now");
+                    }
+
+                }
+                else
+                {
+                    //setControlValue("hdnDueAmnt", dueSum);
+                }
+            });
+           
+            for (var j = 0; j < $('#ddlSelectedMonth').children('option').length; j++) {
+                if (dueSum != 0 || dueSum != "") {
+                    if (j != duemonth) {
+                        $('#ddlSelectedMonth option').filter('[value="' + j + '"]').attr('disabled', true);
+                    }
+                }
+                else
+                {
+                    $('#ddlSelectedMonth option').filter('[value="' + j + '"]').attr('disabled', false);
+                }
+            }
+        }, 10000);
+        
+    }
+
+   
+
+   
+
+   
+
+   
+       
+
+      
+
+       
+       
+
+</script>
+@*<script type="text/javascript">
+    $(document).ready(function () {
+        $.ajax({
+            type: "POST",
+            url: "/api/FeesApi/getFeeDetails",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify([getControlValue("hdnID"), getControlValue("ddl_academic_year")]),
+            success: function (data) {
+                setTimeout(function () {
+                     for (var i = 0; i < data.length; i++) {
+
+                        for (var j = 0; j < $('#ddlSelectedMonth').children('option').length; j++) {
+                            if (j == data[i].monthId) {
+                                 $('#ddlSelectedMonth option').filter('[value="' + j + '"]').attr('disabled', "disabled");
+                            }
+                        }
+                    }
+                }, 1000)
+            },
+            failure: function (response) {
+                alert(response.d);
+            }
+        });
+
+
+
+        })
+</script>*@

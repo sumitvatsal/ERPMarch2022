@@ -1,0 +1,191 @@
+﻿
+@{
+    ViewBag.Title = "ViewTeacherTimeTable";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<style type="text/css">
+    .imgIcon {
+        width: 0.5%;
+        height: 0.5%;
+    }
+
+    .oddTr {
+        background-color: #dddddd;
+    }
+</style>
+<link href="~/css/bootstrap-timepicker.css" rel="stylesheet" />
+<section class="content-header">
+    <h1>
+        <i class="fa fa-eye"></i> Timetable |<small id="ttName"></small>
+    </h1>
+    @*<ul class="breadcrumb">
+            <li><a href="/"><i class="fa fa-home"></i>Home</a></li>
+            <li><a href="/academics/default/index">Academics</a></li>
+            <li class="active">Timetable</li>
+            <li><a href="/timetable/timetable-configuration/index">Timetable Configuration</a></li>
+            <li class="active">1</li>
+        </ul>*@
+</section>
+<section class="content">
+    <div class="box box-solid">
+        <div class="extra-div">
+            <div class="box-header with-border">
+                <span class="fa-stack fa-lg pull-left edusecArLangCss">
+                    <i class="fa fa-calendar fa-2x"></i>
+                </span>&nbsp;
+       
+             
+            </div>
+        </div>
+
+        <div class="box-body">
+            <div class="table-responsive">
+                <table id="example1" class="table table-bordered table-striped table-valign">
+                    <thead id="theadTimeTable">
+                        <tr>
+                            <th class="text-center">Class Timing</th>
+                            <th class="text-center">Monday</th>
+                            <th class="text-center">Tuesday</th>
+                            <th class="text-center">Wednesday</th>
+                            <th class="text-center">Thursday</th>
+                            <th class="text-center">Friday</th>
+                            <th class="text-center">Saturday</th>
+                            <th class="text-center">Sunday</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyEmployeeDetails"></tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <input id="hdn" type="hidden" />
+</section>
+<script src="~/js/bootstrap-timepicker.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        setControlValue("hdn", 0);
+
+        var ID=getQuerystring("Id");
+        if (typeof (ID) != "undefined") {
+            setControlValue("hdn", ID);//
+           GetValues(ID);
+        }
+
+    });
+
+    function GetValues(ID)
+    {
+        var employye = {
+
+            val: ID
+          
+        }
+
+        var ddl = JSON.stringify(employye)
+
+        $("#loader").fadeIn();
+        $.ajax({
+            url: "/api/TimeTableApi/getTimeTableDetforTeacher",
+            type: "Post",
+            data: ddl,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                $("#loader").fadeOut();
+                if(data.ID!=-1)
+                {
+                    setControlValue("hdn", data.ID);
+                    setControlValue("ttName", data.TeacherName);
+                    var abc = data.TimeTableList;
+                   
+                    var html ='';
+                    $.each(data.TimeTableList, function (index, item) {
+                        $.each(item.TimeTableList, function (index1, item1) {
+                            html += '<tr><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td><td class="text-center"></td></tr>';
+                        });
+                    });
+                    $(html).appendTo('#tbodyEmployeeDetails');
+
+                    var arr = $('#tbodyEmployeeDetails tr').map(function () {
+                        return $(this).children().map(function () {
+                            return $(this);
+                        });
+                    });
+                    var row=-1;
+                    $.each(data.TimeTableList, function (index, item) {
+                        
+                        $.each(item.TimeTableList, function (index1, item1) {
+                            var col = 0;
+                            row = row + 1;
+                            arr[row][0].text(item1.timingNm);
+                            if(item1.WeekDaysNm.toLowerCase()=='monday')
+                            {
+                                arr[row][1].text(item1.Course + "(" + item1.subject + ")");
+                            }
+                            else if (item1.WeekDaysNm.toLowerCase() == 'tuesday') {
+                                arr[row][2].text(item1.Course + "(" + item1.subject + ")");
+                            }
+                            else if (item1.WeekDaysNm.toLowerCase() == 'wednesday') {
+                                arr[row][3].text(item1.Course + "(" + item1.subject + ")");
+                            }
+                            else if (item1.WeekDaysNm.toLowerCase() == 'thursday') {
+                                arr[row][4].text(item1.Course + "(" + item1.subject + ")");
+                            }
+                            else if (item1.WeekDaysNm.toLowerCase() == 'friday') {
+                                arr[row][5].text(item1.Course + "(" + item1.subject + ")");
+                            }
+                            else if (item1.WeekDaysNm.toLowerCase() == 'saturday') {
+                                arr[row][6].text(item1.Course + "(" + item1.subject + ")");
+                            }
+                            else if (item1.WeekDaysNm.toLowerCase() == 'sunday') {
+                                arr[row][7].text(item1.Course + "(" + item1.subject + ")");
+                            }
+                 
+                        });
+                        if (item.timingNm != "" && item.timingNm != null) {
+                            row = row + 1;
+                        }
+                    });
+                   
+                    $('#tbodyEmployeeDetails td:empty').append('-');
+                   
+                }
+               
+
+            }
+        });
+    }
+
+</script>

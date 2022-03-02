@@ -1,0 +1,554 @@
+﻿
+@{
+    ViewBag.Title = "AdminViewLeaves";
+    //Layout = "~/Views/Shared/_LayoutEmployee.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data)
+            {
+
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<style type="text/css">
+    .imgIcon {
+        width: 0.5%;
+        height: 0.5%;
+    }
+
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">List of Leave Requests</h3>
+                </div>
+                <div class="box-body">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <div class="form-group">
+                                        <label>First Name:</label>
+                                        <input type="text" class="form-control" id="txtName" placeholder="Enter ...">
+                                        <!-- /.input group -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <div class="form-group">
+                                        <label>Middle Name:</label>
+                                        <input type="text" class="form-control" id="txtMName" placeholder="Enter ...">
+                                        <!-- /.input group -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <div class="form-group">
+                                        <label>Last Name:</label>
+                                        <input type="text" class="form-control" id="txtLName" placeholder="Enter ...">
+                                        <!-- /.input group -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" >
+                            <div class="col-md-4" id="RollnoHIDE">
+                                <div class="form-group">
+                                    <label>Roll No:</label>
+                                    <input type="text" class="form-control" id="txtRollno" placeholder="Roll No ...">
+                                    <!-- /.input group -->
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Date Range:</label>
+                                    <div class="input-group">
+                                        <div class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </div>
+                                        <input type="text" class="form-control pull-right" id="txtDtRange" readonly>
+                                    </div>
+                                    <!-- /.input group -->
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Request Status:</label>
+                                    <select class="form-control dropdown-toggle" valuefield="StatusID" textfield="Status" blankRowValue="-1" blankRowText="----Select----" id="ddlReqStatus"></select>
+                                    <!-- /.input group -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div>
+
+                            <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                <thead>
+                                    <tr>
+                                        @*<th style="width:5%;"><input type="checkbox" id="CheckAll" /></th>*@
+                                        <th style="width:8%;">Sr no.</th>
+                                        @*<th>Roll No.</th>*@
+                                        <th>Student UserID</th>
+                                        <th>Name</th>
+                                        <th>Date from</th>
+                                        <th>Date to</th>
+                                        <th>Reason</th>
+                                        <th>Applied on</th>
+                                        <th>Status</th>
+                                        <th style="display:none;"></th>
+                                        <th style="width:10%;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyEmployeeDetails"></tbody>
+                            </table>
+                        </div>
+                        <div id="ActionBtns" style="display:none;">
+                            <button type="button" class="btn btn-block btn-success" title="Approve Selected" style="width:10%;display:inline-block;" onclick="ApproveChecked()">Approve</button>
+                            <button type="button" class="btn btn-block btn-danger" title="Reject Selected" style="width:10%;display:inline-block;" onclick="RejectChecked()">Reject</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <script type="text/html" id="divEmployeeDetailsJTemplte">
+                {#foreach $T as Datashort}
+                <tr>
+                    @*<td>
+            <input type="checkbox" stdID="{ $T.Datashort.leave.ID}" onclick="ShowHideBtns()">
+        </td>*@
+                    <td style="width:10%;">
+                        { $T.Datashort.leaveID}
+                    </td>
+                    @*<td style="width:10%;">
+            { $T.Datashort.RollNo}
+        </td>*@
+                    <td style="width:10%;">
+                        { $T.Datashort.StudentUserID}
+                    </td>
+                    <td>
+                        { $T.Datashort.FirstName}
+                    </td>
+                    <td>
+                        { $T.Datashort.datefrom}
+                    </td>
+                    <td>
+                        { $T.Datashort.dateto}
+                    </td>
+                    <td>
+                        { $T.Datashort.leave.Reason}
+                    </td>
+                    <td>
+                        { $T.Datashort.RequestDt}
+                    </td>
+                    <td>
+                        <span class="{ $T.Datashort.style}">{ $T.Datashort.statusNm} </span>
+                    </td>
+                    <td style="display:none;">
+                        { $T.Datashort.leave.ID}
+                    </td>
+                    <td>
+                        @*<button type="button" onclick="confirmVMR('Are you sure? You want to Activate/DeActivate This Employee',employeeActivateDeactivate,'{ $T.Datashort.Status}',{ $T.Datashort.Id})" class="btn btn-block btn-success btn-sm">Approve</button>*@
+                        @*<div><img src="/Images/Admin/if_Check_27837.png" class="imgIcon" title="Approve" onclick="Approve({ $T.Datashort.leave.ID})" /> &nbsp;<img src="/Images/Admin/if_Remove_27874.png" class="imgIcon" title="Reject" onclick="Reject({ $T.Datashort.leave.ID})" /></div>*@
+                        <select class="form-control dropdown-toggle ddl" onchange="performAction(this.value,{ $T.Datashort.leave.ID})" valuefield="StatusID" textfield="Status" blankRowValue="-1" blankRowText="----Select----" id="ddl{ $T.Datashort.leaveID}"></select>
+                    </td>
+                </tr>
+                {#/for}
+            </script>
+            <input id="hdnEmpid" type="hidden" />
+
+        </div>
+        <!-- /.row -->
+
+    </div>
+</section>
+<div class="alert alert-success centerSuccess" id="divSucesEmail" style="display:none">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+    <h4>
+        <i class="icon fa fa-check"></i>
+        <span Id="sentEmailMsg"></span>
+    </h4>
+
+</div>
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#RollnoHIDE").hide();
+
+        var empID=getQuerystring("id");
+        if (typeof (empID) != "undefined") {
+            setControlValue("hdnEmpid", empID);
+            //CTstudentLeavesCheck(empID);
+            //var empid=sessionStorage.getItem("EmpId");
+
+            fillDataTable();
+        }
+        //
+        callServiceMethodForDDl("", "/api/StudentApi", "GetLeaveStatus", "ddlReqStatus", false, "", "", "", "");
+    });
+
+    var startDt;
+    var endDt;
+    $('#txtDtRange').daterangepicker();
+
+    $('#txtDtRange').on('change', function () {
+        startDt = $('#txtDtRange').data('daterangepicker').startDate._d;
+        endDt = $('#txtDtRange').data('daterangepicker').endDate._d;
+
+        var millisecondsPerDay = 1000 * 60 * 60 * 24;
+        var millisBetween = endDt.getTime() - startDt.getTime();
+        var days = (millisBetween / millisecondsPerDay)+1;
+        //$('#lblDays').html(Math.floor(days));
+        // Round down.
+        //alert(Math.floor(days));
+        searchCriteria("date",startDt,endDt,"");
+
+    });
+
+    function fillDataTable()
+    {$("#loader").fadeIn();
+        var empid = getControlValue("hdnEmpid");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        setTimeout(function () {
+            callJTemplateServiceMethod(JSON.stringify([empid, "", "", "", "", SchoolID]), "/api/StudentApi", "getStudentsLeaveDet",
+               "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+
+        }, 800);
+
+    }
+
+    function successMsg(p1, p2, p3, datas) {
+        $("#loader").fadeOut();
+        var count=0;
+        $('#example1 tr').each(function () {
+            count++;
+        });
+
+        for(var a=1;a<count;a++)
+        {
+            callServiceMethodForDDl("", "/api/StudentApi", "GetLeaveStatus", "ddl"+a, false, "", "", "", "");
+        }
+
+        setTimeout(function () {
+            $('#example1').DataTable();
+        }, 1000);
+    }
+
+    function Approve(id)
+    {
+        var ar=new Array();
+        var Student = {
+            leaveID: id,
+            statusNm: "approve",
+            MidName: getControlValue("hdnEmpid"),
+            SchoolID: sessionStorage.getItem("SchoolID")
+        }
+        ar.push(Student);
+        var result = window.confirm('Are you sure to approve this request?');
+        if (result == true) {
+            //$.ajax({
+            //    url: "/api/StudentApi/Approve_Reject_Leave",// "~/Masters/GetDeptMethod",
+            //    type: "Post",
+            //    data: JSON.stringify(ar), //{ Name: name,ddlAcademicYr
+            //    //// Address: address, DOB: dob },
+            //    contentType: 'application/json; charset=utf-8',
+            //    success: function (data) {
+            //        alert(data.statusNm);
+            //    }
+            //});
+            ActionTaken(ar);
+           
+        };
+
+    }
+
+    function ApproveChecked()
+    {
+        var ar=new Array();
+        var count=0;
+        $('#example1 tbody input[type=checkbox]').each(function () {
+            if ($(this).is(':checked')) {
+                count++;
+                var Student = {
+                    leaveID: $(this).attr("stdID"),
+                    statusNm: "approve",
+                    MidName:getControlValue("hdnEmpid"),
+                }
+                ar.push(Student);
+            }
+        });
+        if(count>0){
+
+            var result = window.confirm('Are you sure to approve these requests?');
+            if (result == true) {
+                ActionTaken(ar);
+                fillDataTable();
+            };
+        }
+        ShowHideBtns();
+    }
+
+    function ActionTaken(ar)
+    {
+        $.ajax({
+            url: "/api/StudentApi/Approve_Reject_Leave",// "~/Masters/GetDeptMethod",
+            type: "Post",
+            data: JSON.stringify(ar), //{ Name: name,ddlAcademicYr
+            //// Address: address, DOB: dob },
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+
+                $("#divSucesEmail").fadeIn();
+                $("#sentEmailMsg").html(data.statusNm);
+                setTimeout(function () {
+                    $("#divSucesEmail").fadeOut();
+                    $("#sentEmailMsg").html("");
+                    fillDataTable();
+                }, 2000)
+              //  alert(data.statusNm);
+            }
+           
+        });
+       
+         
+
+        
+
+    }
+
+    function Reject(id)
+    {
+        var ar=new Array();
+        var Student = {
+            leaveID: id,
+            MidName:getControlValue("hdnEmpid"),
+            statusNm: "reject",
+             SchoolID: sessionStorage.getItem("SchoolID")
+        }
+        ar.push(Student);
+        var result = window.confirm('Are you sure to reject this request?');
+        if (result == true) {
+            ActionTaken(ar);
+           
+        };
+    }
+
+    function RejectChecked()
+    {
+        var ar=new Array();
+        var count=0;
+        $('#example1 tbody input[type=checkbox]').each(function () {
+            if ($(this).is(':checked')) {
+                count++;
+                var Student = {
+                    leaveID: $(this).attr("stdID"),
+                    statusNm: "reject",
+                    MidName:getControlValue("hdnEmpid"),
+                }
+                ar.push(Student);
+            }
+        });
+
+        if(count>0)
+        {
+            var result = window.confirm('Are you sure to reject these requests?');
+            if (result == true) {
+                ActionTaken(ar);
+                fillDataTable();
+            };
+
+        }
+        ShowHideBtns();
+    }
+
+    function performAction(action,leaveID)
+    {
+       
+        if(action!=-1)
+        {
+            if(action==5)
+            {
+                Approve(leaveID);
+            }
+            else if(action==6)
+            {
+                Reject(leaveID);
+            }
+        }
+    }
+
+    $("#CheckAll").click(function () {
+        $('#example1 tbody input[type="checkbox"]').prop('checked', this.checked);
+        ShowHideBtns();
+
+    });
+
+    function ShowHideBtns()
+    {
+        var count=0;
+        $('#example1 tbody input[type=checkbox]').each(function () {
+            if ($(this).is(':checked')) {
+                count++;
+            }
+        });
+        if(count>0)
+        {
+            $('#ActionBtns').fadeIn();
+        }
+        else
+        {
+            $('#ActionBtns').fadeOut();
+        }
+    }
+    $('#ddlReqStatus').on('change', function () {
+        var value=getControlValue("ddlReqStatus");
+        if(value!=-1)
+        {
+            searchCriteria("status",value,"","");
+        }
+        else{
+            fillDataTable();
+        }
+    });
+
+    //$('#txtRollno').on('keyup', function () {
+    //    //var ddlCourse = getControlValue("ddlCourse");
+    //    //var ddlSection = getControlValue("ddlSection");
+    //    //var name = getControlValue("txtName");
+    //    var rollno = getControlValue("txtRollno");
+    //    if(rollno!="" && rollno!=null){
+    //        searchCriteria("rollno",rollno,"","");
+    //    }
+    //    else{
+    //        fillDataTable();
+    //    }
+    //});
+
+    $('#txtName').on('keyup', function () {
+        var midName = getControlValue("txtMName");
+        var Lname = getControlValue("txtLName");
+        var name = getControlValue("txtName");
+        //var rollno = getControlValue("txtRollno");
+
+        if(name!="" && name!=null){
+            searchCriteria("name",name,midName,Lname);
+        }
+        else{
+            fillDataTable();
+        }
+    });
+
+    $('#txtMName').on('keyup', function () {
+        var midName = getControlValue("txtMName");
+        var Lname = getControlValue("txtLName");
+        var name = getControlValue("txtName");
+        //var rollno = getControlValue("txtRollno");
+
+        if(midName!="" && midName!=null){
+            searchCriteria("name",name,midName,Lname);
+        }
+        else{
+            fillDataTable();
+        }
+    });
+
+    $('#txtLName').on('keyup', function () {
+        var midName = getControlValue("txtMName");
+        var Lname = getControlValue("txtLName");
+        var name = getControlValue("txtName");
+        //var rollno = getControlValue("txtRollno");
+
+        if(Lname!="" && Lname!=null){
+            searchCriteria("name",name,midName,Lname);
+        }
+        else{
+            fillDataTable();
+        }
+    });
+
+    function searchCriteria(type,value,value1,value2)
+    {
+        var empid = getControlValue("hdnEmpid");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        setTimeout(function () {
+            callJTemplateServiceMethod(JSON.stringify([empid, type, value, value1, value2, SchoolID]), "/api/StudentApi", "getStudentsLeaveDet",
+               "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+
+        }, 800);
+    }
+    //
+</script>
+

@@ -1,0 +1,50 @@
+ var availability = db.tblClassTimingDets.Where(s => s.STime < a.period.STime && s.ETime > a.period.STime).Any();
+
+                    var starttimeavailability = db.tblClassTimingDets.Where(s => s.STime < a.period.StartTime && s.ETime > a.period.StartTime && s.CT_ID == a.period.CT_ID && s.SchoolID == a.period.SchoolID && s.IsDeleted == null).Any();
+                    if (starttimeavailability !=false)
+                    {
+                        tt.Msg = "This Timming Already aloted Please Check It";
+                    }
+                    var Endtimeavailability = db.tblClassTimingDets.Where(s => s.STime < a.period.ETime && s.ETime > a.period.ETime && s.CT_ID == a.period.CT_ID && s.SchoolID == a.period.SchoolID && s.IsDeleted == null).Any();
+                    if (Endtimeavailability != false)
+                    {
+                        tt.Msg = "This Timming Already aloted Please Check It";
+
+                    }
+                    var fulltimetimeavailability = db.tblClassTimingDets.Where(s => s.STime > a.period.STime && s.ETime < a.period.ETime && s.CT_ID == a.period.CT_ID && s.SchoolID == a.period.SchoolID && s.IsDeleted == null).Any();
+                    if (fulltimetimeavailability != false)
+                    {
+                        tt.Msg = "This Timming Already aloted Please Check It";
+                    }
+                    else
+                    {
+                        DateTime Sttdtt = timeTo24Hrs(a.period.StartTime);                        DateTime Enddtt = timeTo24Hrs(a.period.EndTime);
+                        tblClassTimingDet d = new SchoolErp.tblClassTimingDet();
+                        d.Name = a.period.Name;
+                        d.STime = Sttdtt.TimeOfDay;//a.period.STime;
+                        d.ETime = Enddtt.TimeOfDay;//a.period.ETime;
+                        d.Status = a.period.Status;
+                        d.IsBreak = a.period.IsBreak;
+                        d.CT_ID = a.period.CT_ID;
+                        d.SchoolID = a.period.SchoolID;
+
+                        db.tblClassTimingDets.Add(d);
+                        db.SaveChanges();
+                        tt.ID = d.ID;
+                        tt.Msg = "Record added succesfully";
+                    }
+
+
+AddMinutes(1)
+
+
+
+select * from tblClassTimingDet where STime<='11:00:00.0000000'and ETime>='11:00:00.0000000' --false starttime is in bet
+select * from tblClassTimingDet where STime<'11:05:00.0000000'and ETime>'11:05:00.0000000' --false end time is in bet
+select * from tblClassTimingDet where STime>'10:00:00.0000000'and ETime<'12:00:00.0000000' ---TIME OUTSIDE
+
+select * from tblClassTimingDet where STime>'10:00:00.0000000'and ETime<'10:30:00.0000000' ---TIME OUTSIDE
+
+
+
+https://stackoverflow.com/questions/2867470/subtracting-from-a-datetime

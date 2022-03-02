@@ -1,0 +1,361 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>OwnerLogin</title>
+    <!-- Bootstrap 3.3.7 -->
+    <link href="~/css/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="~/css/bower_components/font-awesome/css/font-awesome.min.css">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="~/css/bower_components/Ionicons/css/ionicons.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="~/css/dist/css/AdminLTE.min.css">
+    <!-- iCheck -->
+    <link href="~/css/txtBtn.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/plugins/iCheck/square/blue.css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <!-- Google Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+    <!-- jQuery 3 -->
+    <script src="~/css/bower_components/jquery/dist/jquery.min.js"></script>
+    <!-- Bootstrap 3.3.7 -->
+    <script src="~/js/jshelper.js"></script>
+    <script src="~/js/general.js"></script>
+    <script src="~/js/validation.js"></script>
+    <script src="~/css/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <!-- iCheck -->
+    <script src="~/css/plugins/iCheck/icheck.min.js"></script>
+    <script src="~/js/jquery.validate.min.js"></script>
+    <script>
+        $(function () {
+            $('input').iCheck({
+                checkboxClass: 'icheckbox_square-blue',
+                radioClass: 'iradio_square-blue',
+                increaseArea: '20%' // optional
+            });
+        });
+    </script>
+</head>
+<body class="hold-transition login-page">
+    <div>
+
+        <div class="login-box">
+
+            <!-- /.login-logo -->
+            <div class="login-box-body">
+                <div class="login-logo">
+                    <a href="smartvidhya.com"><img src="~/css/dist/img/zeusadsolutions-logo.jpg"></a>
+                </div>
+                <form role="form" id="form1" name="form1">
+
+                    <div class="form-group">
+                        <label id="lblMsg" style="color:red;"></label>
+                   </div>
+
+                    <div class="form-group has-feedback">
+                        <input type="text" id="txtUserId" name="txtUserId" class="form-control" placeholder="User Id">
+                        <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+                    </div>
+                    <div class="form-group has-feedback">
+                        <input type="password" id="txtPassword" name="txtPassword" class="form-control" placeholder="Password">
+                        <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-8">
+                            @*<div class="checkbox icheck">
+                                <label>
+                                    <input type="checkbox"> Remember Me
+                                </label>
+                            </div>*@
+                        </div>
+                        <!-- /.col -->
+                        <div class="col-xs-4">
+                            <input type="button" id="btnlogin" onclick="LoginClick()" class="btn btn-primary btn-block btn-flat" value="Sign In" />
+                        </div>
+                        <!-- /.col -->
+                    </div>
+                </form>
+            </div>
+            <!-- /.login-box-body -->
+        </div>
+        <!-- Trigger the modal with a button -->
+        <button type="button" class="btn btn-info btn-lg" id="btnEmployeeShowTasks" style="display:none" data-toggle="modal" data-target="#myModal2">Open Modal</button>
+
+        <!-- Modal -->
+        <div id="myModal2" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <div class="modal-body">
+                        <button type="button" id="AdvertisingMdlClose" style="display:none" class="close" data-dismiss="modal">&times;</button>
+                        <div class="content">
+                            <div class="panel panel-white">
+                                <div class="panel-body">
+                                    <div class="row">
+                                        @*<div id="player"></div>*@
+
+                                        <video preload="auto" class="VedioWidth" id="click">
+
+                                            <source src="~/Images/smartVidhya.mp4" type='video/mp4;codecs="avc1.42E01E, mp4a.40.2"' />
+                                        </video>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div id="loader" style="display:none"></div>
+
+
+        <script src="http://www.youtube.com/player_api"></script>
+
+        <script>
+            var input = document.getElementById("txtPassword");
+            input.addEventListener("keyup", function (event) {
+                event.preventDefault();
+                if (event.keyCode === 13) {
+                    document.getElementById("btnlogin").click();
+                }
+            });
+            $(document).keypress(function (event) {
+
+                var keycode = (event.keyCode ? event.keyCode : event.which);
+                if (keycode == '13') {
+                    //alert('You pressed a "enter" key in somewhere');
+                    document.getElementById("btnlogin").click();
+                }
+
+            });
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                var Id = getQuerystring("m");
+                if (typeof (Id) != "undefined") {
+                }
+                else {
+                    //callServiceMethod("", "/api/Default", "getAdvertisingVedio", false, "", "", false, "", true, getAdvertisingVedio_scs, "", "", "");
+
+                }
+            })
+
+            //function getAdvertisingVedio_scs(p1, p2, p3, datas)
+            //{
+
+            //    if ($(window).width() > 500) {
+            //        document.getElementById("btnEmployeeShowTasks").click();
+            //        document.getElementById("ancPlayVedio").click();
+            //    }
+            // }
+
+
+        </script>
+        <script type="text/javascript">
+
+            $(document).ready(function () {
+                $("#click").get(0).play();
+                //$("video#click").click(function () {
+                //    this.paused ? this.play() : this.pause();
+                //    return false;
+                //});
+            })
+            $("#click").bind("ended", function () {
+                document.getElementById("AdvertisingMdlClose").click();
+            });
+        </script>
+        @*<script type="text/javascript">
+
+            var player;
+            function onYouTubePlayerAPIReady() {
+                player = new YT.Player('player', {
+                    height: '450',
+                    width: '950',
+                    videoId: 'KBVIvGrlyMg',
+                    events: {
+                        'onReady': onPlayerReady,
+                        'onStateChange': onPlayerStateChange
+                    }
+                });
+            }
+
+            // autoplay video
+            function onPlayerReady(event) {
+                event.target.playVideo();
+            }
+
+            // when video ends
+            function onPlayerStateChange(event) {
+                if (event.data === 0) {
+                    document.getElementById("AdvertisingMdlClose").click();
+                }
+            }
+        </script>*@
+        <script type="text/javascript">
+            $(document).ready(function () {
+                callServiceMethodForDDl("", "/api/Default", "getDDlType", "ddlRoleType", false, "", "", "", "");
+            });
+            function LoginClick() {
+                if ($("#form1").valid()) {
+                    $("#loader").fadeIn();
+                    var person = '{userId: "' + getControlValue("txtUserId") + '",password:"' + getControlValue("txtPassword") + '",type:"' + getControlValue("ddlRoleType") + '" }';
+
+                    //var obj = new Object();
+                    //obj.userId = getControlValue("txtUserId");
+                    //obj.password = getControlValue("txtPassword");
+                    callServiceMethod(person, "/api/Default", "login", false, "", "", false, "", true, loginclick_scs, "", "", "");
+                }
+
+            }
+            function loginclick_scs(p1, p2, p3, datas) {
+                $("#loader").fadeOut();
+                //var val=datas.split('***')
+
+                if (datas.msg == "" || datas.msg == null) {
+                    if (datas.type == "1") {
+                        sessionStorage.setItem("fname", datas.user.FirstName);
+                        sessionStorage.setItem("mname", datas.user.MiddleName);
+                        sessionStorage.setItem("lname", datas.user.LastName);
+                        sessionStorage.setItem("type", datas.type);
+                        sessionStorage.setItem("userId", datas.userId);
+                        sessionStorage.setItem("image", datas.user.PicPath);
+                        location.href = "/AdminPanel/Dashboard";
+
+                    }
+                    else if (datas.type == "3") {
+                        sessionStorage.setItem("fname", datas.emp.FName);
+                        sessionStorage.setItem("mname", datas.emp.MName);
+                        sessionStorage.setItem("lname", datas.emp.LName);
+                        sessionStorage.setItem("type", datas.type);
+                        sessionStorage.setItem("userId", datas.emp.UserType);
+                        sessionStorage.setItem("image", datas.emp.ImageUpload);
+                        sessionStorage.setItem("Department", datas.emp.Department);
+                        sessionStorage.setItem("Designation", datas.emp.Designation);
+                        sessionStorage.setItem("EmpId", datas.emp.Id);
+                        sessionStorage.setItem("DesignationId", datas.emp.DesigId);
+                        sessionStorage.setItem("deptId", datas.emp.departmentID);
+                        location.href = "/EmployeeDashboard/Dashboard";
+                    }
+                    else if (datas.type == "4") {
+                        sessionStorage.setItem("fname", datas.stude.FirstName);
+                        sessionStorage.setItem("mname", datas.stude.MiddleName);
+                        sessionStorage.setItem("lname", datas.stude.LastName);
+                        sessionStorage.setItem("type", datas.stude.Marks);
+                        sessionStorage.setItem("userId", datas.stude.Marks2);
+                        sessionStorage.setItem("image", datas.stude.PicPath);
+                        sessionStorage.setItem("course", datas.stude.Class);
+                        sessionStorage.setItem("RegNo", datas.stude.RegNo);
+                        sessionStorage.setItem("stdID", datas.stude.ID);
+
+                        sessionStorage.setItem("SectionId", datas.stude.Section);
+                        sessionStorage.setItem("ClassId", datas.stude.ClassID);
+                        location.href = "/AdminPanel/StudentDashboard";
+
+                    }
+                    else if (datas.type == "5") {
+                        sessionStorage.setItem("fname", datas.stude.FirstName);
+                        sessionStorage.setItem("mname", datas.stude.MiddleName);
+                        sessionStorage.setItem("lname", datas.stude.LastName);
+                        sessionStorage.setItem("type", datas.stude.Marks);
+                        sessionStorage.setItem("userId", datas.stude.Marks2);
+                        sessionStorage.setItem("image", datas.stude.PicPath);
+                        sessionStorage.setItem("course", datas.stude.Class);
+                        sessionStorage.setItem("RegNo", datas.stude.RegNo);
+                        sessionStorage.setItem("stdID", datas.stude.ID);
+
+                        sessionStorage.setItem("SectionId", datas.stude.Section);
+                        sessionStorage.setItem("ClassId", datas.stude.ClassID);
+
+                        sessionStorage.setItem("FatherName", datas.stude.FatherName);
+                        sessionStorage.setItem("MotherName", datas.stude.MotherName);
+                        location.href = "/Parents/ParentDashboard";
+
+
+                    }
+                }
+                else {
+                    setControlValue("lblMsg", datas.msg);
+                }
+            }
+
+        </script>
+
+
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $("#form1").validate({
+                    errorClass: "my-error-class",
+                    validClass: "my-valid-class",
+                    rules: {
+                        ddlRoleType: {
+                            selectcheck: true
+                        },
+
+                        txtUserId: "required",
+                        txtPassword: "required",
+
+
+
+                    },
+                    messages: {
+
+                        txtUserId: "Please Enter User Id",
+                        ddlRoleType: "Please Select User Type",
+                        txtPassword: "Please Enter Password"
+
+
+                    }
+                })
+                jQuery.validator.addMethod('selectcheck', function (value) {
+                    if (value == "0") {
+                        return (value != '0');
+                    }
+                    else if (value == "? undefined:undefined ?") {
+                        return (value != '? undefined:undefined ?');
+                    }
+                    else {
+                        return true;
+                    }
+
+                }, "Please Select Country");
+
+
+            });
+        </script>
+        <style type="text/css">
+
+            .VedioWidth {
+                width: 1069px;
+                height: 516px;
+                margin-left: -277px;
+            }
+
+            .modal-content {
+                background-color: #0000 !important;
+            }
+
+            .panel {
+                background-color: #0000 !important;
+            }
+        </style>
+    </div>
+</body>
+</html>

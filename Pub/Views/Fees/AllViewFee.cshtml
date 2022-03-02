@@ -1,0 +1,210 @@
+﻿
+@{
+    ViewBag.Title = "AllViewFee";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    //Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+@*<script type="text/javascript">
+        function Print() {
+            //alert('sdfgsdfgsdf');
+            var printContent = document.getElementById("myModal").innerText;
+            myModal.print(printContent);
+            myModal.close();
+
+            //  window.close;
+        }
+    </script>*@
+
+<script>
+
+    function toolbarClick(args) {
+        var myModalObj = document.getElementById("myModal").ej2_instances[0];
+        if (args.item.id === 'myModal') {
+          myModalObj.pdfExport();
+        }
+    }
+
+</script>
+<section class="content">
+    <form id="w0" action="/employee/emp-master/index" method="get">
+        <div class="box-body">
+            <div class="row">
+
+                <div class="row center-block" style="width: 100%;">
+                    <div class="col-lg-4 col-xs-12">
+                        <!-- small box -->
+                        <div class="small-box bg-blue">
+                            <div class="inner">
+                                <h3 id="txttotalamt">0 </h3>
+                                <p>Total  Amount</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fa fa-book"></i>
+                            </div>
+
+                        </div>
+                    </div><!-- ./col -->
+                    <!-- ./col -->
+                    <div class="col-lg-4 col-xs-12">
+                        <!-- small box -->
+                        <div class="small-box bg-orange">
+                            <div class="inner">
+                                <h3 id="txtconcession">0</h3>
+                                <p>Total Give Concession</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fa fa-file"></i>
+                            </div>
+
+                        </div>
+                    </div><!-- ./col -->
+                    <div class="col-lg-4 col-xs-12">
+                        <!-- small box -->
+                        <div class="small-box bg-teal">
+                            <div class="inner">
+                                <h3 id="txtTotalAmount">0 </h3>
+                                <p>Total Payable Amount</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fa fa-book"></i>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div class="row">
+
+                <div class="row center-block" style="width: 100%;">
+                    <!-- ./col -->
+                    <div class="col-lg-4 col-xs-12">
+                        <!-- small box -->
+                        <div class="small-box bg-green">
+                            <div class="inner">
+                                <h3 id="txtPaidAmount">0</h3>
+                                <p>Total Paid Amount</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fa fa-file-text"></i>
+                            </div>
+
+                        </div>
+                    </div><!-- ./col -->
+                    <div class="col-lg-4 col-xs-12">
+                        <!-- small box -->
+                        <div class="small-box bg-red">
+                            <div class="inner">
+                                <h3 id="txtDuesAmount">0</h3>
+                                <p>Total Due Amount</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fa fa-file"></i>
+                            </div>
+
+                        </div>
+                    </div><!-- ./col -->
+                </div>
+
+
+            </div>
+
+
+
+
+
+
+
+
+        </div>
+
+
+    </form>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+      var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethod(JSON.stringify([SchoolID]), "/api/AccountsAPI", "countpaymentAllTypeBySchool", false, "", "", false, "", true, setPaymetnsSum, "", "", "");
+
+    });
+
+
+
+
+</script>
+
+
+<script type="text/javascript">
+
+
+    function setPaymetnsSum(p1, p, p3, datas) {
+        if (datas != "") {
+            setControlValue("txtTotalAmount", datas.split('***')[0]);
+            setControlValue("txtPaidAmount", datas.split('***')[1]);
+            setControlValue("txtDuesAmount", datas.split('***')[2]);
+            setControlValue("txttotalamt", datas.split('***')[3]);
+            setControlValue("txtconcession", datas.split('***')[4]);
+
+        }
+        else {
+            setControlValue("txtTotalAmount", "0");
+            setControlValue("txtPaidAmount", "0");
+            setControlValue("txtDuesAmount", "0");
+            setControlValue("txttotalamt", "0");
+            setControlValue("txtconcession", "0");
+        }
+    }
+
+
+</script>
+

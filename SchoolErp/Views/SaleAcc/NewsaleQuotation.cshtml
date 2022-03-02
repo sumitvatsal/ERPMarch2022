@@ -1,0 +1,1125 @@
+﻿@{
+    Layout = null;
+}
+
+@{
+    ViewBag.Title = "NewPurchase";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<style type="text/css">
+    .imgIcon {
+        width: 0.5%;
+        height: 0.5%;
+    }
+
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #mytable td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #mytable {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 98%;
+        margin: 15px;
+    }
+
+        #mytable td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #mytable tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #mytable tr:hover {
+            background-color: #ddd;
+        }
+
+        #mytable th {
+            padding-top: 8px;
+            padding-bottom: 8px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+<section class="content">
+    <div class="box box-solid">
+        <div class="et">
+            <div class="box-header with-border">
+                <h3 class="box-title">New Sale Quotation</h3>
+
+            </div>
+        </div>
+        <div class="alert alert-success alert-dismissible centerSuccess" id="divsuccesmsg" style="display:none">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <h4>
+                <i class="icon fa fa-check"></i>
+                success! <span Id="spsuccessMsg"></span>
+            </h4>
+
+        </div>
+
+        <div class="box-body">
+            <div class="row">
+
+                <div class="content">
+
+
+
+                    <div class="row">
+                        <form role="form" id="form1" name="form1">
+                            <div class="col-sm-12">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title"> New Sale Quotation</h4>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="panel-body">
+
+                                            <div class="row">
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label for="Country" class="req">Customer <span class="requird">*</span></label>
+                                                    <select class="form-control" id="ddlHead" ng-model="ddlHead" valuefield="Id" textfield="Name" @*blankRowValue="0" blankRowText="--Select--" *@></select>
+                                                </div>
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="invisible">
+                                                        Button
+                                                    </label>
+                                                    <div>
+                                                        <a class="btn btn-success btn-sm" href="/Business/NewCustomer"><i class="fa fa-plus-square"></i></a>
+                                                    </div>
+                                                </div>
+                                                <div id="sandbox" class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label for="simple">Date</label>
+                                                    <input id="simple" type="text" class="form-control" value="">
+                                                </div>
+                                                <div id="sandbox" class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label for="simple1">Expiry Date</label>
+                                                    <input id="simple1" type="text" class="form-control" value="">
+                                                </div>
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label>
+                                                        Line Item
+                                                    </label>
+                                                    <div>
+                                                        <a href="#" style="width: 150px;float: right;margin-right: 8px" id="btnadd" class="btn btn-block btn-success" onclick="openModal()">Add</a>
+                                                    </div>
+                                                </div>
+                                                <div id="ee"></div>
+
+
+                                            </div>
+
+
+                                            <div class="row">
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="req" for="Salarydetails_unit">Grand Total </label>
+                                                    <input class="form-control" value="0.00" readonly id="txtGTotal" name="txtGTotal" type="text" ng-model="txtGTotal" />
+                                                </div>
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="req" for="Salarydetails_unit">Discount <span class="requird">*</span> </label>
+                                                    <input class="form-control" value="0.00" onclick="change()" onkeyup="sum()" id="txtDiscount" name="txtDiscount" type="text" ng-model="txtDiscount" />
+                                                </div>
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="req" for="Salarydetails_unit">Total Discount  </label>
+                                                    <input class="form-control" value="0.00" readonly id="txtTDiscount" name="txtTDiscount" type="text" ng-model="txtTDiscount" />
+                                                </div>
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="req" for="Salarydetails_unit"> Tax </label>
+                                                    <input class="form-control" value="0.00" onclick="change()" onkeyup="sum()" id="txtTax" name="txtTax" type="text" ng-model="txtTax" />
+                                                </div>
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="req" for="Salarydetails_unit">Total Tax <span class="requird">*</span> </label>
+                                                    <input class="form-control" value="0.00" readonly id="txtVat" name="txtVat" type="text" ng-model="txtVat" />
+                                                </div>
+
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="req" for="Salarydetails_unit">Shipping Cost <span class="requird">*</span> </label>
+                                                    <input class="form-control" value="0.00" onkeyup="sum()" id="txtShipping" name="txtShipping" type="text" ng-model="txtShipping" />
+                                                </div>
+
+                                            </div>
+
+
+                                            <div class="row">
+                                                <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                                    <label class="req" for="Salarydetails_unit">Net Total  </label>
+                                                    <input class="form-control" value="0.00" readonly id="txtNTotal" name="txtNTotal" type="text" ng-model="txtNTotal" />
+                                                </div>
+                                                <div class="form-group col-sm-8 col-md-12 col-lg-8">
+                                                    <label class="req" for="Salarydetails_unit">Details</label>
+                                                    <textarea class="form-control" id="txtDetails"></textarea>
+                                                </div>
+
+
+                                            </div>
+                                            <div class="box-footer">
+                                                <input class="btn btn-info" id="btnSave" type="button" value="Save">
+                                                <input type="hidden" id="hdnID1" />
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="hdnID" />
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <table border="1" id="mytable" class="table table-bordered table-striped tbl20 htmlTempletes">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        ProductName
+                                    </th>
+                                    <th>
+                                        UnitName
+                                    </th>
+                                    <th>
+                                        Quantity
+                                    </th>
+                                    <th>
+                                        Discount
+                                    </th>
+                                    <th>
+                                        UnitPrice
+                                    </th>
+                                    <th>
+                                        Description
+                                    </th>
+                                    <th>
+                                        Total
+                                    </th>
+                                    <th>
+                                        TAX
+                                    </th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyEmployeeLeaveRequestDetails"></tbody>
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" onclick="refreshControls()">&times;</button>
+                    <h4 class="modal-title">New Sale Quotation Details</h4>
+                </div>
+                <div class="modal-body">
+                    <form role="form" id="form1" name="form1">
+                        <input type="text" id="unitId" hidden />
+                        <div class="row">
+                            <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                <label for="Country" class="req">Product <span class="requird">*</span></label>
+                                <select class="form-control" id="ddlProduct" ng-model="ddlProduct" valuefield="Id" textfield="Name" onchange="BindUnit()" @*blankRowValue="0" blankRowText="--Select--" *@></select>
+                            </div>
+
+                            <input type="text" id="txtName" hidden />
+                            <input type="text" id="UId" hidden />
+
+
+                            <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                <label class="invisible">
+                                    Button
+                                </label>
+                                <div>
+                                    <a class="btn btn-success btn-sm" href="/Inventory/NewProducts"><i class="fa fa-plus-square"></i></a>
+                                </div>
+                            </div>
+                            <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                <label class="req" for="Salarydetails_unit">Unit  </label>
+                                <input class="form-control" readonly id="txtUnit" name="txtUnit" type="text" ng-model="txtUnit" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-3 col-md-3 col-lg-3">
+                                <label class="req" for="Salarydetails_unit">Quantity <span class="requird">*</span> </label>
+                                <input class="form-control" value="1.00" onkeyup="calc()" id="txtQuantity" name="txtQuantity" type="text" ng-model="txtQuantity" />
+                            </div>
+                            <div class="form-group col-sm-3 col-md-3 col-lg-3">
+                                <label class="req" for="Salarydetails_unit">Unit Price<span class="requird">*</span>  </label>
+                                <input class="form-control" value="0.00" onkeyup="calc()" id="txtPrice" name="txtPrice" type="text" ng-model="txtPrice" />
+                            </div>
+                            <div class="form-group col-sm-3 col-md-3 col-lg-3">
+                                <label class="req" for="Salarydetails_unit">Discount (%) <span class="requird">*</span> </label>
+                                <input class="form-control" value="0.00" onkeyup="calc()" id="txtDiscount1" name="txtDiscount1" type="text" ng-model="txtDiscount1" />
+                            </div>
+                            <div class="form-group col-sm-3 col-md-3 col-lg-3">
+                                <label class="req" for="Salarydetails_unit">Tax <span class="requird">*</span> </label>
+                                <input class="form-control" value="0.00" onkeyup="calc()" id="Tax" name="Tax" type="text" ng-model="Tax" />
+                            </div>
+
+
+
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-2 col-md-2 col-lg-2">
+                                <label class="req" for="Salarydetails_unit">Total <span class="requird">*</span> </label>
+                                <input class="form-control" readonly value="0.00" id="txtTotal1" name="txtTotal1" type="text" ng-model="txtTotal1" />
+                            </div>
+                            <div class="form-group col-sm-10 col-md-10 col-lg-10">
+                                <label class="req" for="Salarydetails_unit">Description</label>
+                                <textarea class="form-control" id="txtDesc"></textarea>
+                            </div>
+
+
+                        </div>
+                        <div class="box-footer">
+                            <input class="btn btn-info" id="btnSumit" onclick="addRow()" type="button" value="Save">
+                            <input class="btn btn-info" id="btnupdate" onclick="update()" type="button" value="Update" style="visibility:hidden;">
+
+                        </div>
+
+
+
+                    </form>
+
+                </div>
+                <div class="modal-footer">
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="alert alert-success centerSuccess" id="divSucesEmail" style="display:none">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h4>
+            <i class="icon fa fa-check"></i>
+            <span Id="sentEmailMsg"></span>
+        </h4>
+
+    </div>
+</section>
+
+
+
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="/css/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+
+
+<script>
+
+    function addRow() {
+        debugger;
+        var txtName = document.getElementById('txtName').value;
+        var txtUnit = document.getElementById('txtUnit').value;
+        var txtQuantity = document.getElementById('txtQuantity').value;
+        var txtDiscount1 = document.getElementById('txtDiscount1').value;
+        var txtPrice = document.getElementById('txtPrice').value;
+        var txtDesc = document.getElementById('txtDesc').value;
+        var txtTotal1 = document.getElementById('txtTotal1').value;
+        var UnitId = document.getElementById('unitId').value;
+        var Productid = getControlValue('ddlProduct');
+        var Tax = document.getElementById('Tax').value;
+
+        var table = document.getElementsByTagName('table')[0];
+
+        var newRow = table.insertRow(1);
+
+        var cel1 = newRow.insertCell(0);
+        var cel2 = newRow.insertCell(1);
+        var cel3 = newRow.insertCell(2);
+        var cel4 = newRow.insertCell(3);
+        var cel5 = newRow.insertCell(4);
+        var cel6 = newRow.insertCell(5);
+        var cel7 = newRow.insertCell(6);
+        var cel8 = newRow.insertCell(7);
+        var cel9 = newRow.insertCell(8);
+        var cel10 = newRow.insertCell(9);
+        var cel11 = newRow.insertCell(10);
+        var cel12 = newRow.insertCell(11);
+        var cel13 = newRow.insertCell(12);
+
+
+
+
+        cel1.innerHTML = txtName;
+        cel1.className = "name";
+        cel2.innerHTML = txtUnit;
+        cel2.className = "unit";
+        cel3.innerHTML = txtQuantity;
+        cel3.className = "quantity";
+        cel4.innerHTML = txtDiscount1;
+        cel4.className = "discount";
+        cel5.innerHTML = txtPrice;
+        cel5.className = "price";
+        cel6.innerHTML = txtDesc;
+        cel6.className = "desc";
+        cel7.innerHTML = txtTotal1;
+        cel7.className = "total";
+        cel8.innerHTML = Tax;
+        cel8.className = "Tax";
+        cel9.innerHTML = UnitId;
+        cel9.className = "unitId";
+        cel9.style.display = "none";
+        cel10.innerHTML = Productid;
+        cel10.className = "productId";
+        cel10.style.display = "none";
+        cel13.innerHTML = "0";
+        cel13.className = "id";
+        cel13.style.display = "none";
+
+
+        var btnRemove = document.createElement("INPUT");
+        btnRemove.type = "button";
+        btnRemove.value = "Remove";
+        btnRemove.setAttribute("onclick", "Remove(this);");
+        cel12.appendChild(btnRemove);
+
+        var btn = document.createElement("INPUT");
+        btn.type = "button";
+        btn.value = "Edit";
+        btn.setAttribute("onclick", "Edit(this);");
+        cel11.appendChild(btn);
+
+        $("#ddlProduct").val('0');
+        $("#txtUnit").val('');
+        $("#txtQuantity").val('1.00');
+        $("#txtPrice").val('0.00');
+        $("#txtDiscount1").val('0.00');
+        $("#txtTotal1").val('0.00');
+        $("#txtDesc").val('');
+
+    }
+    $('#myModal').modal('hide');
+</script>
+<script>
+    function Edit(button) {
+        debugger;
+        openModal();
+        var row = button.parentNode.parentNode;
+        var rowindex = button.parentNode.parentNode.rowIndex;
+
+        var txtName = row.getElementsByTagName("TD")[0].innerHTML.replace(/^\s+|\s+$/g, '').replace(/\s/g, '');
+        var txtUnit = row.getElementsByTagName("TD")[1].innerHTML.replace(/^\s+|\s+$/g, '').replace(/\s/g, '');
+        var txtQuantity = row.getElementsByTagName("TD")[2].innerHTML.replace(/^\s+|\s+$/g, '').replace(/\s/g, '');
+        //var txtDesc2 = row.getElementsByTagName("TD")[5].innerHTML;
+        var txtDiscount1 = row.getElementsByTagName("TD")[3].innerHTML.replace(/^\s+|\s+$/g, '').replace(/\s/g, '');
+        var txtPrice = row.getElementsByTagName("TD")[4].innerHTML.replace(/^\s+|\s+$/g, '').replace(/\s/g, '');
+        var txtDesc = row.getElementsByTagName("TD")[5].innerHTML.replace(/^\s+|\s+$/g, '').replace(/\s/g, '');
+        var txtTotal1 = row.getElementsByTagName("TD")[6].innerHTML.replace(/^\s+|\s+$/g, '').replace(/\s/g, '');
+        var Tax = row.getElementsByTagName("TD")[7].innerHTML.replace(/^\s+|\s+$/g, '').replace(/\s/g, '');
+
+        var UnitId = row.getElementsByTagName("TD")[8].innerHTML.replace(/^\s+|\s+$/g, '').replace(/\s/g, '');
+        var Productid = row.getElementsByTagName("TD")[9].innerHTML.replace(/^\s+|\s+$/g, '').replace(/\s/g, '');
+
+
+
+
+        $('#UId').val(rowindex);
+        $('#txtName').val(txtName);
+        $('#ddlProduct').val(Productid);
+        $('#txtUnit').val(txtUnit);
+        $('#txtQuantity').val(txtQuantity);
+        $('#txtDesc').val(txtDesc);
+        $('#txtPrice').val(txtPrice);
+        $('#txtDiscount1').val(txtDiscount1);
+        $('#txtTotal1').val(txtTotal1);
+        $('#Tax').val(Tax);
+        $('#unitId').val(UnitId);
+        document.getElementById('btnSumit').style.visibility = 'hidden';
+        document.getElementById('btnupdate').style.visibility = 'visible';
+
+        // $('#ddlProduct').val(name);
+        // document.getElementById('ddlProduct').attr = name;
+        //$('#myModal').modal('Show');
+
+    }
+
+
+</script>
+<script>
+    function Remove(button) {
+        //Determine the reference of the Row using the Button.
+        var row = button.parentNode.parentNode;
+        var name = row.getElementsByTagName("TD")[0].innerHTML;
+        if (confirm("Do you want to delete: " + name)) {
+
+            //Get the reference of the Table.
+            var table = document.getElementById("mytable");
+
+            //Delete the Table row using it's Index.
+            table.deleteRow(row.rowIndex);
+
+        }
+        total();
+    };
+
+</script>
+<script>
+    function update() {
+        debugger;
+        if ($("#ddlProduct").val() == "0") {
+            alert("Please select Product  !");
+            $("#ddlProduct").focus()
+            return false;
+
+        }
+        var ddlHead = $("#ddlWare");
+        if (ddlHead.val() == "0") {
+            alert("Please select Warehouse !");
+            ddlHead.focus()
+            return false;
+
+        }
+
+        var row = document.getElementById('UId').value;
+        var table = document.getElementById('mytable');
+        table.rows[row].cells[0].innerHTML = document.getElementById('txtName').value;
+        table.rows[row].cells[1].innerHTML = document.getElementById('txtUnit').value;
+        table.rows[row].cells[2].innerHTML = document.getElementById('txtQuantity').value;
+        table.rows[row].cells[3].innerHTML = document.getElementById('txtDiscount1').value;
+        table.rows[row].cells[4].innerHTML = getControlValue('txtPrice');
+        table.rows[row].cells[5].innerHTML = getControlValue('txtDesc');
+        table.rows[row].cells[6].innerHTML = getControlValue('txtTotal1');
+        table.rows[row].cells[7].innerHTML = getControlValue('Tax');
+
+        table.rows[row].cells[8].innerHTML = getControlValue('unitId');
+        table.rows[row].cells[9].innerHTML = getControlValue('ddlProduct');
+
+        total();
+
+        $("#ddlProduct").val('0');
+        $("#txtUnit").val('');
+        $("#txtQuantity").val('1.00');
+        $("#txtPrice").val('0.00');
+        $("#txtDiscount1").val('0.00');
+        $("#txtTotal1").val('0.00');
+        $("#Tax").val('0.00');
+        $("#txtDesc").val('');
+        $('#myModal').modal('hide');
+        document.getElementById('btnSumit').style.visibility = 'visible';
+        document.getElementById('btnupdate').style.visibility = 'hidden';
+
+
+
+    }
+</script>
+
+<script>
+
+    $(document).ready(function () {
+        debugger;
+        var ID = getQuerystring("id");
+        if (ID != null) {
+            $.ajax({
+                type: 'Post',
+                url: '/api/AccountsAPI/QuotationList1',
+                data: JSON.stringify([ID]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    $('#hdnID').val(result[0].Id);
+                    var loginuser = (sessionStorage.getItem("userId"));
+                    var typeuser = sessionStorage.getItem("type");
+                    var SchoolID = (sessionStorage.getItem("SchoolID"));
+
+                    callServiceMethodForDDl(JSON.stringify([loginuser, typeuser, SchoolID]), "/api/Default", "getCustomer", "ddlHead", false, "", "", "", "");
+
+
+
+                    $('#ddlHead').val(result[0].customer);
+                    $('#txtInvoice').val(result[0].Invoice);
+                    $('#ddlPayment').val(result[0].Product);
+                    $('#txtDiscount').val(result[0].Discount);
+                    $('#txtTDiscount').val(result[0].TotalDiscount);
+                    $('#txtShipping').val(result[0].Shiping);
+                    $('#txtGTotal').val(result[0].GrandTotal);
+                    $('#txtNTotal').val(result[0].netTotal);
+                    $('#txtPaid').val(result[0].UnitPrice);
+                    $('#txtDue').val(result[0].Quantity);
+                    $('#txtTax').val(result[0].Tax);
+                    $('#ToatlTax').val(result[0].TotalTax);
+                    $('#simple1').val(result[0].ExpDate);
+                    $('#txtDetails').val(result[0].Detail);
+                    $('#simple').val(result[0].Date);
+
+                    $("#tbodyEmployeeLeaveRequestDetails tr").remove();
+
+                    var html2 = '';
+                    $.each(result[0].subModList, function (index1, item1) {
+                        html2 += "<tr></td><td class='name'>" + item1.Product + "</td><td class='unit'>" + item1.customer + "</td><td class='quantity'>" + item1.Quantity + "</td><td class='discount'>" + item1.Discount + "</td><td class='price' >" + item1.UnitPrice + "</td><td class='desc'>" + item1.Detail + "</td><td class='total'>" + item1.netTotal + "</td><td class='Tax'>" + item1.Tax + "</td><td style='display: none;' class='unitId'>" + item1.UnitId + "</td><td style='display: none;' class='productId'>" + item1.Productid + "</td><td><input type='button' onclick='Edit(this)' value='Edit' /></td><td></td><td style='display: none;' class='id'>" + item1.Id + "</td></tr>";
+                    });
+                    $(html2).appendTo('#tbodyEmployeeLeaveRequestDetails');
+
+                    //  $('#btnSumit') = Update;
+                    //fillDataTable(ID);
+
+                }
+            });
+
+            localStorage.removeItem("EditBill");
+        }
+
+
+
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser, SchoolID]), "/api/Default", "getCustomer", "ddlHead", false, "", "", "", "");
+
+        setControlValue("hdnID", 0);
+        setControlValue("hdnID1", 0);
+        /*        setControlValue("hdnStatus", 1);*/
+        $('.dtpicker').datepicker({
+            //dateFormat: 'dd/mm/yy' ,supplier
+            autoclose: true,
+            format: 'dd/mm/yyyy'
+        });
+
+        var ID = getQuerystring("id");
+        if (typeof (ID) != "undefined") {
+            setControlValue("hdn", ID);//
+
+            GetValues(ID);
+
+        }
+
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                txtName: "required",
+            },
+            messages: {
+                txtName: "Please Enter Brand Name",
+            }
+        })
+        //callServiceMethodForDDl("", "/api/StudentApi", "GetLeaveStatus", "ddlReqStatus", false, "", "", "", "");
+    });
+
+    var date = new Date();
+    var today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    var optSimple = {
+        format: 'MM/dd/yyyy',
+        todayHighlight: true,
+        orientation: 'bottom right',
+        autoclose: true,
+        container: '#sandbox'
+    };
+
+    var optComponent = {
+        format: 'MM/dd/yyyy',
+        container: '#datePicker',
+        orientation: 'auto top',
+        todayHighlight: true,
+        autoclose: true
+    };
+
+    // SIMPLE
+    $('#simple1').datepicker(optSimple);
+
+    // COMPONENT
+    $('#datePicker').datepicker(optComponent);
+
+    // ===================================
+
+    $('#datepicker1').datepicker({
+        format: "mm : dd : yyyy",
+        todayHighlight: true,
+        autoclose: true,
+        container: '#box1',
+        orientation: 'top right'
+    });
+
+    $('#datepicker2').datepicker({
+        format: 'MM/dd/yyyy',
+        todayHighlight: true,
+        autoclose: true,
+        container: '#box2',
+        orientation: 'top right'
+    });
+
+
+    $('#datepicker1, #datepicker2, #simple1, #datePicker').datepicker('setDate', today);
+
+
+    function openModal() {
+        $('#txtUnit').prop('readonly', false);
+        $('#txtUnit').val();
+        $('#txtUnit').prop('readonly', true);
+        $('#myModal').modal('show');
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser, SchoolID]), "/api/Default", "GetProducts", "ddlProduct", false, "", "", "", "");
+
+    }
+
+    var date = new Date();
+    var today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    var optSimple = {
+        format: 'MM/dd/yyyy',
+        todayHighlight: true,
+        orientation: 'bottom right',
+        autoclose: true,
+        container: '#sandbox'
+    };
+
+    var optComponent = {
+        format: 'MM/dd/yyyy',
+        container: '#datePicker',
+        orientation: 'auto top',
+        todayHighlight: true,
+        autoclose: true
+    };
+
+    // SIMPLE
+    $('#simple').datepicker(optSimple);
+
+    // COMPONENT
+    $('#datePicker').datepicker(optComponent);
+
+    // ===================================
+
+    $('#datepicker1').datepicker({
+        format: "mm : dd : yyyy",
+        todayHighlight: true,
+        autoclose: true,
+        container: '#box1',
+        orientation: 'top right'
+    });
+
+    $('#datepicker2').datepicker({
+        format: 'MM/dd/yyyy',
+        todayHighlight: true,
+        autoclose: true,
+        container: '#box2',
+        orientation: 'top right'
+    });
+
+    $('#datepicker1, #datepicker2, #simple, #datePicker').datepicker('setDate', today);
+
+
+    function openModal() {
+        $('#txtUnit').prop('readonly', false);
+        $('#txtUnit').val();
+        $('#txtUnit').prop('readonly', true);
+        $('#myModal').modal('show');
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser, SchoolID]), "/api/Default", "GetProducts", "ddlProduct", false, "", "", "", "");
+
+    }
+    function calc() {
+        debugger;
+        var txt1 = document.getElementById("txtQuantity").value;
+        var txt2 = document.getElementById("txtPrice").value;
+        var txt4 = document.getElementById("Tax").value / 100;
+        var txt3 = document.getElementById("txtDiscount1").value / 100;
+        var total;
+        total = txt1 * txt2
+
+        if (!isNaN(txt1) && !isNaN(txt2) && !isNaN(txt3) && !isNaN(txt4)) {
+
+            document.getElementById("txtTotal1").value = total - (total * txt3) + (total * txt4)
+        }
+
+
+        else
+            (
+                document.getElementById('"txtTotal1"').value = total
+            )
+
+
+
+
+    }
+
+    function sum() {
+        var txtFirstNumberValue = document.getElementById('txtDiscount').value;
+        var txtSecondNumberValue = localStorage.getItem("TotalDiscount");
+        var txtfifthNumberValue = document.getElementById('txtTax').value;
+        var txtsixNumberValue = localStorage.getItem("TotalTax");
+        var txtThirdNumberValue = document.getElementById('txtGTotal').value;
+        var txtFourthNumberValue = document.getElementById('txtShipping').value;
+        var result = parseInt(txtFirstNumberValue) + parseInt(txtSecondNumberValue);
+        var result1 = parseInt(txtThirdNumberValue) - parseInt(txtFirstNumberValue) + parseInt(txtfifthNumberValue);
+        var result2 = parseInt(result1) + parseInt(txtFourthNumberValue);
+        var result3 = parseInt(txtfifthNumberValue) + parseInt(txtsixNumberValue);
+        if (!isNaN(result)) {
+            document.getElementById('txtTDiscount').value = result;
+        }
+        if (!isNaN(result1)) {
+            document.getElementById('txtNTotal').value = result1;
+        }
+        if (!isNaN(result2)) {
+            document.getElementById('txtNTotal').value = result2;
+        }
+
+        if (!isNaN(result3)) {
+            document.getElementById('txtVat').value = result3;
+        }
+    }
+
+
+    function BindUnit() {
+        debugger;
+        var productId = $('#ddlProduct').val();
+
+        $.ajax({
+            type: 'Get',
+            url: '/api/Default/GetUnitByProductId',
+            data: { ProductId: productId },
+            dataType: 'json',
+            beforeSend: function () {
+                $('#txtUnit').prop('readonly', false);
+            },
+            success: function (unitValue) {
+                var unitRecord = unitValue.split(',');
+                var unitName = unitRecord[0];
+                var unitId = unitRecord[1];
+                unitValue = unitValue.replace("\\\"", "");
+                $('#txtUnit').val(unitName);
+                $('#unitId').val(unitId);
+                $('#txtUnit').prop('readonly', true);
+                var productrecords = unitValue.split(',');
+                var Unitprice = productrecords[2];
+                unitValue = unitValue.replace("\\\"", "");
+                $('#txtPrice').val(Unitprice);
+            }
+        });
+    }
+
+    $("#ddlProduct").change(function () {
+        var ddlProduct = getControlValue("ddlProduct");
+        if (ddlProduct != null && (ddlProduct != -1) && (ddlProduct != undefined)) {
+            var SelectedText = $('#ddlProduct :selected').text();
+            $('#txtName').val(SelectedText);
+        }
+    });
+
+    $("#btnSave").click(function () {
+        debugger;
+        var ID = getControlValue("hdnID");
+        var ID1 = getControlValue("hdnID");
+        var Product = getControlValue("ddlProduct");
+        var unitName = getControlValue("txtUnit");
+        var unitId = getControlValue("unitId");
+        var Quantity = getControlValue("txtQuantity");
+        var Price = getControlValue("txtPrice");
+        var Discount = getControlValue("txtDiscount1");
+        var Desc = getControlValue("txtDesc");
+        var Total = getControlValue("txtTotal1");
+        var Name = getControlValue("txtName");
+        var Tax = getControlValue("Tax");
+        var customer = getControlValue("ddlHead");
+        var Date = getControlValue("simple");
+        var DueDate = getControlValue("simple1");
+        var Discountm = getControlValue("txtDiscount");
+        var TotalDiscount = getControlValue("txtTDiscount");
+        var Shiping = getControlValue("txtShipping");
+        var GrandTotal = getControlValue("txtGTotal");
+        var TotalTax = getControlValue("txtVat");
+        var Tax = getControlValue("txtTax");
+        var NetTotal = getControlValue("txtNTotal");
+        var Details = getControlValue("txtDetails");
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+
+
+        Save(ID1, customer, Date, DueDate, Discountm, TotalDiscount, Shiping, GrandTotal, TotalTax, Tax, NetTotal, Details, SchoolID);
+
+        var productId = [];
+        var unitNames = [];
+        var quantities = [];
+        var prices = [];
+        var discounts = [];
+        var totals = [];
+        var descriptions = [];
+        var unitIds = [];
+        var productNames = [];
+        var Tax = [];
+        var idd = [];
+
+        $('.productId').each(function () {
+            productId.push($(this).text());
+        });
+        $('.unit').each(function () {
+            unitNames.push($(this).text());
+        });
+        $('.quantity').each(function () {
+            quantities.push($(this).text());
+        });
+        $('.discount').each(function () {
+            discounts.push($(this).text());
+        });
+        $('.price').each(function () {
+            prices.push($(this).text());
+        });
+        $('.desc').each(function () {
+            descriptions.push($(this).text());
+        });
+        $('.total').each(function () {
+            totals.push($(this).text());
+        });
+        $('.unitId').each(function () {
+            unitIds.push($(this).text());
+        });
+        $('.name').each(function () {
+            productNames.push($(this).text());
+        });
+        $('.Tax').each(function () {
+            Tax.push($(this).text());
+        });
+        $('.id').each(function () {
+            idd.push($(this).text());
+        });
+
+        for (var i = 0; i < productId.length; i++) {
+            Save1(ID, productId[i], unitNames[i], quantities[i], prices[i], discounts[i], totals[i], descriptions[i], unitIds[i], productNames[i], Tax[i], idd[i]);
+        }
+
+
+        //Save1(ID, Product, unitName, Quantity, Price, Discount, Total, Desc, unitId, Name, Tax);
+    });
+    function Save(ID1, customer, Date, DueDate, Discountm, TotalDiscount, Shiping, GrandTotal, TotalTax, Tax, NetTotal, Details, SchoolID) {
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+            $.ajax({
+                url: "/api/AccountsAPI/SaveRecord",
+                type: "Post",
+                /* data: JSON.stringify(["SavePurchase", ID, Product, unitName, Quantity, Price, Discount, Total, Desc, unitId, Name]),*/
+                data: JSON.stringify(["NewsaleQuotationMain", ID1, customer, Date, DueDate, Discountm, TotalDiscount, Shiping, GrandTotal, TotalTax, Tax, NetTotal, Details, SchoolID]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+
+                    $("#loader").fadeOut();
+                    $("#divSucesEmail").fadeIn();
+                    $("#sentEmailMsg").html(data.Msg);
+                    setTimeout(function () {
+                        $("#divSucesEmail").fadeOut();
+                        $("#sentEmailMsg").html("");
+                    }, 2000)
+
+                    if (data.ID != -1) {
+                        setControlValue("hdn", 0);
+                        setControlValue("txtCTName", "");
+                        $("#txtDesc").val("");
+                        setControlValue("txtDesc", "");
+                        $('#myModal').modal('hide');
+
+                    }
+                    /* txtTotal1 = txtGTotal*/
+                    fillDataTable()
+                }
+            });
+
+        }
+    }
+
+    function Save1(ID, Product, unitName, Quantity, Price, Discount, Total, Desc, unitId, Name,Tax,Idd) {
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+            $.ajax({
+                url: "/api/AccountsAPI/SaveRecord",
+                type: "Post",
+                data: JSON.stringify(["NewsaleQuotation", ID, Product, unitName, Quantity, Price, Discount, Total, Desc, unitId, Name, Tax, Idd]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+
+                    $("#loader").fadeOut();
+                    $("#divSucesEmail").fadeIn();
+                    $("#sentEmailMsg").html(data.Msg);
+                    setTimeout(function () {
+                        $("#divSucesEmail").fadeOut();
+                        $("#sentEmailMsg").html("");
+                    }, 2000)
+
+                    if (data.ID != -1) {
+                        setControlValue("hdn", 0);
+                        setControlValue("txtCTName", "");
+                        $("#txtDesc").val("");
+                        setControlValue("txtDesc", "");
+                        $('#myModal').modal('hide');
+
+                    }
+                    /* txtTotal1 = txtGTotal*/
+                    fillDataTable()
+                }
+            });
+
+        }
+    }
+</script>
+<script type="text/javascript">
+
+
+    function successMsg(p1, p2, p3, datas) {
+
+        $("#loader").fadeOut();
+
+        setTimeout(function () {
+            $('#example1').DataTable({
+
+                dom: 'lBfrtip',
+                bRetrieve: true,
+                bDestroy: true,
+                'columnDefs': [{
+                    "targets": -1,
+                    "orderable": false
+                }],
+            });
+        }, 1000);
+    }
+
+    //
+    $("#btnSearch").click(function () {
+        fillDataTable();
+    });
+
+    function EditStatus(ID, ServiceName, Charge, Tax) {
+
+        Save1(ID, ServiceName, Charge, Desc, Tax);
+    }
+
+
+    function Edit1(ID, quantity, Desc, unit, price, discount, total) {
+        debugger;
+        $('#myModal').modal('show');
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "GetProducts", "ddlProduct", false, "", "", "", "");
+        setControlValue("hdnID", ID);
+        setControlValue("ddlProduct", ID);
+        setControlValue("txtDesc", Desc);
+        setControlValue("txtUnit", unit);
+        setControlValue("txtPrice", price);
+        setControlValue("txtQuantity", quantity);
+        setControlValue("txtDiscount1", discount);
+        setControlValue("txtTotal1", total);
+
+    }
+
+
+    function ResetAll() {
+        setControlValue("txtService", "");
+        setControlValue("txtDesc", "");
+        fillDataTable();
+    }
+
+    function ResetModal() {
+        setControlValue("txtService", "");
+        setControlValue("txtDesc", "");
+        setControlValue("txtCharge", "");
+        setControlValue("txtTax", "");
+        setControlValue("hdnID", 0);
+
+    }
+
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        debugger;
+        $('#btnSumit').click(function () {
+        /*  var databack = $("#myModal #txtTotal1").val().trim();*/
+            total();
+            //var value = $('#txtTotal1').val();
+            //var value2 = $('#txtDiscount1').val();
+            //var value3 = $('#txtQuantity').val();
+            //var value4 = $('#txtPrice').val();
+            //var value5 = $('#Tax').val();
+            //$('#txtGTotal').val(value);
+            //$('#txtNTotal').val(value);
+            //$('#txtDue').val(value);
+            //var result = parseFloat(value3) * parseFloat(value4) * parseFloat(value2) / 100;
+            //$('#txtTDiscount').val(result);
+            //localStorage.setItem("TotalDiscount", result);
+            //var result3 = parseFloat(value3) * parseFloat(value4) * parseFloat(value5) / 100;
+            //$('#txtVat').val(result3);
+            //localStorage.setItem("TotalTax", result3);
+            //$('#myModal').modal('hide');
+
+        });
+    });
+</script>
+<script>
+    function total() {
+        debugger;
+        var Total = 0, Dis = 0, Taxt = 0;
+
+        for (var i = 1; i < document.getElementById('mytable').rows.length; i++) {
+            var qty1 = document.getElementById('mytable').rows[i].cells[2].innerHTML;
+            var Dis1 = document.getElementById('mytable').rows[i].cells[3].innerHTML;
+            var price1 = document.getElementById('mytable').rows[i].cells[4].innerHTML;
+            var total1 = document.getElementById('mytable').rows[i].cells[6].innerHTML;
+            var Tax = document.getElementById('mytable').rows[i].cells[7].innerHTML;
+
+            // Qty = Qty + parseInt(qty1);
+            var result = parseFloat(price1) * parseFloat(Dis1) * parseFloat(qty1) / 100;
+            Dis = Dis + parseInt(result);
+            var result3 = parseFloat(price1) * parseFloat(qty1) * parseFloat(Tax) / 100;
+            Taxt = Taxt + parseInt(result3);
+            Total = Total + parseInt(total1);
+        }
+        // var result = parseFloat(sumVal);
+        $('#txtTDiscount').val(Dis);
+        $('#txtGTotal').val(Total);
+        $('#txtNTotal').val(Total);
+        $('#txtDue').val(Total);
+        localStorage.setItem("TotalDiscount", Dis)
+        $('#txtVat').val(Taxt);
+        $('#myModal').modal('hide');
+    }
+</script>
+

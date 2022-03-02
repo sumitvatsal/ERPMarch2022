@@ -1,0 +1,311 @@
+﻿
+@{
+    ViewBag.Title = "FeeStructureConfig";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<style type="text/css">
+    .imgIcon {
+        width: 0.5%;
+        height: 0.5%;
+    }
+
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 8px;
+            padding-bottom: 8px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+
+<section class="content-header">
+    <h1>
+        <i class="fa fa-eye"></i> Fee Structure |<small id="CTName"></small>
+    </h1>
+    @*<ul class="breadcrumb">
+        <li><a href="/"><i class="fa fa-home"></i>Home</a></li>
+        <li><a href="/academics/default/index">Academics</a></li>
+        <li class="active">Timetable</li>
+        <li><a href="/timetable/class-timing/index">Class Timing</a></li>
+        <li class="active">gffd</li>
+    </ul>*@
+</section>
+<section class="content">
+    <div class="box box-solid">
+        <div class="box-body table-responsive">
+            <p class="text-right btn-view-group edusecArLangTextLeft">
+                <a class="btn btn-default btn-sm" href="/Fees/FeeStructure"><i class="fa fa-chevron-circle-left"></i> Back</a>							@*<a class="btn btn-info btn-sm" href="/timetable/class-timing/update?id=2" data-target="#globalModal" data-toggle="modal" data-backdrop="static"><i class="fa fa-pencil-square-o"></i> Update</a>										<a class="btn btn-danger btn-sm" href="/timetable/class-timing/delete?id=2" data-confirm="Are you sure you want to delete this item?" data-method="post"><i class="fa fa-trash-o"></i> Delete</a>*@
+            </p>
+
+            <table class="table table-bordered">
+                <colgroup>
+                    <col width="200px">
+                    <col width="250px">
+                    <col width="200px">
+                    <col width="250px">
+                </colgroup>
+                <tbody>
+                    <tr>
+                        <th>Name</th>
+                        <td ><span id="CTName1"></span></td>
+                        <th>Academic Year</th>
+                        <td><span id="spYear"></span></td>
+                    </tr>
+                    <tr>
+                        <th>Classes</th>
+                        <td colspan="3"><span id="spClasses"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+            <br>
+            <input id="hdn" type="hidden" />
+            <input id="hdnFSID" type="hidden" />
+            <div class="box box-solid" style="border:1px solid #eee">
+                <div class="extra-div">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><i class="fa fa-table"></i> Fee Structure Details</h3>
+                        @*<div class="box-tools">
+                            <a class="btn btn-success btn-sm" href="#" onclick="openModal()"><i class="fa fa-plus-square"></i> Add</a>
+                        </div>*@
+                    </div>
+                </div>
+                <div class="box-body table-responsive">
+                    <div id="w1" class="grid-view">
+                        <table id="example1" class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th class="text-center">Head Name</th>
+                                    <th class="text-center">Amount (in Rs.)</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td class="text-center">
+                                        <div class="form-group">
+                                            <select id="ddlFeeCategories" class="form-control" valuefield="Cat_ID" textfield="feeCategory" blankRowValue="-1" blankRowText="----Select----" onchange="" aria-required="true"></select>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="txtFeeValue">
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <a class="btn btn-success btn-sm" href="#" id="AddRow" title="Add"><i class="fa fa-plus-square"></i></a>
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyEmployeeDetails"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <script type="text/html" id="tbodyEmployeeEarningJTemplte">
+                    {#foreach $T as Datashort}
+                    <tr>
+                        <td>
+                            { $T.Datashort.count}
+                        </td>
+                        <td>
+                            { $T.Datashort.ct.FeeCategory}
+                        </td>
+                        <td class="text-right">
+                            { $T.Datashort.fsc.Amount}
+
+                        </td>
+                        <td class="text-center">
+                            <i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" onclick="Edit({ $T.Datashort.fsc.ID},{ $T.Datashort.fsc.FeeCategory},{ $T.Datashort.fsc.Amount},{ $T.Datashort.fsc.FeeStructureID})" title="Edit"></i>
+                            <i class="fa fa-fw fa-trash" style="cursor:pointer" onclick="Delete({ $T.Datashort.fsc.ID})" title="Delete"></i>
+                        </td>
+                    </tr>
+                    {#/for}
+                </script>
+            </div>
+        </div>
+    </div>
+
+</section>
+ 
+<script src="~/js/bootstrap-timepicker.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        setControlValue("hdn", 0);
+
+        var ID = getQuerystring("id");
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        if (typeof (ID) != "undefined") {
+            setControlValue("hdnFSID", ID);//
+            GetValues(ID);
+            //fillDataTable();
+
+        }
+
+        callServiceMethodForDDl(JSON.stringify(["FeeCategory", "", "", 1,"", loginuser, typeuser]), "/api/FeesApi", "getList", "ddlFeeCategories", false, "", "", "", "");
+    });
+    function GetValues(ID)
+    {
+        $.ajax({
+            url: "/api/FeesApi/GetFeeStructureDet",
+            type: "Post",
+            data: JSON.stringify([ID]),
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                if(data.fs.ID!=-1)
+                {
+                    //setControlValue("hdn", data.ID);
+                    setControlValue("CTName", data.fs.StructureName);
+                    setControlValue("CTName1", data.fs.StructureName);
+                    setControlValue("spYear", data.year);
+                    setControlValue("spClasses", data.courses);
+                    fillDataTable();
+                }
+            }
+        });
+    }
+
+    function fillDataTable()
+    {
+        var id=getControlValue("hdnFSID");
+        callJTemplateServiceMethod(JSON.stringify(["FeeStructureConfig",id]), "/api/FeesApi", "getList",
+    "tbodyEmployeeDetails", "tbodyEmployeeEarningJTemplte", true, successMsg, "", "", "");
+    }
+
+    function successMsg(p1, p2, p3, datas) {
+        
+    }
+
+    //
+    $("#AddRow").click(function () {
+        var fsID=getControlValue("hdnFSID");
+        var id=getControlValue("hdn");
+        var _cat=getControlValue("ddlFeeCategories");
+        var _amnt = getControlValue("txtFeeValue");
+        if (_cat != undefined && _amnt != undefined && _cat != -1 && _amnt != "" && _amnt != null)
+        {
+            SaveDetails(id,_cat,_amnt,fsID);
+        }
+    });
+
+    function SaveDetails(id,CT_id,amnt,fsID)
+    {       
+                    $.ajax({
+                        url: "/api/FeesApi/SaveRecord",
+                        type: "Post",
+                        data:JSON.stringify(["FeeStructureConfig",id,CT_id,amnt,fsID]),
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if(data!=-1)
+                            {
+                                if(data==0)
+                                {
+                                    alert("Record already exists!!");
+                                }
+                                else{
+                                    alert("Details saved");
+                                }
+                                
+                                setControlValue("ddlFeeCategories", -1);
+                                setControlValue("txtFeeValue", "");
+                                setControlValue("hdn", 0);
+                            }
+                            else{
+                                alert("Some Error!!");
+                            }
+                            fillDataTable();
+                        }
+                    });
+    }
+
+    function Edit(id,name,stime)
+    {
+        setControlValue("hdn", id);
+        setControlValue("ddlFeeCategories", name);
+        setControlValue("txtFeeValue", stime);
+    }
+
+    function Delete(id)
+    {
+        var result = window.confirm('Are you sure to delete this record?');
+        if (result == true) {
+            $.ajax({
+                url: "/api/FeesApi/DeleteRecord",
+                type: "Post",
+                data: JSON.stringify([id,"FeeStructureConfig"]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    if(data==1){
+                        alert("Record successfully deleted");
+                        fillDataTable()
+                    }
+                }
+            });
+        }
+    }
+</script>

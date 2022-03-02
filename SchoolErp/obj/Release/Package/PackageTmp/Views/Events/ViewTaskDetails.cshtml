@@ -1,0 +1,407 @@
+﻿
+@{
+    ViewBag.Title = "ViewTaskDetails";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+ <section ng-app="eventApp" ng-controller="ViewtaskDetails">
+     <div class="content">
+         <div class="col-sm-12">
+             <ul class="nav nav-tabs nav-tabs-highlight">
+                 <li class="active"><a href="#tbb_a" data-toggle="tab" aria-expanded="true">Task For Students</a></li>
+                 <li class=""><a href="#tbb_b" data-toggle="tab" aria-expanded="false">Tasks For Employee</a></li>
+             </ul><br>
+             <div class="tab-content">
+                 <div class="tab-pane active" id="tbb_a">
+                     <div class="row">
+                         <div class="col-sm-12">
+                             <div class="panel panel-default">                               
+                                 <div class="panel-body">
+                                     <div class="form-group">
+                                         <table id="example1" class="table table-bordered table-striped" style="width:100%">
+                                             <thead style="background-color:steelblue;color:white;width:100%;">
+                                                 <tr>
+                                                     <th>Sr No.</th>
+                                                     <th>School</th>
+                                                     <th>Task</th>
+                                                     <th>Student Name</th>
+                                                     <th>Priority</th>
+                                                     <th>Class</th>
+                                                     <th>Section</th>
+                                                     <th>Task Date</th>
+                                                     <th>Status</th>
+                                                     <th>Action</th>
+                                                 </tr>
+                                             </thead>
+                                             <tbody>
+                                                 <tr ng-repeat="employee in employees" ng-class-odd="'oddTr'">
+
+                                                     <td>
+                                                         {{employee.sno}}
+
+                                                     </td>
+                                                     <td>
+                                                         {{employee.School}}
+
+                                                     </td>
+                                                     <td>
+                                                         {{employee.TaskName}}
+
+
+                                                     </td>
+                                                     <td>
+                                                         {{employee.StudentName}}
+
+
+                                                     </td>
+
+
+                                                     <td>
+                                                         <a href="#" style="background-color:{{employee.priorityColor}};color:white;padding: 4px;border-radius: 8px;">  {{employee.Priority}}</a>
+
+                                                     </td>
+                                                     <td>
+                                                         {{employee.Class}}
+
+                                                     </td>
+                                                     <td>
+                                                         {{employee.Section}}
+
+                                                     </td>
+
+                                                     <td>
+                                                         {{employee.TaskDate}}
+
+                                                     </td>
+                                                     <td>
+                                                         <a href="#" style="background-color:{{employee.color}};color:white;padding: 4px;border-radius: 8px;">
+                                                             {{employee.Status}}
+                                                         </a>
+                                                     </td>
+                                                     <td>
+                                                         <i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" ng-click="editStudentTaskDetasils(employee)"></i>
+                                                         &nbsp;
+                                                         <i class="glyphicon glyphicon-eye-open" style="cursor:pointer" ng-click="viewStudentTaskDetasils(employee)"></i>
+                                                         &nbsp;
+                                                         <i class="fa fa-fw fa-trash" style="cursor:pointer" ng-click="deleteStudentTaskById(employee)"></i>
+                                                     </td>
+                                                 </tr>
+                                             </tbody>
+                                         </table>
+                                     </div>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+
+                 </div>
+                 <div class="tab-pane" id="tbb_b">
+                     <div class="row">
+                         <div class="col-sm-12">
+                             <div class="panel panel-default">
+                                
+                                 <div class="panel-body">
+                                     <div class="form-group">
+
+                                         <table id="example1" class="table table-bordered table-striped"  style="width:100%">
+                                             <thead style="background-color:steelblue;color:white;width:100%;">
+                                                 <tr>
+                                                     <th>Sr. No.</th>
+                                                     <th>School</th>
+                                                     <th>Task</th>
+                                                     <th>Employee Name</th>
+                                                     <th>Priority</th>
+                                                     <th>Department</th>
+                                                     <th>Task Date</th>
+                                                     <th>Status</th>
+                                                     <th>Action</th>
+                                                 </tr>
+                                             </thead>
+                                             <tbody>
+                                                 <tr ng-repeat="employee in eventss" ng-class-odd="'oddTr'">
+
+                                                     <td>
+                                                         {{employee.sno}}
+
+                                                     </td>
+                                                     <td>
+                                                         {{employee.School}}
+
+                                                     </td>
+                                                     <td>
+                                                         {{employee.TaskName}}
+
+
+                                                     </td>
+                                                     <td>
+                                                         {{employee.EmployeeName}}
+
+
+                                                     </td>
+
+
+                                                     <td>
+                                                         <a href="#" style="background-color:{{employee.priorityColor}};color:white;padding: 4px;border-radius: 8px;">   {{employee.Priority}}</a>
+
+                                                     </td>
+                                                     <td>
+                                                         {{employee.Department}}
+
+                                                     </td>
+                                                     <td>
+                                                         {{employee.TaskDate}}
+
+                                                     </td>
+                                                     <td>
+                                                         <a href="#" style="background-color:{{employee.color}};color:white;padding: 4px;border-radius: 8px;">  {{employee.Status}}</a>
+
+                                                     </td>
+
+                                                     <td>
+                                                         <i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" ng-click="editStudentTaskDetasils(employee)"></i>
+                                                         &nbsp;
+                                                         <i class="glyphicon glyphicon-eye-open" style="cursor:pointer" ng-click="viewEmployeeTaskDetails(employee)"></i>
+                                                         &nbsp;
+                                                         <i class="fa fa-fw fa-trash" style="cursor:pointer" ng-click="deleteEmployeeTaskbyId(employee)"></i>
+                                                     </td>
+
+
+
+                                                 </tr>
+
+
+                                             </tbody>
+
+                                         </table>
+
+
+
+
+                                     </div>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+
+                 </div>
+             </div>
+         </div>
+
+
+     </div>
+     <!-- Trigger the modal with a button -->
+     <button type="button" class="btn btn-info btn-lg" id="btnEmployeeShowTasks" style="display:none" data-toggle="modal" data-target="#myModal2">Open Modal</button>
+
+     <!-- Modal -->
+     <div id="myModal2" class="modal fade" role="dialog">
+         <div class="modal-dialog">
+             <div class="modal-content">
+                 <div class="modal-header">
+                     <button type="button" class="close" data-dismiss="modal">&times;</button>
+                     <h4 class="modal-title">Task Details</h4>
+                 </div>
+                 <div class="modal-body">
+                     <div class="content">
+                         <div class="panel panel-white">
+                             <div class="panel-body">
+                                 <div class="row">
+                                     <div class="col-md-12">
+
+                                         @*<div class="form-group col-md-6">
+                                                <label class="col-sm-5 control-label">School</label>
+                                                <div class="col-sm-7">
+                                                    <p class="form-control-static" id="ddlSchoolName"></p>
+                                                </div>
+                                            </div>*@
+                                         <div class="form-group col-md-6">
+                                             <label class="col-sm-5 control-label">Task</label>
+                                             <div class="col-sm-7">
+                                                 <p class="form-control-static" id="spEmployeeTaskName"></p>
+                                             </div>
+                                         </div>
+                                         <div class="form-group col-md-6">
+                                             <label class="col-sm-5 control-label">Description</label>
+                                             <div class="col-sm-7">
+                                                 <p class="form-control-static" id="spEmployeeTaskDesc"></p>
+                                             </div>
+                                         </div>
+
+                                     </div>
+                                     <div class="col-md-12">
+                                         <div class="form-group col-md-6">
+                                             <label class="col-sm-5 control-label">Date</label>
+                                             <div class="col-sm-7">
+                                                 <p class="form-control-static" id="spEmployeeTaskDate"></p>
+                                             </div>
+                                         </div>
+                                         <div class="form-group col-md-6">
+                                             <label class="col-sm-5 control-label">Employee Name</label>
+                                             <div class="col-sm-7">
+                                                 <p class="form-control-static" id="spEmployeeName"> </p>
+                                             </div>
+                                         </div>
+                                         <div id="header"></div>
+                                     </div>
+                                     <div class="col-md-12">
+                                         <div class="form-group col-md-6">
+                                             <label class="col-sm-5 control-label">Priority</label>
+                                             <div class="col-sm-7">
+                                                 <p class="form-control-static" id="spEmployeeTaskPriority"></p>
+                                             </div>
+                                         </div>
+                                         <div class="form-group col-md-6">
+                                             <label class="col-sm-5 control-label">Status</label>
+                                             <div class="col-sm-7">
+                                                 <p class="form-control-static" id="spEmployeeStatus"></p>
+                                             </div>
+                                         </div>
+                                         <div id="header"></div>
+                                     </div>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+                 <div class="modal-footer">
+                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                 </div>
+             </div>
+
+         </div>
+     </div>
+     <!-- Trigger the modal with a button -->
+     <button type="button" class="btn btn-info btn-lg" id="btnStudentShowTasks" style="display:none" data-toggle="modal" data-target="#myModal">Open Modal</button>
+
+     <!-- Modal -->
+     <div id="myModal" class="modal fade" role="dialog">
+         <div class="modal-dialog">
+             <div class="modal-content">
+                 <div class="modal-header">
+                     <button type="button" class="close" data-dismiss="modal">&times;</button>
+                     <h4 class="modal-title">Task Details</h4>
+                 </div>
+                 <div class="modal-body">
+                     <div class="content">
+                         <div class="panel panel-white">
+                             <div class="panel-body">
+                                 <div class="row">
+                                     <div class="col-md-12">
+                                         <form class="form-horizontal">
+                                             <div class="col-md-12">
+                                                 @*<div class="form-group col-md-6">
+                                                        <label class="col-sm-5 control-label">School</label>
+                                                        <div class="col-sm-7">
+                                                            <p class="form-control-static" id="ddlSchoolName1"></p>
+                                                        </div>
+                                                    </div>*@
+                                                 <div class="form-group col-md-6">
+                                                     <label class="col-sm-5 control-label">Task</label>
+                                                     <div class="col-sm-7">
+                                                         <p class="form-control-static" id="spStudentTaskName"></p>
+                                                     </div>
+                                                 </div>
+                                                 <div class="form-group col-md-6">
+                                                     <label class="col-sm-5 control-label">Description</label>
+                                                     <div class="col-sm-7">
+                                                         <p class="form-control-static" id="spStudentTaskDesc"></p>
+                                                     </div>
+                                                 </div>
+                                                 <div id="header"></div>
+                                             </div>
+                                             <div style="clear:both"</div>
+                                             <div class="col-md-12">
+                                                 <div class="form-group col-md-6">
+                                                     <label class="col-sm-5 control-label">Date</label>
+                                                     <div class="col-sm-7">
+                                                         <p class="form-control-static" id="spStudentTaskDate"></p>
+                                                     </div>
+                                                 </div>
+                                                 <div class="form-group col-md-6">
+                                                     <label class="col-sm-5 control-label">Student Name</label>
+                                                     <div class="col-sm-7">
+                                                         <p class="form-control-static" id="spStudentName"> </p>
+                                                     </div>
+                                                 </div>
+                                                 <div id="header"></div>
+                                             </div>
+                                             <div style="clear:both"</div>
+                                             <div class="col-md-12">
+                                                 <div class="form-group col-md-6">
+                                                     <label class="col-sm-5 control-label">Priority</label>
+                                                     <div class="col-sm-7">
+                                                         <p class="form-control-static" id="spStudentTaskPriority"></p>
+                                                     </div>
+                                                 </div>
+                                                 <div class="form-group col-md-6">
+                                                     <label class="col-sm-5 control-label">Status</label>
+                                                     <div class="col-sm-7">
+                                                         <p class="form-control-static" id="spStudentStatus"></p>
+                                                     </div>
+                                                 </div>
+                                                 <div id="header"></div>
+                                             </div>
+                                             <div style="clear:both"</div>
+                                         </form>
+                                     </div>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+                 <div class="modal-footer">
+                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                 </div>
+             </div>
+
+         </div>
+     </div>
+     <div class="alert alert-success centerSuccess" id="divSuccessMsg" style="display:none"></div>
+
+</section>
+ 
+<script src="~/js/angular.min.js"></script>
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+ <script src="~/js/Events/model.js"></script>
+<script src="~/js/Events/controller.js"></script>
+<script src="~/js/Events/service.js"></script>
+
+<style type="text/css">
+    #header {
+        border-bottom: 1px solid #DDDDDD;
+    }
+</style>

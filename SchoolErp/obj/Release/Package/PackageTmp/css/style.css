@@ -1,0 +1,136 @@
+
+body {
+	background: #fafafa;
+	color: #222;
+}
+.main-container {
+	background: #fafafa;
+	padding: 20px 30px;
+}
+.content-container {
+	background: #efefef;
+}
+h2.heading {
+	margin-bottom: 25px;	
+}
+.toggler {
+	display: block;
+	text-decoration: none!important;
+	font-size: 14px;
+	font-weight: 600;
+}
+.profile-panel .info-panel {
+	padding-bottom: 30px;
+	font-size: 14px;
+}
+.profile-panel .info-panel ul {
+	padding: 0px;
+}
+.profile-panel .info-panel ul li {
+	list-style-type: none;
+	display: inline;
+	font-size: 12px;
+}
+.profile-panel .info-panel ul li.labels {
+	width: 200px;
+	float: left;
+}
+.profile-panel .info-panel ul li span {
+	padding-left: 15px;
+}
+.tab-controller {
+	margin-bottom: 15px;
+}
+.panel-default>.panel-heading {
+	background: transparent;
+	
+}
+.profile-panel .panel-collapse {
+	
+}
+.profile-panel .panel-collapse.open {
+	display: block;
+}
+.profile-panel .panel-default {
+	border: none;
+	border-radius: 0px!important;
+}
+.tab-controller li a {
+	background: #e6e5e5;
+	border: 1px solid #ddd;
+	border-bottom: none;
+	border-radius: 0px;
+	color: #333;
+	padding: 10px 10px;
+}
+.tab-controller li {
+	margin-right: 8px;
+}
+.tab-controller li.active a {
+	background: #efefef!important;
+	font-weight: 600;
+}
+.basic-profile {
+	display: inline-block;
+	width: 100%;
+	margin-bottom: 30px;
+}
+.basic-profile .profile-pic {
+	
+}
+.basic-profile .profile-pic img {
+	width: 100%;
+	max-width: 175px;
+}
+.basic-profile h4 {
+	
+}
+.action-panel {
+	max-width: 300px;
+	float: right;
+}
+#example td img {
+	width: 35px;
+	border-radius: 100%;
+}
+.table-striped>tbody>tr:nth-of-type(odd), .table-striped>tbody>tr:nth-of-type(even) {
+	background-color: #fff;
+}
+#example thead {
+	background: #fafafa;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+@media only screen and (max-width: 767px) {
+	.main-container {
+		padding-left: 0px;
+		padding-right: 0px;
+	}
+	.tab-controller li {
+		margin-right: 2px;
+		margin-bottom: 8px;
+	}
+	.action-panel {
+		float: left;
+	}
+}
+
+@media only screen and (max-width: 480px) {
+	.profile-panel .info-panel ul li.labels {
+		width: 100px;
+	}
+	.profile-panel .info-panel ul li span {
+		padding-left: 5px;
+	}
+}

@@ -1,0 +1,236 @@
+﻿
+@{
+    ViewBag.Title = "ViewAssginGrade";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">View Employee Details</h3>
+                </div>
+                <div class="box-body">
+                    <div class="form-group">
+                        <a href="/Payroll/EmployeeAccountInformation" style="width: 150px;float: right;margin-right: 8px" class="btn btn-block btn-primary">Assign Grade</a>
+                        <div style="height:40px"></div>
+                        <div>
+
+                            <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                <thead>
+                                    <tr>
+                                      <th>School</th>
+                                        <th>Name</th>
+                                        <th>Department</th>
+                                        <th>Designation</th>
+                                        <th>Grade</th>
+                                        <th>Status</th>
+                                         <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyEmployeeDetails"></tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <script type="text/html" id="divEmployeeDetailsJTemplte">
+                {#foreach $T as Datashort}
+                <tr>
+                    <td>{$T.Datashort.School}</td>
+                    <td>
+                        { $T.Datashort.EmployeeName}
+                    </td>
+                    <td>
+                        { $T.Datashort.Extra10}
+                    </td>
+                    <td>
+                        { $T.Datashort.Designation}
+                    </td>
+                    <td>
+                        { $T.Datashort.GradeName}
+                    </td>
+                    <td>
+                        <button type="button" style="width: 120px;" class="{ $T.Datashort.Extra11}"> { $T.Datashort.Status}</button>
+                    </td>
+                    <td>
+                        <select class="form-control dropdown-toggle" onchange="performActionByEmploy(this.value,{ $T.Datashort.HeadId})" id="ddlEmployeeAction">
+                            <option>Action</option>
+                             <option value="Edit">Edit</option>
+                        </select>
+                    </td>
+                    
+                 </tr>
+                {#/for}
+            </script>
+
+
+        </div>
+        <!-- /.row -->
+      
+</section>
+<!-- DataTables -->
+<link href="~/js/PDFExcelDatatable/buttons.dataTables.min.css" rel="stylesheet" />
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/js/PDFExcelDatatable/dataTables.buttons.min.js"></script>
+<script src="~/js/PDFExcelDatatable/jszip.min.js"></script>
+<script src="~/js/PDFExcelDatatable/pdfmake.min.js"></script>
+<script src="~/js/PDFExcelDatatable/vfs_fonts.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.html5.min.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.print.min.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.colVis.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#loader").fadeIn();
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        var t = $('#example1').DataTable();
+        t.destroy();
+        callJTemplateServiceMethod(JSON.stringify([loginuser, typeuser]), "/api/PayrollAPI", "getAllAssginGradEmployee",
+             "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+    });
+    function successMsg(p1, p2, p3, datas)
+    {
+        $("#loader").fadeOut();
+        setTimeout(function () {
+            $('#example1').DataTable({
+
+                'columnDefs': [{
+                    "targets": -1,
+                    "orderable": false
+
+                }],
+                dom: 'lBfrtip',
+                buttons: [
+                    //{
+                    //    extend: 'copyHtml5',
+                    //    exportOptions: {
+                    //        columns: [0, ':visible']
+                    //    }
+                    //},
+                    {
+                        extend: 'excelHtml5',
+                        exportOptions: {
+                            columns: ':visible'
+                        }
+                       
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        exportOptions: {
+                            columns: [0,2,3,4, 5]
+                        },
+                        title: 'School ERP',
+                        customize: function(doc) {
+                doc.styles.title = {
+                    color: 'red',
+                    fontSize: '20',
+                    background: 'blue',
+                    alignment: 'left'
+                }
+            }
+                    },
+                    'colvis'
+                ]
+            });
+        }, 1000);
+    }
+
+ 
+    function performActionByEmploy(val,Id)
+    {
+        if(val=="Edit")
+        {
+       
+            location.href="/Payroll/EmployeeAccountInformation?Id="+Id;
+        }
+    }
+  
+
+ 
+</script>
+<style type="text/css">
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+
+
+
+

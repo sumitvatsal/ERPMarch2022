@@ -1,0 +1,273 @@
+﻿
+@{
+    ViewBag.Title = "ImportStudentAttendence";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<div class="content">
+    <div id="content">
+        <style>
+            #overlaygif {
+                background: url("/images/loading.gif") no-repeat center;
+                position: fixed;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+            }
+
+            .panel-default > .panel-heading-custom {
+                background: #F8F8F8;
+                color: #black;
+            }
+
+            #customstyle:link {
+                text-decoration: none;
+                color: black;
+            }
+
+            #customstyle:visited {
+                text-decoration: none;
+                color: black;
+            }
+
+            #customstyle:active {
+                text-decoration: none;
+                color: black;
+                font-weight: bold;
+            }
+
+            #customstyle:hover {
+                text-decoration: none;
+                font-weight: bold;
+                color: black;
+            }
+        </style>
+
+
+        <div class="content">
+            @using (Html.BeginForm("ImportStudentAttendence", "ImportExport", FormMethod.Post, new { enctype = "multipart/form-data", onsubmit = "return myFunction()" }))
+            {
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4 class="panel-title">Student Attendance Import</h4>
+                            </div>
+                            <br />
+                            <div>
+                                @if (ViewBag.ImportFlag == "success")
+                                {
+                                    <h4 class="panel-title" style="color:green">&nbsp;&nbsp;&nbsp;@ViewBag.ResultStatus</h4>
+                                }
+                                else
+                                {
+                                    <h4 class="panel-title" style="color:red">&nbsp;&nbsp;&nbsp;@ViewBag.ResultStatus</h4>
+                                }
+
+                            </div>
+                            <div class="panel-body">
+                                <div class="panel-body">
+                                    <div id="overlaygif" style="display:none;"></div>
+                                    <div class="row">
+                                        <div class="form-group col-sm-3">
+                                            <label for="reg_input" class="req">Year</label>
+                                            <select class="form-control" name="ddlAttendenceYear" id="ddlAttendenceYear">
+                                                <option value="">Select Year</option>
+                                                <option value="2018">2018</option>
+                                                <option value="2019">2019</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group col-sm-3">
+                                            <label for="reg_input_name">Month</label>
+                                            <select maxlength="6" class="form-control" name="ddlAttendenceMonths" id="ddlAttendenceMonths">
+                                                <option value="0">Select</option>
+                                                <option value="01">January</option>
+                                                <option value="02">February</option>
+                                                <option value="03">March</option>
+                                                <option value="04">April</option>
+                                                <option value="05">May</option>
+                                                <option value="06">June</option>
+                                                <option value="07">July</option>
+                                                <option value="08">August</option>
+                                                <option value="09">September</option>
+                                                <option value="10">October</option>
+                                                <option value="11">November</option>
+                                                <option value="12">December</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="reg_input_name" class="req">Browse File</label>
+                                        <input id="ytContactForm_filea" type="hidden" value="" name="ContactForm[filea]">
+                                        <input id="FileUpload" name="FileUpload" type="file" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-5">
+                                        <div class="form_sep">
+                                            <input class="btn btn-info" type="submit" name="yt0" value="Submit">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="progress" style="display:none;">
+                                            <div class="progress-bar progress-bar-info" style="width: 80% " id="progressbar">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            }
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group col-sm-3">
+                                        <label for="reg_input" class="req">Year</label>
+                                        <select class="form-control" name="ddlAttendenceYear1" id="ddlAttendenceYear1">
+                                            <option value="">Select Year</option>
+                                            <option value="2018">2018</option>
+                                            <option value="2019">2019</option>
+                                            <option value="2020">2020</option>
+                                            <option value="2021">2021</option>
+                                            <option value="2022">2022</option>
+                                            <option value="2023">2023</option>
+                                            <option value="2024">2024</option>
+                                            <option value="2025">2025</option>
+                                            <option value="2026">2026</option>
+                                            <option value="2027">2027</option>
+                                            <option value="2028">2028</option>
+                                            <option value="2029">2029</option>
+                                            <option value="2030">2030</option>
+                                            <option value="2031">2031</option>
+                                            <option value="2032">2032</option>
+                                            <option value="2033">2033</option>
+                                            <option value="2034">2034</option>
+                                            <option value="2035">2035</option>
+                                            <option value="2036">2036</option>
+                                            <option value="2037">2037</option>
+                                            <option value="2038">2038</option>
+                                            <option value="2039">2039</option>
+                                            <option value="2040">2040</option>
+                                            <option value="2041">2041</option>
+                                            <option value="2042">2042</option>
+                                            <option value="2043">2043</option>
+                                            <option value="2044">2044</option>
+                                            <option value="2045">2045</option>
+                                            <option value="2046">2046</option>
+                                            <option value="2047">2047</option>
+                                            <option value="2048">2048</option>
+                                            <option value="2049">2049</option>
+                                            <option value="2050">2050</option>
+                                            <option value="2051">2051</option>
+                                            <option value="2052">2052</option>
+                                            <option value="2053">2053</option>
+                                            <option value="2054">2054</option>
+                                            <option value="2055">2055</option>
+                                            <option value="2056">2056</option>
+                                            <option value="2057">2057</option>
+                                            <option value="2058">2058</option>
+                                            <option value="2059">2059</option>
+                                            <option value="2060">2060</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group col-sm-3">
+                                        <label for="reg_input_name">Month</label>
+                                        <select maxlength="6" class="form-control" name="ddlAttendenceMonths1" id="ddlAttendenceMonths1">
+                                            <option value="0">Select</option>
+                                            <option value="01">January</option>
+                                            <option value="02">February</option>
+                                            <option value="03">March</option>
+                                            <option value="04">April</option>
+                                            <option value="05">May</option>
+                                            <option value="06">June</option>
+                                            <option value="07">July</option>
+                                            <option value="08">August</option>
+                                            <option value="09">September</option>
+                                            <option value="10">October</option>
+                                            <option value="11">November</option>
+                                            <option value="12">December</option>
+                                        </select>
+                                    </div>
+                                    <div class="alert alert-warning warning">
+                                        <span class="icon-info22" style="color:orange"></span>
+                                        Download the excel file format from below link , mark P for present and A for absent while filling excel sheet.
+                                        <br>
+                                        <p class="form-control-static">&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:void(0)" onclick="exportAttendenceExcel()">Student Attendance Import</a></p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div><!-- content -->
+</div>
+
+<script type="text/javascript">
+    function exportAttendenceExcel() {
+        $.ajax({
+            type: "POST",
+            url: '/ImportExport/ExportStudentAttendenceSheet', //call your controller and action
+            data: { months: $("#ddlAttendenceMonths1").val(), years: $("#ddlAttendenceYear1").val() },
+            success: function (data) {
+                if (data != null && (data.errorMessage == null || data.errorMessage === "")) {
+
+                    // Get the file name for download
+                    if (data.fileName != "") {
+                        // use window.location.href for redirect to download action for download the file
+                        window.location.href = "DownloadSpreadsheet/?file=" + data.fileName;
+                    }
+                } else {
+                    alert("An error ocurred", data.errorMessage);
+                }
+            }
+        });
+    }
+
+
+
+
+</script>

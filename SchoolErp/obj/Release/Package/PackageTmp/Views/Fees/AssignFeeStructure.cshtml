@@ -1,0 +1,730 @@
+﻿
+@{
+    ViewBag.Title = "AssignFeeStructure";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<style type="text/css">
+    .imgIcon {
+        width: 0.5%;
+        height: 0.5%;
+    }
+
+    .oddTr {
+        background-color: #dddddd;
+    }
+    getAllStudentsDetails
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 8px;
+            padding-bottom: 8px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+        #example2 td img {
+            width: 35px;
+            height: 35px;
+            border-radius: 100%;
+        }
+
+
+    #example2 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example2 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example2 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example2 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example2 th {
+            padding-top: 8px;
+            padding-bottom: 8px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+
+    td.details-control {
+        background: url('../../Images/plus.jpg') no-repeat center center;
+        cursor: pointer;
+    }
+
+    tr.shown td.details-control {
+        background: url('../../Images/plus.jpg') no-repeat center center;
+    }
+</style>
+
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<link rel="stylesheet" href="~/css/bower_components/select2/dist/css/select2.min.css">
+<script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>
+<section class="content-header">
+    <h1>
+        <i class="fa fa-th-list"></i> Fee Structure Assignment
+    </h1>
+    @*<ul class="breadcrumb">
+            <li><a href="/"><i class="fa fa-home"></i>Home</a></li>
+            <li><a href="/academics/default/index">Academics</a></li>
+            <li class="active">Timetable</li>
+            <li class="active">Timetable Configuration</li>
+        </ul>*@
+</section>
+<section class="content">
+
+    <div class="box box-solid">
+        <div class="extra-div">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-search"></i> Search Students</h3>
+            </div>
+        </div>
+
+        <form id="w1">
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label for="Country" class="req">School<span class="requird">*</span></label>
+                            <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name" @*blankRowValue="0" blankRowText="--Select--"*@></select>
+                        </div>
+                    </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label class="control-label">Academic Year</label>
+                                <select id="tc_academic_year" class="form-control" valuefield="ID" textfield="StartYear" blankRowValue="-1" blankRowText="----Select----" onchange="" aria-required="true"></select>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label class="control-label">Class</label>
+                                @*<select class="form-control select2" id="ddlCourse" valuefield="Section" textfield="Class" multiple="multiple"></select>*@
+                                <select class="form-control" id="ddlCourse" valuefield="Id" textfield="CourseName" blankRowValue="-1" blankRowText="----Select----"></select>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label class="control-label">Section</label>
+                                <select class="form-control" id="ddlSection" valuefield="Id" textfield="SectionName" blankRowValue="-1" blankRowText="----Select----"></select>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label class="control-label">Student Name</label>
+                                <input type="text" id="txtSearchName" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label class="control-label">Student ID</label>
+                                <input type="text" id="txtSearchID" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <div class="box-footer">
+                <button type="button" id="btnSearch" class="btn btn-info">Search</button>    <a class="btn btn-default" href="#" onclick="ResetAll()">Reset</a>
+            </div>
+
+        </form>
+    </div>
+    <div class=" box box-solid">
+        <div class="col-md-12">
+
+
+            <div class="col-md-8">
+                <div class="box box-solid ">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><i class="fa fa-eye"></i> Student List</h3>
+                    </div>
+
+                    <div class="box-body table-responsive">
+
+                        <div id="w2" class="grid-view">
+                            <table class="table table-striped table-bordered" id="example1">
+                                <thead>
+                                    <tr>
+                                        <th>#.<input type="checkbox" id="CheckAll" /></th>
+                                        @*<th>Reg No</th>*@
+                                        @*<th>Photo</th>*@
+                                        <th>Name</th>
+                                        <th>Class-Section</th>
+                                        <th>Reg No</th>
+                                        @*<th>Fee Structure</th>*@
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyEmployeeDetails"></tbody>
+                            </table>
+                        </div>
+                        <script type="text/html" id="divEmployeeDetailsJTemplte">
+                            {#foreach $T as Datashort}
+                            <tr>
+                                <td>
+                                    <input type="checkbox" stdID="{ $T.Datashort.ID}"/> { $T.Datashort.count}
+                                </td>
+                                @*<td>
+                                    { $T.Datashort.count}
+                                </td>*@
+
+                                @*<td>
+                                        <img src="{ $T.Datashort.PicPath}" alt="#" onclick="GoToFeeCalc({ $T.Datashort.ID})" />
+                                    </td>*@
+                                <td>
+                                    { $T.Datashort.FirstName} @*<a href="#" onclick="GoToFeeCalc({ $T.Datashort.ID})">{ $T.Datashort.FirstName}</a>*@
+                                </td>
+                                <td>
+                                    { $T.Datashort.Class}-{ $T.Datashort.Section}
+                                </td>
+
+                                <td>
+                                    { $T.Datashort.RegNo}
+                                </td>
+                                @*<td>
+                                    { $T.Datashort.RollNo}
+                                </td>*@
+                            </tr>
+                            {#/for}
+                        </script>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="box box-solid ">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><i class="fa fa-eye"></i> Fee Structures</h3>
+                    </div>
+                    <div class="box-body table-responsive">
+
+                        <div id="w2" class="grid-view">
+                            <table class="table table-striped table-bordered" id="example2">
+                                <thead>
+                                    <tr>
+                                        <th style="width:5%;"></th>
+                                        <th>#</th>
+                                        <th>Name</th>
+
+                                        @*<th class="action-column">Action</th>*@
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyFeeStructures"></tbody>
+                            </table>
+                        </div>
+                        <script type="text/html" id="tbodyFeeStructuresJTemplte">
+                            {#foreach $T as Datashort}
+                            <tr>
+                                <td><input type="checkbox" id="cb_{ $T.Datashort.count}" onchange="MakeRadioButton({ $T.Datashort.count})"  fsID="{ $T.Datashort.fs.ID}"/></td>
+                                <td style="width:10%;">
+                                    { $T.Datashort.count}
+                                </td>
+                                <td>
+                                    <a href="#" title="View Details" onclick="GoToCreateFeeConfig({ $T.Datashort.fs.ID})">{ $T.Datashort.fs.StructureName}</a>
+                                </td>
+                                @*<td style="width:15%;">
+                                        <span class="{ $T.Datashort.style}" title="{ $T.Datashort.action}" onclick="EditStatus({ $T.Datashort.fs.ID},'{ $T.Datashort.fs.StructureName}',{ $T.Datashort.fs.AcademicYear},'{ $T.Datashort.classes}',{ $T.Datashort.fs.Status})">{ $T.Datashort.StatusNm} </span>
+                                    </td>*@
+                                @*<td>
+                                        <i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" onclick="Edit({ $T.Datashort.fs.ID},'{ $T.Datashort.fs.StructureName}',{ $T.Datashort.fs.AcademicYear},'{ $T.Datashort.classes}',{ $T.Datashort.fs.Status})" title="Edit"></i>
+                                        <i class="fa fa-fw fa-eye" style="cursor:pointer" onclick="ViewDetails({ $T.Datashort.ID},'{ $T.Datashort.con.Name}',{ $T.Datashort.con.Status},'{ $T.Datashort.StatusNm}','{ $T.Datashort.Course}','{ $T.Datashort.fromDT}','{ $T.Datashort.ToDt}','{ $T.Datashort.WeekDaysNm}','{ $T.Datashort.timingNm}')" title="View"></i>
+                                        <i class="fa fa-fw fa-trash" style="cursor:pointer" onclick="Delete({ $T.Datashort.fs.ID})" title="Delete"></i>
+                                    </td>*@
+                            </tr>
+                            {#/for}
+                        </script>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*<div class="box-body table-responsive">
+            <div id="w1" class="grid-view">
+                <table id="example2" class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th class="text-center">Head Name</th>
+                            <th class="text-center">Amount (in Rs.)</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td class="text-center">
+                                <div class="form-group">
+                                    <select id="ddlFeeCategories" class="form-control" valuefield="Cat_ID" textfield="feeCategory" blankRowValue="-1" blankRowText="----Select----" onchange="" aria-required="true"></select>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" id="txtFeeValue">
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <a class="btn btn-success btn-sm" href="#" id="AddRow" title="Add"><i class="fa fa-plus-square"></i></a>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyFeeStructures"></tbody>
+                </table>
+            </div>
+        </div>
+        <script type="text/html" id="tbodyFeeStructuresJTemplte">
+            {#foreach $T as Datashort}
+            <tr>
+                <td>
+                    { $T.Datashort.count}
+                </td>
+                <td>
+                    { $T.Datashort.ct.FeeCategory}
+                </td>
+                <td class="text-right">
+                    { $T.Datashort.fsc.Amount}
+
+                </td>
+                <td class="text-center">
+                    <i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" onclick="Edit({ $T.Datashort.fsc.ID},{ $T.Datashort.fsc.FeeCategory},{ $T.Datashort.fsc.Amount},{ $T.Datashort.fsc.FeeStructureID})" title="Edit"></i>
+                    <i class="fa fa-fw fa-trash" style="cursor:pointer" onclick="Delete({ $T.Datashort.fsc.ID})" title="Delete"></i>
+                </td>
+            </tr>
+            {#/for}
+        </script>*@
+    <div class=" box box-solid">
+        <div class="col-md-12">
+            <div class="box box-solid ">
+                <input class="btn btn-primary center-block" type="button" value="Save" onclick="AssignFeeStructure()" />
+                </div>
+            </div>
+        </div>
+            <div class="modal fade" id="myModal" role="dialog" onclose="ResetModal()">
+                <div class="modal-dialog">
+
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title">
+                                <i class="fa fa-plus-square"></i> Add Fee Structure <button type="button" class="close" data-dismiss="modal" onclick="ResetModal()">
+                                    <span aria-hidden="true">×</span><span class="sr-only">Close</span>
+                                </button>
+                            </h3>
+                        </div>
+                        <div class="modal-body">
+                            <div class="col-md-12">
+                                <div class="box-body">
+                                    <div class="form-group">
+                                        <label class="control-label">Structure Name</label>
+                                        <input type="text" id="txtName" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label">Academic Year</label>
+                                        <select id="ddl_academic_year" class="form-control" valuefield="ID" textfield="StartYear" blankRowValue="-1" blankRowText="----Select----" onchange="" aria-required="true"></select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label">Class</label>
+                                        <select class="form-control select2" id="ddlClasses" valuefield="Section" textfield="Class" multiple="multiple" style="width:100%;"></select>
+                                    </div>
+
+                                    <div class="box-footer">
+                                        <input type="button" class="btn btn-primary" value="Save Changes" id="btnCreate" name="Save" />
+                                        <input type="hidden" id="hdnID" />
+                                    </div>
+                                    <!-- /.form group -->
+                                </div>
+                                <!-- /.box-body -->
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                        </div>
+                    </div>
+                    <input type="hidden" id="hdnStatus" />
+                </div>
+            </div>
+</section>
+
+<script>
+
+    $(document).ready(function () {
+        setControlValue("hdnID", 0);
+        setControlValue("hdnStatus", 1);
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+
+
+       // callServiceMethodForDDl("", "/api/TimeTableApi", "GetAcademicYear", "tc_academic_year", false, "", "", "", "");
+     // callServiceMethodForDDl("", "/api/TimeTableApi", "GetAcademicYear", "ddl_academic_year", false, "", "", "", "");
+   //  callServiceMethodForDDl("", "/api/StudentApi", "GetClasses", "ddlCourse", false, "", "", "", "");
+     callServiceMethodForDDl("", "/api/FeesApi", "GetClasseswithSection", "ddlClasses", false, "", "", "", "");
+    var SchoolID=getControlValue("ddlSchoolName");
+     callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TimeTableApi", "GetAcademicYearBySchool", "tc_academic_year", false, "", "", "", "");
+      $("#ddlSchoolName").change(function () {
+     var SchoolID=getControlValue("ddlSchoolName");
+     callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TimeTableApi", "GetAcademicYearBySchool", "tc_academic_year", false, "", "", "", "");
+    });
+      var SchoolID=getControlValue("ddlSchoolName");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TimeTableApi", "GetAcademicYear", "ddl_academic_year", false, "", "", "", "");
+     $("#ddlSchoolName").change(function () {
+      var SchoolID=getControlValue("ddlSchoolName");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TimeTableApi", "GetAcademicYear", "ddl_academic_year", false, "", "", "", "");
+    });
+
+       
+     var SchoolID=getControlValue("ddlSchoolName");
+    callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+     $("#ddlSchoolName").change(function () {
+     var SchoolID=getControlValue("ddlSchoolName");
+    callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+    });
+    $("#ddlCourse").change(function () {
+            var ddlCourse = getControlValue("ddlCourse");
+        var SchoolID=getControlValue("ddlSchoolName");
+            if (ddlCourse != null && (ddlCourse != -1) && (ddlCourse != undefined))
+            {
+                callServiceMethodForDDl(JSON.stringify([ddlCourse,SchoolID]), "/api/StudentApi", "GetSectionsbyschool", "ddlSection", false, "", "", "", "");
+            }
+        });
+
+        $("#ddlClasses").select2();
+
+        setTimeout(function () {
+            var arr = {};
+            $("#ddlClasses").val(arr).trigger("change");
+        }, 500);
+
+       // fillDataTable();
+
+        // Add event listener for opening and closing details
+        $('#tbodyFeeStructures').on('click', 'td.details-control', function () {
+            debugger;
+            var tr = $(this).closest('tr');
+            var row = $("#example2").row(tr);
+
+            if (row.child.isShown()) {
+                // This row is already open - close it
+                row.child.hide(); 
+                tr.removeClass('shown');
+            }
+            else {
+                // Open this row
+                row.child(format(row.data())).show();
+                tr.addClass('shown');
+            }
+        });
+    });
+
+    function format(d) {
+        // `d` is the original data object for the row
+
+        return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">' +
+            '<tr>' +
+            '<td>Full name:</td>' +
+            '<td>' + d.name + '</td>' +
+            '</tr>' +
+            '<tr>' +
+            '<td>Extension number:</td>' +
+            '<td>' + d.extn + '</td>' +
+            '</tr>' +
+            '<tr>' +
+            '<td>Extra info:</td>' +
+            '<td>And any further details here (images etc)...</td>' +
+            '</tr>' +
+            '</table>';
+    }
+
+    function fillDataTable2() {
+        var name = getControlValue("txtSearchName");
+        var year = getControlValue("tc_academic_year");
+        var course = getControlValue("ddlCourse");
+        var section = getControlValue("ddlSection");
+        //var status = getControlValue("ddl_status");
+        var School = getControlValue("ddlSchoolName");
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+
+        callJTemplateServiceMethod(JSON.stringify(["FeeStructure1", name, year, course, section, 1, School, loginuser,typeuser]), "/api/FeesApi", "getList",
+            "tbodyFeeStructures", "tbodyFeeStructuresJTemplte", true, successMsg, "", "", "");
+    }
+
+    function successMsg2(p1, p2, p3, datas) {
+
+    }
+    function openModal()
+    {
+        var arr = {};
+        $("#ddlClasses").val(arr).trigger("change");
+        $('#myModal').modal('show');
+    }
+
+    function GetValues(ID)
+    {
+        $.ajax({
+            url: "/api/TimeTableApi/GetClassTiming",
+            type: "Post",
+            data: JSON.stringify([ID]),
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                if(data.ID!=-1)
+                {
+                    setControlValue("hdn", data.ID);
+                    setControlValue("CTName", data.ct.Name);
+                    setControlValue("CTName1", data.ct.Name);
+                    setControlValue("Desc", data.ct.Description);
+
+                    fillDataTable(data.ID);
+                }
+            }
+        });
+    }
+
+    function fillDataTable() {
+
+        var name=getControlValue("txtSearchName");
+        var year = getControlValue("tc_academic_year");
+        var course=getControlValue("ddlCourse");
+        var section = getControlValue("ddlSection");
+        var stdIDs = getControlValue("txtSearchID");
+        var School = getControlValue("ddlSchoolName");
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callJTemplateServiceMethod(JSON.stringify([name, year, course, section, stdIDs, School, loginuser, typeuser]), "/api/FeesApi", "getAllStudentsDetails",
+           "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+    }
+
+    function successMsg(p1, p2, p3, datas) {
+        setTimeout(function () {
+            //$('#example1').DataTable();
+        }, 1000);
+    }
+
+    $("#btnSearch").click(function () {
+        fillDataTable();
+        fillDataTable2();
+    });
+
+    $("#btnCreate").click(function () {
+
+        var ID=getControlValue("hdnID");
+        var name = getControlValue("txtName");
+        var year = getControlValue("ddl_academic_year");
+        var classes = getControlValue("ddlClasses");
+        var status = getControlValue("hdnStatus");
+        Save(ID,name,year,classes,status);
+    });
+
+    $("#CheckAll").click(function () {
+        $('#example1 tbody input[type="checkbox"]').prop('checked', this.checked);
+    });
+
+    function MakeRadioButton(x) {
+        $("#example2 input[type=checkbox]").each(function () {
+            if (this.checked && this.id == "cb_" + x) {
+                $(this).closest('tr').find('input[type=checkbox]').prop('checked', false);
+                this.checked = true;
+            }
+            else {
+                this.checked = false;
+            }
+        });
+    }
+    function AssignFeeStructure()
+    {
+        var structID = 0;
+        var Items = new Array();
+        $('#example1 tbody input[type=checkbox]').each(function () {
+            if ($(this).is(':checked')) {
+                var Student = {
+                    ID: $(this).attr("stdID")
+                }
+                Items.push(Student);
+            }
+        });
+        $('#example2 input[type="checkbox"]:checked').each(function () {
+            structID = $(this).attr("fsID");
+        });
+        if (Items.length < 1 || structID == 0) {
+            if (Items.length < 1) {
+                alert("No Student Selected!!");
+            }
+            if (structID == 0) {
+                alert("Please select the Fee Structure to be assigned!!");
+            }
+        }
+        else {
+            var Student = {
+                ID: structID,
+                rgDoclist: Items,
+                SchoolID: getControlValue("ddlSchoolName")
+            } 
+                 $.ajax({
+                     url: "/api/FeesApi/AssignFeeStructure",
+                type: "Post",
+                     data: JSON.stringify(Student),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    alert(data.StatusName);
+                }
+            });
+        }
+       
+    }
+
+    function EditStatus(id,name,year,classes,status)
+    {
+        var st=0;
+        status==false?st=1:st=0;
+        Save(id,name,year,classes,st);
+    }
+
+    function Edit(id,name,year,classes,status)
+    {
+        setControlValue("hdnID", id);
+        setControlValue("txtName", name);
+        setControlValue("ddl_academic_year", year);
+
+        openModal();
+        var a=classes.split(",");
+        $("#ddlClasses").val(a).trigger("change");
+        if(status){
+            setControlValue("hdnStatus", 1);
+        }
+        else{
+            setControlValue("hdnStatus", 0);
+        }
+    }
+
+    function ViewDetails(id,name,status,statusNm,course,fromDt,Edt,weekdays,timing)
+    {
+        setControlValue("spName", name);
+        setControlValue("spCourse", course);
+        setControlValue("spWeekDays", weekdays);
+        setControlValue("spClassTiming", timing);
+        setControlValue("spStDt", fromDt);
+        setControlValue("spEdDt", Edt);
+        if(status==1)
+        {
+            $("#spActive").show();
+            $("#spInactive").hide();
+            setControlValue("spActive", statusNm);
+        }
+        else
+        {
+            $("#spActive").hide();
+            $("#spInactive").show();
+            setControlValue("spInactive", statusNm);
+        }
+        openModal();
+    }
+
+    function ResetAll()
+    {
+        setControlValue("txtSearchName", "");
+        setControlValue("tc_academic_year",-1);
+        setControlValue("ddlCourse",-1);
+        setControlValue("ddlSection",-1);
+        setControlValue("txtSearchID", "");
+
+        fillDataTable();
+    }
+
+    function ResetModal()
+    {
+        setControlValue("txtBankName", "");
+        setControlValue("txtAlias","");
+        setControlValue("hdnID", 0);
+        setControlValue("hdnStatus",0);
+    }
+
+    function Delete(id)
+    {
+        var result = window.confirm('Are you sure to delete this record?');
+        if (result == true) {
+            $.ajax({
+                url: "/api/FeesApi/DeleteRecord",
+                type: "Post",
+                data: JSON.stringify([id,"FeeStructure"]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    if(data==1){
+                        alert("Record successfully deleted");
+                        fillDataTable()
+                    }
+                }
+            });
+        }
+    }
+
+    function GoToFeeCalc(id)
+    {
+        window.location.href = "/Fees/FeeCalculation?id="+id;
+    }
+
+</script>
+
+

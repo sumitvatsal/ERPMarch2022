@@ -1,0 +1,542 @@
+﻿
+@{
+    ViewBag.Title = "EmployeeLeaveRequest";
+  //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+     Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<section class="content">
+    <div class="box box-solid">
+        <div class="et">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-search"></i> Search Employee</h3>
+                 
+            </div>
+        </div>
+
+ 
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label>From Date</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control pull-right" readonly="readonly" id="txtStartDate" ng-model="txtStartDate">
+                            </div>
+                            <!-- /.input group -->
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group">
+                            <label>To Date</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control pull-right" readonly="readonly" id="txtEndDate" ng-model="txtEndDate" />
+                            </div>
+                            <!-- /.input group -->
+                        </div>
+                    </div>
+                </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label for="Country" class="req">School<span class="requird">*</span></label>
+                                <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name"></select>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group field-empinfosearch-emp_category_id">
+                                <label class="control-label" for="empinfosearch-emp_category_id">Status</label>
+                                <select class="form-control" data-required="true" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" id="ddlStatus"></select>
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                    </div>
+           
+                    <div class="row">
+                        <div class="col-sm-4" style="margin-top: 25px;">
+                            <div class="form-group field-empinfosearch-searchinput">
+
+                                <input type="text" id="txtEmployeeName" class="form-control" placeholder="Enter Employee First/Last Name.">
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4" style="margin-top: 25px;">
+                            <div class="form-group field-empinfosearch-emp_info_id">
+
+                                <input type="text" id="txtEmployeeCode" class="form-control" placeholder="Enter Employee Code">
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <div class="box-footer">
+                <input class="btn btn-primary" onclick="searchEmployee()" value="Search" type="button" />   <a class="btn btn-default" href="javascript:void(0)" onclick="clearAll()">Reset</a>
+            </div>
+
+        
+    </div>
+    <div class="row" style="overflow-x:scroll">
+        <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Employee Leave Request</h3>
+                </div>
+                <div class="box-body">
+                    <div class="form-group">
+                     <div>
+
+                            <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                <thead>
+                                    <tr>
+                                        <th>School</th>
+                                        <th>Emp. Code</th>
+                                        <th>Photo</th>
+                                        <th>Name</th>
+                                        <th>Department</th>
+                                        <th>Designation</th>
+                                        <th>Leave Date</th>
+                                        <th>Leave Type</th>
+                                        <th>Leave In day</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                        <th>View</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyEmployeeLeaveRequestDetails"></tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <script type="text/html" id="tbodyEmployeeLeaveRequestDetailsJTemplte">
+                {#foreach $T as Datashort}
+                <tr>
+                    <td>
+                        { $T.Datashort.School}
+                    </td>
+                    <td>
+                        { $T.Datashort.Employeecode}
+                    </td>
+                    <td>
+                        <img src="{ $T.Datashort.ImageUpload}" alt="#" />
+                    </td>
+                    <td>
+                        { $T.Datashort.FName}
+                    </td>
+                    <td>
+                        { $T.Datashort.Department}
+                    </td>
+                    <td>
+                        { $T.Datashort.Designation}
+                    </td>
+                    <td>
+                        { $T.Datashort.Extra2}
+                    </td>
+                    <td>
+                        { $T.Datashort.Extra4}
+                    </td>
+                    <td>
+                        { $T.Datashort.Extra3}
+                    </td>
+                    <td >
+                  <span class="{ $T.Datashort.Extra10}">{ $T.Datashort.Status}</span> 
+ 
+                    </td>
+                    <td>
+                        <select id="ddlLeaveStatus_{ $T.Datashort.Id}" valuefield="Id" textfield="Name" onchange="confirmVMR('Are you sure? You want to change status ',approveunapprovedleaverequst,this.value,{ $T.Datashort.Id})" blankRowValue="0" blankRowText="--Select--" class="form-control"></select>
+                   </td>
+                    <td>
+                    
+                        <i class="glyphicon glyphicon-eye-open" style="cursor:pointer" onclick="showLeaveDetails('{ $T.Datashort.FName}','{ $T.Datashort.Department}','{ $T.Datashort.Designation}','{ $T.Datashort.Extra2}','{ $T.Datashort.Extra4}','{ $T.Datashort.Extra3}','{ $T.Datashort.Status}','{ $T.Datashort.Month}','{ $T.Datashort.Extra10}')"></i>
+                   </td>
+</tr>
+                {#/for}
+            </script>
+
+
+        </div>
+ </div>
+</section>
+
+   <!-- Trigger the modal with a button -->
+<button type="button" class="btn btn-info btn-lg" id="btnEmployeeShowTasks" style="display:none" data-toggle="modal" data-target="#myModal2">Open Modal</button>
+
+<!-- Modal -->
+<div id="myModal2" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Leave Request Details</h4>
+            </div>
+            <div class="modal-body">
+                <div class="content">
+                    <div class="panel panel-white">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-12">
+
+
+                                    <div class="form-group col-md-6">
+                                        <label class="col-sm-5 control-label">Employee Name</label>
+                                        <div class="col-sm-7">
+                                            <p class="form-control-static" id="spEmployeeName"></p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label class="col-sm-5 control-label">Department</label>
+                                        <div class="col-sm-7">
+                                            <p class="form-control-static" id="spEmployeeDepartment"></p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group col-md-6">
+                                        <label class="col-sm-5 control-label">Designation</label>
+                                        <div class="col-sm-7">
+                                            <p class="form-control-static" id="spEmployeeDesignation"></p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label class="col-sm-5 control-label">LeaveType</label>
+                                        <div class="col-sm-7">
+                                            <p class="form-control-static" id="spLeaveType"> </p>
+                                        </div>
+                                    </div>
+                                    <div id="header"></div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group col-md-6">
+                                        <label class="col-sm-5 control-label">Leave In Day</label>
+                                        <div class="col-sm-7">
+                                            <p class="form-control-static" id="spEmployeeTaskPriority"></p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label class="col-sm-5 control-label">Status</label>
+                                        <div class="col-sm-7">
+                                            <p class="form-control-static" id="spEmployeeLeaveStatus"></p>
+                                        </div>
+                                    </div>
+                                    <div id="header"></div>
+                                    <div class="col-md-12">
+                                        <label class="col-sm-3 control-label">Leave Reason</label>
+                                        <div class="col-sm-9">
+                                            <p class="form-control-static" id="spLeaveReason"></p>
+                                          </div>
+                                        </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!-- DataTables -->
+<link href="~/js/PDFExcelDatatable/buttons.dataTables.min.css" rel="stylesheet" />
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script src="~/js/PDFExcelDatatable/dataTables.buttons.min.js"></script>
+<script src="~/js/PDFExcelDatatable/jszip.min.js"></script>
+<script src="~/js/PDFExcelDatatable/pdfmake.min.js"></script>
+<script src="~/js/PDFExcelDatatable/vfs_fonts.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.html5.min.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.print.min.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.colVis.min.js"></script>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () { 
+       
+        $("#loader").fadeIn();
+        var firstDayOfMonth = function() {
+            // your special logic...
+            return 1;
+        };
+
+        var d = new Date();
+        var currMonth = d.getMonth();
+        var currYear = d.getFullYear();
+        var startDate = new Date(currYear,currMonth,firstDayOfMonth());
+        $('#txtStartDate').datepicker('setDate',startDate);
+
+
+ 
+        var currentTime = new Date() 
+        var maxDate =  new Date(currentTime.getFullYear(), currentTime.getMonth() +1, +0)
+         $("#txtEndDate").datepicker('setDate', maxDate);
+     
+       
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        //callServiceMethodForDDl("", "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        callServiceMethodForDDl("", "/api/EmployeeAPI", "leaveStatus", "ddlStatus", false, "", "", "", "");
+        callJTemplateServiceMethod(JSON.stringify([loginuser, typeuser]), "/api/EmployeeAPI", "getAllEmployeeLeaveRequest",
+            "tbodyEmployeeLeaveRequestDetails", "tbodyEmployeeLeaveRequestDetailsJTemplte", true, successMsg, "", "", "");
+
+
+      
+    });
+    function successMsg(p1, p2, p3, datas)
+    {
+        $("#loader").fadeOut();
+        if(datas!=="")
+        {
+            for(var i=0;i<datas.length;i++)
+            {
+                callServiceMethodForDDl("", "/api/EmployeeAPI", "leaveStatus", "ddlLeaveStatus_"+datas[i].Id+"", false, "", "", "", "");
+            }
+            setTimeout(function () {
+                $('#example1').DataTable({
+                   // "pageLength": 50,
+                    dom: 'lBfrtip',
+                    'columnDefs': [{
+                        "targets": [-1,-2,0,2],
+                        "orderable": false
+
+                    }],
+                    buttons: [
+                        //{
+                        //    extend: 'copyHtml5',
+                        //    exportOptions: {
+                        //        columns: [0, ':visible']
+                        //    }
+                        //},
+                        {
+                            extend: 'excelHtml5',
+                            exportOptions: {
+                                columns: ':visible'
+                            }
+                        },
+                        {
+                            extend: 'pdfHtml5',
+                            exportOptions: {
+                                columns: [0,2,3,4, 5,6,7,8]
+                            },
+                            title: 'Employee Leaves Details',
+                            customize: function(doc) {
+                                doc.styles.title = {
+                                    color: 'red',
+                                    fontSize: '40',
+                                    background: 'blue',
+                                    alignment: 'center'
+                                }
+                            }
+                        },
+                        //'colvis'
+                    ]
+                });
+            }, 1000);
+        }
+    }
+
+    function approveunapprovedleaverequst(value,Id)
+       
+    {
+      var emp = {
+            Extra5: value,
+            Id: Id,
+         }
+        var ddl = JSON.stringify(emp)
+        callServiceMethod(ddl, "/api/LeaveAPI", "approvedUnapproveLeaveRequest", false, "", "", false, "", true, approveunapprovedleaverequst_scs, "", "", "");
+
+
+    }
+
+    function  approveunapprovedleaverequst_scs(p1,p2,p3,datas)
+    {
+        location.href="/Leave/EmployeeLeaveRequest"; 
+        setTimeout(function(){
+            alert("rahul");
+        },4000)
+    }
+
+
+
+    function searchEmployee()
+    {
+        var employye = {
+
+            
+            Employeecode: getControlValue("txtEmployeeCode"),
+           
+            Extra5: getControlValue("txtStartDate"),
+            Extra6: getControlValue("txtEndDate"),
+           
+            UserType: getControlValue("ddlStatus"),
+            FName: getControlValue("txtEmployeeName"),
+            SchoolID: getControlValue("ddlSchoolName")
+          
+         
+
+        }
+
+        var ddl = JSON.stringify(employye)
+        $("#loader").fadeIn();
+        var t = $('#example1').DataTable();
+        t.destroy();
+        callJTemplateServiceMethod(ddl, "/api/EmployeeAPI", "searchEmployeeForLeaveRequest",
+            "tbodyEmployeeLeaveRequestDetails", "tbodyEmployeeLeaveRequestDetailsJTemplte", true, showSearchResult, "", "", "");
+
+        // callServiceMethod(ddl, "/api/EmployeeAPI", "searchEmployeeForSms", false, "", "", false, "", false, "", "", "", "");
+    }
+
+    function showSearchResult(p1,p2,p3,datas)
+    { $("#loader").fadeOut();
+        if(datas!=="")
+        {
+            for(var i=0;i<datas.length;i++)
+            {
+                callServiceMethodForDDl("", "/api/EmployeeAPI", "leaveStatus", "ddlLeaveStatus_"+datas[i].Id+"", false, "", "", "", "");
+            }
+            setTimeout(function () {
+                $('#example1').DataTable({
+
+                    bRetrieve: true,
+                    bDestroy: true,
+                    'columnDefs': [{
+                        "targets": [-1,-2,2],
+                        "orderable": false
+
+                    }],
+                });
+
+                //'colvis'
+            }, 1000);
+        }
+    }
+    
+
+    function clearAll()
+    {
+        setControlValue("ddlStatus","0");
+        setControlValue("txtEmployeeName","");
+        setControlValue("txtEmployeeCode","");
+        var firstDayOfMonth = function() {
+            // your special logic...
+            return 1;
+        };
+
+        var d = new Date();
+        var currMonth = d.getMonth();
+        var currYear = d.getFullYear();
+        var startDate = new Date(currYear,currMonth,firstDayOfMonth());
+        $('#txtStartDate').datepicker('setDate',startDate);
+
+
+ 
+        var currentTime = new Date() 
+        var maxDate =  new Date(currentTime.getFullYear(), currentTime.getMonth() +1, +0)
+        $("#txtEndDate").datepicker('setDate', maxDate);
+    }
+
+
+    function showLeaveDetails(EmpName,Dept,Desg,leaveDate,leaveType,leaveIdDay,status,reason,color)
+    {
+        document.getElementById("btnEmployeeShowTasks").click();
+        setControlValue("spEmployeeName",EmpName);
+        setControlValue("spEmployeeDepartment",Dept);
+        setControlValue("spEmployeeDesignation",Desg);
+        setControlValue("spLeaveType",leaveType);
+        setControlValue("spEmployeeLeaveStatus",status);
+        $("#spEmployeeLeaveStatus").addClass(color);
+        setControlValue("spLeaveReason",reason);
+      
+        setControlValue("spEmployeeTaskPriority",leaveIdDay);
+    }
+
+    </script>
+<style type="text/css">
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>

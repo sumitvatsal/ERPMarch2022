@@ -1,0 +1,702 @@
+﻿
+@{
+    ViewBag.Title = "StudentVehicleCurrentLocation";
+    Layout = "~/Views/Shared/_LayoutStudent.cshtml";
+}
+
+
+<section class="content" style="margin-right:300px">
+
+   
+
+       
+
+
+            <!--- User Info BOX -->
+
+          
+      
+        <div id="main" class="main">
+
+
+            <input type="hidden" id="VehicleId" value='123' />
+            <div class="wrap-content">
+                <div class="rightpanel">
+                    <div class="maincontent">
+                        <div class="maintitle">
+                            <h1>Current Location</h1>
+                            <span style="font-weight: bold" id="loc"></span>
+                            <input type="hidden" id="HiddenID" />
+                            <input type="hidden" id="HiddenVehicleno" />
+                            <input type="hidden" id="HiddenValidationKey" />
+                        </div>
+                        <div>
+                            <span>
+                                Moving
+                                <img src="http://maps.google.com/mapfiles/ms/icons/green-dot.png" alt="MOV" />
+                            </span> |
+                            <span>
+                                IDLE
+                                <img src="http://maps.google.com/mapfiles/ms/icons/yellow-dot.png" alt="IDLE" />
+                            </span> |
+                            <span>
+                                Battery Disconnected
+                                <img src="http://maps.google.com/mapfiles/ms/icons/blue-dot.png" alt="BD" />
+                            </span> |
+                            <span>
+                                Not Reporting
+                                <img src="http://maps.google.com/mapfiles/ms/icons/red-dot.png" alt="NR" />
+                            </span> |
+                            <span>
+                                NO GPS FIX
+                                <img src="http://maps.google.com/mapfiles/ms/icons/orange-dot.png" alt="No GPS FIX" />
+                            </span>
+                        </div>
+                        <div class="containt">
+                            <div class="map">
+                                <div class="frsp">
+                                    <div id="map_canvas" style="width: 100%; height: 100%;">
+                                    </div>
+                                    <div class="eventtext" style="width: 99%; display: none;">
+                                        <div>
+                                            Lattitude: <span id="Latitude"></span>
+                                        </div>
+                                        <div>
+                                            Longitude: <span id="Longitude"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+            <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJs9f6yPQRmMsDkg7DiFtaeMjbik3kd0E&libraries=places"></script>
+
+            <script type="text/javascript">
+                var prevAvlStatus = '';
+                var msg;
+                var map;
+                var markerUsers = []; //User points
+                var markers = [];
+                var infowindows = [];
+                var geocoder, bound1;
+                var info_window;
+                var flightPath;
+                var lines = [];
+                var flightPlanCoordinates = [];
+                var lineSymbol = {
+                    path: google.maps.SymbolPath.FORWARD_OPEN_ARROW,
+                    scale: 2,
+                    strokeColor: '#393'
+                };
+                var infowindow = new google.maps.InfoWindow();
+
+                function initialize() {
+                    var mapDiv = document.getElementById("map_canvas");
+                    var myOptions = {
+                        zoom: 15,
+                        zoomControlOptions: {
+                            position: google.maps.ControlPosition.TOP_RIGHT
+                        },
+                        center: latlng,
+                        mapTypeId: google.maps.MapTypeId.ROADMAP
+                    };
+
+                    map = new google.maps.Map(mapDiv, myOptions);
+                    var latlng = new google.maps.LatLng(28.63244546123956, 77.22135543823242);
+
+                    geocoder = new google.maps.Geocoder();
+
+
+                    google.maps.event.addListener(map, 'bounds_changed', function (event) {
+                        bound1 = map.getBounds();
+                    });
+                    info_window = new google.maps.InfoWindow({
+                        content: 'loading'
+                    });
+
+
+                }
+                $(document).ready(function () {
+                    //$(document)[0].oncontextmenu = function () { return false; }
+
+                    //$(document).mousedown(function (e) {
+                    //    if (e.button == 2) {
+                    //        alert('Sorry, this functionality is disabled!');
+                    //        return false;
+                    //    } else {
+                    //        return true;
+                    //    }
+                    //});
+                    //document.onkeypress = function (event) {
+
+                    //    if (event.keyCode == 123) {
+                    //        alert('Sorry\nNo F12 is allowed. Be creative!');
+                    //        return false;
+                    //    }
+                    //}
+                    //document.onmousedown = function (event) {
+
+                    //    if (event.keyCode == 123) {
+                    //        alert('Sorry\nNo F12 is allowed. Be creative!');
+                    //        return false;
+                    //    }
+                    //}
+                    //document.onkeydown = function (event) {
+
+                    //    if (event.keyCode == 123) {
+                    //        alert('Sorry\nNo F12 is allowed. Be creative!');
+                    //        return false;
+                    //    }
+                    //    else if (event.ctrlKey &&
+                    //        (event.keyCode === 67 ||
+                    //            event.keyCode === 86 ||
+                    //            event.keyCode === 85 ||
+                    //            event.keyCode === 117)) {
+                    //        alert('Sorry\nNo CTRL+U is allowed. Be creative!');
+                    //        return false;
+                    //    }
+
+                    //}  
+                    
+                    var id = GetParameterValues('id');
+                    var ValidationKey = GetParameterValues('ValidationKey');
+                    var Vehicleno = GetParameterValues('Vehicleno');
+                    function GetParameterValues(param) {
+                        var url = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+
+                        for (var i = 0; i < url.length; i++) {
+                            var urlparam = url[i].split('=');
+
+                            if (urlparam[0] == param) {
+                                return urlparam[1];
+                            }
+                        }
+
+                    }
+
+                    $("#HiddenID").val(id);
+                    $("#HiddenValidationKey").val(ValidationKey);
+                    $("#HiddenVehicleno").val(Vehicleno);
+                   
+
+                    if (id == "-1")
+                    {
+                        initialize();
+                    }
+                    else
+                    {
+                        LoadHubs();
+                    }
+                   
+                    initialize();
+                    LoadVehicle();
+                });
+                
+                function LoadVehicle() {
+                  
+                    var details =
+                    {
+                        RegdNo: $("#HiddenVehicleno").val(),
+                        ValidationKey: $("#HiddenValidationKey").val()
+                    }
+                    var dll = JSON.stringify(details)
+
+                    $.ajax({
+                        type: "POST",
+                        url: "/api/TransportApi/getLocation",
+                        data: dll,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+
+                       
+              
+                    //$.ajax({
+                    //    type: "GET",
+                    //    url: "http://gps.migps.in/api/MiGpsApi/GetCurrentLocation",
+                    //    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    //    data: 'RegdNo=' + RegdNo + '&ValidationKey=' + ValidationKey,
+                    //    success: function (data) {
+                            var count = data.length;
+                            var i = 0;
+                            var lat = data.Lattitude;
+                            var lng = data.Longitude;
+                            var rdate = new Date(data.RDateTime);
+                            var rdatestr = ('0' + rdate.getDate()).slice(-2) + '-' + ('0' + (parseInt(rdate.getMonth(), '10') + 1)).slice(-2) + '-' + rdate.getFullYear() + ' ' + ('0' + rdate.getHours()).slice(-2) + ':' + ('0' + rdate.getMinutes()).slice(-2) + ':' + ('0' + rdate.getSeconds()).slice(-2)
+
+                            var title = data.RegdNo + "On :" + rdatestr + " at : " + data.Location + " Speed : " + data.Speed + " Ignition : " + data.AvailableStatus;
+                            if (data.Temperature != null)
+                            {
+                                title += " Temperature : " + data.Temperature;
+                            }
+                            if (data.ACStatus != null)
+                            {
+
+                                title += " AC : " + data.ACStatus;
+                            }
+                            var tooltip = "<table width='100%' cellspacing='0' cellpadding='0' style='background-color:#ffffff;'>";
+                            tooltip = tooltip + "<tr><td  align='center' style='font-size: 12px;font-weight: bold;' colspan='2'>Vehicle Details</td></tr>";
+                            tooltip = tooltip + "<tr><td colspan='2'><hr style='height:1px;background-color:red;'></td></tr>";
+                            tooltip = tooltip + "<tr><td style='width:140px;font-size: 12px;' align='right'>Vehicle No :</td><td align=left style='font-size: 12px;'>" + data.RegdNo + " </td></tr>";
+                            tooltip = tooltip + " <tr><td style='width:140px;font-size: 12px;' align='right'>Date/Time :</td><td align=left style='font-size: 12px;'>" + rdatestr + " </td></tr>";
+                            tooltip = tooltip + "<tr><td style='width:140px;font-size: 12px;' align='right'>Speed :</td><td align=left style='font-size: 12px;'>" + data.Speed + "</td></tr>";
+                            tooltip = tooltip + "<tr><td style='width:140px;font-size: 12px;' align='right'>Ignition :</td><td align=left style='font-size: 12px;'>" + data.AvailableStatus + "</td></tr>";
+                            tooltip = tooltip + "<tr><td  align='right' style='width:140px;font-size: 12px'>Location :</td><td align=left style='font-size: 12px;'>" + data.Location + "</td></tr>";
+                            tooltip = tooltip + "</table>";
+                           
+                            title += " Day Distance: " + data.DayDistance + " Km.";
+                            var avlStatus = data.AvailableStatus;
+                            $('#loc').text(title);
+                            addMarker(data, tooltip, avlStatus);
+                           
+                        },
+                        complete: function () {
+                            $('#loadingmessage').hide();
+                            setTimeout(function () { LoadVehicle(); }, 5000);
+                        },
+                        error: function () {
+                            $('#loadingmessage').hide();
+                        },
+                    });
+                }
+
+
+                setTimeout(function () { LoadVehicle(); }, 1000);
+                //On click of Taxi ICOM on MAP
+                function addMarker(data, tooltip, avlStatus) {
+                    if (avlStatus == "IDLE") {
+                        var fillColor = "#ffff00"; //yellow
+                    }
+                    else if (avlStatus == "MOV") {
+                        var fillColor = "#7af442"; //green
+                    }
+                    else if (avlStatus == "NR") {
+                        var fillColor = "#ff0000"; //red
+
+                    }
+                    else if (avlStatus == "NGF") {
+                        var fillColor = "#ffa500"; //orange
+                    }
+                    else if (avlStatus == "BD") {
+                        var fillColor = "#8080ff"; //blue
+                    }
+                  
+                    var Bus = "M17.402,0H5.643C2.526,0,0,3.467,0,6.584v34.804c0,3.116,2.526,5.644,5.643,5.644h11.759c3.116,0,5.644-2.527,5.644-5.644 V6.584C23.044,3.467,20.518,0,17.402,0z M22.057,14.188v11.665l-2.729,0.351v-4.806L22.057,14.188z M20.625,10.773 c-1.016,3.9-2.219,8.51-2.219,8.51H4.638l-2.222-8.51C2.417,10.773,11.3,7.755,20.625,10.773z M3.748,21.713v4.492l-2.73-0.349 V14.502L3.748,21.713z M1.018,37.938V27.579l2.73,0.343v8.196L1.018,37.938z M2.575,40.882l2.218-3.336h13.771l2.219,3.336H2.575z M19.328,35.805v-7.872l2.729-0.355v10.048L19.328,35.805z";
+                    var truck = "M21.474,377.522V117.138c0-14.469,11.729-26.199,26.199-26.199h260.25c14.469,0,26.198,11.73,26.198,26.199v260.385   c0,4.823-3.909,8.733-8.733,8.733H30.207C25.383,386.256,21.474,382.346,21.474,377.522z M231.634,466.724   c0,30.01-24.329,54.338-54.338,54.338c-30.009,0-54.338-24.328-54.338-54.338c0-30.011,24.329-54.338,54.338-54.338   C207.305,412.386,231.634,436.713,231.634,466.724z M204.464,466.724c0-15.005-12.164-27.169-27.169-27.169   s-27.17,12.164-27.17,27.169s12.165,27.17,27.17,27.17S204.464,481.729,204.464,466.724z M130.495,412.385H8.733   c-4.823,0-8.733,3.91-8.733,8.733v26.495c0,4.823,3.91,8.733,8.733,8.733h97.598C108.879,438.862,117.704,423.418,130.495,412.385z    M515.938,466.724c0,30.01-24.329,54.338-54.338,54.338c-30.01,0-54.338-24.328-54.338-54.338   c0-30.011,24.328-54.338,54.338-54.338C491.609,412.385,515.938,436.713,515.938,466.724z M488.77,466.724   c0-15.005-12.165-27.169-27.17-27.169c-15.006,0-27.169,12.164-27.169,27.169s12.164,27.17,27.169,27.17   S488.77,481.729,488.77,466.724z M612,421.118v26.495c0,4.823-3.91,8.733-8.733,8.733h-70.704   c-5.057-34.683-34.906-61.427-70.961-61.427c-36.062,0-65.912,26.745-70.969,61.427H248.261   c-2.549-17.483-11.373-32.928-24.164-43.961h134.994V162.594c0-9.646,7.82-17.466,17.466-17.466h82.445   c23.214,0,44.911,11.531,57.9,30.77l53.15,78.721c7.796,11.547,11.962,25.161,11.962,39.094v118.672h21.253   C608.09,412.385,612,416.295,612,421.118z M523.408,256.635l-42.501-60.393c-1.636-2.324-4.3-3.707-7.142-3.707H407.47   c-4.822,0-8.733,3.91-8.733,8.733v60.393c0,4.824,3.91,8.733,8.733,8.733h108.798C523.342,270.394,527.48,262.421,523.408,256.635z";
+
+
+                    //var Bus1 = <img src= "Images/Transport/defaultEast.jpg" />;
+                    var icon = { // car icon
+                        path: Bus,
+                        scale: .6,
+                        fillColor: fillColor, //<-- Car Color, you can change it 
+                        fillOpacity: 1,
+                        strokeWeight: 1,
+                        anchor: new google.maps.Point(0, 5), //to change bus to var car
+                        rotation: parseInt(data.Direction) //<-- Car angle
+                    };
+
+
+                    var position = new google.maps.LatLng(data.Lattitude, data.Longitude);
+                    map.setCenter(position);
+                    if (prevAvlStatus != "IDLE" || 1 == 1) {
+                        var marker = new google.maps.Marker({
+                            position: position,
+                            map: map,
+                            title: data.RegdNo,
+                            html: tooltip,
+                            icon: icon
+                        });
+                        clearMarkers();
+                        markers.push(marker);
+                        flightPlanCoordinates.push(position);
+                        VehiclePath();
+                        google.maps.event.addListener(marker, 'click', function () {
+                            info_window.setContent(this.html);
+                            info_window.open(map, this);
+                        });
+                        prevAvlStatus = data.AvailableStatus;
+                    }
+                }
+
+                function removeAllinfoWindows() {
+                    var i = 0;
+                    for (i = 0; i < infowindows.length; i++) {
+                        var m = infowindows[i];
+                        m.close();
+                    }
+                }
+
+
+                // Removes the markers from the map, but keeps them in the array.
+                function clearMarkers() {
+                    setAllMap(null);
+                }
+                // Deletes all markers in the array by removing references to them.
+                function deleteMarkers() {
+                    clearMarkers();
+                    markers = [];
+                }
+                // Sets the map on all markers in the array.
+                function setAllMap(map) {
+                    var i = 0;
+                    for (i = 0; i < markers.length; i++) {
+                        var m = markers[i];
+                        m.setMap(map);
+                        //markers[i].setMap(map);
+
+                    }
+                }
+                function VehiclePath() {
+                    var flightPath = new google.maps.Polyline({
+                        path: flightPlanCoordinates,
+                        geodesic: true,
+                        strokeColor: '#00FF00',
+                        strokeOpacity: 1.0,
+                        strokeWeight: 3
+                    });
+
+                    flightPath.setMap(map);
+                }
+
+                function GUnload() { }
+                function GetGeoAddress() {
+                    var lat = document.getElementById('Latitude').value;
+                    var lng = document.getElementById('Longitude').value;
+                    var latlng = new google.maps.LatLng(lat, lng);
+                    geocoder.geocode({ 'latLng': latlng }, function (results, status) {
+                        if (status == google.maps.GeocoderStatus.OK) {
+                            if (results[1]) {
+                                var googleaddres = results[1].formatted_address;
+                                $("#From").val(googleaddres);
+                                var ivr = googleaddres.split(",");
+                                var ivrName = ivr[1];
+
+                                $("#Locality").val(ivrName);
+
+                            } else {
+                                alert('No results found');
+                            }
+                        } else {
+                            alert('Geocoder failed due to: ' + status);
+                        }
+                    });
+                }
+
+                //======Load HUBS==============
+
+                function LoadHubs() {
+
+
+                    var SchoolID = sessionStorage.getItem("SchoolID");
+                    var VehicleID = $("#HiddenID").val();
+                    $.ajax({
+                        type: "Post",
+                        url: "/api/TransportApi/GetAllHublanlong",
+                        data: JSON.stringify([SchoolID, VehicleID]),
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (datas) {
+                            if (datas.length != 0) {
+                              
+                               
+                                stations = [];
+                                for (var i = 0; i < datas.length; i++) {
+                                    var stations1 = [
+
+                                        { lat: parseFloat(datas[i].HubLat), lng: parseFloat(datas[i].HubLong), name: datas[i].HubAddress }
+
+
+
+                                    ]
+                                    stations = stations.concat(stations1);
+
+                                }
+                                initMap();
+
+                            }
+                            else
+                            {
+                                initialize();
+                            }
+                          
+                            
+                        }
+                    });
+                }
+
+                // Add a marker to the map and push to the array.
+                function addMarkerHub(location, title) {
+                   
+                    var imageLandmrk = new google.maps.MarkerImage('..Images/Hub/HubICON.png', new google.maps.Size(35, 35));
+
+                    var marker = new google.maps.Marker({
+                        position: location,
+                        map: map,
+                        title: title
+
+                    });
+                    marker.setIcon(imageLandmrk);
+                    markerUsers.push(marker);
+                }
+                function clearMarkersHubs() {
+                    setAllMap(null);
+                }
+
+                // Removes the markers from the map, but keeps them in the array.
+                function clearMarkersHub() {
+                    setAllMapl(null);
+                }
+                // Deletes all markers in the array by removing references to them.
+                function deleteMarkersl() {
+                    clearMarkersHub();
+                    markerUsers = [];
+                }
+                // Sets the map on all markers in the array.
+                function setAllMapl(map) {
+                    var i = 0;
+                    for (i = 0; i < markerUsers.length; i++) {
+                        var m = markerUsers[i];
+                        m.setMap(map);
+                    }
+                }
+                function initMap() {
+                    initialize();
+                    var service = new google.maps.DirectionsService;
+                    // list of points
+
+                    //up in ajax
+
+                    // Zoom and center map automatically by stations (each station will be in visible map area)
+                    var lngs = stations.map(function (station) { return station.lng; });
+                    var lats = stations.map(function (station) { return station.lat; });
+                    map.fitBounds({
+                        west: Math.min.apply(null, lngs),
+                        east: Math.max.apply(null, lngs),
+                        north: Math.min.apply(null, lats),
+                        south: Math.max.apply(null, lats),
+                    });
+
+                    // Show stations on the map as markers
+
+                    for (var i = 0; i < stations.length; i++) {
+                        var imageLandmrk = new google.maps.MarkerImage('../Images/Hub/HubICON.png', new google.maps.Size(35, 35));
+                        var marker = new google.maps.Marker({
+                            position: stations[i],
+                            map: map,
+                            title: stations[i].name
+                        });
+                        marker.setIcon(imageLandmrk);
+
+                    }
+
+                    // Divide route to several parts because max stations limit is 25 (23 waypoints + 1 origin + 1 destination)
+                    for (var i = 0, parts = [], max = 25 - 1; i < stations.length; i = i + max)
+                        parts.push(stations.slice(i, i + max + 1));
+
+                    // Service callback to process service results
+                    var service_callback = function (response, status) {
+                        if (status != 'OK') {
+                            console.log('Directions request failed due to ' + status);
+                            return;
+                        }
+                        var renderer = new google.maps.DirectionsRenderer;
+                        renderer.setMap(map);
+                        renderer.setOptions({ suppressMarkers: true, preserveViewport: true });
+                        renderer.setDirections(response);
+                    };
+
+                    // Send requests to service to get route (for stations count <= 25 only one request will be sent)
+                    for (var i = 0; i < parts.length; i++) {
+                        // Waypoints does not include first station (origin) and last station (destination)
+                        var waypoints = [];
+                        for (var j = 1; j < parts[i].length - 1; j++)
+                            waypoints.push({ location: parts[i][j], stopover: false });
+                        // Service options
+                        var service_options = {
+                            origin: parts[i][0],
+                            destination: parts[i][parts[i].length - 1],
+                            waypoints: waypoints,
+                            travelMode: 'WALKING'
+                        };
+                        // Send request
+                        service.route(service_options, service_callback);
+                    }
+                }
+
+
+                //======================
+            </script>
+
+            <div id="footer">
+            </div>
+           
+        </div>
+       
+        
+    
+</section>
+<!-- Content Wrapper. Contains page content -->
+<!-- Content Wrapper. Contains page content -->
+
+
+
+
+<style type="text/css">
+        #loadingmessage {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            background-color: grey;
+            opacity: .8;
+        }
+
+        .ajax-loader {
+            position: absolute;
+            left: 45%;
+            top: 50%;
+            margin-left: -32px; /* -1 * image width / 2 */
+            margin-top: -32px; /* -1 * image height / 2 */
+            display: block;
+        }
+
+
+
+    #map_canvas {
+        min-height: 900px;
+        height: 100%;
+        width: 1900px;
+    }
+
+            .map    {
+                min-height: 900px;
+                height: 100%;
+                width:1900px;
+            }
+
+    .containt {
+        min-height: 900px;
+        height: 100%;
+        width: 1900px;
+    }
+      
+
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .topnav {
+            overflow: hidden;
+            /*background-color: #333;*/
+            height: 60px;
+        }
+
+            .topnav a {
+                float: left;
+                display: block;
+                color: #f2f2f2;
+                text-align: center;
+                padding: 20px 16px;
+                text-decoration: none;
+                font-size: 17px;
+                height: 60px;
+            }
+
+                .topnav a:hover {
+                    background-color: #ddd;
+                    color: black;
+                }
+
+        .active {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .topnav .icon {
+            display: none;
+        }
+
+      
+            .topnav a:not(:first-child) {
+                display: none;
+            }
+
+            .topnav a.icon {
+                float: right;
+                display: block;
+            }
+  
+
+      
+            .topnav.responsive {
+                position: relative;
+            }
+
+                .topnav.responsive .icon {
+                    position: absolute;
+                    right: 0;
+                    top: 0;
+                }
+
+                .topnav.responsive a {
+                    float: none;
+                    display: block;
+                    text-align: left;
+                }
+        
+</style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

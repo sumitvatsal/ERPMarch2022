@@ -1,0 +1,493 @@
+﻿
+@{
+    ViewBag.Title = "ScholarRegister";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<style type="text/css">
+    .imgIcon {
+        width: 0.5%;
+        height: 0.5%;
+    }
+
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 8px;
+            padding-bottom: 8px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+<section class="content-header">
+    <h1>
+        <i class="fa fa-eye"></i> Scholar Register |<small id="CTName"></small>
+    </h1>
+    @*<ul class="breadcrumb">
+            <li><a href="/"><i class="fa fa-home"></i>Home</a></li>
+            <li><a href="/academics/default/index">Academics</a></li>
+            <li class="active">Timetable</li>
+            <li><a href="/timetable/class-timing/index">Class Timing</a></li>
+            <li class="active">gffd</li>
+        </ul>*@
+</section>
+<section class="content">
+    <div class="box box-solid">
+        <div class="box-body table-responsive">
+            <p class="text-right btn-view-group edusecArLangTextLeft">
+                @*<a class="btn btn-default btn-sm" href="/TimeTable/ClassTiming"><i class="fa fa-chevron-circle-left"></i> Back</a>*@							@*<a class="btn btn-info btn-sm" href="/timetable/class-timing/update?id=2" data-target="#globalModal" data-toggle="modal" data-backdrop="static"><i class="fa fa-pencil-square-o"></i> Update</a>										<a class="btn btn-danger btn-sm" href="/timetable/class-timing/delete?id=2" data-confirm="Are you sure you want to delete this item?" data-method="post"><i class="fa fa-trash-o"></i> Delete</a>*@
+            </p>
+            <div class="dvImgPreview" id="dvPreview">@*<img id="profileImg" alt="#" />*@</div>
+            <table class="table table-bordered">
+                <colgroup>
+                    <col >
+                    <col >
+                    <col >
+                    <col >
+                </colgroup>
+                <tbody>
+                    <tr>
+                        <th>Name</th>
+                        <td colspan="3"><span id="spName"></span></td>
+                    </tr>
+                    <tr>
+                        <th>Registration No.</th>
+                        <td><span id="spRegNo"></span></td>
+                        <th>Registration No.</th>
+                        <td><span id="spRegNo"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+            <br>
+            <input id="hdn" type="hidden" />
+            <div class="box box-solid" style="border:1px solid #eee">
+                <div class="extra-div">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><i class="fa fa-table"></i> Details</h3>
+                        <div class="box-tools">
+                            <a class="btn btn-success btn-sm" href="#" onclick="openModal()"><i class="fa fa-plus-square"></i> Add</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-body table-responsive">
+                    <div id="w1" class="grid-view">
+                        <table id="example1" class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th style="width:8%;">Sr no.</th>
+                                    <th>Name</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                    <th>IsBreak</th>
+                                    <th style="width:10%;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyEmployeeDetails"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <script type="text/html" id="divEmployeeDetailsJTemplte">
+                    {#foreach $T as Datashort}
+                    <tr>
+                        <td style="width:10%;">
+                            { $T.Datashort.CountID}
+                        </td>
+                        <td>
+                            { $T.Datashort.period.Name}
+                        </td>
+                        <td>
+                            { $T.Datashort.period.StartTime}
+                        </td>
+                        <td>
+                            { $T.Datashort.period.EndTime}
+                        </td>
+                        <td style="width:15%;">
+                            <span class="{ $T.Datashort.style}">{ $T.Datashort.IsBreak}</span>
+                        </td>
+                        <td>
+                            <i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" onclick="Edit({ $T.Datashort.period.ID},'{ $T.Datashort.period.Name}','{ $T.Datashort.period.STime}','{ $T.Datashort.period.ETime}',{ $T.Datashort.period.Status},{ $T.Datashort.period.IsBreak})" title="Edit"></i>
+                            <i class="fa fa-fw fa-trash" style="cursor:pointer" onclick="Delete({ $T.Datashort.period.ID})" title="Delete"></i>
+                        </td>
+                    </tr>
+                    {#/for}
+                </script>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">
+                        <i class="fa fa-plus-square"></i> Class Timing Detail		<button type="button" class="close" data-dismiss="modal">
+                            <span aria-hidden="true">×</span><span class="sr-only">Close</span>
+                        </button>
+                    </h3>
+                </div> <!-- /.modal-header -->
+
+
+                <form id="class-timing-detail" role="form" name="form1">
+                    <input type="hidden" id="hdnID">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group field-classtimingdetail-tctd_name required">
+                                    <label class="control-label" for="classtimingdetail-tctd_name">Name <span class="requird">*</span></label>
+                                    <input type="text" id="PeriodName" class="form-control" name="PeriodName" maxlength="150" aria-required="true">
+
+                                    <div class="help-block"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="col-sm-6 col-xs-6 no-padding">
+                                    <div class="form-group ">
+                                        <div class=""><label for="start-time">Start Time <span class="requird">*</span></label></div>
+                                        <div class="input-group bootstrap-timepicker timepicker " style="width:98%;">
+                                            <input id="sTime" type="text" name="sTime" readonly="readonly" class="form-control input-small timer">
+                                            <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-6 col-xs-6 no-padding">
+                                    <div class="form-group  ">
+                                        <div class=""><label for="end-time">End Time <span class="requird">*</span></label></div>
+                                        <div class="input-group bootstrap-timepicker timepicker" style="width:99%;">
+                                            <input id="eTime" type="text" name="eTime" readonly="readonly" class="form-control input-small timer">
+                                            <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group field-classtimingdetail-tctd_is_break">
+
+                                    <input type="hidden" name="ClassTimingDetail[tctd_is_break]" value="0"><label><input type="checkbox" id="is_break" name="ClassTimingDetail[tctd_is_break]"> Is Break</label>
+
+                                    <div class="help-block"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div><!--./modal-body-->
+
+                    <div class="modal-footer">
+                        <button type="button" id="btnCreate" class="btn btn-primary pull-left">Create</button>    	<button type="button" class="btn btn-default pull-right" data-dismiss="modal">Close</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+    <div class="alert alert-success alert-dismissible centerSuccess" id="divsuccesmsg" style="display:none">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h4>
+            <i class="icon fa fa-check"></i>
+            success! <span Id="spsuccessMsg"></span>
+        </h4>
+
+    </div>
+</section>
+<style type="text/css">
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+                                    background-color: #e1e4e8;
+                                }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+            width: 35px;
+        }
+
+    .dvImgPreview {
+        background-position: center center;
+        background-size: cover;
+        -webkit-box-shadow: 0 0 1px 1px rgba(0, 0, 0, .3);
+        min-height: 30px;
+        min-width: 30px;
+        height: 100px;
+        width: 100px;
+        max-height: 100px;
+        max-width: 100px;
+    }
+</style>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var docLength = 0;
+
+        var Id = getQuerystring("id");
+        if (typeof (Id) != "undefined") {
+
+            callJTemplateServiceMethod(JSON.stringify([Id]), "/api/StudentApi", "getStudentDocuments",
+                "tbodyEmployeeDocuments", "tbodyEmployeeDocumentsJTemplte", false, "", "", "", "");
+
+
+            $("#loader").fadeIn();
+            $.ajax({
+                url: "/api/StudentApi/FindStudentByID",// "~/Masters/GetDeptMethod",
+                type: "Post",
+                data: JSON.stringify([Id]), //{ Name: name,ddlAcademicYr
+                //// Address: address, DOB: dob },
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    var path1 = data.PicPath.replace(/\\/g, "/");
+                    $("#dvPreview").css("background-image", "url(" + path1 + ")");
+                    setControlValue("hdnID", data.ID);
+                    setControlValue("spName", data.FirstName + " " + data.MiddleName + " " + data.LastName);//data.Religion);
+                    setControlValue("spRegNo", data.RegNo);
+                    setControlValue("spRegNo1", data.RegNo);
+                    setControlValue("spClass", data.Class + "-" + data.Section);
+                    setControlValue("spClass1", data.Class + "-" + data.Section);
+                    setControlValue("spFirstNm", data.FirstName);
+                    setControlValue("spMidNm", data.MiddleName);
+                    setControlValue("spBatch", data.batch);
+                    setControlValue("spSRNo", data.SRNo);
+                    setControlValue("spStream", data.stream);
+
+                    setControlValue("spLastNm", data.LastName);
+                    setControlValue("spRollNo", data.RollNo);
+                    setControlValue("spDOB", ChangeDateformat(data.DOB));
+                    setControlValue("spJoinDt", ChangeDateformat(data.JoiningDate));
+                    setControlValue("spGender", data.Gender);
+                    setControlValue("spBloodGrp", data.BloodGroup);
+
+                    setControlValue("spBirthPlc", data.BirthPlace);
+                    setControlValue("spNationality", data.Nationality);
+                    setControlValue("spMTongue", data.MotherTongue);
+                    setControlValue("spLanguages", data.Lang_known);
+                    setControlValue("spReligion", data.Religion);
+                    setControlValue("spCategory", data.Category);
+                    setControlValue("spAadhar", data.AadharNo);
+
+                    setControlValue("spResAdd", data.PermanentAddress);
+                    setControlValue("spCorpAdd", data.CorrespondAddress);
+                    setControlValue("spResCity", data.PermCity);
+                    setControlValue("spCorpCity", data.CorsCity);
+                    setControlValue("spResdState", data.PermState);
+                    setControlValue("spCorpState", data.CorsState);
+                    setControlValue("spResdPin", data.PermPincode);
+                    setControlValue("spCorsPin", data.CorsPincode);
+                    setControlValue("spSMSNo", data.SMSmobileNo);
+                    setControlValue("spEmerNo", data.EmergencyNo);
+                    setControlValue("spEmerPers", data.EmerContPerson);
+                    setControlValue("spEmeRel", data.ContPersRelation);
+
+                    setControlValue("spFName", data.FatherName);
+                    setControlValue("spMName", data.MotherName);
+                    setControlValue("spGname", data.GuardianName);
+                    setControlValue("spFDOB", ChangeDateformat(data.FDOB));
+                    setControlValue("spMDob", ChangeDateformat(data.MDOB));
+                    setControlValue("spGDob", "-");
+                    setControlValue("spFNationality", data.FNationality);
+                    setControlValue("spMNationality", data.MNationality);
+                    setControlValue("spGNationality", data.GNationality);
+                    setControlValue("spFQual", data.FQualification);
+                    setControlValue("spMQual", data.MQualification);
+                    setControlValue("spGQual", data.GQualification);
+                    setControlValue("spFJob", data.FJob);
+                    setControlValue("spMJob", data.MJob);
+                    setControlValue("spGJob", data.GJob);
+                    setControlValue("spFOAdd", data.FOfficeAddress);
+                    setControlValue("spMOAdd", data.MOfficeAddress);
+                    setControlValue("spGOAdd", data.GOfficeAddress);
+
+                    setTimeout(function () {
+                        setControlValue("spFDesig", data.FDesig);
+                        setControlValue("spMDesig", data.MDesig);
+                        setControlValue("spGDesig", data.GDesig);
+                        setControlValue("spFIncome", data.FIncome);
+                        setControlValue("spMIncome", data.MIncome);
+                        setControlValue("spGIncome", data.GIncome);
+                        setControlValue("spFMobile", data.FMobile);
+                        setControlValue("spMMobile", data.Mmobile);
+                        setControlValue("spGMobile", data.Gmobile);
+                        setControlValue("spFMail", data.Fmail);
+                        setControlValue("spMMail", data.Mmail);
+                        setControlValue("spGMail", data.Gmail);
+                        setControlValue("spFAdhar", data.FAdharNo);
+                        setControlValue("spMAdhar", data.MAdharNo);
+                        setControlValue("spGAdhar", data.GAdharNo);
+
+                        setControlValue("spSUsrname", data.SUserID);
+                        setControlValue("spSpwd", data.SPwd);
+                        setControlValue("spPUserName", data.PUserID);
+                        setControlValue("spPpwd", data.PPwd);
+
+                        var i = 1;
+                        $.each(data.prevlist, function (index, item) {
+                            setControlValue("spPrevYear" + i, item.PSYear);
+                            setControlValue("spPrevSchool" + i, item.School);
+                            setControlValue("spPrevBoard" + i, item.Board);
+                            setControlValue("spPrevClass" + i, item.Class);
+                            setControlValue("spPrevMarks" + i, item.Marks);
+                            setControlValue("spPrevAwards", item.Awards);
+                            //$("#spPrevYear" + i).val(item.PSYear);
+                            //$("#spPrevSchool" + i).val(item.School);
+                            //$("#spPrevBoard" + i).val(item.Board);
+                            //$("#spPrevClass" + i).val(item.Class);
+                            //$("#spPrevMarks" + i).val(item.Marks);
+                            //$("#spPrevAwards").val(item.Awards);
+                            if (i == 1) {
+                                setControlValue("spPrevTC", item.TCNo);
+                                //$("#spPrevTC").val(item.TCNo);
+                            }
+                            i = i + 1;
+                        });
+
+                        setControlValue("spHeight", data.ht.Height);
+                        setControlValue("spWeight", data.ht.Weight);
+                        setControlValue("spVisionL", data.ht.VisionLeft);
+                        setControlValue("spVisionR", data.ht.VisionRight);
+                        setControlValue("spMedication", data.ht.MedicationDetails);
+                        debugger;
+
+                        if (data.FPicPath != null) {
+                            $("#dvPreviewF").show();
+                            var path2 = data.FPicPath.replace(/\\/g, "/");
+                            $("#dvPreviewF").css("background-image", "url(" + path2 + ")");
+                            //$("#FImg").attr("src", path2);
+                        }
+
+                        if (data.MPicPath != null) {
+                            $("#dvPreviewM").show();
+                            var path3 = data.MPicPath.replace(/\\/g, "/");
+                            $("#dvPreviewM").css("background-image", "url(" + path3 + ")");
+                            //$("#MImg").attr("src", path3);
+                        }
+                    }, 2000)
+
+
+                    $("#loader").fadeOut();
+
+                }
+            });
+
+        }
+        else {
+
+        }
+    });
+
+
+
+                    function ChangeDateformat(dt) {
+                        var date = "";
+                        if (dt != null) {
+                            var formattedDate = new Date(dt);
+                            var d = formattedDate.getDate();
+                            var m = formattedDate.getMonth();
+                            m += 1;  // JavaScript months are 0-11
+                            var y = formattedDate.getFullYear();
+
+                            date = m + "/" + d + "/" + y;
+                        }
+
+                        return date;
+                    }
+                });
+
+
+                function pad(n, width, z) {
+                    z = z || '0';
+                    n = n + '';
+                    return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+                }
+</script>

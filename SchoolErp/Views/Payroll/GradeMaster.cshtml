@@ -1,0 +1,489 @@
+﻿
+@{
+    ViewBag.Title = "GradeMaster";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section class="content" ng-app="myApp" ng-controller="salryhead">
+    <div class="box box-solid">
+        <div class="et">
+            <div class="box-header with-border">
+                <h3 class="box-title"> Salary Grade</h3>
+
+            </div>
+        </div>
+
+
+        <div class="box-body">
+            <div class="row">
+
+                <div class="content">
+
+
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">Grade Master</h4>
+                                </div>
+                                <form role="form" id="form1" name="form1">
+                                    <div class="panel-body">
+                                        <div class="panel-body">
+                                            <div class="form-group">
+                                                <label for="Country" class="req">School<span class="requird">*</span></label>
+                                                <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name"></select>
+
+
+                                            </div>
+                                            <div class="alert alert-success alert-dismissible" style="display:none">
+                                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                                <h4>
+                                                    <i class="icon fa fa-check"></i>
+                                                    success! <span ng-bind="successMsg"></span>
+                                                </h4>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="text" Id="txtGradeId" style="display:none" />
+                                                <label class="req" for="Salarydetails_unit">Grade Name <span class="requird">*</span></label>
+                                                <input class="form-control" id="txtGradeName" name="txtGradeName" type="text" />
+                                            </div>
+                                            <div class="form-group">
+
+                                                <label class="req" for="Salarydetails_designationid">Designation <span class="requird">*</span></label>
+                                                <select class="form-control" id="ddlDesignation" style="color:black"  name="ddlDesignation" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="----Select----" style="width: 100%;"></select>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="form-group">
+                                                    <label class="req" for="Salarydetails_designationid">Earning</label>
+                                                    <table id="gridEarning" class="table table-bordered table-striped tbl20 grid">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>School</th>
+                                                                <th>Head Name</th>
+                                                                <th>value</th>
+
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="tbodyEmployeeEarning"></tbody>
+
+                                                    </table>
+                                                    <script type="text/html" id="tbodyEmployeeEarningJTemplte">
+                                                        {#foreach $T as Datashort}
+                                                        <tr>
+                                                            <td style="width:155px">
+                                                                {$T.Datashort.School}
+                                                            </td>
+                                                            <td style="width:155px">
+                                                                { $T.Datashort.Name}
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" style="width:40px" onkeypress="return priceonly(event,this)" salrtyType="{ $T.Datashort.Code}" rahul="{ $T.Datashort.Id}" id="txtEarningValue_{ $T.Datashort.Id}" />
+
+                                                            </td>
+                                                        </tr>
+                                                        {#/for}
+                                                    </script>
+
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="form-group">
+                                                    <label class="req" for="Salarydetails_designationid">Deduction</label>
+                                                    <table id="griddeduction" class="table table-bordered table-striped tbl20  grid">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>School</th>
+                                                                <th>Head Name</th>
+                                                                <th>value</th>
+                                                                <th>Amt./Per</th>
+
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="tbodyEmployeeDeduction"></tbody>
+
+                                                    </table>
+                                                    <script type="text/html" id="tbodyEmployeeDeductionJTemplte">
+                                                        {#foreach $T as Datashort}
+                                                        <tr>
+                                                            <td style="width:155px">
+                                                            {$T.Datashort.School}
+                                                            </td>
+                                                            <td style="width:155px">
+                                                                { $T.Datashort.Name}
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" bharti="{ $T.Datashort.Id}" salrtyType2="{ $T.Datashort.Code}" style="width:40px" id="txtDeductionValue_{ $T.Datashort.Id}" />
+                                                            </td>
+                                                            <td>
+                                                                <select style="width:80px" id="ddlDeductionType_{ $T.Datashort.Id}">
+                                                                    <option>Amount</option>
+                                                                    <option>Percent</option>
+                                                                </select>
+                                                            </td>
+                                                        </tr>
+                                                        {#/for}
+                                                    </script>
+
+                                                </div>
+                                            </div>
+                                            <div class="clearfix"></div>
+                                            <div class="form-group">
+
+                                                <label><input id="chkStatus" checked="checked" ng-model="chkstatus" type="checkbox" /> Active</label>
+                                            </div>
+
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-5">
+                                                <div class="form_sep">
+                                                    <input class="btn btn-info" id="btnsumit" onclick="saveGradeDetails()" type="button" value="Save">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </form>
+</div>
+                        </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <div class="alert alert-success centerSuccess" id="divSucesEmail" style="display:none">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h4>
+            <i class="icon fa fa-check"></i>
+            <span Id="sentEmailMsg"></span>
+        </h4>
+
+    </div>
+    </section>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+
+        $("#ddlSchoolName").change(function () {
+            var id = "Earning";
+            //var loginuser = (sessionStorage.getItem("userId"));
+            //var typeuser = sessionStorage.getItem("type");
+            var SchoolID = getControlValue("ddlSchoolName");
+            callJTemplateServiceMethod(JSON.stringify([id, SchoolID]), "/api/PayrollAPI", "getEmployeePayrollHead",
+                "tbodyEmployeeEarning", "tbodyEmployeeEarningJTemplte", false, "", "", "", "");
+            id = "Deduction";
+            //var loginuser = (sessionStorage.getItem("userId"));
+            //var typeuser = sessionStorage.getItem("type");
+            var SchoolID = getControlValue("ddlSchoolName");
+            callJTemplateServiceMethod(JSON.stringify([id, SchoolID]), "/api/PayrollAPI", "getEmployeePayrollHead",
+                "tbodyEmployeeDeduction", "tbodyEmployeeDeductionJTemplte", false, "", "", "", "");
+        });
+
+        var id = "Earning";
+        //var loginuser = (sessionStorage.getItem("userId"));
+        //var typeuser = sessionStorage.getItem("type");
+        var SchoolID = getControlValue("ddlSchoolName");
+        callJTemplateServiceMethod(JSON.stringify([id,SchoolID]), "/api/PayrollAPI", "getEmployeePayrollHead",
+                   "tbodyEmployeeEarning", "tbodyEmployeeEarningJTemplte", false, "", "", "", "");
+        id = "Deduction";
+        //var loginuser = (sessionStorage.getItem("userId"));
+        //var typeuser = sessionStorage.getItem("type");
+        var SchoolID = getControlValue("ddlSchoolName");
+        callJTemplateServiceMethod(JSON.stringify([id,SchoolID]), "/api/PayrollAPI", "getEmployeePayrollHead",
+                 "tbodyEmployeeDeduction", "tbodyEmployeeDeductionJTemplte", false, "", "", "", "");
+
+     })
+
+</script>
+<script type="text/javascript">
+    function saveGradeDetails()
+    {
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+            var grade = {
+                Id: getControlValue("txtGradeId"),
+                GradeName: getControlValue("txtGradeName"),
+                Designation: getControlValue("ddlDesignation"),
+                Status: getControlValue("chkStatus"),
+                SchoolID: $("#ddlSchoolName").val()
+            }
+            var ddl = JSON.stringify(grade)
+
+
+            callServiceMethod(ddl, "/api/PayrollAPI", "saveGradeDetails", false, "", "", false, "", true, saveGradeDetails_scs, "", "", "");
+        }
+
+
+    }
+
+    function saveGradeDetails_scs(p1, p2, p3, datas)
+    {   
+        $("#loader").fadeOut();
+        if (datas != "")
+        {
+            if (datas == "Grade already Exists")
+            {
+                $("#divSucesEmail").fadeIn();
+                $("#sentEmailMsg").html(datas);
+                setTimeout(function () {
+                    $("#divSucesEmail").fadeOut();
+                    $("#sentEmailMsg").html("");
+                }, 2000)
+                
+            }
+            else
+            {
+                var salryhead = new Array();
+                var salry;
+                $("#gridEarning input[type=text]").each(function () {
+                    if ($(this).val() != "") {
+                        salry = {
+                            Id: datas,
+                            HeadId: $(this).attr("rahul"),
+                            HeadAmount: $(this).val(),
+                            Type: 'Amount',
+                            HeadType: $(this).attr("salrtyType"),
+                            SchoolID: $("#ddlSchoolName").val()
+                        }
+                        salryhead.push(salry);
+                    }
+
+                })
+
+                $("#griddeduction input[type=text]").each(function () {
+                    if ($(this).val() != "") {
+                        var ddlval = this.id.replace('txtDeductionValue', 'ddlDeductionType')
+                        salry = {
+                            Id: datas,
+                            HeadId: $(this).attr("bharti"),
+                            HeadAmount: $(this).val(),
+                            Type: $("#" + ddlval).val(),
+                            HeadType: $(this).attr("salrtyType2"),
+                            SchoolID: $("#ddlSchoolName").val()
+                        }
+                        salryhead.push(salry);
+                    }
+                })
+
+                var ddl = JSON.stringify(salryhead)
+
+
+                callServiceMethod(ddl, "/api/PayrollAPI", "saveGradesalaryAssignDetails", false, "", "", false, "", true, saveGradeDetails_scs_scs, "", "", "");
+            }
+        
+        }
+       // alert(datas.Id);
+    }
+
+    function saveGradeDetails_scs_scs(p1,p2,p3,datas)
+    {
+         
+
+        $("#divSucesEmail").fadeIn();
+        $("#sentEmailMsg").html(datas);
+        setTimeout(function () {
+            $("#divSucesEmail").fadeOut();
+            $("#sentEmailMsg").html("");
+        }, 2000)
+
+       clearAllTextboxes();
+
+    }
+
+
+    function clearAllTextboxes()
+    {
+        setControlValue("txtGradeId", "");
+        setControlValue("txtGradeName", "");
+        setControlValue("ddlDesignation", "0");
+        $("#gridEarning input[type=text]").each(function () {
+            $(this).val("");
+        });
+        $("#griddeduction input[type=text]").each(function () {
+            $(this).val("");
+        });
+ 
+
+    }
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        //callServiceMethodForDDl("", "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+       
+        var SchoolID = $("#ddlSchoolName").val();
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllDesignationBySchoolID", "ddlDesignation", false, "", "", "", "");
+        $("#ddlSchoolName").change(function () {
+            var SchoolID = $("#ddlSchoolName").val();
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllDesignationBySchoolID", "ddlDesignation", false, "", "", "", "");     
+        });
+
+       
+
+
+        var Id = getQuerystring("Id");
+        if (typeof (Id) != "undefined") {
+           
+                $("#loader").fadeIn();
+            callServiceMethod(JSON.stringify([Id]), "/api/PayrollAPI", "editGradeDetasilById", false, "", "", false, "", true, editGradeDetasilById_scss, "", "", "");
+        }
+    })
+
+    function editGradeDetasilById_scss(p1, p2, p3, datas)
+    {
+       
+            $("#loader").fadeOut();
+        setControlValue("txtGradeName", datas.GradeName);
+        setControlValue("ddlDesignation", datas.Designation);
+        setControlValue("chkStatus", datas.Status);
+        setControlValue("txtGradeId", datas.Id);
+        setControlValue("ddlSchoolName", datas.SchoolID)
+        getsalayHeadDetails(datas.Id);
+       // $('#ddlSchoolName').val(employee["SchoolID"])
+    }
+
+    function getsalayHeadDetails(id)
+    {
+        callServiceMethod(JSON.stringify([id]), "/api/PayrollAPI", "getsalayHeadDetails", false, "", "", false, "", true, getsalayHeadDetails_scss, "", "", "");
+
+        //callJTemplateServiceMethod(JSON.stringify([id]), "/api/PayrollAPI", "getsalayHeadDetails",
+        //     "tbodyEmployeeDeduction", "tbodyEmployeeDeductionJTemplte", false, "", "", "", "");
+    }
+
+    function getsalayHeadDetails_scss(p1,p2,p3,datas)
+    {
+        setTimeout(function () { 
+        if (datas.length > 0)
+        {
+            for (var i = 0; i < datas.length; i++)
+            {
+                var d = "#txtEarningValue_" + datas[i].HeadId;
+                setControlValue("txtEarningValue_" + datas[i].HeadId + "", datas[i].HeadAmount);
+                setControlValue("txtDeductionValue_" + datas[i].HeadId + "", datas[i].HeadAmount);
+                setControlValue("ddlDeductionType_" + datas[i].HeadId + "", datas[i].Type);
+                
+            //    $("#txtEarningValue_1002").val(datas[i].HeadAmount);
+            }
+        }
+        }, 2000)
+     
+    }
+</script>
+
+<style type="text/css">
+
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    .grid td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    .grid {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        .grid td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        .grid tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .grid tr:hover {
+            background-color: #ddd;
+        }
+
+        .grid th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                ddlDesignation: {
+                    selectcheck: true
+                },
+
+                txtGradeName: "required",
+               
+
+
+            },
+            messages: {
+ 
+                txtGradeName: "Please Enter Grade Name",
+                ddlDesignation: "Please Select Designation"
+
+
+            }
+        })
+        jQuery.validator.addMethod('selectcheck', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+
+
+    });
+</script>

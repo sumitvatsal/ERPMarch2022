@@ -1,0 +1,352 @@
+﻿@model SchoolErp.TBLStudent
+
+@{
+    ViewBag.Title = "AdmitCard";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<html>
+<head>
+    <style>
+        .spn {
+            color: #343F93 !important;
+            font: 300;
+          
+        }
+        /*.span {
+            color: !important;
+        }*/
+        /*hr {
+            display: block;
+            height: 1px;
+            background: transparent;
+            width: 100%;
+            border: none;
+            border-top: solid 1px #aaa;
+        }*/
+        /*body {
+            -webkit-print-color-adjust: exact !important;
+        }
+        .page {
+            background-color: white !important;
+        }*/
+      
+    </style>
+    <link href="~/css/style_admitCrd.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet">
+    <script src="~/js/jquery.PrintArea.js"></script>
+</head>
+
+<body>
+    <div id="dvContents" class="main">
+        <table>
+            <tr>
+                <td><img id="Imglogo" /></td>
+                <td colspan="3">
+                    <h1><span id="spSchool" style="color:#428bca!important; "  ></span></h1>
+                    <h2>(<span id="spBoard"></span> AFFILIATED)</h2>
+                    <h3>
+                        <span id="spAddress"></span>, Dist. <span id="spDistrict"></span> <br />
+                        Ph.:<span id="spPhone"></span> Email: <span id="spEmail"></span>
+                    </h3>
+                    @*<hr style="height:3px; background-color:#2fc2f8; border:0;" />*@
+                    <hr style="height:3px; background-color:#2fc2f8;display: block;
+            border: none;
+            border-top: solid 3px #2fc2f8;" />
+
+                </td>
+            </tr>
+
+          
+
+
+
+
+            <tr><td rowspan="8"><img id="StudentImg" style="min-height:30px;min-width:30px;width:120px;height:140px;max-height:140px;max-width:120px;" /></td><td><div style=" margin-left:10px;color:#99256e !important; " class="heading">Name : </div></td><td><span style=" color: #1b2193 !important;" class="name-text" id="spName"></span></td><td></td></tr>
+            <tr><td><div style=" margin-left:10px ; color:#99256e !important;  " class="heading">Class : </div></td><td><span class="name-text" style=" color: #1b2193 !important;" id="spClass"></span></td><td></td></tr>
+            <tr><td><div style=" margin-left:10px;color:#99256e !important; "class="heading">D.O.B. : </div></td><td><span class="name-text" style=" color: #1b2193 !important;" id="spDOB"></span></td><td></td></tr>
+            <tr><td><div style=" margin-left:10px;color:#99256e !important; " class="heading">Gender : </div></td><td><span id="spGender" style=" color: #1b2193 !important;" class="name-text"></span></td><td></td></tr>
+            <tr><td><div style=" margin-left:10px;color:#99256e !important; " class="heading">Address : </div></td><td><span id="spPerAdd" style=" color: #1b2193 !important;" class="name-text"></span></td><td></td></tr>
+            <tr><td></td><td><span id="spPerCity" style=" color: #1b2193 !important;" class="name-text"></span></td><td></td></tr>
+            <tr><td></td><td><span id="spPerState" style=" color: #1b2193 !important;" class="name-text"></span></td><td></td></tr>
+            <tr><td></td><td><span id="spPerPin" style=" color: #1b2193 !important;" class="name-text"></span></td>@*<td><img id="SignImg" style="min-height:10px;min-width:30px;width:80px;height:30px;max-height:30px;max-width:80px;" /></td>*@</tr>
+            <tr><td></td><td><div style=" margin-left:10px;color:#99256e !important; " class="heading">Mobile : </div></td><td><span id="SmsMobile" style=" color: #1b2193 !important;" class="name-text"></span><br /></td>@*<td><div class="heading1">Principal</div></td>*@</tr>
+        </table>
+    </div>
+   
+    <div style="width:600px;margin:10px auto;padding:15px;text-align: center">
+            <a href="javascript:void(0)" class="btn btn-primary" onclick="backbuttonclick()">Back</a>
+            <input type="button" class="btn btn-primary" value="Print" id="Print1" name="Print" onclick="printAdmitCard()"/>
+
+        </div>
+
+</body>
+</html>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+
+
+        var docLength = 0;
+
+        var Id = getQuerystring("id");
+        var Schoolid = sessionStorage.getItem("SchoolID");
+        var imgID = getQuerystring("imgNo");
+        if (typeof (Id) != "undefined") {
+            $("#loader").fadeIn();
+            $.ajax({
+                url: "/api/StudentApi/GetStudentAdmitCard",
+                type: "Post",
+                data: JSON.stringify([Id,Schoolid]),
+                //// Address: address, DOB: dob },
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    $("#spSchool").text(data.SchoolName);
+                    $("#spBoard").text(data.AffilatedFrom);
+                    $("#spAddress").text(data.SchoolAddress);
+                    $("#spDistrict").text(data.District);
+                    $("#spEmail").text(data.SchoolEmailID);
+                    $("#spPhone").text(data.SchoolPhoneNO);
+                    if (data.SchoolLogo != null && data.SchoolLogo!="") {
+                        var SchoolLogopath = data.SchoolLogo.replace(/\\/g, "/");
+                        $("#Imglogo").attr("src", SchoolLogopath)
+                    }
+                    else
+                    {
+                        var Schoolnulllogo = "/Images/Employee/EmployyeImage/No_Photo_Available.jpg";
+                        $("#Imglogo").attr("src", Schoolnulllogo)
+
+                    }
+                    $("#dvContents").css('background-color', 'white');
+                   
+                   
+                  
+                    $("#spName").text(data.StudentName);
+                    $("#spClass").text(data.ClassName);
+                    $("#spDOB").text(data.DOB);
+                    $("#spPerAdd").text(data.StudentAddress);
+                    $("#spGender").text(data.Gender);                  
+                    $("#spPerState").text(data.State);
+                    $("#spPerCity").text(data.City);
+                    $("#spPerPin").text(data.Pincode);
+                    $("#SmsMobile").text(data.Mobilenumber);
+                    if (data.StudentImage != null && data.StudentImage!="") {
+                        var studentImagee = data.StudentImage.replace(/\\/g, "/");
+                        $("#StudentImg").attr("src", studentImagee);
+
+                    }
+                    else
+                    {
+                        var studentnullimage = "/Images/Employee/EmployyeImage/No_Photo_Available.jpg";
+                        $("#StudentImg").attr("src", studentnullimage);
+                    }
+
+
+                  
+                 
+                  
+
+                    $("#loader").fadeOut();
+
+
+                }
+            });
+
+        }
+        else {
+
+        }
+
+        function ChangeDateformat(dt) {
+            var date = "";
+            if (dt != null) {
+                var formattedDate = new Date(dt);
+                var d = formattedDate.getDate();
+                var m = formattedDate.getMonth();
+                m += 1;  // JavaScript months are 0-11
+                var y = formattedDate.getFullYear();
+
+                date = m + "/" + d + "/" + y;
+            }
+
+            return date;
+        }
+
+
+    });
+
+    //function printmyadmitCard()
+    //{
+    //    $("#loader").fadeIn();
+    //    var mode = 'iframe'; //popup
+    //    var close = mode == "popup";
+    //    var options = { mode: mode, popClose: close };
+    //    //$("#dvContents").print(options);
+    //    window.print();
+    //    $("#loader").fadeOut();
+    //}
+
+
+
+
+
+    function printAdmitCard() {
+        $("#loader").fadeIn();
+        //var contents = $("#dvContents").html();
+        //var frame1 = $('<iframe />');
+        //frame1[0].name = "frame1";
+        //frame1.css({ "position": "absolute", "top": "-1000000px" });
+        //$("body").append(frame1);
+        //var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+        //frameDoc.document.open();
+        ////Create a new HTML document.
+        //frameDoc.document.write('<html><head><title>DIV Contents</title>');
+        ////frameDoc.document.write('<style type="text/css">h1,h2,h3,h4,h5,h6{margin:0; padding:0;}.main{width:500px;background:#d3effb !important;margin:10px auto;border-radius:25px;padding:15px;border: 1px solid #a2b2b9;font-family: "Poppins", sans-serif;}h1{color:#005ca7;font-weight:bold;line-height:38px;font-size: 33px;text-align: center;}h2{	color:#000;font-size:18px;font-weight:bold;text-align:center;line-height:22px;}h3{color:#000;font-size:14px;line-height:22px;text-align: center;}.heading{color:#99256e;font-size:14px;font-weight:bold;line-height:6px;}.heading1{color:#3066a4;font-size:14px;font-weight:bold;}.main table{font-weight:bold;}.name-text{color:#1b2193;}.logo{}</style>');
+        //frameDoc.document.write('<link href="/css/style_admitCrd.css" rel="stylesheet" media="print"/>');
+        //frameDoc.document.write('<link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300" rel="stylesheet">');
+        //frameDoc.document.write('<link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet">');
+        //frameDoc.document.write('</head><body>');
+        ////Append the external CSS file.
+
+
+        ////Append the DIV contents.
+        //frameDoc.document.write(contents);
+        //frameDoc.document.write('</body></html>');
+        //frameDoc.document.close();
+        //setTimeout(function () {
+        //    window.frames["frame1"].focus();
+        //    window.frames["frame1"].print();
+        //    frame1.remove();
+        //    //window.location.href = "/Student/StudentProfile?id=" + id;
+        //}, 100);
+
+        var mode = 'iframe'; //popup
+        var close = mode == "popup";
+        var options = { mode: mode, popClose: close };
+        $("#dvContents").printArea(options);
+        $("#loader").fadeOut();
+    }
+
+    function backbuttonclick() {
+        location.href = "/Student/StudentProfile?id=" + getQuerystring("id");
+    }
+</script>
+
+
+
+@*var imgno = GetParameterValues('imgNo')
+    var id = GetParameterValues('id');
+
+    function GetParameterValues(param) {
+        var url = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+        for (var i = 0; i < url.length; i++) {
+            var urlparam = url[i].split('=');
+            if (urlparam[0] == param) {
+                return urlparam[1];
+            }
+        }
+    }*@
+
+
+ @*var path1 = data.PicPath.replace(/\\/g, "/");
+                    $("#profileImg").attr("src", path1);
+
+                    //var logoPath ="/Images/Admin/AdmitCards/ID5.png"
+                    //$('.main').attr("style", "background:#d3effb url(" + logoPath + ") center left 180px no-repeat !important;");
+                    //setControlValue("spName", data.FirstName + " " + data.MiddleName + " " + data.LastName);//data.Religion);
+                    //setControlValue("spRegNo", data.RegNo);
+                    //setControlValue("spRegNo1", data.RegNo);
+                    //setControlValue("spClass", data.Class + "-" + data.Section);
+                    //setControlValue("spClass1", data.Class + "-" + data.Section);
+                    //setControlValue("spFirstNm", data.FirstName);
+                    //setControlValue("spMidNm", data.MiddleName);
+                    //setControlValue("spBatch", data.batch);
+                    //setControlValue("spSRNo", data.SRNo);
+                    //setControlValue("spStream", data.stream);
+
+                    //setControlValue("spLastNm", data.LastName);
+                    //setControlValue("spRollNo", data.RollNo);
+                    //setControlValue("spDOB", ChangeDateformat(data.DOB));
+                    //setControlValue("spGender", data.Gender);
+                    //setControlValue("spBloodGrp", data.BloodGroup);
+
+                    //setControlValue("spReligion", data.Religion);
+                    //setControlValue("spCategory", data.Category);
+                    //setControlValue("spAadhar", data.AadharNo);
+
+                    //setControlValue("spResAdd", data.PermanentAddress);
+                    //setControlValue("spCorpAdd", data.CorrespondAddress);
+                    //setControlValue("spResCity", data.PermCity);
+                    //setControlValue("spCorpCity", data.CorsCity);
+                    //setControlValue("spResdState", data.PermState);
+                    //setControlValue("spCorpState", data.CorsStateNm);
+                    //setControlValue("spResdPin", data.PermPincode);
+                    //setControlValue("spCorsPin", data.CorsPincode);
+                    //setControlValue("spSMSNo", data.SMSmobileNo);
+                    //setControlValue("spEmerNo", data.EmergencyNo);
+                    //setControlValue("spEmerPers", data.EmerContPerson);
+                    //setControlValue("spEmeRel", data.ContPersRelation);
+
+                    //setControlValue("spFName", data.FatherName);
+                    //setControlValue("spMName", data.MotherName);
+                    //setControlValue("spGname", data.GuardianName);
+                    //setControlValue("spFOAdd", data.FOfficeAddress);
+                    //setControlValue("spMOAdd", data.MOfficeAddress);
+                    //setControlValue("spGOAdd", data.GOfficeAddress);
+                    //setControlValue("spFMobile", data.FMobile);
+                    //setControlValue("spMMobile", data.Mmobile);
+                    //setControlValue("spGMobile", data.Gmobile);
+                    //setControlValue("spFMail", data.Fmail);
+                    //setControlValue("spMMail", data.Mmail);
+                    //setControlValue("spGMail", data.Gmail);
+
+                    //setControlValue("spAddress", data.sd.Address + "," + data.sd.City + "," + data.sd.Pincode);//
+                    //setControlValue("spState", data.sd.Board);
+                    //setControlValue("spBoard", data.sd.Board);
+                    //setControlValue("spDistrict", data.sd.District);
+                    //setControlValue("spEmail", data.sd.Email);
+                    //setControlValue("spGMail", data.sd.Mobile);
+                    //setControlValue("spPhone", data.sd.Phone);
+                    //setControlValue("spSchool", data.sd.School);
+
+                    //if (data.principalSign != null) {
+                    //    var path2 = data.principalSign.replace(/\\/g, "/");
+                    //    $("#SignImg").attr("src", path2);
+                    //}
+
+                    //if (data.sd.LogoPic != null) {
+                    //    var path3 = data.sd.LogoPic.replace(/\\/g, "/");
+                    //    $("#Imglogo").attr("src", path3);
+                    //}*@
+

@@ -1,0 +1,377 @@
+﻿
+@{
+    ViewBag.Title = "ContraVoucher";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<link href="~/css/bower_components/select2/dist/css/select2.min.css" rel="stylesheet" />
+
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.select2').select2();
+    })
+
+</script>
+<section class="content">
+    <div class="box box-solid">
+        <div class="et">
+            <div class="box-header with-border">
+                <h3 class="box-title">Contra Voucher</h3>
+
+            </div>
+        </div>
+        <div class="alert alert-success alert-dismissible centerSuccess" id="divsuccesmsg" style="display:none">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <h4>
+                <i class="icon fa fa-check"></i>
+                success! <span Id="spsuccessMsg"></span>
+            </h4>
+
+        </div>
+
+        <div class="box-body">
+            <div class="row">
+
+                <div class="content">
+
+
+
+                    <div class="row">
+                        <form role="form" id="form1" name="form1">
+                            <div class="col-sm-12">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title"> New Contra Voucher</h4>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="panel-body">
+
+                                            <div class="row">
+                                                <div id="sandbox" class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label for="simple">Date</label>
+                                                    <input id="simple" type="text" class="form-control" value="">
+                                                </div>
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label for="Country" class="req"> Account  <span class="requird">*</span></label>
+                                                    <select class="form-control" id="ddlPayment" ng-model="ddlPayment" valuefield="Id" textfield="Name" onchange="BindContra()" blankRowValue="0" blankRowText="--Select--"></select>
+                                                </div>
+                                                <input type="text" id="txtCoa" hidden />
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label for="Country" class="req">Debit <span class="requird">*</span></label>
+                                                    <input class="form-control" value="0.00" id="txtDebit" name="txtDebit" type="text" onkeypress="return isNumber(this,event)" ng-model="txtDebit" />
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-sm-4 col-md-4 col-lg-4">
+                                                    <label for="Country" class="req">Credit <span class="requird">*</span></label>
+                                                    <input class="form-control" value="0.00" id="txtCredit" name="txtCredit" type="text" ng-model="txtCredit" onkeypress="return isNumber(this,event)" />
+                                                </div>
+                                                <div class="form-group col-sm-8 col-md-8 col-lg-8">
+                                                    <label class="req" for="Salarydetails_unit">Remark <span class="requird">*</span></label>
+                                                    <textarea class="form-control" id="txtNote" required></textarea>
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-5">
+                                                    <div class="form_sep">
+                                                        <input class="btn btn-info" id="btnSumit" type="button" value="Save">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="hdnID" />
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('.dtpicker').datepicker({
+            //dateFormat: 'dd/mm/yy' ,supplier
+            autoclose: true,
+            format: 'dd/mm/yyyy'
+        });
+        var date = new Date();
+        var today = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+        var optSimple = {
+            format: 'MM/dd/yyyy',
+            todayHighlight: true,
+            orientation: 'bottom right',
+            autoclose: true,
+            container: '#sandbox'
+        };
+
+        var optComponent = {
+            format: 'MM/dd/yyyy',
+            container: '#datePicker',
+            orientation: 'auto top',
+            todayHighlight: true,
+            autoclose: true
+        };
+
+        // SIMPLE
+        $('#simple').datepicker(optSimple);
+
+        // COMPONENT
+        $('#datePicker').datepicker(optComponent);
+
+        // ===================================
+
+        $('#datepicker1').datepicker({
+            format: "mm : dd : yyyy",
+            todayHighlight: true,
+            autoclose: true,
+            container: '#box1',
+            orientation: 'top right'
+        });
+
+        $('#datepicker2').datepicker({
+            format: 'MM/dd/yyyy',
+            todayHighlight: true,
+            autoclose: true,
+            container: '#box2',
+            orientation: 'top right'
+        });
+
+        $('#datepicker1, #datepicker2, #simple, #datePicker').datepicker('setDate', today);
+
+
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser, SchoolID]), "/api/Default", "getBankAccounts", "ddlPayment", false, "", "", "", "");
+      
+        setControlValue("hdnID", 0);
+
+
+        var ID = getQuerystring("id");
+        if (typeof (ID) != "undefined") {
+            setControlValue("hdn", ID);//
+
+            GetValues(ID);
+
+        }
+
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                txtNote: "required",
+
+            },
+            messages: {
+                txtNote: "Please Enter Remark",
+            }
+        })
+        //callServiceMethodForDDl("", "/api/StudentApi", "GetLeaveStatus", "ddlReqStatus", false, "", "", "", "");
+    });
+
+    function BindContra() {
+        var productId = $('#ddlPayment').val();
+
+        $.ajax({
+            type: 'Get',
+            url: '/api/Default/GetBankCOaid',
+            data: { ProductId: productId },
+            dataType: 'json',
+            success: function (unitValue) {
+                var Record = unitValue.split(',');
+                var Name = Record[0];
+                var Id = Record[1];
+                unitValue = unitValue.replace("\\\"", "");
+                $('#txtCoa').val(Name);
+                $('#unitId').val(Id);
+            }
+        });
+    }
+    function successMsg(p1, p2, p3, datas) {
+
+        $("#loader").fadeOut();
+
+        setTimeout(function () {
+            $('#example1').DataTable({
+
+                dom: 'lBfrtip',
+                bRetrieve: true,
+                bDestroy: true,
+                'columnDefs': [{
+                    "targets": -1,
+                    "orderable": false
+                }],
+            });
+        }, 1000);
+    }
+
+    $("#btnSumit").click(function () {
+        debugger;
+        var ddlHead = $("#ddlPayment");
+        if (ddlHead.val() == "0") {
+            alert("Please select Account !");
+            ddlHead.focus()
+            return false;
+
+        }
+        var ID = getControlValue("hdnID");
+        var Date = getControlValue("simple");
+        var Payment = getControlValue("ddlPayment")
+        var Coa = getControlValue("txtCoa")
+        var Debit = getControlValue("txtDebit")
+        var Credit = getControlValue("txtCredit")
+        var Remark = getControlValue("txtNote")
+        var loginuser = (sessionStorage.getItem("userId"));
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+
+
+        Save(ID, Date, Payment, Coa, Debit, Credit, Remark, loginuser, SchoolID);
+    });
+
+    function Save(ID, Date, Payment, Coa, Debit, Credit, Remark, loginuser, SchoolID) {
+
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+            $.ajax({
+                url: "/api/AccountsAPI/SaveFinancial",
+                type: "Post",
+                data: JSON.stringify(["SaveContraVoucher", ID, Date, Payment, Coa, Debit, Credit, Remark, loginuser, SchoolID]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    $("#loader").fadeOut();
+                    if (data == 1) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Amount Added Successfully ");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+
+                    }
+                    else if (data == 2) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Amount Updated Successfully ");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+
+                    }
+                    else if (data == -1) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Amount name already Exist");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+                    }
+                    else {
+                        alert("Some Error!!");
+                    }
+                    ResetModal();
+                    fillDataTable();
+                    //$('#myModal').modal('hide');
+
+                }
+            });
+
+        }
+    }
+
+    function ResetAll() {
+        setControlValue("simple", "");
+        setControlValue("ddlPayment", "");
+        setControlValue("txtDebit", "");
+        setControlValue("txtCredit", "");
+        $("#txtNote").val('');
+        setControlValue("txtNote", "");
+    }
+
+    function ResetModal() {
+       // setControlValue("simple", "");
+        setControlValue("ddlPayment", "0");
+        setControlValue("txtDebit", "0.00");
+        setControlValue("txtCredit", "0.00");
+        $("#txtNote").val('');
+        setControlValue("txtNote", "");
+        setControlValue("hdnID", 0);
+    }
+
+</script>
+<script type="text/javascript">
+    function isNumber(txt, evt) {
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode == 46) {
+            //Check if the text already contains the . character
+            if (txt.value.indexOf('.') === -1) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if (charCode > 31 &&
+                (charCode < 48 || charCode > 57))
+                return false;
+        }
+        return true;
+    }
+</script>
+
+
+
+
+

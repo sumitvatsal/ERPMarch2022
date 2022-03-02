@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="4e29c30f35c14f51b81a3bc50e673620" Name="Diagram1" ZoomLevel="75">
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblFeeStructureAssign" Width="1.5" PointX="14.75" PointY="8.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblScholarRegisterDetail" Width="1.5" PointX="0.75" PointY="19.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblAcademicYear" Width="1.5" PointX="2.75" PointY="0.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblCastCategory" Width="1.5" PointX="4.75" PointY="0.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblCaste" Width="1.5" PointX="2.875" PointY="4.375" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblClass" Width="1.5" PointX="6.75" PointY="0.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblClassTeacherAllocation" Width="1.5" PointX="5" PointY="3.625" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblClassTiming" Width="1.5" PointX="4.75" PointY="6.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblClassTimingDet" Width="1.875" PointX="6.75" PointY="6.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblCountry" Width="1.5" PointX="0.75" PointY="7.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblCours" Width="1.5" PointX="6.75" PointY="2.5" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblDepartmnet" Width="1.5" PointX="8.75" PointY="0.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblDesignation" Width="1.5" PointX="8.75" PointY="3.5" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblDocumentNo" Width="1.5" PointX="10.75" PointY="0.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblEmployeeAccountInformation" Width="1.5" PointX="10.75" PointY="4.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblEmployeeAttendence" Width="1.5" PointX="4.75" PointY="9.625" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblemployeeLeaveRequest" Width="1.5" PointX="9" PointY="9.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblEmployeeSalaryDetail" Width="1.5" PointX="10.75" PointY="9" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblEmployyeMonthSalaryStructure" Width="1.5" PointX="8.875" PointY="7" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblEventDetail" Width="1.5" PointX="12.75" PointY="0.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblEventType" Width="1.5" PointX="0.75" PointY="12.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblExPayeeDetail" Width="1.5" PointX="12.75" PointY="5.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblExpenseCategory" Width="1.5" PointX="12.75" PointY="11.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblFeeCalculate" Width="1.5" PointX="14.75" PointY="0.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblFeeStructure" Width="1.5" PointX="14.75" PointY="5.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblFeeStructureClass" Width="1.5" PointX="14.75" PointY="8.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblGender" Width="1.5" PointX="14.75" PointY="11.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblGradeAssignSalaryHead" Width="1.5" PointX="12.75" PointY="14.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblHomeAssignment" Width="1.5" PointX="14.75" PointY="14.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.TBLLanguage" Width="1.5" PointX="6.75" PointY="15.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblLeaveDetail" Width="1.5" PointX="16.75" PointY="0.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblLeaveType" Width="1.5" PointX="16.75" PointY="4.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblMasterGrade" Width="1.5" PointX="16.75" PointY="7.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblModule" Width="1.5" PointX="16.75" PointY="10.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblNoticeBoard" Width="1.5" PointX="16.75" PointY="13.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.TBLPrevSchoolDet" Width="1.5" PointX="8.75" PointY="17.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblQualification" Width="1.5" PointX="16.75" PointY="17.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblReligion" Width="1.5" PointX="18.75" PointY="0.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblRoleAssign" Width="1.5" PointX="18.75" PointY="3.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblRoleMaster" Width="1.5" PointX="4.75" PointY="18.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblRoleSubModAssign" Width="1.5" PointX="18.75" PointY="6.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblRoteDestination" Width="1.5" PointX="18.75" PointY="9.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblSalaryHead" Width="1.5" PointX="10.75" PointY="18.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblScholarRegister" Width="1.5" PointX="18.75" PointY="12.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblSection" Width="1.5" PointX="0.75" PointY="19.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblStaffCategory" Width="1.5" PointX="12.75" PointY="19.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblState" Width="1.5" PointX="20.75" PointY="0.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblStatu" Width="1.5" PointX="20.75" PointY="3.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblStream" Width="1.5" PointX="20.75" PointY="6.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblStRegDoc" Width="1.5" PointX="20.75" PointY="9.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblStRegHealthDet" Width="1.5" PointX="20.75" PointY="12.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblStRegistration" Width="1.5" PointX="14.75" PointY="20.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblStRegPrevSchoolDet" Width="1.5" PointX="20.75" PointY="16.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.TBLStudent" Width="1.5" PointX="20.75" PointY="20.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblStudentAttendence" Width="1.5" PointX="2.75" PointY="21.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.TBLStudentDoc" Width="1.5" PointX="4.75" PointY="21.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.TBLStudentHealthDet" Width="1.5" PointX="6.75" PointY="21.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblStudentLeaveApply" Width="1.5" PointX="8.75" PointY="21.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblSubject" Width="1.5" PointX="22.75" PointY="0.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblSubjectTeacherAllocate" Width="1.5" PointX="22.75" PointY="3.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblSubModule" Width="1.5" PointX="22.75" PointY="6.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblTaskDetail" Width="1.5" PointX="22.75" PointY="9.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblTaskToDo" Width="1.5" PointX="10.75" PointY="22.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblTaskToDoForEmployee" Width="1.5" PointX="22.75" PointY="14.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblTeacherDiary" Width="1.5" PointX="16.75" PointY="22.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblThoughtsOfDay" Width="1.5" PointX="22.75" PointY="17.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblTimeTable" Width="1.5" PointX="22.75" PointY="20.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblTimeTableConfig" Width="1.5" PointX="24.75" PointY="0.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblTransExPayeeDetail" Width="1.5" PointX="24.75" PointY="4.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblTransportAllocation" Width="1.5" PointX="24.75" PointY="8.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblTransportDriver" Width="1.5" PointX="24.75" PointY="12.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblTransportVehicalDetail" Width="1.5" PointX="24.75" PointY="16.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblTransRoute" Width="1.5" PointX="24.75" PointY="20.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblUser" Width="1.5" PointX="22.75" PointY="24.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblWeekDay" Width="1.5" PointX="24.75" PointY="23.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblAdvertisingVedio" Width="1.5" PointX="0.75" PointY="25.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblCity" Width="1.5" PointX="2.75" PointY="25.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblDocument" Width="1.5" PointX="4.75" PointY="25.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblEmployee" Width="1.5" PointX="6.75" PointY="25.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblEmployeeDocument" Width="1.5" PointX="8.75" PointY="25.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblMaritalStatu" Width="1.5" PointX="10.75" PointY="25.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblUserType" Width="1.5" PointX="26.75" PointY="0.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblSchoolDetail" Width="1.5" PointX="17.375" PointY="26.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblAuthentication" Width="1.5" PointX="25.375" PointY="26.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.licence_details" Width="1.5" PointX="27.375" PointY="3.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblSyllabu" Width="1.5" PointX="27.375" PointY="12.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblnewtimetable" Width="1.5" PointX="27.375" PointY="26.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblHoliday" Width="1.5" PointX="27.375" PointY="16.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblGalleryImage" Width="1.5" PointX="27.375" PointY="20.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblGpsDeviceRecord" Width="1.5" PointX="9.375" PointY="28.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblHubDetail" Width="1.5" PointX="11.375" PointY="28.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblSuperAdminModule" Width="1.5" PointX="0.75" PointY="29.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblSuperAdminSubModule" Width="1.5" PointX="2.75" PointY="29.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblAttendenceMachineMaster" Width="1.5" PointX="29.375" PointY="3.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Tran_MachineRawPunch" Width="1.5" PointX="29.375" PointY="6.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblSchoolSm" Width="1.5" PointX="29.375" PointY="10.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblStudentdetailsClassToClass" Width="1.5" PointX="29.375" PointY="13.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblTransportVehicalsDetail" Width="1.5" PointX="29.375" PointY="18.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblFeeCategory" Width="1.5" PointX="29.375" PointY="26.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblFeeStructureConfig" Width="1.5" PointX="29.375" PointY="30.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblFeeHead" Width="1.5" PointX="29.375" PointY="22.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblFeeStructureConfig2" Width="1.5" PointX="31.375" PointY="0.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblFeeCalculate_temp" Width="1.5" PointX="3.375" PointY="13.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblDestination" Width="1.5" PointX="9.375" PointY="14.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblFeeConcession" Width="1.5" PointX="0.75" PointY="16.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.TariffDetail" Width="1.5" PointX="31.375" PointY="5.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.StudentFee" Width="1.5" PointX="0.75" PointY="38.125" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.StudentConcession" Width="1.5" PointX="25.375" PointY="31.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.stdfee1" Width="1.5" PointX="31.375" PointY="9.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.AppointmentDiary" Width="1.5" PointX="33.375" PointY="8.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.tblBatch" Width="1.5" PointX="35.375" PointY="8.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.payment_details" Width="1.5" PointX="34.75" PointY="34.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.migpsGpsTrackingSys" Width="1.5" PointX="29.375" PointY="34.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.UserPermissions" Width="1.5" PointX="35.625" PointY="17.125" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.UserPreferences" Width="1.5" PointX="31.375" PointY="34.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.UserRoles" Width="1.5" PointX="35.625" PointY="14.375" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Users" Width="1.5" PointX="33.375" PointY="13.375" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.VersionInfo" Width="1.5" PointX="35.375" PointY="4.75" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_UserPermissions_UserId" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_UserRoles_UserId" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Attendance" Width="1.5" PointX="44.125" PointY="16.125" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Companies" Width="1.5" PointX="34" PointY="28.125" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.DailyClosing" Width="1.5" PointX="11.75" PointY="32.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.DamagedProducts" Width="1.5" PointX="47.375" PointY="39.125" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Employees" Width="1.5" PointX="41.875" PointY="13.5" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Exceptions" Width="1.5" PointX="17.75" PointY="33.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.GoodsIssue" Width="1.5" PointX="42.125" PointY="40.875" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.GoodsIssueDetails" Width="1.5" PointX="44.375" PointY="39.25" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.GoodsReceipt" Width="1.5" PointX="44.125" PointY="18.875" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.GoodsReceiptDetails" Width="1.5" PointX="46.375" PointY="30.25" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Languages" Width="1.5" PointX="33.75" PointY="0.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.PurchaseDetails" Width="1.5" PointX="44.375" PointY="34.875" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.QuotationDetails" Width="1.5" PointX="47.375" PointY="34.625" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Quotations" Width="1.5" PointX="45.125" PointY="23.625" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.RolePermissions" Width="1.5" PointX="34" PointY="20.875" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Roles" Width="1.5" PointX="31.75" PointY="20.875" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.SaleDetails" Width="1.5" PointX="49.375" PointY="29.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Sales" Width="1.5" PointX="47.125" PointY="44.375" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.ServiceInvoiceDetails" Width="1.5" PointX="49.375" PointY="52.5" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.ServiceInvoices" Width="1.5" PointX="47.125" PointY="51.625" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_Attendance_Employees" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_GoodsIssue_Employees" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_GoodsReceipt_Employees" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_GoodsIssue_Sales" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_GoodsIssueDetails_GoodsIssue" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_GoodsReceiptDetails_GoodsReceipt" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_QuotationDetails_Quotations" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_RolePermissions_RoleId" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_UserRoles_RoleId" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_SaleDetails_Sales" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_ServiceInvoiceDetails_ServiceInvoices" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Warehouses" Width="1.5" PointX="31.375" PointY="18.75" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_GoodsIssueDetails_Warehouses" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_GoodsReceiptDetails_Warehouses" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Accounts" Width="1.5" PointX="8.25" PointY="45.5" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Banks" Width="1.5" PointX="31.75" PointY="27.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Categories" Width="1.5" PointX="31.75" PointY="22.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.CustomerGroups" Width="1.5" PointX="0.75" PointY="32.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Customers" Width="1.5" PointX="6" PointY="41.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Regions" Width="1.5" PointX="3.75" PointY="45" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Shippers" Width="1.5" PointX="2.75" PointY="32.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.SupplierGroups" Width="1.5" PointX="9.75" PointY="32.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Suppliers" Width="1.5" PointX="6" PointY="49.375" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Territories" Width="1.5" PointX="6" PointY="37.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Units" Width="1.5" PointX="11.75" PointY="32.75" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_Accounts_Accounts" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_Accounts_Customers" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_Accounts_Suppliers" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_Categories_Categories" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_DamagedProducts_Categories" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_Customers_Regions" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_GoodsIssue_Customers" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_Quotations_Customers" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_Sales_Customers" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_ServiceInvoices_Customers" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_Employees_Regions" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_Employees_Territories" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_GoodsReceipt_Suppliers" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_QuotationDetails_Units" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_Suppliers_Regions" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_Territories_Regions" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Brands" Width="1.5" PointX="33.375" PointY="0.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Products" Width="1.5" PointX="34" PointY="26.125" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Services" Width="1.5" PointX="17.375" PointY="33.75" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_Products_Categories" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_DamagedProducts_Products" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_GoodsIssueDetails_Products" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_GoodsReceiptDetails_Products" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_Products_Units" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_PurchaseDetails_Products" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_QuotationDetails_Products" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_SaleDetails_Products" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_ServiceInvoiceDetails_Services" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.ExpenseTypes" Width="1.5" PointX="34.375" PointY="20.75" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Transactions" Width="1.5" PointX="10.5" PointY="46.625" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_Transactions_Accounts" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Purchases" Width="1.5" PointX="8.25" PointY="53.125" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_GoodsReceipt_Purchases" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_PurchaseDetails_Purchases" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_Purchases_Suppliers" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.SupplierPayment" Width="1.5" PointX="8.25" PointY="59.375" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_Purchases1_Suppliers" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.PaymentCustomer" Width="1.5" PointX="8.25" PointY="40" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_PaymentCustomer_Customers" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.Expenses" Width="1.5" PointX="36.625" PointY="20.875" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_Expenses_ExpenseTypes" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.TempDebit" Width="1.5" PointX="10.5" PointY="52.625" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_TempDebit_Accounts" />
+        <EntityTypeShape EntityType="SCHOOLERPModel.TempCredit" Width="1.5" PointX="10.5" PointY="40.75" />
+        <AssociationConnector Association="SCHOOLERPModel.FK_TempCredit_Accounts" />
+        </Diagram>
+      <Diagram DiagramId="3ed285454fe14558a9d87a4da90d5ba9" Name="Diagram2" >
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

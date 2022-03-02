@@ -1,0 +1,512 @@
+﻿
+@{
+    ViewBag.Title = "FeeSubmit";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    //Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+@*<script type="text/javascript">
+        function Print() {
+            //alert('sdfgsdfgsdf');
+            var printContent = document.getElementById("myModal").innerText;
+            myModal.print(printContent);
+            myModal.close();
+
+            //  window.close;
+        }
+    </script>*@
+
+<script>
+
+    function toolbarClick(args) {
+        var myModalObj = document.getElementById("myModal").ej2_instances[0];
+        if (args.item.id === 'myModal') {
+            myModalObj.pdfExport();
+        }
+    }
+
+</script>
+<section class="content">
+    <form id="w0" action="/employee/emp-master/index" method="get">
+        <div class="box-body">
+            <div class="row">
+
+                <div class="row center-block" style="width: 75%;">
+                    <div class="col-lg-4 col-xs-12">
+                        <!-- small box -->
+                        <div class="small-box bg-teal">
+                            <div class="inner">
+                                <h3 id="txtTotalAmount">0 </h3>
+                                <p>Total Payable Amount</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fa fa-book"></i>
+                            </div>
+                            <a class="small-box-footer" href="/Accounts/Expenses">More info <i class="fa fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div><!-- ./col -->
+                    <div class="col-lg-4 col-xs-12">
+                        <!-- small box -->
+                        <div class="small-box bg-green">
+                            <div class="inner">
+                                <h3 id="txtPaidAmount">0</h3>
+                                <p>Total Paid Amount</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fa fa-file-text"></i>
+                            </div>
+                            <a class="small-box-footer" href="/Accounts/Expenses" target="_blank">More info <i class="fa fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div><!-- ./col -->
+                    <div class="col-lg-4 col-xs-12">
+                        <!-- small box -->
+                        <div class="small-box bg-yellow">
+                            <div class="inner">
+                                <h3 id="txtDuesAmount">0</h3>
+                                <p>Total Due Amount</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fa fa-file"></i>
+                            </div>
+                            <a class="small-box-footer" href="/Accounts/Expenses">More info <i class="fa fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div><!-- ./col -->
+                </div>
+                <div class="col-sm-4" id="schoolhidden">
+                    <div class="form-group field-empinfosearch-emp_designation_id">
+                        <label for="Country" class="req">School<span class="requird">*</span></label>
+                        <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name"></select>
+
+                        <div class="help-block"></div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group ">
+
+                        <label class="control-label" for="empinfosearch-emp_designation_id">Class</label>
+                        <select class="form-control" id="ddlCourse" style="color:black;" name="ddlCourse" valuefield="Id" textfield="CourseName" blankRowValue="0" blankRowText="----Select----"></select>
+                        <div class="help-block"></div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+
+                        <label class="control-label" for="empinfosearch-emp_designation_id">Section</label>
+                        <select class="form-control" id="ddlSection" style="color:black;" name="ddlSection" valuefield="Id" textfield="SectionName" blankRowValue="0" blankRowText="----Select----"></select>
+
+                        <div class="help-block"></div>
+                    </div>
+                </div>
+
+
+            </div>
+
+
+
+
+
+
+
+
+        </div>
+        <div class="box-footer">
+            <input class="btn btn-primary" onclick="SEARCHSTUDENTINCLASSSECTION()" value="Search" type="button" />
+            <a class="btn btn-default" onclick="restClear()" href="javascript:void(0)">Reset</a>
+            @*<input type="button" id="create_pdf" value="Export Pdf" onclick="pdfExport()" class="btn btn-primary" />
+
+                <a href="#" class="btn btn-primary" onClick="$('#example1').tableExport({ type: 'excel', escape: 'false', defaultFileName: 'rahul', bootstrap: true });">Excel Exports</a>*@
+        </div>
+
+    </form>
+    <div class="row" style="overflow:auto">
+        <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">View Student Details</h3>
+                </div>
+                <div class="box-body">
+                    <div class="form-group">
+                        <div>
+
+                            <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                <thead>
+                                    <tr>
+                                        <th>School</th>
+                                        <th>Roll NO</th>
+                                        @*<th>School</th>*@
+                                        <th>UserID</th>
+                                        <th>Photo</th>
+                                        <th>Name</th>
+                                        <th>Class</th>
+                                        <th>Section</th>
+                                        <th>FatherName</th>
+                                        <th>Session</th>
+                                        <th>View Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyEmployeeDetails"></tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <script type="text/html" id="divEmployeeDetailsJTemplte">
+                {#foreach $T as Datashort}
+                <tr>
+                    @*<td>
+                            { $T.Datashort.School}
+                        </td>*@
+                    <td>
+                        { $T.Datashort.School}
+                    </td>
+                    <td>
+                        { $T.Datashort.RollNo}
+                    </td>
+                    <td>
+                        { $T.Datashort.SUserID}
+                    </td>
+                    <td>
+                        <img src="{ $T.Datashort.PicPath}" alt="#" />
+                    </td>
+                    <td>
+                        { $T.Datashort.FirstName}
+                    </td>
+                    @*<img src="~/Images/School/SchoolImage/3575048482shiva.jpg" />*@
+                    <td>
+                        { $T.Datashort.Class}
+                    </td>
+                    <td>
+                        { $T.Datashort.Section}
+                    </td>
+                    <td>
+                        { $T.Datashort.FatherName}
+                    </td>
+                    <td>
+                        { $T.Datashort.AcademicYear}
+                    </td>
+                    <td>
+                        @*<a href="#" style="width: 150px;float: right;margin-right: 8px" id="btnadd" class="btn btn-block btn-primary" onclick="openModal('{ $T.Datashort.ID }', '{$T.Datashort.ClassID}',{$T.Datashort.SectionID})">Submission</a>*@
+
+                        <a href="#" style="width: 150px;float: right;margin-right: 8px" id="btnadd" class="btn btn-block btn-primary" onclick="openModal('{ $T.Datashort.ID }')">viewFee</a>
+                </tr>
+                {#/for}
+            </script>
+            <div class="modal fade" id="myModal" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" onclick="refreshControls()">&times;</button>
+                            <h4 class="modal-title">Fee Details</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form role="form" id="form1" name="form1">
+
+                                <section class="content">
+                                    <!-- /.row -->
+
+                                    <div class="box box-solid">
+                                        <div>
+                                            <div class="box-header with-border">
+                                                <h3 class="box-title"><i class="fa fa-search"></i> View Payable Details</h3>
+                                                <div class="box-tools">
+                                                    <img alt="" src="../Images/pr1.png" onclick="print()" align="right" width="20px" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row" style="overflow-x:scroll">
+                                            <div class="col-md-12">
+                                                <!-- general form elements -->
+                                                <div class="box box-primary">
+                                                    <div class="box-body">
+                                                        <div class="form-group">
+                                                            <div>
+
+                                                                <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>FeeHead</th>
+                                                                            <th>Total</th>
+                                                                            <th>Concession</th>
+                                                                            <th>NetTotal</th>
+                                                                            <th>Paid</th>
+                                                                            <th>Balance</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody id="tbodyEmployeeLeaveRequestDetails"></tbody>
+                                                                </table>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </section>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                        </div>
+                    </div>
+                </div>
+                <!-- /.row -->
+                <!-- Modal -->
+            </div>
+        </div>
+    </div>
+
+
+</section>
+
+
+
+
+
+
+
+
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#schoolhidden").hide();
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethod(JSON.stringify([SchoolID]), "/api/AccountsAPI", "countpaymentAllTypeBySchool", false, "", "", false, "", true, setPaymetnsSum, "", "", "");
+
+    });
+
+    $("#ddlCourse").change(function () {
+        var ddlCourse = getControlValue("ddlCourse");
+        if (ddlCourse != null && (ddlCourse != -1) && (ddlCourse != undefined)) {
+            var SchoolID = sessionStorage.getItem("SchoolID");
+            callServiceMethodForDDl(JSON.stringify([ddlCourse, SchoolID]), "/api/StudentApi", "GetSectionsbyschool", "ddlSection", false, "", "", "", "");
+
+        }
+
+
+
+    });
+
+
+    function SEARCHSTUDENTINCLASSSECTION() {
+        if ($("#w0").valid()) {
+            var SchoolID = $("#ddlSchoolName").val();
+            var ClassID = $("#ddlCourse").val();
+            var SectionID = $("#ddlSection").val();
+            var t = $('#example1').DataTable();
+            t.destroy();
+            callJTemplateServiceMethod(JSON.stringify([SchoolID, ClassID, SectionID]), "/api/StudentApi", "getAllStudentsbyclassSection",
+                "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+
+        }
+
+    }
+
+    function restClear() {
+        $("#ddlCourse").val(0);
+        $("#ddlSection").val(0);
+        location.reload();
+    }
+
+</script>
+<script type="text/javascript">
+
+    function (dispose) {
+        pdf.save('UnpaidFeesReports.pdf');
+    }, margins);
+    $("#loader").fadeOut();
+
+    function pdfExport() {
+        $("#loader").fadeIn();
+        var pdf = new jsPDF('p', 'pt', 'a2');
+
+        source = $('#divmonthlyAttendenceReport')[0];
+        pdf.text("UnPaid Fees Reports", 5 + 360, 20);
+        specialElementHandlers = {
+
+            '#bypassme': function (element, renderer) {
+                return true
+            }
+        };
+        margins = {
+            top: 0,
+            bottom: 0,
+            left: 10,
+            width: 500
+        };
+
+        pdf.fromHTML(
+            source, // HTML string or DOM elem ref.
+            margins.left, // x coord
+            margins.top, { // y coord
+            'width': "1000", // max width of content on PDF
+            'elementHandlers': specialElementHandlers
+        },
+
+            function (dispose) {
+                pdf.save('UnpaidFeesReports.pdf');
+            }, margins);
+        $("#loader").fadeOut();
+
+    }
+
+</script>
+
+<script type="text/javascript">
+    var loginuser;
+    var typeuser;
+    $(document).ready(function () {
+        var firstDayOfMonth = function () {
+            // your special logic...
+            return 1;
+        };
+
+        var d = new Date();
+        var currMonth = d.getMonth();
+        var currYear = d.getFullYear();
+        var startDate = new Date(currYear, currMonth, firstDayOfMonth());
+        $('#txtStartDate').datepicker('setDate', startDate);
+
+
+        ``
+        var currentTime = new Date()
+        var maxDate = new Date(currentTime.getFullYear(), currentTime.getMonth() + 1, +0)
+        $("#txtEndDate").datepicker('setDate', maxDate);
+        loginuser = (sessionStorage.getItem("userId"));
+        typeuser = sessionStorage.getItem("type");
+        var t = $('#example1').DataTable();
+        t.destroy();
+
+    })
+
+    function successMsg(p1, p2, p3, datas) {
+        setTimeout(function () {
+            $('#example1').DataTable({
+                bRetrieve: true,
+                bDestroy: true,
+                'columnDefs': [{
+                    "targets": -1,
+                    "orderable": false
+                }],
+            })
+        }, 1000);
+
+    }
+
+    function setPaymetnsSum(p1, p, p3, datas) {
+        if (datas != "") {
+            setControlValue("txtTotalAmount", datas.split('***')[0]);
+            setControlValue("txtPaidAmount", datas.split('***')[1]);
+            setControlValue("txtDuesAmount", datas.split('***')[2]);
+
+        }
+        else {
+            setControlValue("txtTotalAmount", "0");
+            setControlValue("txtPaidAmount", "0");
+            setControlValue("txtDuesAmount", "0");
+        }
+    }
+
+
+    function openModal(StudentId, ClassID, SectionID, RegNo, FatherName, FirstName, SchoolID, AcademicYear, PUserID) {
+        debugger;
+        localStorage.setItem('StudentId', StudentId);
+        localStorage.setItem('ClassID', ClassID);
+        localStorage.setItem('SectionID', SectionID);
+        localStorage.setItem('RegNo', RegNo);
+        localStorage.setItem('FirstName', FirstName);
+        localStorage.setItem('FatherName', FatherName);
+        localStorage.setItem('SchoolID', SchoolID);
+        localStorage.setItem('AcademicYear', AcademicYear);
+        localStorage.setItem('PUserID', PUserID);
+        var studentId = localStorage.getItem('StudentId');
+        $.ajax({
+            type: 'Get',
+            url: "/api/AccountsAPI/getAllPaymentDetails1",
+            dataType: 'html',
+            data: { StudentId: studentId },
+            success: function (data) {
+                $('#tbodyEmployeeLeaveRequestDetails').append(data);
+            }
+
+        });
+        $('#myModal').modal('show');
+
+    }
+
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                ddlCategory: {
+                    selectcheck: true
+                },
+
+                txtAmount: "required",
+                ddlFeeCategories: "required",
+                ddlAccount: "required",
+
+
+            },
+            messages: {
+
+
+                ddlFeeCategories: "Please Select Fee Category",
+                txtAmount: "Please Enter Amount",
+                ddlAccount: "Please Select Primary Date",
+
+
+
+            }
+        })
+    });
+
+</script>

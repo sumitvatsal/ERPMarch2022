@@ -1,0 +1,104 @@
+﻿ .my-error-class {
+    color:#FF0000; 
+     font-weight:500;
+}
+.my-valid-class {
+    color:black; /* green */
+}
+.requird {
+    color:red;
+}
+#loader {
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 99;
+    opacity: 0.8;
+    filter: alpha(opacity=80);
+    -moz-opacity: 0.8;
+    background: url('../Images/loader7.gif') 50% 50% no-repeat rgb(0, 0, 0);
+   
+}
+
+.centerSuccess {
+    	 
+	position: fixed;
+    z-index: 99999;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    left: 50%;
+    width:400px;
+	/*background: #000;*/
+ 
+
+}
+
+.swal-modal
+{
+	width:360px !important;
+}
+.swal-footer
+{
+	text-align:center !important;
+}
+
+<style type="text/css">
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+    width: 35px;
+    height: 35px;
+    border-radius: 100%;
+}
+
+ 
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+           /*padding: 8px;*/ 
+             
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+
+    
+ .goog-logo-link {
+   display:none !important;
+} 
+
+/*.goog-te-gadget{
+   color: transparent !important;
+}*/
+
+div.goog-te-gadget {
+  color: transparent !important;
+}
+.goog-te-combo {
+    color:black;
+}

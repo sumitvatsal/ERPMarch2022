@@ -1,0 +1,664 @@
+﻿@model SchoolErp.Models.fees
+@{
+    ViewBag.Title = "ConcessionAllow";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section class="content">
+    <form id="w0" action="/employee/emp-master/index" method="get">
+        <div class="box-body">
+            <div class="row">
+
+
+                <div class="col-sm-4" id="schoolhidden">
+                    <div class="form-group field-empinfosearch-emp_designation_id">
+                        <label for="Country" class="req">School<span class="requird">*</span></label>
+                        <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name"></select>
+
+                        <div class="help-block"></div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group ">
+
+                        <label class="control-label" for="empinfosearch-emp_designation_id">Class</label>
+                        <select class="form-control" id="ddlCourse" style="color:black;" name="ddlCourse" valuefield="Id" textfield="CourseName" blankRowValue="0" blankRowText="----Select----"></select>
+                        <div class="help-block"></div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+
+                        <label class="control-label" for="empinfosearch-emp_designation_id">Section</label>
+                        <select class="form-control" id="ddlSection" style="color:black;" name="ddlSection" valuefield="Id" textfield="SectionName" blankRowValue="0" blankRowText="----Select----"></select>
+
+                        <div class="help-block"></div>
+                    </div>
+                </div>
+
+
+            </div>
+
+
+
+
+
+
+
+
+        </div>
+        <div class="box-footer">
+            <input class="btn btn-primary" onclick="SEARCHSTUDENTINCLASSSECTION()" value="Search" type="button" />
+            <a class="btn btn-default" onclick="restClear()" href="javascript:void(0)">Reset</a>
+            @*<input type="button" id="create_pdf" value="Export Pdf" onclick="pdfExport()" class="btn btn-primary" />
+
+                <a href="#" class="btn btn-primary" onClick="$('#example1').tableExport({ type: 'excel', escape: 'false', defaultFileName: 'rahul', bootstrap: true });">Excel Exports</a>*@
+        </div>
+
+    </form>
+    <div class="row" style="overflow:auto">
+        <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">View Student Details</h3>
+                </div>
+                <div class="box-body">
+                    <div class="form-group">
+                        <div>
+
+                            <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                <thead>
+                                    <tr>
+                                        <th>S.NO</th>
+                                        @*<th>School</th>*@
+                                        <th>UserID</th>
+                                        <th>Photo</th>
+                                        <th>Name</th>
+                                        <th>Class</th>
+                                        <th>Section</th>
+                                        <th>ConcessionApply</th>
+                                        <th>Delete</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyEmployeeDetails"></tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <script type="text/html" id="divEmployeeDetailsJTemplte">
+                {#foreach $T as Datashort}
+                <tr>
+                    @*<td>
+                            { $T.Datashort.School}
+                        </td>*@
+                    <td>
+                        { $T.Datashort.RollNo}
+                    </td>
+                    <td>
+                        { $T.Datashort.SUserID}
+                    </td>
+                    <td>
+                        <img src="{ $T.Datashort.PicPath}" alt="#" />
+                    </td>
+                    <td>
+                        { $T.Datashort.FirstName}
+                    </td>
+                    @*<img src="~/Images/School/SchoolImage/3575048482shiva.jpg" />*@
+                    <td>
+                        { $T.Datashort.Class}
+                    </td>
+                    <td>
+                        { $T.Datashort.Section}
+                    </td>
+
+                    <td>
+                        <a href="#" style="width: 150px;float: right;margin-right: 8px" id="btnadd" class="btn btn-block btn-primary" onclick="openModal('{ $T.Datashort.ID }', '{$T.Datashort.ClassID}',{$T.Datashort.SectionID})">Concession</a>
+
+
+                    </td>
+                    <td>
+                        <i class="fa fa-fw fa-trash" style="cursor:pointer" onclick="deleteStudentById({ $T.Datashort.ID})"></i>
+                    </td>
+                </tr>
+                {#/for}
+            </script>
+
+
+
+            <div class="modal fade" id="myModal" role="dialog">
+                <div class="modal-dialog">
+
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" onclick="refreshControls()">&times;</button>
+                            <h4 class="modal-title">Fee Concession</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form role="form" id="form1" name="form1">
+                                <div class="col-md-12">
+                                    <div class="box-body">
+                                        <div class="form-group">
+                                            <label class="control-label">Academic Year</label>
+                                            <select id="tc_academic_year" class="form-control" valuefield="ID" textfield="StartYear" blankRowValue="-1" blankRowText="----Select----" onchange="" aria-required="true"></select>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Fee Head: <span class="requird">*</span></label>
+                                            <select id="ddlFeeCategories" class="form-control" valuefield="Cat_ID" textfield="feeCategory" blankRowValue="-1" blankRowText="----Select----" onchange="" aria-required="true"></select>
+
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="cars">Concession Name:</label>
+                                            <select class="form-control" id="ddlFeeConcession" style="color:black;" name="ddlFeeConcession" valuefield="Cat_ID" textfield="feeCategory" blankRowValue="0" blankRowText="----Select----"></select>
+                                            @*<select id="ddlFeeConcession" class="form-control" valuefield="Cat_ID" textfield="feeCategory" blankRowValue="-1" blankRowText="----Select----" " onchange="generateReceipt()" aria-required="true"></select>*@
+
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Amount: <span class="requird">*</span></label>
+                                            <input type="text" class="form-control" name="txtAmount" id="txtAmount" placeholder="Enter ...">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Description:</label>
+                                            <textarea class="form-control" rows="2" placeholder="Enter ..." name="txtDesc" id="txtDesc"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="checkbox" checked="checked" id="cbActive" />&nbsp;Active
+                                            <!-- /.input group -->
+                                        </div>
+                                        <div class="box-footer">
+                                            <input class="btn btn-info" id="btnSumit" type="button" value="Save">
+                                            @Html.HiddenFor(m => m.ID)
+                                            <input type="hidden" id="hdnID" />
+                                        </div>
+                                        <!-- /.form group -->
+                                    </div>
+                                    <!-- /.box-body -->
+
+
+                                </div>
+                            </form>
+
+                        </div>
+                        <div class="modal-footer">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!-- /.row -->
+        <!-- Modal -->
+    </div>
+    <div class="alert alert-success centerSuccess" id="divSucesEmail" style="display:none">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h4>
+            <i class="icon fa fa-check"></i>
+            <span Id="sentEmailMsg"></span>
+        </h4>
+
+    </div>
+</section>
+
+
+
+
+
+
+<!-- DataTables -->
+<link href="~/js/PDFExcelDatatable/buttons.dataTables.min.css" rel="stylesheet" />
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/js/PDFExcelDatatable/dataTables.buttons.min.js"></script>
+<script src="~/js/PDFExcelDatatable/jszip.min.js"></script>
+<script src="~/js/PDFExcelDatatable/pdfmake.min.js"></script>
+<script src="~/js/PDFExcelDatatable/vfs_fonts.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.html5.min.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.print.min.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.colVis.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#schoolhidden").hide();
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+        //$("#loader").fadeIn();
+        //var loginuser = (sessionStorage.getItem("userId"));
+        //var typeuser = sessionStorage.getItem("type");
+
+        //$("#loader").fadeOut();
+        //var t = $('#example1').DataTable();
+        //t.destroy();
+        //callJTemplateServiceMethod(JSON.stringify([loginuser, typeuser]), "/api/StudentApi", "getAllStudentsDetailsBySchool",
+        //     "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+    });
+
+    $("#ddlCourse").change(function () {
+        var ddlCourse = getControlValue("ddlCourse");
+        if (ddlCourse != null && (ddlCourse != -1) && (ddlCourse != undefined)) {
+            var SchoolID = sessionStorage.getItem("SchoolID");
+            callServiceMethodForDDl(JSON.stringify([ddlCourse, SchoolID]), "/api/StudentApi", "GetSectionsbyschool", "ddlSection", false, "", "", "", "");
+
+        }
+    });
+
+    function SEARCHSTUDENTINCLASSSECTION() {
+
+        //var student = {
+        //     SchoolID : $("#ddlSchoolName").val(),
+        //     ClassID : $("#ddlCourse").val(),
+        //     SectionID : $("#ddlSection").val()
+
+        //}
+        //var ddl = JSON.stringify(student)
+        if ($("#w0").valid()) {
+            var SchoolID = $("#ddlSchoolName").val();
+            var ClassID = $("#ddlCourse").val();
+            var SectionID = $("#ddlSection").val();
+            var t = $('#example1').DataTable();
+            t.destroy();
+            callJTemplateServiceMethod(JSON.stringify([SchoolID, ClassID, SectionID]), "/api/StudentApi", "getAllStudentsbyclassSection",
+                "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+
+        }
+        $(document).ready(function () {
+            //callServiceMethodForDDl("", "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+            var loginuser = (sessionStorage.getItem("userId"));
+            var typeuser = sessionStorage.getItem("type");
+            callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+
+            setControlValue("hdnID", 0);
+            /*        setControlValue("hdnStatus", 1);*/
+            $('.dtpicker').datepicker({
+                //dateFormat: 'dd/mm/yy' ,
+                autoclose: true,
+                format: 'dd/mm/yyyy'
+            });
+
+            fillDataTable();
+
+
+           // callServiceMethodForDDl(JSON.stringify(["FeeCategory", "", "", 1, "", loginuser, typeuser]), "/api/FeesApi", "getList", "ddlFeeCategories", false, "", "", "", "");
+
+
+            //callServiceMethodForDDl("", "/api/StudentApi", "GetLeaveStatus", "ddlReqStatus", false, "", "", "", "");
+        });
+        var SchoolID = getControlValue("ddlSchoolName");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TimeTableApi", "GetAcademicYearBySchool", "tc_academic_year", false, "", "", "", "");
+        $("#ddlSchoolName").change(function () {
+            var SchoolID = getControlValue("ddlSchoolName");
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TimeTableApi", "GetAcademicYearBySchool", "tc_academic_year", false, "", "", "", "");
+
+           // callServiceMethodForDDl(JSON.stringify(["ConcessionAllow", "", "", 1, "", loginuser, typeuser]), "/api/FeesApi", "getList", "ddlFeeConcession", false, "", "", "", "");
+        });
+    }
+
+
+
+
+    function openModal(StudentId, ClassID, SectionID) {
+        localStorage.setItem('StudentId', StudentId);
+        localStorage.setItem('ClassID', ClassID);
+        localStorage.setItem('SectionID', SectionID);
+
+        $("#loader").fadeIn();
+        var Concession = getControlValue("ddlFeeConcession");
+        var Cat_ID = getControlValue("ddlFeeCategories");
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        var t = $('#example1').DataTable();
+        t.destroy();
+        callJTemplateServiceMethod(JSON.stringify(["ConcessionAllow", Concession, Cat_ID, -1, loginuser, typeuser]), "/api/FeesApi", "getList",
+            "tBodyHW", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+        callServiceMethodForDDl(JSON.stringify(["FeeConcession", "", "", 1, "", loginuser, typeuser]), "/api/FeesApi", "getList", "ddlFeeConcession", false, "", "", "", "");
+        callServiceMethodForDDl(JSON.stringify(["FeeCategory", "", "", 1, "", loginuser, typeuser]), "/api/FeesApi", "getList", "ddlFeeCategories", false, "", "", "", "");
+
+
+
+        $("#ddlFeeConcession").change(function () {
+            var ddlFeeConcession = getControlValue("ddlFeeConcession");
+            if (ddlFeeConcession != null && (ddlFeeConcession != -1) && (ddlFeeConcession != undefined)) {
+                var SelectedText = $('#ddlFeeConcession :selected').text();
+                $('#txtAmount').val(SelectedText);
+            }
+        });
+
+
+        $('#myModal').modal('show');
+
+    }
+    function restClear()
+    {
+        $("#ddlCourse").val(0);
+        $("#ddlSection").val(0);
+        location.reload();
+    }
+
+    function successMsg(p1, p2, p3, datas)
+    {
+        setTimeout(function () {
+            $('#example1').DataTable({
+                'columnDefs': [{
+                    "targets": [-1, -2,-7],
+                    "orderable": false
+
+                }],
+                dom: 'lBfrtip',
+                buttons: [
+                    //{
+                    //    extend: 'copyHtml5',
+                    //    exportOptions: {
+                    //        columns: [0, ':visible']
+                    //    }
+                    //},
+
+                    'colvis'
+                ]
+            });
+        }, 1000);
+
+        $("#loader").fadeOut();
+    }
+
+
+    $("#btnSumit").click(function () {
+        debugger;
+        var ID = getControlValue("hdnID");
+        var StudentId = localStorage.getItem('StudentId');
+        var Con = getControlValue("ddlFeeConcession");
+        var Amount = getControlValue("txtAmount");
+        var des = getControlValue("txtDesc");
+        var Academic_Year = getControlValue("tc_academic_year")
+        var Active = getControlValue("cbActive")
+        var ClassID = localStorage.getItem('ClassID');
+        var SectionID = localStorage.getItem('SectionID');
+        var FeeHead = getControlValue("ddlFeeCategories");
+        Save(ID, StudentId, Con, Amount, des, Academic_Year, Active, ClassID, SectionID,FeeHead);
+    });
+    function Save(ID, StudentId, Acc, Conc, Amount, Desc, Active, ClassID, SectionID,FeeHead) {
+        localStorage.removeItem('StudentId');
+        localStorage.removeItem('ClassID');
+        localStorage.removeItem('SectionID');
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+            $.ajax({
+                url: "/api/FeesApi/SaveRecord",
+                type: "Post",
+                data: JSON.stringify(["ConcessionAllow", ID, StudentId, Acc, Conc, Amount, Desc, Active, ClassID, SectionID,FeeHead]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+
+                    $("#loader").fadeOut();
+                    $("#divSucesEmail").fadeIn();
+                    $("#sentEmailMsg").html(data.Msg);
+                    setTimeout(function () {
+                        $("#divSucesEmail").fadeOut();
+                        $("#sentEmailMsg").html("");
+                    }, 2000)
+
+                    if (data.ID != -1) {
+                        setControlValue("hdn", 0);
+                        setControlValue("txtCTName", "");
+                        $("#txtDesc").val("");
+                        setControlValue("txtDesc", "");
+                        $('#myModal').modal('hide');
+
+                    }
+
+                    fillDataTable();
+                    //$('#myModal').modal('hide');
+
+                }
+            });
+
+        }
+    }
+    function ResetModal() {
+        setControlValue("ddlFeeConcession", "");
+        setControlValue("txtAmount", "");
+        setControlValue("hdnID", 0);
+    }
+
+
+
+    function deleteStudentById(Id) {
+        var result = window.confirm("Are you sure ,you want to delete this student ?");
+        if (result == true) {
+ var Id = Id;
+         $.ajax({
+            type: "Get",
+            url: "@Url.Content("~/api/StudentApi/deleteStudentById")",
+            contentType: "application/json; charset=utf-8",
+            data: { Id: Id},
+            dataType: "json",
+             success: function (b) {
+                 $("#divSuccessMsg").fadeOut();
+                 var loginuser = (sessionStorage.getItem("userId"));
+                 var typeuser = sessionStorage.getItem("type");
+                 var t = $('#example1').DataTable();
+                 t.destroy();
+                 // all students callJTemplateServiceMethod(JSON.stringify([loginuser, typeuser]), "/api/StudentApi", "getAllStudentsDetailsBySchool",
+                 //    "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg1, "", "", "");
+                 SEARCHSTUDENTINCLASSSECTION();
+
+
+
+                $("#loader").fadeOut();
+                //$("#divSuccessMsg").fadeIn();
+                //$("#divSuccessMsg").html("<strong>Success!</strong> " + b);
+
+                 setTimeout(function () {
+                     alert(b);
+
+
+
+
+                //
+
+                }, 2000)
+
+            },
+
+            error: function () {
+
+            }
+                        });
+        }
+
+    }
+
+
+    function successMsg1(p1, p2, p3, datas) {
+
+
+        setTimeout(function () {
+
+            $('#example1').DataTable({
+
+                'columnDefs': [{
+                    "targets":[-1,-2,-8],
+                    "orderable": false
+
+                }],
+
+
+            })
+        }, 1000);
+
+
+        $("#loader").fadeOut();
+
+        //alert("Student Deleted Successfully");
+    }
+    function employeeActivateDeactivate(thiss,EmpId)
+    {
+        var employye = {
+
+            Id: EmpId,
+            Status: $(thiss).is(":checked")
+        }
+        var ddl = JSON.stringify(employye)
+        callServiceMethod(ddl, "/api/EmployeeAPI", "EmployeStatusUpdate", false, "", "", false, "", true, employeeActivateDeactivate_scs, "", "", "");
+
+
+    }
+
+    function employeeActivateDeactivate_scs(p1,p2,p3,datas)
+    {
+        alert(datas);
+    }
+
+    function performActionByEmploy(val,id)
+    {
+        if(val=="ViewDocument")
+        {
+
+            $("#anchrfModelDeocument"+id+"").click();
+        }
+        else if(val=="StudentEdit")
+        {
+
+            window.location.href="/Student/AddStudent?id="+id;
+        }
+        else if(val=="StudentView")
+        {
+            window.location.href = "/Student/StudentProfile?id="+id;
+        }
+
+
+
+    }
+</script>
+<style type="text/css">
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+
+<script>
+    function selectedtext(ddlFeeConcession)
+    {
+        var selvalue = ddlFeeConcession.value;
+        var seltext = ddlFeeConcession.options[ddlFeeConcession.selectedIndex].innerHTML;
+        $('#txtAmount').val(seltext);
+    }
+
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#loader").fadeOut();
+
+        $("#w0").validate({
+
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+
+                ddlCourse: {
+
+                    selectcheck1: true
+
+                },
+                ddlSection: {
+
+                    selectcheck2: true
+
+                },
+            },
+            messages: {
+
+                ddlCourse: "Please Select Class",
+                ddlSection: "Please Select Section",
+
+
+
+            }
+        })
+
+        jQuery.validator.addMethod('selectcheck1', function (value) {
+            return (value != "0");
+        }, "Please select Class");
+        jQuery.validator.addMethod('selectcheck2', function (value) {
+            return (value != "0");
+        }, "Please select Section");
+    });
+</script>

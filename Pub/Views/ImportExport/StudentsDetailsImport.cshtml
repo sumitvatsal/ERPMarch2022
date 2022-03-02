@@ -1,0 +1,707 @@
+﻿
+@{
+    ViewBag.Title = "StudentsDetailsImport";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<section class="content">
+    <div class="content">
+        <div id="content">
+            <style>
+                #overlaygif {
+                    background: url("/images/loading.gif") no-repeat center;
+                    position: fixed;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    left: 0;
+                }
+
+                .panel-default > .panel-heading-custom {
+                    background: #F8F8F8;
+                    color: #black;
+                }
+
+                #customstyle:link {
+                    text-decoration: none;
+                    color: black;
+                }
+
+                #customstyle:visited {
+                    text-decoration: none;
+                    color: black;
+                }
+
+                #customstyle:active {
+                    text-decoration: none;
+                    color: black;
+                    font-weight: bold;
+                }
+
+                #customstyle:hover {
+                    text-decoration: none;
+                    font-weight: bold;
+                    color: black;
+                }
+            </style>
+
+
+            <div class="content">
+                @using (Html.BeginForm("StudentsDetailsImport", "ImportExport", FormMethod.Post, new { enctype = "multipart/form-data", onsubmit = "return myFunction()" }))
+                {
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">Student Details Import</h4>
+                                </div>
+                                <br />
+                                <div>
+                                    @if (ViewBag.ImportStuStatusFlag == "success")
+                                    {
+                                        <h4 class="panel-title" style="color:green">&nbsp;&nbsp;&nbsp;@ViewBag.ImportStuStatus</h4>
+                                    }
+                                    else
+                                    {
+                                        <h4 class="panel-title" style="color:red">&nbsp;&nbsp;&nbsp;@ViewBag.ImportStuStatus</h4>
+                                    }
+
+                                </div>
+                                <div class="panel-body">
+                                    <div class="panel-body">
+                                        <div id="overlaygif" style="display:none;"></div>
+                                        <div class="form-group">
+                                            <label for="reg_input_name" class="req">Browse File</label>
+                                            <input type="file" id="FileUpload" name="FileUpload" class="" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-5">
+                                            <div class="form_sep">
+                                                <input class="btn btn-info" type="submit" name="yt0" value="Submit">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="progress" style="display:none;">
+                                                <div class="progress-bar progress-bar-info" style="width: 80% " id="progressbar">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="alert alert-warning warning">
+                                                <span class="icon-info22" style="color:orange"></span>
+                                                Download the excel file format from below link.
+                                                <br>
+                                                <p class="form-control-static">&nbsp;&nbsp;&nbsp;&nbsp;<a href="~/Export/StudentImport.xlsx">Student Details Import</a></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-12">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <div class="panel panel-white">
+                                                <div class="panel-body">
+
+                                                    <div class="box box-danger direct-chat direct-chat-danger">
+                                                        <div class="panel-heading">
+                                                            <h5 class="panel-title"> Class & Section</h5>
+                                                        </div>
+                                                        <div class="panel-body" id="divCountry" style="overflow-y: scroll;height: 400px;">
+                                                            <div class="clt">
+                                                                <ul id="divCitystateCountry"></ul>
+                                                            </div>
+                                                        </div>
+                                                        @*<script type="text/html" id="divReligonMasterJTemplte">
+                            {#foreach $T as Datashort}
+                            <div class="form-group">{ $T.Datashort.Name}</div>
+                            {#/for}
+                        </script>*@
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+                                        <div class="col-sm-3">
+                                            <div class="panel panel-white">
+                                                <div class="panel-body">
+
+                                                    <div class="box box-danger direct-chat direct-chat-danger">
+                                                        <div class="panel-heading">
+                                                            <h5 class="panel-title"> Class & Stream</h5>
+                                                        </div>
+                                                        <div class="panel-body" id="divClassStream" style="overflow-y: scroll;height: 400px;">
+                                                            <div class="clt">
+                                                                <ul id="divdivClassStreamFor"></ul>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-sm-3">
+                                            <div class="panel panel-white">
+                                                <div class="panel-body">
+
+                                                    <div class="box box-danger direct-chat direct-chat-danger">
+                                                        <div class="panel-heading">
+                                                            <h5 class="panel-title"> Academic Year</h5>
+                                                        </div>
+                                                        <div class="panel-body" id="divAcademicYearMaster">
+
+
+
+                                                        </div>
+                                                        <script type="text/html" id="divAcademicYearMasterJTemplte">
+                                                            {#foreach $T as Datashort}
+                                                            <div class="form-group">{ $T.Datashort.StartYear}</div>
+                                                            {#/for}
+                                                        </script>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="panel panel-white">
+                                                <div class="panel-body">
+
+                                                    <div class="box box-danger direct-chat direct-chat-danger">
+                                                        <div class="panel-heading">
+                                                            <h5 class="panel-title"> Gender</h5>
+                                                        </div>
+                                                        <div class="panel-body" id="divGenderMaster">
+
+                                                        </div>
+
+                                                        <script type="text/html" id="divGenderMasterJTemplte">
+                                                            {#foreach $T as Datashort}
+                                                            <div class="form-group">{ $T.Datashort.GenderName}</div>
+                                                            {#/for}
+                                                        </script>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="panel panel-white">
+                                                <div class="panel-body">
+
+                                                    <div class="box box-danger direct-chat direct-chat-danger">
+                                                        <div class="panel-heading">
+                                                            <h5 class="panel-title"> Religon</h5>
+                                                        </div>
+                                                        <div class="panel-body" id="divReligonMaster">
+
+                                                        </div>
+                                                        <script type="text/html" id="divReligonMasterJTemplte">
+                                                            {#foreach $T as Datashort}
+                                                            <div class="form-group">{ $T.Datashort.ReligionName}</div>
+                                                            {#/for}
+                                                        </script>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-3">
+                                            <div class="panel panel-white">
+                                                <div class="panel-body">
+
+                                                    <div class="box box-danger direct-chat direct-chat-danger">
+                                                        <div class="panel-heading">
+                                                            <h5 class="panel-title">Cast Category</h5>
+                                                        </div>
+                                                        <div class="panel-body" id="divCastCaegoryMaster">
+
+                                                        </div>
+                                                        <script type="text/html" id="divCastCaegoryMasterJTemplte">
+                                                            {#foreach $T as Datashort}
+                                                            <div class="form-group">{ $T.Datashort.Category}</div>
+                                                            {#/for}
+                                                        </script>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @*INCLUDE COUNTRY*@
+                                        @*<div class="col-sm-3">
+            <div class="panel panel-white">
+                <div class="panel-body">
+
+                    <div class="box box-danger direct-chat direct-chat-danger">
+                        <div class="panel-heading">
+                            <h5 class="panel-title"> State</h5>
+                        </div>
+                        <div class="panel-body" id="divStateMaster">
+
+                        </div>
+                        <script type="text/html" id="divStateMasterJTemplte">
+                            {#foreach $T as Datashort}
+                            <div class="form-group">{ $T.Datashort.StateName}</div>
+                            {#/for}
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>*@
+                                        <div class="col-sm-3">
+                                            <div class="panel panel-white">
+                                                <div class="panel-body">
+
+                                                    <div class="box box-danger direct-chat direct-chat-danger">
+                                                        <div class="panel-heading">
+                                                            <h5 class="panel-title"> Country State And City</h5>
+                                                        </div>
+                                                        <div class="panel-body" id="divCountry" style="overflow-y: scroll;height: 400px;">
+                                                            <div class="clt">
+                                                                <ul id="divCitystateCountry1"></ul>
+                                                            </div>
+                                                        </div>
+                                                     
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-sm-3">
+                                            <div class="panel panel-white">
+                                                <div class="panel-body">
+
+                                                    <div class="box box-danger direct-chat direct-chat-danger">
+                                                        <div class="panel-heading">
+                                                            <h5 class="panel-title"> Status</h5>
+                                                        </div>
+                                                        <div class="panel-body" id="divStatusMaster">
+
+                                                        </div>
+                                                        <script type="text/html" id="divStatusMasterJTemplte">
+                                                            {#foreach $T as Datashort}
+                                                            <div class="form-group">{ $T.Datashort.Status}</div>
+                                                            {#/for}
+                                                        </script>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        @*    <div class="col-sm-3">
+            <div class="panel panel-white">
+                <div class="panel-body">
+
+                    <div class="box box-danger direct-chat direct-chat-danger">
+                        <div class="panel-heading">
+                            <h5 class="panel-title"> Religon</h5>
+                        </div>
+                        <div class="panel-body" id="f">
+
+                        </div>
+                        <script type="text/html" id="r">
+                            {#foreach $T as Datashort}
+                            <div class="form-group">{ $T.Datashort.Name}</div>
+                            {#/for}
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>*@
+
+
+
+
+
+
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+
+                    </div>
+                }
+            </div>
+
+        </div><!-- content -->
+    </div>
+</section>
+<div class="alert alert-success centerSuccess" id="divSuccessMsg" style="display:none">
+
+</div>
+<div class="alert alert-danger centerSuccess" id="divErrorMsg" style="display:none">
+
+</div>
+<!-- DataTables -->
+<link href="~/js/PDFExcelDatatable/buttons.dataTables.min.css" rel="stylesheet" />
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+
+<script src="~/js/jsExcel/tableExport.js"></script>
+<script src="~/js/jsExcel/jquery.base64.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script>
+<script src="~/js/jsExcel/html2canvas.js"></script>
+
+
+<script src="~/js/jsExcel/base64.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var mes = getQuerystring("m");
+        if (typeof (mes) != "undefined") {
+            if (mes == "1") {
+                $("#divSuccessMsg").fadeIn();
+                $("#divSuccessMsg").html("<strong>Success!</strong>  Data Imported Successfully!");
+                setTimeout(function () {
+                    $("#divSuccessMsg").fadeOut();
+                }, 4000)
+            }
+            if (mes == "p") {
+                $("#divErrorMsg").fadeIn();
+                $("#divErrorMsg").html("<strong>Error!</strong>  Mobile No is Wrong No should be 10 number !");
+                setTimeout(function () {
+                    $("#divErrorMsg").fadeOut();
+                }, 4000)
+            }
+
+            if (mes == "f") {
+                $("#divErrorMsg").fadeIn();
+                $("#divErrorMsg").html("<strong>Error!</strong> Father Mobile No is Wrong No should be 10 number !");
+                setTimeout(function () {
+                    $("#divErrorMsg").fadeOut();
+                }, 4000)
+            }
+            if (mes == "m") {
+                $("#divErrorMsg").fadeIn();
+                $("#divErrorMsg").html("<strong>Error!</strong>  Mother Mobile No is Wrong No should be 10 number !");
+                setTimeout(function () {
+                    $("#divErrorMsg").fadeOut();
+                }, 4000)
+            }
+            if (mes == "e") {
+                $("#divErrorMsg").fadeIn();
+                $("#divErrorMsg").html("<strong>Error!</strong>  Emergency No is Wrong No should be 10 number !");
+                setTimeout(function () {
+                    $("#divErrorMsg").fadeOut();
+                }, 4000)
+            }
+
+            if (mes == "cl") {
+                $("#divErrorMsg").fadeIn();
+                $("#divErrorMsg").html("<strong>Error!</strong>  Please Check your Class");
+                setTimeout(function () {
+                    $("#divErrorMsg").fadeOut();
+                }, 4000)
+            }
+
+            if (mes == "sec") {
+                $("#divErrorMsg").fadeIn();
+                $("#divErrorMsg").html("<strong>Error!</strong>  Please Check your Class Section");
+                setTimeout(function () {
+                    $("#divErrorMsg").fadeOut();
+                }, 4000)
+            }
+
+            //if (mes == "steam") {
+            //    $("#divErrorMsg").fadeIn();
+            //    $("#divErrorMsg").html("<strong>Error!</strong>  Please Check your Class Steam");
+            //    setTimeout(function () {
+            //        $("#divErrorMsg").fadeOut();
+            //    }, 4000)
+            //}
+
+            if (mes == "gen") {
+                $("#divErrorMsg").fadeIn();
+                $("#divErrorMsg").html("<strong>Error!</strong>  Please Check Gender");
+                setTimeout(function () {
+                    $("#divErrorMsg").fadeOut();
+                }, 4000)
+            }
+
+
+            if (mes == "cast") {
+                $("#divErrorMsg").fadeIn();
+                $("#divErrorMsg").html("<strong>Error!</strong>  Please Check Cast Category");
+                setTimeout(function () {
+                    $("#divErrorMsg").fadeOut();
+                }, 4000)
+            }
+
+            if (mes == "stat") {
+                $("#divErrorMsg").fadeIn();
+                $("#divErrorMsg").html("<strong>Error!</strong>  Please Check State");
+                setTimeout(function () {
+                    $("#divErrorMsg").fadeOut();
+                }, 4000)
+            }
+            if (mes == "staa") {
+                $("#divErrorMsg").fadeIn();
+                $("#divErrorMsg").html("<strong>Error!</strong>  Please Check Status");
+                setTimeout(function () {
+                    $("#divErrorMsg").fadeOut();
+                }, 4000)
+            }
+
+
+        }
+    })
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callJTemplateServiceMethod(JSON.stringify([SchoolID]), "/api/TimeTableApi", "GetAcademicYearBySchool",
+            "divAcademicYearMaster", "divAcademicYearMasterJTemplte", false, "", "", "", "");
+
+
+        callJTemplateServiceMethod("", "/api/StudentApi", "GetGenders",
+            "divGenderMaster", "divGenderMasterJTemplte", false, "", "", "", "");
+
+        callJTemplateServiceMethod("", "/api/StudentApi", "GetCategories",
+            "divCastCaegoryMaster", "divCastCaegoryMasterJTemplte", false, "", "", "", "");
+
+        callJTemplateServiceMethod("", "/api/StudentApi", "GetReligions",
+            "divReligonMaster", "divReligonMasterJTemplte", false, "", "", "", "");
+
+
+        callJTemplateServiceMethod("", "/api/StudentApi", "GetStates",
+            "divStateMaster", "divStateMasterJTemplte", false, "", "", "", "");
+        callJTemplateServiceMethod("", "/api/StudentApi", "GetStatus",
+            "divStatusMaster", "divStatusMasterJTemplte", false, "", "", "", "");
+        //callJTemplateServiceMethod("", "/api/EmployeeAPI", "getAllReligon",
+        //    "divReligonMaster", "divReligonMasterJTemplte", false, "", "", "", "");
+
+         //callJTemplateServiceMethod("", "/api/TimeTableApi", "GetAcademicYear",
+        //    "divAcademicYearMaster", "divAcademicYearMasterJTemplte", false, "", "", "", "");
+
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            url: "/api/StudentApi/getAllClassWithSection",
+            data: "",
+            success: function (Record) {
+                var treestruc = '';
+                for (var i = 0; i < Record.length; i++) {
+                    treestruc += "<li><b><a href='#' style='color:black;' data-toggle='tooltip' data-placement='right' title='Country'>" + Record[i].Name + "</a></b><ul>";
+
+                    for (var j = 0; j < Record[i].MasterSection.length; j++) {
+
+                        treestruc += "<li><a href='#' style='color:#C70039;' data-toggle='tooltip' data-placement='right' title='State'>" + Record[i].MasterSection[j].Name + "</a><ul>";
+                        //for (var k = 0; k<Record[i].MasteState[j].cities.length; k++) {
+                        //    treestruc += "<li><a href='#' data-toggle='tooltip' data-placement='right' title='City'>" + Record[i].MasteState[j].cities[k].Name +"</a></li>";
+                        //}
+                        treestruc += "</ul></li>";
+
+                    }
+                    treestruc += "</ul></li>";
+
+
+
+
+                }
+                $("#divCitystateCountry").html(treestruc);
+
+            }
+        });
+
+        //<div class="clt">
+        //    <ul>
+        //        <li>
+        //            Fruit
+        //                 <ul>
+        //                <li>
+        //                    Red
+        //                                                                        <ul>
+        //                        <li>Cherry</li>
+        //                        <li>Strawberry</li>
+        //                    </ul>
+        //                </li>
+        //                <li>
+        //                    Yellow
+        //                                                                        <ul>
+        //                        <li>Banana</li>
+        //                    </ul>
+        //                </li>
+        //            </ul>
+        //        </li>
+        //        <li>
+        //            Meat
+        //                                                                <ul>
+        //                <li>Beef</li>
+        //                <li>Pork</li>
+        //            </ul>
+        //        </li>
+        //    </ul>
+        //</div>
+
+
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            url: "/api/StudentApi/getAllClassAndStream",
+            data: "",
+            success: function (Record) {
+                var treestruc = '';
+                for (var i = 0; i < Record.length; i++) {
+                    treestruc += "<li><b><a href='#' style='color:black;' data-toggle='tooltip' data-placement='right' title='Country'>" + Record[i].Name + "</a></b><ul>";
+
+                    for (var j = 0; j < Record[i].MasterStream.length; j++) {
+
+                        treestruc += "<li><a href='#' style='color:#C70039;' data-toggle='tooltip' data-placement='right' title='State'>" + Record[i].MasterStream[j].Name + "</a><ul>";
+                        //for (var k = 0; k<Record[i].MasteState[j].cities.length; k++) {
+                        //    treestruc += "<li><a href='#' data-toggle='tooltip' data-placement='right' title='City'>" + Record[i].MasteState[j].cities[k].Name +"</a></li>";
+                        //}
+                        treestruc += "</ul></li>";
+
+                    }
+                    treestruc += "</ul></li>";
+
+
+
+
+                }
+                $("#divdivClassStreamFor").html(treestruc);
+
+            }
+        });
+
+
+    });
+
+
+
+    $.ajax({
+        type: "POST",
+        dataType: "json",
+        contentType: "application/json; charset=utf-8",
+        url: "/api/EmployeeAPI/getAllCountrySateCity",
+        data: "",
+        success: function (Record) {
+            var treestruc = '';
+            for (var i = 0; i < Record.length; i++) {
+                treestruc += "<li><b><a href='#' style='color:black;' data-toggle='tooltip' data-placement='right' title='Country'>" + Record[i].Name + "</a></b><ul>";
+
+                for (var j = 0; j < Record[i].MasteState.length; j++) {
+
+                    treestruc += "<li><a href='#' style='color:#C70039;' data-toggle='tooltip' data-placement='right' title='State'>" + Record[i].MasteState[j].Name + "</a><ul>";
+                    for (var k = 0; k < Record[i].MasteState[j].cities.length; k++) {
+                        treestruc += "<li><a href='#' data-toggle='tooltip' data-placement='right' title='City'>" + Record[i].MasteState[j].cities[k].Name + "</a></li>";
+                    }
+                    treestruc += "</ul></li>";
+
+                }
+                treestruc += "</ul></li>";
+
+
+
+
+            }
+            $("#divCitystateCountry1").html(treestruc);
+
+        }
+    });
+
+
+
+</script>
+<style type="text/css">
+    .clt, .clt ul, .clt li {
+        position: relative;
+    }
+
+        .clt ul {
+            list-style: none;
+            padding-left: 32px;
+        }
+
+        .clt li::before, .clt li::after {
+            content: "";
+            position: absolute;
+            left: -12px;
+        }
+
+        .clt li::before {
+            border-top: 1px solid #000;
+            top: 9px;
+            width: 8px;
+            height: 0;
+        }
+
+        .clt li::after {
+            border-left: 1px solid #000;
+            height: 100%;
+            width: 0px;
+            top: 2px;
+        }
+
+        .clt ul > li:last-child::after {
+            height: 8px;
+        }
+</style>
+

@@ -1,0 +1,290 @@
+﻿
+@{
+    ViewBag.Title = "SuperAdminLogin";
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+ <div class="login-box">
+   
+    <!-- /.login-logo -->
+    <div class="login-box-body">
+        <div class="login-logo">
+            <a href="smartvidhya.com"><img src="~/css/dist/img/zeusadsolutions-logo.jpg"></a>
+        </div>
+        <form role="form" id="form1" name="form1">
+
+            <div class="form-group">
+                <label id="lblMsg" style="color:red;"></label>
+                <select class="form-control" name="ddlRoleType" valuefield="Id" textfield="Name" id="ddlRoleType" disabled>
+                    <option value="2">Owner</option>
+                </select>
+            </div>
+
+            <div class="form-group has-feedback">
+                <input type="text" id="txtUserId" name="txtUserId" class="form-control" placeholder="User Id">
+                <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+            </div>
+            <div class="form-group has-feedback">
+                <input type="password" id="txtPassword" name="txtPassword" class="form-control" placeholder="Password">
+                <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+            </div>
+            <div class="row">
+                <div class="col-xs-8">
+                    @*<div class="checkbox icheck">
+                        <label>
+                            <input type="checkbox"> Remember Me
+                        </label>
+                    </div>*@
+                </div>
+                <!-- /.col -->
+                <div class="col-xs-4">
+                     <input type="button" id="btnlogin" onclick="LoginClick()" class="btn btn-primary btn-block btn-flat" value="Sign In" />
+                </div>
+                <!-- /.col -->
+            </div>
+        </form>
+  </div>
+    <!-- /.login-box-body -->
+</div>
+<!-- Trigger the modal with a button -->
+<button type="button" class="btn btn-info btn-lg" id="btnEmployeeShowTasks" style="display:none" data-toggle="modal" data-target="#myModal2">Open Modal</button>
+
+<!-- Modal -->
+<div id="myModal2" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog"  >
+        <div class="modal-content" >
+             
+            <div class="modal-body">
+                <button type="button" id="AdvertisingMdlClose" style="display:none" class="close" data-dismiss="modal">&times;</button>
+                <div class="content">
+                    <div class="panel panel-white">
+                        <div class="panel-body">
+                            <div class="row">
+                                @*<div id="player"></div>*@
+                               
+                                <video preload="auto" class="VedioWidth" id="click">
+                                    
+                                    <source src="~/Images/smartVidhya.mp4" type='video/mp4;codecs="avc1.42E01E, mp4a.40.2"' />
+                                </video>
+                               
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+    </div>
+</div>
+
+
+
+<script src="http://www.youtube.com/player_api"></script>
+
+    <script>
+        var input = document.getElementById("txtPassword");
+input.addEventListener("keyup", function(event) {
+            event.preventDefault();
+        if (event.keyCode === 13) {
+            document.getElementById("btnlogin").click();
+        }
+});
+        $(document).keypress(function (event) {
+
+            var keycode = (event.keyCode ? event.keyCode : event.which);
+            if (keycode == '13') {
+                //alert('You pressed a "enter" key in somewhere');
+                document.getElementById("btnlogin").click();
+            }
+
+        });
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var Id = getQuerystring("m");
+        if (typeof (Id) != "undefined") {
+        }
+        else {
+            //callServiceMethod("", "/api/Default", "getAdvertisingVedio", false, "", "", false, "", true, getAdvertisingVedio_scs, "", "", "");
+           
+        }
+    })
+
+    //function getAdvertisingVedio_scs(p1, p2, p3, datas)
+    //{
+        
+    //    if ($(window).width() > 500) {
+    //        document.getElementById("btnEmployeeShowTasks").click();
+    //        document.getElementById("ancPlayVedio").click();
+    //    }
+    // }
+
+    
+</script>
+<script type="text/javascript">
+   
+    $(document).ready(function () {
+        $("#click").get(0).play();
+        //$("video#click").click(function () {
+        //    this.paused ? this.play() : this.pause();
+        //    return false;
+        //});
+    })
+    $("#click").bind("ended", function () {
+        document.getElementById("AdvertisingMdlClose").click();
+    });
+</script>
+@*<script type="text/javascript">
+  
+    var player;
+    function onYouTubePlayerAPIReady() {
+        player = new YT.Player('player', {
+            height: '450',
+            width: '950',
+            videoId: 'KBVIvGrlyMg',
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
+            }
+        });
+    }
+
+    // autoplay video
+    function onPlayerReady(event) {
+        event.target.playVideo();
+    }
+
+    // when video ends
+    function onPlayerStateChange(event) {
+        if (event.data === 0) {
+            document.getElementById("AdvertisingMdlClose").click();
+        }
+    }
+</script>*@
+<script type="text/javascript">
+    $(document).ready(function () {
+        //callServiceMethodForDDl("", "/api/Default", "getDDlTypeSuperAdmin", "ddlRoleType", false, "", "", "", "");
+    });
+    function LoginClick()
+    {
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+            var person = '{userId: "' + getControlValue("txtUserId") + '",password:"' + getControlValue("txtPassword") + '",type:"' + getControlValue("ddlRoleType") + '" }';
+
+            //var obj = new Object();
+            //obj.userId = getControlValue("txtUserId");
+            //obj.password = getControlValue("txtPassword");
+            callServiceMethod(person, "/api/Default", "login", false, "", "", false, "", true, loginclick_scs, "", "", "");
+        }
+
+    }
+    function loginclick_scs(p1, p2, p3, datas)
+    {
+        $("#loader").fadeOut();
+    //var val=datas.split('***')
+
+        if (datas.msg == "" || datas.msg == null) {
+            if (datas.type == "2") {
+                sessionStorage.setItem("fname", datas.user.FirstName);
+                sessionStorage.setItem("mname", datas.user.MiddleName);
+                sessionStorage.setItem("lname", datas.user.LastName);
+                sessionStorage.setItem("type", datas.type);
+                sessionStorage.setItem("userId", datas.userId);
+                sessionStorage.setItem("image", datas.user.PicPath);
+             
+                location.href = "/AdminPanel/SuperAdminDashboard";
+               
+            }
+           
+        }
+    else {
+        setControlValue("lblMsg", datas.msg);
+        }
+    }
+
+</script>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                ddlRoleType: {
+                    selectcheck: true
+                },
+
+                txtUserId: "required",
+                txtPassword: "required",
+
+
+
+            },
+            messages: {
+
+                txtUserId: "Please Enter User Id",
+                ddlRoleType: "Please Select User Type",
+                txtPassword: "Please Enter Password"
+
+
+            }
+        })
+        jQuery.validator.addMethod('selectcheck', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+
+
+    });
+</script>
+<style type="text/css">
+
+    .VedioWidth{width: 1069px;
+    height: 516px;
+    margin-left: -277px;}
+    .modal-content{
+background-color: #0000!important;
+}
+ .panel{
+background-color: #0000!important;
+}
+</style>

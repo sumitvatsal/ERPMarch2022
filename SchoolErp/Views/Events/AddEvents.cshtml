@@ -1,0 +1,713 @@
+﻿
+@{
+    ViewBag.Title = "AddEvents";
+  //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+ 
+
+<section class="content" ng-app="eventApp" ng-controller="AddeventCtrl">
+    <div class="row" id="divAddCourses">
+        <!-- left column -->
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Add Events</h4>
+                </div>
+                <form role="form" id="form1" name="form1">
+                    <div class="panel-body">
+                        <div class="col-md-6">
+
+                            <div class="form-group">
+                                <label for="Country" class="req">School<span class="requird">*</span></label>
+                                <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name" ></select>
+
+                            </div>
+
+                            <div class="form-group">
+                                <input class="form-control" style="display:none" id="txtEventId" type="text">
+                                <label class="req" for="Event_event_name">Event Name <span class="requird">*</span></label>
+                                <input class="form-control" name="txtEventName" id="txtEventName" type="text">
+                            </div>
+                            <div class="form-group" id="eventtype">
+                                <label for="Event_eventtypeid">Event Type <span class="requird">*</span></label>
+                                <select class="form-control" style="color:black;" name="ddlEventType" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" id="ddlEventType"></select>
+
+                            </div>
+                            <div class="form-group">
+                                <label class="req" for="Event_event_description">Description</label>
+                                <textarea class="form-control" name="Event[event_description]" id="txtEventDescription"></textarea>
+                            </div>
+                            <div class="form-group" id="employeeautocomplete">
+                                <label for="Event_employeemasterid">Organizer/Incharge Name</label>
+                                <input class="form-control ui-autocomplete-input" id="txtInchargeName" type="text" value="" name="employee" />
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-5">
+                                    <div class="form_sep">
+                                        <input class="btn btn-info" name="std_reg_submit" id="std_reg_submit" ng-click="saveEventDetails()" type="button" value="Save">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="req" for="Event_event_start">Start Date <span class="requird">*</span></label>
+                                @*<div class='input-group date' id='txtStartDate'>
+                <input type='text' class="form-control" />
+                <span class="input-group-addon">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                </span>
+            </div>*@
+
+
+                                <input name="txtStartDate" id="txtStartDate" type="text" class="form-control datepicker">
+                            </div>
+                            <div class="form-group">
+                                <label class="req" for="Event_event_start">Start Time <span class="requird">*</span></label>
+                                <div class="input-group bootstrap-timepicker timepicker " style="width:98%;">
+                                    <input id="sTime" type="text" class="form-control input-small timer">
+                                    <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
+                                </div>
+                            </div>
+
+
+                            <div class="form-group">
+
+                                <label class="req" for="Event_event_end">End Date <span class="requird">*</span></label>
+                                <input name="txtEndDate" placeholder="end date" class="form-control datepicker" placeholder="mm/dd/yyyy" id="txtEndDate" type="text">
+                            </div>
+                            <div class="form-group">
+                                <label class="req" for="Event_event_start">End Time <span class="requird">*</span></label>
+                                <div class="input-group bootstrap-timepicker timepicker " style="width:98%;">
+                                    <input id="eTime" type="text" class="form-control input-small timer">
+                                    <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="Event_event_for">Event For <span class="required">*</span></label>
+                                <select class="form-control" style="color:black;" data-required="true" name="txtEventFor" id="txtEventFor">
+                                    <option value="0">Please Select</option>
+                                    <option value="1">Common to All</option>
+                                    <option value="2">Selected Batch</option>
+                                    <option value="3">Selected Department</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="course" style="display:none">
+                                <label for="mail_to">Batch</label>
+                                <select class="form-control select2" id="ddlClassSection" name="ddlClassSection" valuefield="Id" textfield="Name" multiple="multiple" blankRowValue="-1" blankRowText="--Select--"></select>
+
+                            </div>
+                            <div class="form-group" id="department" style="display:none">
+                                <label for="reg_input">Department</label>
+                                <select class="form-control select2" valuefield="Id" textfield="Name" multiple="multiple" blankRowValue="0" blankRowText="--Select--" id="ddlDepartment"></select>
+                            </div>
+                            <div class="col-sm-6" style="border:double;font-size:large;">
+                                <div class="form-group field-notice-is_status" >
+
+                                    <label> <input type="checkbox" id="chkSms" name="chkSms" checked="checked"> Send Sms</label>
+
+                                    <div class="help-block"></div>
+                                </div>
+                            </div>
+
+                        </div>
+                        </div>
+                         
+                        
+             
+                </form>
+
+</div>
+        </div>
+
+
+    </div>
+    <!--/.col (left) -->
+
+
+
+
+
+
+
+
+
+    <div class="content">
+             <div class="col-sm-12">
+                <ul class="nav nav-tabs nav-tabs-highlight">
+                    <li class="active"><a href="#tbb_a" data-toggle="tab" aria-expanded="true">Events For Class</a></li>
+                    <li class=""><a href="#tbb_b" data-toggle="tab" aria-expanded="false">Events For Department</a></li>
+                </ul><br>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="tbb_a">
+
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">Events For Classes </h4>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="form-group">
+
+                                            <table id="example1" class="table table-bordered table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>School</th>
+                                                        <th>Event Name</th>
+                                                        <th>Event For</th>
+                                                        <th>Event Type</th>
+                                                        <th>Class</th>
+                                                        <th>Section</th>
+                                                      @*<th>Department</th>*@
+                                                        <th>Start Date</th>
+                                                        <th>End Date</th>
+                                                        <th>Action</th>
+
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="employee in employees" ng-class-odd="'oddTr'">
+
+                                                        <td>
+                                                            {{employee.School}}
+
+                                                        </td>
+                                                        <td>
+                                                            {{employee.EventName}}
+
+                                                        </td>
+
+                                                        <td>
+                                                            {{employee.EventFor}}
+
+
+                                                        </td>
+
+
+                                                        <td>
+                                                            {{employee.EventType}}
+
+                                                        </td>
+                                                        <td>
+                                                            {{employee.ClassId}}
+
+                                                        </td>
+                                                        <td>
+                                                            {{employee.Section}}
+
+                                                        </td>
+                                                        @*<td>
+            {{employee.Department}}
+
+        </td>*@
+                                                        <td>
+                                                            {{employee.StartDate}}
+
+                                                        </td>
+                                                        <td>
+                                                            {{employee.EndDate}}
+
+                                                        </td>
+
+                                                        <td>
+                                                            <i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" ng-click="editEventsClassDetailsById(employee)"></i>
+                                                            &nbsp;
+                                                            <i class="fa fa-fw fa-trash" style="cursor:pointer" ng-click="deleteEventsDetailsById(employee)"></i>
+                                                        </td>
+
+
+
+                                                    </tr>
+
+
+                                                </tbody>
+
+                                            </table>
+
+
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+  
+                    </div>
+                    <div class="tab-pane " id="tbb_b">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">Events For Departments</h4>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="form-group">
+
+                                            <table id="example2" class="table table-bordered table-striped">
+                                                <thead style="background-color:steelblue;color:white;width:100%;">
+                                                    <tr>
+                                                        <th>School</th>
+                                                        <th>Event Name</th>
+                                                        <th>Event For</th>
+                                                        <th>Event Type</th>
+                                                       
+                                                        <th>Department</th>
+                                                        <th>Start Date</th>
+                                                        <th>End Date</th>
+                                                        <th>Action</th>
+
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="employee in eventss" ng-class-odd="'oddTr'">
+                                                        <td>
+                                                            {{employee.School}}
+
+                                                        </td>
+                                                        <td>
+                                                            {{employee.EventName}}
+
+                                                        </td>
+
+                                                        <td>
+                                                            {{employee.EventFor}}
+
+
+                                                        </td>
+
+
+                                                        <td>
+                                                            {{employee.EventType}}
+
+                                                        </td>
+
+                                                        <td>
+                                                            {{employee.Department}}
+
+                                                        </td>
+                                                        <td>
+                                                            {{employee.StartDate}}
+
+                                                        </td>
+                                                        <td>
+                                                            {{employee.EndDate}}
+
+                                                        </td>
+
+                                                        <td>
+                                                            <i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" ng-click="editEventsDepartmentDetailsById(employee)"></i>
+                                                            &nbsp;
+                                                            <i class="fa fa-fw fa-trash" style="cursor:pointer" ng-click="deleteEventsDetailsById(employee)"></i>
+                                                        </td>
+
+
+
+                                                    </tr>
+
+
+                                                </tbody>
+
+                                            </table>
+
+
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                         
+                    </div>
+                </div>
+            </div>
+      
+
+    </div>
+
+
+
+     
+    <!-- /.row -->
+    <div class="alert alert-success centerSuccess" id="divSucesEmail" style="display:none">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h4>
+            <i class="icon fa fa-check"></i>
+            <span Id="sentEmailMsg"></span>
+        </h4>
+
+    </div>
+</section>
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+<link href="~/css/bower_components/select2/dist/css/select2.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>
+
+<script src="~/js/Events/model.js"></script>
+<script src="~/js/Events/controller.js"></script>
+<script src="~/js/Events/service.js"></script>
+
+ 
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+ <link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<link href="~/css/bootstrap-timepicker.css" rel="stylesheet" />
+ <script src="~/js/bootstrap-timepicker.js"></script>
+ 
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+      
+        var SchoolID = getControlValue("ddlSchoolName");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EventsAPI", "getAllActiveEventsBySchool", "ddlEventType", false, "", "", "", "");
+        var SchoolID = getControlValue("ddlSchoolName");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EventsAPI", "getAllClassAndSectionBySchool", "ddlClassSection", false, "", "", "", "");
+        var SchoolID = getControlValue("ddlSchoolName");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EventsAPI", "getAllDepartmentBySchool", "ddlDepartment", false, "", "", "", "");
+
+        $("#ddlSchoolName").change(function () {
+            var SchoolID = getControlValue("ddlSchoolName");
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EventsAPI", "getAllActiveEventsBySchool", "ddlEventType", false, "", "", "", "");
+        });
+        $("#ddlSchoolName").change(function () {
+            var SchoolID = getControlValue("ddlSchoolName");
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EventsAPI", "getAllClassAndSectionBySchool", "ddlClassSection", false, "", "", "", "");
+        });
+        $("#ddlSchoolName").change(function () {
+            var SchoolID = getControlValue("ddlSchoolName");
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EventsAPI", "getAllDepartmentBySchool", "ddlDepartment", false, "", "", "", "");
+        });
+        //callServiceMethodForDDl("", "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        //$("#txtStartDate").datepicker({
+
+        //    changeMonth: true,
+        //    changeYear: true,
+
+
+
+        //    dateFormat: 'mm-dd-yy',
+        //    onSelect: function (datetext) {
+
+        //        var d = new Date(); // for now
+
+        //        var h = d.getHours();
+        //        h = (h < 10) ? ("0" + h) : h;
+
+        //        var m = d.getMinutes();
+        //        m = (m < 10) ? ("0" + m) : m;
+
+        //        var s = d.getSeconds();
+        //        s = (s < 10) ? ("0" + s) : s;
+
+        //        datetext = datetext + " " + h + ":" + m + ":" + s;
+
+        //        $('#txtStartDate').val(datetext);
+        //    }
+
+
+
+        //});
+
+        //$('#ddlClassSection').on("change", function () {
+        //    var a = $('#ddlClassSection').val();
+        //    if (a != 0)
+        //    {
+        //        $("#ddlClassSection option[value=0]").remove();
+        //        //var a = document.getElementById('ddlClassSection');
+        //        //a.selectedIndex = removeItem()
+
+
+        //        //$("#ddlClassSection").val(-1).prop("selected", false);
+        //    }
+
+        //});
+
+
+        $('#txtStartDate').datepicker(
+            {
+                autoclose: true
+            }
+            );
+        $('#txtEndDate').datepicker(
+            {
+                autoclose: true
+            }        
+        );
+        
+        $('.timer').timepicker({ timeFormat: 'h:mm:ss p', startTime: new Date(0, 0, 0, 05, 0, 0), interval: 05 });
+        $('#eTime').timepicker({ timeFormat: 'h:mm:ss p'});
+        
+        
+    })
+    $('#ddlClassSection').on("change", function () {
+
+        var a = $('#ddlClassSection').val();
+        if (a != 0)
+        {
+            $("#ddlClassSection option[value=0]").remove();
+        }
+
+    });
+
+
+
+    // 
+    $('#txtStartDate').on("change", function () {
+        var startdate = $('#txtStartDate').datepicker('getDate');
+        var EndDate = $('#txtEndDate').datepicker('getDate');
+
+        var a = getControlValue("txtStartDate");
+        var b = getControlValue("txtEndDate");
+        if (a != "" && b != "") {
+            if (startdate > EndDate) {
+                alert("Start Date should be less than End Date");
+                setControlValue("txtStartDate","")
+            }
+            else {
+
+            }
+        }
+        else {
+
+        }
+
+    });
+
+    $('#txtEndDate').on("change", function () {
+        var startdate = $('#txtStartDate').datepicker('getDate');
+        var EndDate = $('#txtEndDate').datepicker('getDate');
+        var a = getControlValue("txtStartDate");
+        var b = getControlValue("txtEndDate");
+        if (a != "" && b != "") {
+            if (startdate > EndDate) {
+                alert("End Date should be greater than  Start Date ");
+                setControlValue("txtEndDate", "")
+            }
+            else {
+
+            }
+        }
+        else {
+
+        }
+       
+
+    });
+
+
+    $("#txtEventFor").on("change", function () {
+
+        var val = $("#txtEventFor").val();
+        if (val == 0 || val == 1) {
+            $("#course").hide("hide");
+            $("#department").hide("hide");
+            //$("#ddlClassSection option[value]").remove();
+            //$("#ddlDepartment option[value]").remove();
+            //$("#ddlClassSection option[value]").remove();  it is to remove value from multiselect 
+            $("#ddlDepartment option:selected").prop("selected", false); //done for select 
+            $("#ddlClassSection option:selected").prop("selected", false);
+          
+
+        }
+        else 
+        {
+
+        }
+
+    });
+</script>
+
+
+
+
+ 
+
+
+<style type="text/css">
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                ddlEventType: {
+                    selectcheck: true
+                },
+                txtEventFor: {
+                    selectcheck1: true
+                },
+
+                txtEventName: "required",
+                txtStartDate: "required",
+                txtEndDate: "required",
+                ddlClassSection: {
+
+                    selectcheck3: true
+                },
+                ddlDepartment:
+                {
+
+                    selectcheck4 :true
+                },
+                
+
+
+
+            },
+            messages: {
+
+                txtEventName: "Please Enter Event Name",
+                ddlEventType: "Please Select Event Type",
+                txtStartDate: "Please Enter Start Date ",
+                txtEndDate: "Please Enter End Date ",
+                txtEventFor: "Please select Events For",
+                ddlClassSection: "please Select Batch",
+                ddlDepartment: "Please Select Department"
+
+
+            }
+        })
+        jQuery.validator.addMethod('selectcheck', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+
+        jQuery.validator.addMethod('selectcheck1', function (value) {
+            if (value == "prompt") {
+                return (value != 'prompt');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+        jQuery.validator.addMethod('selectcheck3', function (value) {
+            if (value == "-1") {
+                return (value != '-1');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "please Select Batch");
+        jQuery.validator.addMethod('selectcheck4', function (value) {
+            if (value == "-1") {
+                return (value != '-1');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "please Select Department");
+        
+
+
+    });
+</script>

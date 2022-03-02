@@ -1,0 +1,268 @@
+﻿
+@{
+    ViewBag.Title = "ViewTaskDetails";
+    Layout = "~/Views/Shared/_LayoutStudent.cshtml";
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section class="content" style="overflow-x: scroll;width:100%">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Task Details</h3>
+                </div>
+                <div class="box-body">
+                    <div class="form-group">
+                        <div>
+
+                            <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                <thead>
+                                    <tr>
+                                        <th>Task Name</th>
+                                        <th>Task Description</th>
+                                        <th>Priority</th>
+                                        <th>Task Date</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyEmployeeLeaves"></tbody>
+
+                            </table>
+                            <script type="text/html" id="tbodyEmployeeLeavesJTemplte">
+                                {#foreach $T as Datashort}
+                                <tr>
+                                    <td>
+                                        { $T.Datashort.TaskName}
+                                    </td>
+                                    <td>
+                                        <a href="javascript:void(0)" onclick="viewTaskDetasil({ $T.Datashort.Id})">{ $T.Datashort.Description}</a>
+                                    </td>
+                                    <td>
+                                        <a href="#" style="color:white;padding: 4px;border-radius: 8px;background-color:{ $T.Datashort.priorityColor}"> { $T.Datashort.Priority}   </a>
+                                    </td>
+                                    <td>
+                                        { $T.Datashort.TaskDate}
+                                    </td>
+                                    <td>
+                                        <a href="#" style="color:white;padding: 4px;border-radius: 8px;background-color:{ $T.Datashort.color}">   { $T.Datashort.Status}</a>
+                                    </td>
+                                    <td id="taskActions_{ $T.Datashort.Id}">
+                                        <input class="btn btn-info" name="std_reg_submit" onclick="confirmVMR('Are you sure? You want to Complete This Task',changeTaskStatus,{ $T.Datashort.Id},'')" id="btncomtask_{ $T.Datashort.Id}" type="button" value="Completed Task">
+                                       &nbsp;&nbsp;&nbsp;&nbsp; <a href="javascript:void(0)" onclick="viewTaskDetasil({ $T.Datashort.Id})"> <i class="glyphicon glyphicon-eye-open" style="cursor:pointer"></i></a>
+</td>
+
+                                </tr>
+                                {#/for}
+                            </script>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Trigger the modal with a button -->
+    <button type="button" class="btn btn-info btn-lg" id="btnStudentShowTasks" style="display:none" data-toggle="modal" data-target="#myModal">Open Modal</button>
+
+    <!-- Modal -->
+    <div id="myModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Task Details</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="content">
+                        <div class="panel panel-white">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <form class="form-horizontal">
+                                            <div class="col-md-12">
+                                                <div class="form-group col-md-6">
+                                                    <label class="col-sm-5 control-label">Task</label>
+                                                    <div class="col-sm-7">
+                                                        <p class="form-control-static" id="spStudentTaskName"></p>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="col-sm-5 control-label">Description</label>
+                                                    <div class="col-sm-7">
+                                                        <p class="form-control-static" id="spStudentTaskDesc"></p>
+                                                    </div>
+                                                </div>
+                                                <div id="header"></div>
+                                            </div>
+                                            <div style="clear:both"</div>
+                                            <div class="col-md-12">
+                                                <div class="form-group col-md-6">
+                                                    <label class="col-sm-5 control-label">Date</label>
+                                                    <div class="col-sm-7">
+                                                        <p class="form-control-static" id="spStudentTaskDate"></p>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="col-sm-5 control-label">Student Name</label>
+                                                    <div class="col-sm-7">
+                                                        <p class="form-control-static" id="spStudentName"> </p>
+                                                    </div>
+                                                </div>
+                                                <div id="header"></div>
+                                            </div>
+                                            <div style="clear:both"</div>
+                                            <div class="col-md-12">
+                                                <div class="form-group col-md-6">
+                                                    <label class="col-sm-5 control-label">Priority</label>
+                                                    <div class="col-sm-7">
+                                                        <p class="form-control-static" id="spStudentTaskPriority"></p>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="col-sm-5 control-label">Status</label>
+                                                    <div class="col-sm-7">
+                                                        <p class="form-control-static" id="spStudentStatus"></p>
+                                                    </div>
+                                                </div>
+                                                <div id="header"></div>
+                                            </div>
+                                            <div style="clear:both"</div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        if (sessionStorage.getItem("stdID") != "") {
+            getAllTaasks(sessionStorage.getItem("stdID"));
+        }
+    })
+
+    function getAllTaasks(val) {
+        $("#loader").fadeIn();
+
+        var task = {
+            val: val,
+            val1: sessionStorage.getItem("SchoolID")
+        }
+        callJTemplateServiceMethod(JSON.stringify(task), "/api/StudentApi", "getStudentTaskByStdId",
+                     "tbodyEmployeeLeaves", "tbodyEmployeeLeavesJTemplte", true, sussess_msg, "", "", "");
+        $("#loader").fadeOut();
+    }
+    function sussess_msg(p1,p2,p3,datas)
+    {
+        for(var i=0;i<datas.length;i++)
+        {
+            if(datas[i].Status=="Resolved")
+            {
+                $("#btncomtask_"+datas[i].Id).fadeOut();
+                $("#taskActions_"+datas[i].Id).html("<a href='javascript:void(0)' style='color:white;padding: 4px;border-radius: 8px;background-color:green'>Completed</a>");
+
+            }
+            else{
+               //  $("#btncomtask_"+datas[i].Id).fadeIn();
+                /// $("#taskActions_"+datas[i].Id).html("");
+            }
+        }
+      var t = $('#example1').DataTable();
+            t.destroy();
+        setTimeout(function () {
+            $('#example1').DataTable({
+    'columnDefs': [{
+                        
+                        "orderable": false
+                    }],
+    });
+        }, 2000)
+    }
+
+    function changeTaskStatus(id)
+    {
+        var task = {
+            val: id,
+            val1: sessionStorage.getItem("SchoolID"),
+            val2: sessionStorage.getItem("stdID")
+
+        }
+        callServiceMethod(JSON.stringify(task), "/api/StudentApi", "changeStudentTaskStatus", false, "", "", false, "", true, changeTaskStatus_scs, "", "", "");
+    }
+    function changeTaskStatus_scs(p1,p2,p3,datas)
+    {
+        location.reload();
+    }
+   
+    function viewTaskDetasil(id)
+    {
+        document.getElementById("btnStudentShowTasks").click();
+        callServiceMethod(JSON.stringify([id]), "/api/StudentApi", "viewTaskDetasilForStudentId", false, "", "", false, "", true, viewTaskDetasil_scs, "", "", "");
+    }
+    function viewTaskDetasil_scs(p1,p2,p3,datas)
+    {
+     //   document.getElementById("btnStudentShowTasks").click();
+        setControlValue("spStudentTaskName", datas.TaskName);
+        setControlValue("spStudentTaskDesc", datas.Description);
+        setControlValue("spStudentTaskDate", datas.TaskDate);
+        setControlValue("spStudentName", sessionStorage.getItem("fname") + " " + sessionStorage.getItem("lname"));
+        setControlValue("spStudentTaskPriority", "<a href='#' style='background-color:" + datas.priorityColor + ";color:white;padding: 4px;border-radius: 8px;'>" + datas.Priority + "</a>");
+        setControlValue("spStudentStatus", "<a href='#' style='background-color:" + datas.color + ";color:white;padding: 4px;border-radius: 8px;'>" + datas.Status + "</a>");
+
+       
+    }
+</script>
+<style type="text/css">
+    #header {
+        border-bottom: 1px solid #DDDDDD;
+    }
+</style>
+

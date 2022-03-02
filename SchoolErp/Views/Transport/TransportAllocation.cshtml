@@ -1,0 +1,734 @@
+﻿
+@{
+    ViewBag.Title = "TransportAllocation";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section class="content">
+
+
+
+    <div class="row">
+        <form id="form1">
+            <div class="col-md-12">
+                <div class="panel">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Transport Allocation</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="box-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="col-md-6">
+                                        <div class="form-group validating">
+                                            <label for="reg_input" class="req" style="margin-bottom:33px;">Vehicle</label>
+                                            @*<label class="req" for="Transportallocation_routedetailsid"></label>*@
+
+                                            <input type="hidden" name="txtId" id="txtId" placeholder="Vehicle No" class="form-control" />
+                                            <select class="form-control" id="ddlVehicle" style="color:black;" onchange="getDestinationByRouteId(this.value)" name="ddlVehicle" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" ng-model="txtDepartment"></select>
+
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group validating">
+                                           
+                                            <label class="req" for="Transportallocation_routedetailsid">Vehicle Stop</label><img src="~/Images/Hub/HubICON.png" style="margin-bottom:20px;" />
+                                            <select class="form-control" name="ddlHub" id="ddlHub" style="color:black;" valuefield="ID" textfield="HubAddress" blankRowValue="0" blankRowText="--Select--"></select>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="col-md-6">
+                                        <div class="form-group validating">
+                                            <label class="req" for="Transportallocation_usertypeid">Type</label>
+                                            <select class="form-control" name="Transportallocation_usertypeid" style="color:black;" id="Transportallocation_usertypeid">
+                                                <option value="">Select Type</option>
+                                                <option value="Student">Student</option>
+                                                <option value="Employee">Employee</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div id="course" class="col-md-6">
+                                        <div class="form-group validating" style="">
+                                            <label for="reg_input" class="req">Course</label>
+                                            <select class="form-control" id="ddlCourse" name="ddlCourse" style="color:black;" valuefield="Id" textfield="CourseName" blankRowValue="-1" blankRowText="----Select----"></select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-12">
+
+
+                                    <div id="batch" class="col-md-6">
+                                        <div class="form-group validating" style="">
+
+                                            <label for="reg_input" class="req">Section</label>
+                                            <select class="form-control" id="ddlSection" style="color:black;" valuefield="Id" onchange="getAllStudentByClassSectionId(this.value)" textfield="SectionName" blankRowValue="-1" blankRowText="----Select----"></select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6" id="student" style="display:none">
+
+                                        <div class="form-group validating">
+                                            <label for="reg_input" class="req">Student</label>
+                                            <select class="form-control" multiple="multiple" id="ddlStudents" name="ddlStudents" style="color:black;" valuefield="ID" textfield="FirstName" blankRowValue="-1" blankRowText="----Select----">
+                                                <option value="">Please Select</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-12" id="employeeautocomplete" style="display:none">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Department</label>
+                                            <select class="form-control" id="txtDepartment" name="txtDepartment" style="color:black;" onchange="getAllEmployeeByDepId(this.value)" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--">  </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Employee</label>
+                                            <select class="form-control" id="ddlEmployee" style="color:black;" name="ddlEmployee" valuefield="Id" textfield="Route" blankRowValue="0" blankRowText="--Select--">  </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="control-label">
+
+                                            </label>
+                                            <input type="checkbox" id="chkstatus" ng-model="chkstatus"> Active
+
+
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+
+
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+
+                                            </div>
+                                        </div>
+
+                                        <input type="button" value="Reset" onclick="ClearAllFields()" id="btnsubmit" class="btn btn-info pull-right">
+                                        <input type="button" value="Submit" onclick="saveTransportAllocationDetails()" id="btnsubmit" style="margin-right:80px;" class="btn btn-info pull-right">
+                                        
+                                        <input type="hidden" id="HubLat" />
+                                        <input type="hidden" id="HubLong" />
+                                        <input type="hidden" id="HubAddress1" />
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </form>
+    </div>
+    <div class="row">
+
+
+        <div id="gmap">
+
+
+
+        </div>
+
+
+
+
+    </div>
+</section>
+<div class="alert alert-success centerSuccess" id="divSuccessMsg" style="display:none">
+
+</div>
+<style>
+    div#gmap {
+        width: 100%;
+        height: 850px;
+        border: double;
+    }
+</style>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJs9f6yPQRmMsDkg7DiFtaeMjbik3kd0E&libraries=places"></script>
+@*validationjs*@
+<script src="~/js/validation.js"></script>
+<script src="~/js/jquery.validate.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(document)[0].oncontextmenu = function () { return false; }
+
+        $(document).mousedown(function (e) {
+            if (e.button == 2) {
+                alert('Sorry, this functionality is disabled!');
+                return false;
+            } else {
+                return true;
+            }
+        });
+        document.onkeypress = function (event) {
+
+            if (event.keyCode == 123) {
+                alert('Sorry\nNo F12 is allowed. Be creative!');
+                return false;
+            }
+        }
+        document.onmousedown = function (event) {
+
+            if (event.keyCode == 123) {
+                alert('Sorry\nNo F12 is allowed. Be creative!');
+                return false;
+            }
+        }
+        document.onkeydown = function (event) {
+
+            if (event.keyCode == 123) {
+                alert('Sorry\nNo F12 is allowed. Be creative!');
+                return false;
+            }
+            else if (event.ctrlKey &&
+                (event.keyCode === 67 ||
+                    event.keyCode === 86 ||
+                    event.keyCode === 85 ||
+                    event.keyCode === 117)) {
+                alert('Sorry\nNo CTRL+U is allowed. Be creative!');
+                return false;
+            }
+
+        }  
+
+        $("#chkstatus").prop("checked", true);
+        //var id = GetParameterValues('id');
+        ////alert("Hello your ID is " + id);
+        //function GetParameterValues(param) {
+        //    var url = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+        //    for (var i = 0; i < url.length; i++) {
+        //        var urlparam = url[i].split('=');
+        //        if (urlparam[0] == param) {
+        //            return urlparam[1];
+        //        }
+        //    }
+        //}
+        //var Alloca =
+        //{
+        //    ID: id
+        //}
+        //var idd = JSON.stringify(Alloca)
+        //$.ajax({
+        //    type:"POST",
+        //    url: "/api/TransportApi/EditAllowcationDetails",
+        //    data: idd,
+        //    contentType: 'application/json; charset=utf-8',
+        //    success: function (datas) {
+              
+        //        if (datas.UserType == "Student")
+        //        {
+
+        //            $("#employeeautocomplete").hide("slow");
+        //            $("#course").show("slow");
+        //            $("#batch").show("slow");
+        //            $("#student").show("slow");
+        //            $("#ddlVehicle").val(datas.VehicleID);
+        //            $("#txtId").val(datas.Id);
+        //            var SchoolID = sessionStorage.getItem("SchoolID");
+        //            var VehicleID = datas.VehicleID;
+        //            callServiceMethodForDDl(JSON.stringify([SchoolID, VehicleID]), "/api/TransportApi", "getAllhubBySchool", "ddlHub", false, "", "", "", "");
+        //            $("#ddlHub").val(datas.HubID);
+        //            $("#Transportallocation_usertypeid").val(datas.UserType);
+        //            $("#ddlCourse").val(datas.Class);
+        //            var ddlCourse = datas.Class;
+        //            var SchoolID = sessionStorage.getItem("SchoolID");
+        //            callServiceMethodForDDl(JSON.stringify([ddlCourse, SchoolID]), "/api/StudentApi", "GetSectionsbyschool", "ddlSection", false, "", "", "", "");
+        //            $("#ddlSection").val(datas.Section);
+
+        //            var Student = {
+        //                ClassID: datas.Class,
+        //                SectionID: datas.Section,
+        //                SchoolID: sessionStorage.getItem("SchoolID")
+        //            }
+
+        //            callServiceMethodForDDl(JSON.stringify(Student), "/api/TransportApi", "getAllStudentByClassSectionIdbySchool", "ddlStudents", false, "", "", "", "");
+        //            $("#ddlStudents").val(datas.StudentName);
+        //            $("#chkstatus").prop("checked",datas.Status1);
+        //            $("#HubLat").val(datas.lat);
+        //            $("#HubLong").val(datas.longi);
+        //            $("#HubAddress1").val(datas.Hubaddress);
+                 
+        //            initialize();
+        //            //$("#").val();              
+        //            //$("#").val();
+        //        }
+        //        else if (datas.EmployeeName == "Employee")
+        //        {
+        //            $("#course").hide("slow");
+        //            $("#batch").hide("slow");
+        //            $("#student").hide("slow");
+        //            $("#employeeautocomplete").show("slow");
+
+        //        }
+
+        //    }
+
+
+        //});
+
+      
+        $("#course").hide("slow");
+        $("#batch").hide("slow");
+        $("#student").hide("slow");
+        $("#employeeautocomplete").hide("slow");
+        //callServiceMethodForDDl("", "/api/TransportApi", "getAllRouteDetails", "ddlRoute", false, "", "", "", "");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TransportApi", "getAllVehiclebySchool", "ddlVehicle", false, "", "", "", "");
+
+        $("#ddlVehicle").change(function () {
+            var SchoolID = sessionStorage.getItem("SchoolID");
+            var VehicleID = $("#ddlVehicle").val();
+            callServiceMethodForDDl(JSON.stringify([SchoolID, VehicleID]), "/api/TransportApi", "getAllhubBySchool", "ddlHub", false, "", "", "", "");
+
+        });
+
+        $("#ddlHub").change(function () {
+
+            var HubDetails =
+            {
+                ID: $("#ddlHub").val(),
+
+
+            }
+
+            var Value = JSON.stringify(HubDetails);
+            $.ajax({
+                type: "POST",
+                url: "/api/TransportApi/getHubDetailByIDD",
+                data: Value,
+                contentType: "application/json; charset=utf-8",
+
+                success: function (datas) {
+                    if (datas != "") {
+
+                        $("#hiddenid").val(datas.ID);
+                        $("#HubLat").val(datas.HubLat);
+                        $("#HubLong").val(datas.HubLong);
+                        $("#HubAddress1").val(datas.HubAddress);
+
+                        initialize();
+                    }
+                }
+            });
+
+
+
+        });
+
+
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllDepartmentsBySchoolID", "txtDepartment", false, "", "", "", "");
+    })
+
+    function getDestinationByRouteId(Id) {
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethodForDDl(JSON.stringify([Id, SchoolID]), "/api/TransportApi", "getDestinationByRouteIdBySchool", "ddlDestination", false, "", "", "", "");
+    }
+    $("#ddlCourse").change(function () {
+        var ddlCourse = getControlValue("ddlCourse");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        if (ddlCourse != null && (ddlCourse != -1) && (ddlCourse != undefined)) {
+            callServiceMethodForDDl(JSON.stringify([ddlCourse, SchoolID]), "/api/StudentApi", "GetSectionsbyschool", "ddlSection", false, "", "", "", "");
+
+        }
+    });
+
+    function getAllEmployeeByDepId(val) {
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethodForDDl(JSON.stringify([val, SchoolID]), "/api/TransportApi", "getAllEmployeeByDepIdBySchool", "ddlEmployee", false, "", "", "", "");
+    }
+
+    //function getAllEmployeeByDepId(val) {
+    //    callServiceMethodForDDl(JSON.stringify([val]), "/api/TransportApi", "getAllEmployeeByDepId", "ddlEmployee", false, "", "", "", "");
+    //}
+
+    function getAllStudentByClassSectionId(sectionId) {
+
+        var Student = {
+            ClassID: getControlValue("ddlCourse"),
+            SectionID: sectionId,
+            SchoolID: sessionStorage.getItem("SchoolID")
+        }
+
+        callServiceMethodForDDl(JSON.stringify(Student), "/api/TransportApi", "getAllStudentByClassSectionIdbySchool", "ddlStudents", false, "", "", "", "");
+    }
+
+
+
+
+    function saveTransportAllocationDetails() {
+        if ($("#form1").valid()) {
+            if (getControlValue("Transportallocation_usertypeid") == "Student") {
+
+
+
+                var ddlCourse = $("#ddlCourse").val();
+                var ddlSection = $("#ddlSection").val();
+                var ddlStudents = $("#ddlStudents").val();
+                if (ddlCourse == "-1") {
+                    alert("Please Select Course ")
+                }
+                else if (ddlSection == "-1") {
+                    alert("Please Select Section ")
+                }
+                else if (ddlStudents == "-1") {
+                    alert("Please Select Students")
+                }
+                else {
+                    var stu = $("#ddlStudents").val().join();
+
+                    var std = stu.split(',').length;
+                    var Items = new Array();
+                    for (var i = 0; i < std; i++) {
+                        var Student = {
+                            Class1: getControlValue("ddlCourse"),
+                            Section1: getControlValue("ddlSection"),
+                            StudentName: stu.split(',')[i],
+                        }
+                        Items.push(Student);
+                    }
+
+                    var stutotal = {
+                        Id: $("#txtId").val(),
+                        VehicleID: getControlValue("ddlVehicle"),
+                        HubID: getControlValue("ddlHub"),//This is HubID
+                        UserType: getControlValue("Transportallocation_usertypeid"),
+                        stu: Items,
+                        SchoolID: sessionStorage.getItem("SchoolID"),
+                        Status1: $("#chkstatus").prop("checked")
+                    }
+
+                    var ddl2 = JSON.stringify(stutotal);
+                    callServiceMethod(ddl2, "/api/TransportApi", "saveTransportAllocationDetails", false, "", "", false, "", true, saveTransportAllocationDetails_scs, "", "", "");
+                }
+
+
+
+
+            }
+            else {
+                var Department = $("#txtDepartment").val();
+                var Employee = $("#ddlEmployee").val();
+
+
+
+                if (Department == "0") {
+                    alert("Please Select Department ");
+                }
+                else if (Employee == "0") {
+                    alert("Please Select Employee ");
+                }
+                else {
+                    var allocation = {
+
+                        Id: getControlValue("txtId"),
+                        //route: getControlValue("ddlRoute"),
+                        //Destination: getControlValue("ddlDestination"),
+                        VehicleID: getControlValue("ddlVehicle"),
+                        HubID: getControlValue("ddlHub"),//This is HubID
+                        UserType: getControlValue("Transportallocation_usertypeid"),
+                        Department: getControlValue("txtDepartment"),
+                        EmployeeName: getControlValue("ddlEmployee"),
+                        SchoolID: sessionStorage.getItem("SchoolID"),
+                        Status1: $("#chkstatus").prop("checked")
+                    }
+
+                    var ddl = JSON.stringify(allocation)
+
+
+                    callServiceMethod(ddl, "/api/TransportApi", "saveTransportAllocationDetails", false, "", "", false, "", true, saveTransportAllocationDetails_scs, "", "", "");
+                }
+
+            }
+        }
+
+
+    }
+
+    function saveTransportAllocationDetails_scs(p1, p2, p3, datas) {
+        $("#divSuccessMsg").fadeIn();
+        $("#divSuccessMsg").html("<strong>Success!</strong> " + datas);
+        setTimeout(function () {
+
+            $("#divSuccessMsg").fadeOut();
+            ClearAllFields();
+        }, 2000);
+    }
+    function datevalidationforcreation() {
+        var startdate = $("#Transportallocation_transportallocation_startdate option:selected").val();
+        if (startdate != "") {
+            var enddate = $("#Transportallocation_transportallocation_enddate option:selected").val();
+            if (enddate == "") {
+                alert('End date cannot be blank');
+                return false;
+            } else {
+                if (startdate > enddate) {
+                    alert("End date must be greater than Start date");
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        }
+    }
+    function updateFields(data) {
+        $('#Transportallocation_transportallocation_startdate1').empty();
+        $('#Transportallocation_transportallocation_enddate1').empty();
+        $('#Transportallocation_transportallocation_startdate1').append(data);
+        $('#Transportallocation_transportallocation_enddate1').append(data);
+    }
+    function datevalidation() {
+        var startdate = $("#Transportallocation_transportallocation_startdate1 option:selected").val();
+
+        if (startdate != "") {
+            var enddate = $("#Transportallocation_transportallocation_enddate1 option:selected").val();
+
+            if (enddate == "") {
+                alert('End date cannot be blank');
+                return false;
+            } else {
+                if (startdate > enddate) {
+                    alert("End date must be greater than Start date");
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        }
+    }
+    $("#Transportallocation_usertypeid").change(function () {
+        var str = "";
+        str += $(this).val();
+        if (str == '') {
+            $("#course").hide("slow");
+            $("#batch").hide("slow");
+            $("#student").hide("slow");
+            $("#employeeautocomplete").hide("slow");
+        }
+        if (str === 'Student') {
+            $("#employeeautocomplete").hide("slow");
+            $("#course").show("slow");
+            $("#batch").show("slow");
+            $("#student").show("slow");
+        }
+        if (str === 'Employee') {
+            $("#course").hide("slow");
+            $("#batch").hide("slow");
+            $("#student").hide("slow");
+            $("#employeeautocomplete").show("slow");
+        }
+    });
+    $("#Transportallocation_usertypeid1").change(function () {
+        var str = "";
+        str += $(this).val();
+        if (str === 'Student') {
+            $("#department1").hide("slow");
+            $("#employee1").hide("slow");
+            $("#course1").show("slow");
+            $("#batch1").show("slow");
+            $("#student1").show("slow");
+        }
+        if (str === 'Employee') {
+            $("#course1").hide("slow");
+            $("#batch1").hide("slow");
+            $("#student1").hide("slow");
+            $("#department1").show("slow");
+            $("#employee1").show("slow");
+        }
+    });
+    $("#Transportallocation_routedetailsid").change(function () {
+        $.ajax({
+            type: "POST",
+            url: "Fetchfeedatesforcreate",
+            data: { routedetailsid: $('#Transportallocation_routedetailsid option:selected').val() },
+            dataType: "html",
+            success: function (data) {
+                $('#Transportallocation_transportallocation_startdate').empty();
+                $('#Transportallocation_transportallocation_enddate').empty();
+                $('#Transportallocation_transportallocation_startdate').append(data);
+                $('#Transportallocation_transportallocation_enddate').append(data);
+            }
+        });
+        $('#item-grid').yiiGridView('update', {
+            data: { search: $('#Transportallocation_routedetailsid option:selected').text() }
+        });
+        return false;
+    });
+    $("input").keyup(function () {
+
+        $('#item-grid').yiiGridView('update', {
+            data: { search: $('#search').val() }
+        });
+        return false;
+    });
+
+    function ClearAllFields() {
+
+        $("#txtId").val(0);
+        $("#ddlVehicle").val(0);
+        $("#ddlHub").val(0);
+        $("#ddlHub").empty(); //way to clear DroupDown
+        $("#Transportallocation_usertypeid").val("");
+        $("#txtDepartment").val(0);
+        $("#ddlEmployee").val(0);
+        $("#ddlStudents option[value]").remove(); //way to remove value in multiple select .
+        $("#ddlCourse").val(-1);
+        $("#ddlSection").val(-1);
+        $("#chkstatus").prop("checked", true);
+
+        location.reload();
+
+
+
+
+    }
+    function initialize() {
+
+        var lat = document.getElementById("HubLat").value;
+        var lng = document.getElementById("HubLong").value;
+        var geoAddress = document.getElementById("HubAddress1").value;
+        var latlng = new google.maps.LatLng(lat, lng);
+
+        var mapDiv = document.getElementById("gmap");
+
+        geocoder = new google.maps.Geocoder();
+
+        var myOptions = {
+            zoom: 11,
+            center: latlng,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        map = new google.maps.Map(mapDiv, myOptions);
+
+        var imageLandmrk = new google.maps.MarkerImage('../Images/Hub/HubICON.png', new google.maps.Size(35, 35));
+
+        var marker = new google.maps.Marker({
+            position: latlng,
+            map: map,
+            title: geoAddress
+        });
+        marker.setIcon(imageLandmrk);
+    }
+
+
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#loader").fadeOut();
+
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+
+            rules: {
+
+                ddlVehicle: {
+
+                    selectcheck: true
+
+                },
+                ddlHub: {
+
+                    selectcheck1: true
+
+                },
+                Transportallocation_usertypeid: {
+
+                    selectcheck2: true
+
+                },
+
+
+
+
+            },
+            messages: {
+                ddlVehicle: "Please select VehicleNo ",
+                ddlHub: "Please select Bus Stop ",
+                Transportallocation_usertypeid: "Please select Usertype",
+
+
+
+
+
+
+            }
+        })
+        jQuery.validator.addMethod('selectcheck', function (value) {
+            return (value != "0");
+        }, "Please select VehicleNo ");
+        jQuery.validator.addMethod('selectcheck1', function (value) {
+            return (value != "0");
+        }, "Please select Bus Stop ");
+        jQuery.validator.addMethod('selectcheck2', function (value) {
+            return (value != "");
+        }, "Please select Usertype");
+
+
+
+
+    });
+</script>

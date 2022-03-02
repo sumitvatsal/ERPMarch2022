@@ -1,0 +1,1502 @@
+﻿
+@{
+    ViewBag.Title = "EmployeeProfile";
+    // Layout = "~/Views/Shared/_LayoutEmployee.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {               
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+ 
+
+<link href="~/css/style.css" rel="stylesheet" />
+<script src="~/js/custom.js"></script>
+<div class="main-container" id="dvContents">
+    <div class="container-fluid content-container">
+        <h2 class="heading" id="spUserRoleName"> Details</h2>
+        <div class="row">
+            <div class="basic-profile">
+                <div class="col-sm-2 profile-pic">
+                    <div class="profile-image"><img id="ImgEmployeePic" src="" alt="#" /></div>
+                </div>
+                <div class="col-sm-6">
+                    <input type="text" id="txtEmployeeId" style="display:none" />
+                    <input type="text" id="txtEmployeeStatus" style="display:none" />
+                    <h4 id="EmployeeFullName"></h4>
+                    <p>-<span id="spEmpDepartment"></span></p>
+                    <p id="spEmpEmailId"></p>
+                    <p><span class="phone1" id="spEmpMob"></span> &nbsp; <span class="phone2" id="spEmpPhone"></span></p>
+                    <p id="pEmployeeStatus"></p>
+                </div>
+
+                <div class="col-sm-4 action-panel">
+                     
+                </div>
+            </div>
+        </div>
+        <ul class="nav nav-tabs tab-controller">
+            <li class="active"><a data-toggle="tab" href="#home">General Info</a></li>
+            <li><a data-toggle="tab" href="#menu1">Department</a></li>
+            <li><a data-toggle="tab" href="#menu2">Leave</a></li>
+            <li><a data-toggle="tab" href="#menu3">Performance</a></li>
+            <li><a data-toggle="tab" href="#menu4">Permission</a></li>
+            <li><a data-toggle="tab" href="#menu5">Documents</a></li>
+            <li><a data-toggle="tab" href="#menu6">Payroll</a></li>
+            <li><a data-toggle="tab" href="#menu7">Change Password</a></li>
+        </ul>
+
+        <div class="tab-content profile-panel">
+            <div id="home" class="tab-pane fade in active">
+                <div class="panel-group">
+                    <!--panel-->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="toggler" href="#">General Information <i class="fa fa-angle-up pull-right"></i></a>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse collapse open">
+                            <div class="panel-body info-panel">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Employee Code </li>
+                                            <li>: <span id="spEmployeeCode"></span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Joining Date</li>
+                                            <li>: <span id="spJoiningDate"></span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">First Name</li>
+                                            <li>: <span id="spFName"></span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Middle Name</li>
+                                            <li>: <span id="spMname"></span></li>
+                                        </ul>
+                                        @*<ul class="col-sm-6">
+                                                <li class="labels">Email</li>
+                                                <li>: <span id="spEmpEmailId"><a href="mailto:janebelley@gmail.com" >janebelley@gmail.com</a></span></li>
+                                            </ul>*@
+                                    </div>
+
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Last Name</li>
+                                            <li>: <span id="spLName"></span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">DOB</li>
+                                            <li>: <span id="spDOB"></span></li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Gender</li>
+                                            <li>: <span id="spGender"></span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Religon</li>
+                                            <li>: <span id="spRelegon"></span></li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Mother Name</li>
+                                            <li>: <span id="spMotherName"></span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Father Name</li>
+                                            <li>: <span id="spFateherName"></span></li>
+                                        </ul>
+                                    </div>
+
+
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Marital Status</li>
+                                            <li>: <span id="spMaritalStatus"></span></li>
+                                        </ul>
+                                        <ul class="col-sm-6"></ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!--end panel-->
+
+                <div class="panel-group">
+                    <!--panel-->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="toggler" href="#">Address Information <i class="fa fa-angle-up pull-right"></i></a>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse collapse open">
+                            <div class="panel-body info-panel">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Country</li>
+                                            <li>: <span id="spCountry"></span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">State</li>
+                                            <li>: <span id="spState"></span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">City</li>
+                                            <li>: <span id="spCity"></span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Pin Code</li>
+                                            <li>: <span id="spPinCode"></span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-12">
+                                            <li class="labels">Present Address</li>
+                                            <li>: <span id="spPresentAddress"></span></li>
+                                        </ul>
+
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-12">
+                                            <li class="labels">Permanent Address</li>
+                                            <li>: <span id="spParmanentAddress"><a href="tel:9386945679">9386945679</a></span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Phone No</li>
+                                            <li>: <span id="spPhone"></span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Mobile No</li>
+                                            <li>: <span id="spMobileNo"></span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Email Address</li>
+                                            <li>: <span id="spEmailAddress"></span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Adhaar No</li>
+                                            <li>: <span id="spAdhaarNo"></span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!--end panel-->
+
+                <div class="panel-group">
+                    <!--panel-->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="toggler" href="#">Login Panel Details <i class="fa fa-angle-up pull-right"></i></a>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse collapse open">
+                            <div class="panel-body info-panel">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">UserId</li>
+                                            <li>: <span id="spUserId"></span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Password</li>
+                                            <li>: <span id="spPasswordnotshow">******</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">User Type</li>
+                                            <li>: <span id="spUserRoleName1"></span></li>
+                                        </ul>
+                                        
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!--end panel-->
+
+            </div><!-- end tab 1-->
+
+
+            <div id="menu1" class="tab-pane">
+                <div class="panel-group">
+                    <!--panel-->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="toggler" href="#">Department /Designation <i class="fa fa-angle-up pull-right"></i></a>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse collapse open">
+                            <div class="panel-body info-panel">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Department</li>
+                                            <li>: <span id="spDepartment1"></span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Designation</li>
+                                            <li>: <span id="spDesignation1"></span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Qualfication</li>
+                                            <li>: <span id="spQualfication"></span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Total Experience</li>
+                                            <li>: <span id="spTotalExperience"></span></li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Staff </li>
+                                            <li>: <span id="spStaff"></span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!--end panel-->
+
+                <div class="panel-group">
+                    <!--panel-->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="toggler" href="#">Work <i class="fa fa-angle-down pull-right"></i></a>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse collapse">
+                            <div class="panel-body info-panel">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Department</li>
+                                            <li>: <span>Designer</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Title</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Reporting To</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Date of Hire</li>
+                                            <li>: <span>__/__/__</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Source of Hire</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Eployee Status</li>
+                                            <li>: <span>__/__/__</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Work Phone</li>
+                                            <li>: <span><a href="tel:9386945679">9386945679</a></span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Eployee Type</li>
+                                            <li>: <span>Full Time</span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!--end panel-->
+
+                <div class="panel-group">
+                    <!--panel-->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="toggler" href="#">Personal Details <i class="fa fa-angle-down pull-right"></i></a>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse collapse">
+                            <div class="panel-body info-panel">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Address 1</li>
+                                            <li>: <span>____</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Address 2</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">City</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Country</li>
+                                            <li>: <span>____</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">State</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Postal Code</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Mobile</li>
+                                            <li>: <span><a href="tel:9386945679">9386945679</a></span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Other Email</li>
+                                            <li>: <span>_____</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Date of Birth</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Gender</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Nationality</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Maritial Status</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Driving License</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Hobbies</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!--end panel-->
+
+            </div><!-- end tab 2-->
+
+
+
+
+            <div id="menu2" class="tab-pane">
+                <div class="panel-group">
+                    <!--panel-->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="toggler" href="#">Assign Leaves <i class="fa fa-angle-up pull-right"></i></a>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse collapse open">
+                            <div class="panel-body info-panel">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <table id="grid" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Leaves Name</th>
+                                                        <th>Assign Leave</th>
+                                                        <th>Start Date</th>
+                                                        <th>End Date</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tbodyEmployeeLeaves"></tbody>
+
+                                            </table>
+                                            <script type="text/html" id="tbodyEmployeeLeavesJTemplte">
+                                                {#foreach $T as Datashort}
+                                                <tr>
+                                                    <td>
+                                                        { $T.Datashort.leaveCategory}
+                                                    </td>
+                                                    <td>
+                                                        { $T.Datashort.leaveAssign}
+                                                    </td>
+                                                    <td>
+                                                        { $T.Datashort.StartDate}
+                                                    </td>
+                                                    <td>
+                                                        { $T.Datashort.EndDate}
+                                                    </td>
+
+                                                </tr>
+                                                {#/for}
+                                            </script>
+                                        </div>
+                                    </div>
+                                 
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!--end panel-->
+
+                @*<div class="panel-group">
+                    <!--panel-->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="toggler" href="#">Work <i class="fa fa-angle-down pull-right"></i></a>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse collapse">
+                            <div class="panel-body info-panel">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Department</li>
+                                            <li>: <span>Designer</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Title</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Reporting To</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Date of Hire</li>
+                                            <li>: <span>__/__/__</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Source of Hire</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Eployee Status</li>
+                                            <li>: <span>__/__/__</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Work Phone</li>
+                                            <li>: <span><a href="tel:9386945679">9386945679</a></span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Eployee Type</li>
+                                            <li>: <span>Full Time</span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!--end panel-->
+
+                <div class="panel-group">
+                    <!--panel-->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="toggler" href="#">Personal Details <i class="fa fa-angle-down pull-right"></i></a>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse collapse">
+                            <div class="panel-body info-panel">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Address 1</li>
+                                            <li>: <span>____</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Address 2</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">City</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Country</li>
+                                            <li>: <span>____</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">State</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Postal Code</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Mobile</li>
+                                            <li>: <span><a href="tel:9386945679">9386945679</a></span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Other Email</li>
+                                            <li>: <span>_____</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Date of Birth</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Gender</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Nationality</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Maritial Status</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Driving License</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Hobbies</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!--end panel-->*@
+
+            </div><!-- end tab 3-->
+
+
+            <div id="menu3" class="tab-pane">
+                <div class="panel-group">
+                    <!--panel-->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="toggler" href="#">Basic Info4 <i class="fa fa-angle-up pull-right"></i></a>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse collapse open">
+                            <div class="panel-body info-panel">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">First Name</li>
+                                            <li>: <span>Jane</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Last Name</li>
+                                            <li>: <span>Balley</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Employer ID</li>
+                                            <li>: <span>123456</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Email</li>
+                                            <li>: <span><a href="mailto:janebelley@gmail.com">janebelley@gmail.com</a></span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!--end panel-->
+
+                <div class="panel-group">
+                    <!--panel-->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="toggler" href="#">Work <i class="fa fa-angle-down pull-right"></i></a>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse collapse">
+                            <div class="panel-body info-panel">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Department</li>
+                                            <li>: <span>Designer</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Title</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Reporting To</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Date of Hire</li>
+                                            <li>: <span>__/__/__</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Source of Hire</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Eployee Status</li>
+                                            <li>: <span>__/__/__</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Work Phone</li>
+                                            <li>: <span><a href="tel:9386945679">9386945679</a></span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Eployee Type</li>
+                                            <li>: <span>Full Time</span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!--end panel-->
+
+                <div class="panel-group">
+                    <!--panel-->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="toggler" href="#">Personal Details <i class="fa fa-angle-down pull-right"></i></a>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse collapse">
+                            <div class="panel-body info-panel">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Address 1</li>
+                                            <li>: <span>____</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Address 2</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">City</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Country</li>
+                                            <li>: <span>____</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">State</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Postal Code</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Mobile</li>
+                                            <li>: <span><a href="tel:9386945679">9386945679</a></span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Other Email</li>
+                                            <li>: <span>_____</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Date of Birth</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Gender</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Nationality</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Maritial Status</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Driving License</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Hobbies</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!--end panel-->
+
+            </div><!-- end tab 4-->
+
+
+
+            <div id="menu4" class="tab-pane">
+                <div class="panel-group">
+                    <!--panel-->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="toggler" href="#">Basic Info5 <i class="fa fa-angle-up pull-right"></i></a>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse collapse open">
+                            <div class="panel-body info-panel">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">First Name</li>
+                                            <li>: <span>Jane</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Last Name</li>
+                                            <li>: <span>Balley</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Employer ID</li>
+                                            <li>: <span>123456</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Email</li>
+                                            <li>: <span><a href="mailto:janebelley@gmail.com">janebelley@gmail.com</a></span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!--end panel-->
+
+                <div class="panel-group">
+                    <!--panel-->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="toggler" href="#">Work <i class="fa fa-angle-down pull-right"></i></a>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse collapse">
+                            <div class="panel-body info-panel">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Department</li>
+                                            <li>: <span>Designer</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Title</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Reporting To</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Date of Hire</li>
+                                            <li>: <span>__/__/__</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Source of Hire</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Eployee Status</li>
+                                            <li>: <span>__/__/__</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Work Phone</li>
+                                            <li>: <span><a href="tel:9386945679">9386945679</a></span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Eployee Type</li>
+                                            <li>: <span>Full Time</span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!--end panel-->
+
+                <div class="panel-group">
+                    <!--panel-->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="toggler" href="#">Personal Details <i class="fa fa-angle-down pull-right"></i></a>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse collapse">
+                            <div class="panel-body info-panel">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Address 1</li>
+                                            <li>: <span>____</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Address 2</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">City</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Country</li>
+                                            <li>: <span>____</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">State</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Postal Code</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Mobile</li>
+                                            <li>: <span><a href="tel:9386945679">9386945679</a></span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Other Email</li>
+                                            <li>: <span>_____</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Date of Birth</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Gender</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Nationality</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Maritial Status</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="row">
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Driving License</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                        <ul class="col-sm-6">
+                                            <li class="labels">Hobbies</li>
+                                            <li>: <span>___</span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!--end panel-->
+
+            </div><!-- end tab 5-->
+
+
+
+
+            <div id="menu5" class="tab-pane">
+                <div class="panel-group">
+                    <!--panel-->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="toggler" href="#">Employee Documents <i class="fa fa-angle-up pull-right"></i></a>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse collapse open">
+                            <div class="panel-body info-panel">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <table class="table table-bordered table-striped tbl20 htmlTempletes">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Document Name</th>
+                                                        <th>PdF</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tbodyEmployeeDocuments"></tbody>
+
+                                            </table>
+                                            <script type="text/html" id="tbodyEmployeeDocumentsJTemplte">
+                                                {#foreach $T as Datashort}
+                                                <tr>
+                                                    <td>
+                                                        { $T.Datashort.Name}
+                                                    </td>
+                                                    <td>
+                                                        <a href="{ $T.Datashort.Id}" download>Download</a>
+                                                    </td>
+
+                                                </tr>
+                                                {#/for}
+                                            </script>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!--end panel-->
+
+
+
+            </div><!-- end tab 6-->
+
+
+
+            <div id="menu6" class="tab-pane">
+                <div class="panel-group">
+                    <!--panel-->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="toggler" href="#">Salary Slips <i class="fa fa-angle-up pull-right"></i></a>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse collapse open">
+                            <div class="panel-body info-panel">
+                                <div class="container-fluid">
+                                     
+                                    <div class="col-md-12" id="divShowEmployees" >
+                                        <!-- general form elements -->
+                                        
+                                          
+                                            <div class="box-body">
+                                                <div class="form-group">
+                                                    <div>
+
+                                                        <table id="grid" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                                            <thead>
+                                                                <tr>
+
+                                                                    <th>Employee Name</th>
+                                                                      <th>Designation</th>
+                                                                    <th>From Date</th>
+                                                                    <th>To Date</th>
+                                                                    <th>Net Salary</th>
+                                                                    <th>Monthly salary</th>
+                                                                    <th>No Of Leave</th>
+                                                                    <th></th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="tbodyEmployeeDetails"></tbody>
+                                                        </table>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                       
+                                        <script type="text/html" id="divEmployeeDetailsJTemplte">
+                                            {#foreach $T as Datashort}
+                                            <tr>
+
+                                                <td>
+                                                    { $T.Datashort.EmployeeName}
+                                                </td>
+                                              
+                                                <td>
+                                                    { $T.Datashort.Designation}
+                                                </td>
+                                                <td>
+                                                    { $T.Datashort.FromDate}
+                                                </td>
+                                                <td>
+                                                    { $T.Datashort.ToDate}
+                                                </td>
+                                                <td>
+                                                    { $T.Datashort.NetSalary} <span>/-</span>
+                                                </td>
+                                                <td>
+                                                    { $T.Datashort.MonthlyGross} <span>/-</span>
+                                                </td>
+                                                <td>
+                                                    { $T.Datashort.NoOfLeave}
+                                                </td>
+                                                <td>
+                                                    <button type="button" onclick="generateSalarySlip({ $T.Datashort.Id})" class="btn btn-block btn-success">Salary Slip Generate</button>
+                                                </td>
+                                            </tr>
+                                            {#/for}
+                                        </script>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!--end panel-->
+ 
+
+            </div><!-- end tab 7-->
+
+
+
+
+
+            <div id="menu7" class="tab-pane">
+
+                <div class="panel-group">
+                    <!--panel-->
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="toggler" href="#">Change Password <i class="fa fa-angle-up pull-right"></i></a>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse collapse open">
+                            <div class="panel-body info-panel">
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                  <div class="form-group col-sm-6">
+                                                        <label style="display:none" id="lblPwdMsg"></label>
+                                                    </div>
+                                                    </div>
+                                                    <div class="col-sm-12">
+
+                                                        <div class="form-group col-sm-6">
+                                                            <label for="reg_input_name" class="req">User Id</label>
+                                                            <input type="text" id="txtUserId" disabled="disabled" class="form-control" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-12">
+                                                        <div class="form-group col-sm-6">
+                                                            <label for="reg_input_name" class="req">Enter Old Password <span class="requird">*</span></label>
+                                                            <input type="password" id="txtOldPassword" onblur="checkOldPwd()" class="form-control" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-12">
+                                                        <div class="form-group col-sm-6">
+                                                            <label for="reg_input_name" class="req">Enter New Password <span class="requird">*</span></label>
+                                                            <input type="password" id="txtNewPassword" class="form-control" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-12">
+                                                        <div class="form-group col-sm-6">
+                                                            <label for="reg_input_name" class="req">Enter Confirm Password <span class="requird">*</span></label>
+                                                            <input type="password" onblur="chkPwdConfrmPwd()" id="txtConfirmPassword" class="form-control" />
+                                                        </div>
+                                                    </div>
+
+
+                                                    <div class="col-sm-12">
+                                                        <div class="form-group col-sm-6">
+                                                            <input type="button" class="btn btn-sm btn-primary" onclick="changeEmployeePWd()" value="Change Pwd" />
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!--end panel-->
+
+
+
+
+            </div><!-- end tab 3-->
+
+
+
+
+
+
+
+        </div>
+    </div>
+</div>
+
+
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var Id = getQuerystring("Id");
+        if (typeof (Id) != "undefined") {
+            callServiceMethod(JSON.stringify([Id]), "/api/EmployeeAPI", "ViewEmployeeDetailsById", false, "", "", false, "", true, editEmployeeDetailsById_scs, "", "", "");
+            callJTemplateServiceMethod(JSON.stringify([Id]), "/api/EmployeeAPI", "getEmployeeDocuemnts",
+                   "tbodyEmployeeDocuments", "tbodyEmployeeDocumentsJTemplte", false, "", "", "", "");
+        }
+
+    })
+
+
+    function editEmployeeDetailsById_scs(p1,p2,p3,datas)
+    {
+        if (datas.ImageUpload == null || datas.ImageUpload=="")
+        {
+            datas.ImageUpload = "/Images/Employee/EmployyeImage/No_Photo_Available.jpg";
+        }
+
+
+        $("#ImgEmployeePic").attr("src", datas.ImageUpload);
+
+        setControlValue("spUserRoleName", datas.TypeName);
+        setControlValue("spUserRoleName1", datas.TypeName);
+        setControlValue("spEmpDepartment", datas.Department + " (" + datas.Designation+")");
+        setControlValue("txtEmployeeId", datas.Id);
+        setControlValue("spEmployeeCode", datas.Employeecode);
+        setControlValue("spJoiningDate", datas.JoiningDate);
+        setControlValue("spFName", datas.FName);
+        setControlValue("spMname", datas.MName);
+        setControlValue("spLName", datas.LName);
+        setControlValue("spDOB", datas.DOB);
+        setControlValue("spGender", datas.Gender);
+        setControlValue("spRelegon", datas.Religon);
+
+        setControlValue("spMotherName", datas.MotherName);
+        setControlValue("spFateherName", datas.FatherName);
+        setControlValue("spMaritalStatus", datas.MaritalStaus);
+        setControlValue("spCountry", datas.Country);
+        setControlValue("spState", datas.State);
+        setControlValue("spCity", datas.city);
+        setControlValue("spPinCode", datas.Pin);
+        setControlValue("spPresentAddress", datas.PresentAddress);
+        setControlValue("spParmanentAddress", datas.PermanentAddress);
+        setControlValue("spPhone", datas.Phone);
+        setControlValue("spMobileNo", datas.Mobile);
+        setControlValue("spEmailAddress", "<a href='malto:" + datas.Email + "'>" + datas.Email + "</a>");
+        setControlValue("spAdhaarNo", datas.AdhaarNo);
+        setControlValue("spDepartment1", datas.Department); 
+         setControlValue("spDesignation1", datas.Designation);
+         setControlValue("spQualfication", datas.qualfication);
+         setControlValue("spTotalExperience", datas.TotalExperience);
+         setControlValue("spStaff", datas.UserType);
+        setControlValue("EmployeeFullName", datas.FName + " " + datas.MName + " " + datas.LName);
+        //setControlValue("txtMiddleName", datas.MName);
+        //setControlValue("txtLastName", datas.LName);
+        //setControlValue("txtDOB", datas.DOB);
+        //setControlValue("ddlGender", datas.Gender);
+        setControlValue("spEmpEmailId", "<a href='malto:" + datas.Email + "'>" + datas.Email + "</a>");
+        setControlValue("spUserId", datas.UserName);
+        setControlValue("spPassword", datas.Password);
+        setControlValue("spEmpMob", "<i class='fa fa-mobile'></i> " + datas.Mobile + "");
+        setControlValue("spEmpPhone", "<i class='fa fa-mobile'></i> " + datas.Phone + "");
+      //  alert(datas.Status);
+        if(datas.Status=="Activate")
+        {
+            setControlValue("pEmployeeStatus", " <button type='button' style='width: 156px;'  class='btn btn-block btn-success btn-sm'>" + datas.Status + "</button>");
+        }
+        else{
+            setControlValue("pEmployeeStatus", " <button type='button' style='width: 156px;'   class='btn btn-block btn-danger btn-sm'>" + datas.Status + "</button>");
+        }
+
+
+        setControlValue("txtEmployeeStatus", datas.Status);
+
+        setControlValue("txtUserId", datas.UserName);
+
+        if (datas.DesigId != "") {
+
+            getAllLeave(datas.DesigId);
+        }
+
+    }
+ 
+    function getAllLeave(val)
+    {
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callJTemplateServiceMethod(JSON.stringify([val, SchoolID]), "/api/EmployeeAPI", "getEmployeeLeavesByIddd",
+                          "tbodyEmployeeLeaves", "tbodyEmployeeLeavesJTemplte", false, "", "", "", "");
+    }
+
+    function checkOldPwd()
+    {
+        var check = {
+            Id: getControlValue("txtEmployeeId"),
+            OldPwd: getControlValue("txtOldPassword"),
+            USerID: getControlValue("txtUserId"),
+            SchoolID: sessionStorage.getItem("SchoolID")
+        }
+
+        var ddl = JSON.stringify(check)
+        callServiceMethod(ddl, "/api/EmployeeAPI", "checkOldPwdOfEmployee", false, "", "", false, "", true, checkOldPwd_scs, "", "", "");
+  
+    }
+
+    function checkOldPwd_scs(p1, p2, p3, datas)
+    {
+        if (datas != "") {
+           $("#lblPwdMsg").html(datas);
+            $("#lblPwdMsg").removeAttr("style");
+            $("#lblPwdMsg").attr("style", "color:red;font-weight:bold");
+            setTimeout(function () {
+                $("#lblPwdMsg").attr("style", "display:none");
+                setControlValue("txtOldPassword", "");
+            }, 2000)
+        }
+    }
+
+    function chkPwdConfrmPwd()
+    {
+        if (getControlValue("txtNewPassword") == getControlValue("txtConfirmPassword")) {
+
+        }
+        else {
+            $("#lblPwdMsg").html("Pwd and confirm pwd not match");
+            $("#lblPwdMsg").removeAttr("style");
+            $("#lblPwdMsg").attr("style", "color:red;font-weight:bold");
+            setTimeout(function () {
+                $("#lblPwdMsg").attr("style", "display:none");
+                setControlValue("txtNewPassword", "");
+                setControlValue("txtConfirmPassword", "");
+            }, 1000)
+
+        }
+
+    }
+
+    function changeEmployeePWd()
+    {
+
+        if (getControlValue("txtOldPassword") != "") {
+            if (getControlValue("txtNewPassword") != "") {
+
+                if (getControlValue("txtConfirmPassword") != "") {
+                    var check = {
+                        Id: getControlValue("txtEmployeeId"),
+                        OldPwd: getControlValue("txtOldPassword"),
+                        USerID: getControlValue("txtUserId"),
+                        NewPWd: getControlValue("txtNewPassword")
+                       
+                    }
+
+                    var ddl = JSON.stringify(check)
+                    callServiceMethod(ddl, "/api/EmployeeAPI", "changeEmployeePWd", false, "", "", false, "", true, changeEmployeePWd_scs, "", "", "");
+                }
+                else {
+                    alert("Please Enter  Confirm Password ");
+                }
+            }
+            else {
+                alert("Please Enter  Password ");
+            }
+        }
+
+            else {
+                alert("Please Enter Old Password!");
+            }
+    }
+
+    function changeEmployeePWd_scs(p1, p2, p3, datas)
+    {
+        if (datas != "")
+        {
+
+            $("#lblPwdMsg").html(datas);
+            $("#lblPwdMsg").removeAttr("style");
+            $("#lblPwdMsg").attr("style", "color:green;font-weight:bold");
+           
+           
+ 
+               
+            setTimeout(function () {
+                //$("#lblPwdMsg").attr("style", "display:none");
+                $("#divSuccessMsg").fadeOut();
+                setControlValue("txtNewPassword", "");
+                setControlValue("txtConfirmPassword", "");
+                setControlValue("txtOldPassword", "");
+              
+            }, 1000)
+        }
+    }
+ 
+ 
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+
+        var id = getQuerystring("Id");
+        if (typeof (id) != "undefined") {
+            callJTemplateServiceMethod(JSON.stringify([id]), "/api/EmployeeAPI", "employeeSalarySlips",
+                 "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", false, "", "", "", "");
+        }
+    })
+    
+    
+    function generateSalarySlip(Id)
+    {
+        location.href="/EmployeeDashboard/SalarySlip?Id="+Id;
+    }
+</script>
+
+ 
+
+<style type="text/css">
+    
+    #grid {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #grid td, #customers th {
+            border: 1px solid #ddd;
+           /*padding: 8px;*/ 
+             
+        }
+
+        #grid tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #grid tr:hover {
+            background-color: #ddd;
+        }
+
+        #grid th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>

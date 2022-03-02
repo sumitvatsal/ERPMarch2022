@@ -1,0 +1,962 @@
+﻿
+@{
+    ViewBag.Title = "GeneratePayslip";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<section class="content" ng-app="myApp" ng-controller="salryhead">
+    <div class="box box-solid">
+        <div class="et">
+            <div class="box-header with-border">
+                <h3 class="box-title"> Salary Grade Assign</h3>
+
+            </div>
+        </div>
+
+
+        <div class="box-body">
+            <div class="row">
+
+                <div class="content">
+
+
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h4 class="panel-title">Grade Master</h4>
+                                </div>
+                                <form role="form" id="form1" name="form1">
+                                    <div class="panel-body">
+                                        <div class="panel-body">
+                                            <div class="alert alert-success alert-dismissible" style="display:none">
+                                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                                <h4>
+                                                    <i class="icon fa fa-check"></i>
+                                                    success! <span ng-bind="successMsg"></span>
+                                                </h4>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="Country" class="req">School<span class="requird">*</span></label>
+                                                <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" onchange="getGrades1(this.value)" valuefield="Id" textfield="Name" ></select>
+
+                                            </div>
+                                          
+
+                                            <div class="form-group">
+                                                <input type="text" id="txtSalaryId" style="display:none" />
+                                                <label class="req" for="Salarydetails_designationid">Designation <span class="requird">*</span></label>
+                                                <select class="form-control" id="ddlDesignation" name="ddlDesignation" valuefield="Id" textfield="Name" blankRowValue="0" onchange="getGrades(this.value)" blankRowText="----Select----" style="width: 100%;"></select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="req" for="Salarydetails_unit">Select Employee <span class="requird">*</span></label>
+                                                <select class="form-control" id="ddelSelectEmployee" name="ddelSelectEmployee" valuefield="Id" onchange="getGradebeEmployeeId(this.value)" textfield="Name" blankRowValue="0" blankRowText="--Select--" style="width: 100%;" style="width: 100%;"></select>
+
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>From Date</label>
+                                                    <div class="input-group date">
+                                                        <div class="input-group-addon">
+                                                            <i class="fa fa-calendar"></i>
+                                                        </div>
+                                                        <input type="text" class="form-control dtpicker" onblur="setMontdayFromMonth()" readonly="readonly" id="txtStartDate" ng-model="txtStartDate">
+                                                    </div>
+                                                    <!-- /.input group -->
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>To Date</label>
+                                                    <div class="input-group date">
+                                                        <div class="input-group-addon">
+                                                            <i class="fa fa-calendar"></i>
+                                                        </div>
+                                                        <input type="text" class="form-control pull-right" onchange="myfunc()" readonly="readonly" id="txtEndDate" ng-model="txtEndDate" />
+                                                    </div>
+                                                    <!-- /.input group -->
+                                                </div>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="text" id="txtNoOfDayInMoth" style="display:none" />
+                                                <input type="text" id="txtSalaryInMonthDay" style="display:none" />
+
+                                                <label class="req" for="Salarydetails_unit">No Of Leave</label>
+                                                <input type="text" id="txtNoLeave" onkeypress="return numbersonly(event)" value="0" class="form-control" />
+                                            </div>
+
+                                            <div class="form-group">
+                                                <input type="text" ng-model="txtGradeId" style="display:none" />
+                                                <label class="req" for="Salarydetails_unit">Grade Name <span class="requird">*</span></label>
+                                                <select class="form-control" name="ddlGradeSelect" id="ddlGradeSelect" onchange="getSalryDetails(this.value)" valuefield="Id" textfield="GradeName" blankRowValue="0" blankRowText="----Select----" style="width: 100%;"></select>
+                                            </div>
+                                            <div id="showUsingGrade" style="display:none">
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label class="req" for="Salarydetails_designationid">Earning</label>
+                                                        <table id="gridEarning" class="table table-bordered table-striped tbl20 grid">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Head Name</th>
+                                                                    <th>value</th>
+                                                                    <th></th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="tbodyEmployeeEarning"></tbody>
+
+                                                        </table>
+                                                        <table id="tbltoltEarning" class="table table-bordered table-striped tbl20  grid">
+                                                            <tr>
+                                                                <td style="width:120px"><strong>Monthly Gross -</strong></td>
+                                                                <td id="tdTotalEarning"></td>
+                                                            </tr>
+                                                        </table>
+                                                        <script type="text/html" id="tbodyEmployeeEarningJTemplte">
+                                                            {#foreach $T as Datashort}
+                                                            <tr>
+                                                                <td style="width:155px">
+                                                                    { $T.Datashort.Name}
+                                                                </td>
+                                                                <td id="tdAmountEarningAmt_{ $T.Datashort.Id}">
+                                                                    { $T.Datashort.Extra10}
+                                                                </td>
+                                                                <td>  { $T.Datashort.Code}  </td>
+                                                            </tr>
+                                                            {#/for}
+                                                        </script>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label class="req" for="Salarydetails_designationid">Deduction</label>
+                                                        <table id="griddeduction" class="table table-bordered table-striped tbl20  grid">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Head Name</th>
+                                                                    <th>value</th>
+                                                                    <th>Amt./Per</th>
+
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="tbodyEmployeeDeduction"></tbody>
+
+                                                        </table>
+                                                        <table id="tbltoltDeduction" class="table table-bordered table-striped tbl20  grid">
+                                                            <tr>
+                                                                <td style="width:120px"><strong>Total Deduction -</strong></td>
+                                                                <td id="tdTotalDeduction"></td>
+                                                            </tr>
+                                                        </table>
+
+                                                        <script type="text/html" id="tbodyEmployeeDeductionJTemplte">
+                                                            {#foreach $T as Datashort}
+                                                            <tr>
+                                                                <td style="width:155px">
+                                                                    { $T.Datashort.Name}
+                                                                </td>
+                                                                <td>
+                                                                    { $T.Datashort.Extra10}
+                                                                </td>
+                                                                <td>
+                                                                    { $T.Datashort.Code}
+                                                                </td>
+                                                            </tr>
+                                                            {#/for}
+                                                        </script>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="clearfix"></div>
+                                            <div>
+                                                <div class="col-md-6">
+                                                    <table id="gridEarningAfterLeave" class="table table-bordered table-striped tbl20 grid">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Head Name</th>
+                                                                <th>value</th>
+                                                                <th></th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="tbodyEmployeeEarningAfterLeave"></tbody>
+
+                                                    </table>
+                                                    <table id="tbltoltEarningAfterLeave" class="table table-bordered table-striped tbl20  grid">
+                                                        <tr>
+                                                            <td style="width:120px"><strong>Gross Earning -</strong></td>
+                                                            <td id="tdTotalEarningAfterLeave"></td>
+                                                        </tr>
+                                                    </table>
+                                                    <script type="text/html" id="tbodyEmployeeEarningAfterLeaveJTemplte">
+                                                        {#foreach $T as Datashort}
+                                                        <tr>
+                                                            <td style="width:155px" rahulbharti="{ $T.Datashort.Id}" amount="{ $T.Datashort.Extra10}" salaryType="{ $T.Datashort.Code}" id="txt_{ $T.Datashort.Name}">
+                                                                { $T.Datashort.Name}
+                                                            </td>
+                                                            <td id="tdEarningAmtAfterLeave_{ $T.Datashort.Id}">
+                                                                { $T.Datashort.Extra10}
+                                                            </td>
+                                                            <td>  { $T.Datashort.Code}  </td>
+                                                        </tr>
+                                                        {#/for}
+                                                    </script>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label class="req" for="Salarydetails_designationid">Deduction After Leave</label>
+                                                        <table id="griddeductionAfterLeave" class="table table-bordered table-striped tbl20  grid">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Head Name</th>
+                                                                    <th>value</th>
+                                                                    <th>Amt./Per</th>
+
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="tbodyEmployeeDeductionAfterLeave"></tbody>
+
+                                                        </table>
+                                                        <table id="tbltoltDeductionAfterLeave" class="table table-bordered table-striped tbl20  grid">
+                                                            <tr>
+                                                                <td style="width:150px"><strong>Gross Deduction -</strong></td>
+                                                                <td id="tdTotalDeductionAfterLeaver"></td>
+                                                            </tr>
+                                                        </table>
+
+                                                        <script type="text/html" id="tbodyEmployeeDeductionAfterLeaveJTemplte">
+                                                            {#foreach $T as Datashort}
+                                                            <tr>
+                                                                <td style="width:155px" bhharti="{ $T.Datashort.Id}" dedAmount="{ $T.Datashort.Extra10}">
+                                                                    { $T.Datashort.Name}
+                                                                </td>
+                                                                <td id="txtdeduction_{ $T.Datashort.Id}">
+                                                                    { $T.Datashort.Extra10}
+                                                                </td>
+                                                                <td id="txtAmt_{ $T.Datashort.Id}">
+                                                                    { $T.Datashort.Code}
+                                                                </td>
+                                                            </tr>
+                                                            {#/for}
+                                                        </script>
+
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <div class="clearfix"></div>
+
+                                            <div class="form-group">
+                                                <strong>Net Salary-</strong>   <span id="spNetsalary"></span>
+                                            </div>
+                                            <div class="form-group">
+
+                                                <label><input id="chkStatus" checked="checked" ng-model="chkstatus" type="checkbox" /> Status</label>
+                                            </div>
+
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-5">
+                                                <div class="form_sep">
+                                                    <input class="btn btn-info" id="btnsumit" onclick="saveEmployeeSalaryDetails()" type="button" value="Save">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    </form>
+</div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  
+</section>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.dtpicker').datepicker({
+            autoclose: true
+
+        });
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+         var SchoolID = $("#ddlSchoolName").val();
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllDesignationBySchoolID", "ddlDesignation", false, "", "", "", "");
+        //callServiceMethodForDDl("", "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+    })
+        function getGrades1(val) {
+
+            callServiceMethodForDDl(JSON.stringify([val]), "/api/EmployeeAPI", "getAllDesignationBySchoolID", "ddlDesignation", false, "", "", "", "");
+        }
+        //callServiceMethodForDDl("", "/api/EmployeeAPI", "getAllDesignation", "ddlDesignation", false, "", "", "", "");
+   
+    function getGrades(val) {
+        var SchoolID = $("#ddlSchoolName").val();
+        callServiceMethodForDDl(JSON.stringify([val, SchoolID]), "/api/PayrollAPI", "getAllEmployeeByDesignationBySchool", "ddelSelectEmployee", false, "", "", "", "");
+        //callServiceMethodForDDl(JSON.stringify([val, SchoolID]), "/api/PayrollAPI", "getAllEmployeeByDesignation", "ddelSelectEmployee", false, "", "", "", "");
+     // callServiceMethodForDDl(JSON.stringify([val]), "/api/PayrollAPI", "getAllGradeByDesignation", "ddlGradeSelect", false, "", "", "", "");
+        }
+     
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        //var date = new Date();
+        //var year = date.getFullYear();
+        //var month = date.getMonth();
+
+        //$('#txtStartDate').datepicker
+        //({
+        //    format: "mm/dd/yyyy",
+        //    minViewMode:0,
+        //    autoclose: true,
+        //    startDate: new Date(year, month, '01'),
+        //    endDate: new Date(year + 1, month, '31')
+        //});
+
+        var firstDayOfMonth = function () {
+            // your special logic...
+            return 1;
+        };
+
+        var d = new Date();
+        var currMonth = d.getMonth();
+        var currYear = d.getFullYear();
+        var startDate = new Date(currYear, currMonth, firstDayOfMonth());
+        $('#txtStartDate').datepicker('setDate', startDate);
+
+
+
+        var currentTime = new Date()
+        var maxDate = new Date(currentTime.getFullYear(), currentTime.getMonth() + 1, +0)
+        $("#txtEndDate").datepicker('setDate', maxDate);
+       // $("#txtEndDate").datepicker();
+ 
+
+      
+        setTimeout(function () { 
+            datyInMonth();
+        }, 1000)
+
+      
+    });
+
+    function setMontdayFromMonth()
+    {
+        var month = $('#txtStartDate').val().split('/')[0];
+        var year = $('#txtStartDate').val().split('/')[2];
+
+        var getDaysInMonth = function (month, year) {
+          
+            return new Date(year, month, 0).getDate();
+           
+        };
+        setControlValue("txtNoOfDayInMoth", getDaysInMonth(month, year));
+     //   alert(getDaysInMonth(month, year));
+    }
+    function datyInMonth() {
+        var start = $("#txtStartDate").datepicker("getDate");
+        var end = $("#txtEndDate").datepicker("getDate");
+        days = (end - start) / (1000 * 60 * 60 * 24);
+        // alert(Math.round(days + 1));
+        setControlValue("txtNoOfDayInMoth", Math.round(days + 1));
+        setControlValue("txtSalaryInMonthDay", Math.round(days + 1));
+
+
+
+     
+        //console.log(getDaysInMonth(2, 2012));
+        //console.log(getDaysInMonth(9, 2012));
+        //console.log(getDaysInMonth(12, 2012));
+
+
+        
+    }
+
+
+  
+    function myfunc() {
+
+        var firstDayOfMonth = function () {
+            // your special logic...
+            return 1;
+        };
+
+        var startdate = $("#txtStartDate").datepicker("getDate");
+        var enddate = $("#txtEndDate").datepicker("getDate");
+        var stdate = new Date(startdate);
+        var edate = new Date(enddate);
+        if (stdate > edate) {
+            var d = new Date();
+            var currMonth = d.getMonth();
+            var currYear = d.getFullYear();
+            var startDate = new Date(currYear, currMonth, firstDayOfMonth());
+            $('#txtStartDate').datepicker('setDate', startDate);
+
+
+
+            var currentTime = new Date()
+            var maxDate = new Date(currentTime.getFullYear(), currentTime.getMonth() + 1, +0)
+            $("#txtEndDate").datepicker('setDate', maxDate);
+
+
+
+            alert("End Date should be greater than Start Date")
+
+        }
+
+
+        var start = $("#txtStartDate").datepicker("getDate");
+        var end = $("#txtEndDate").datepicker("getDate");
+        days = (end - start) / (1000 * 60 * 60 * 24);
+       // alert(Math.round(days + 1));
+        setControlValue("txtSalaryInMonthDay", Math.round(days + 1));
+
+        if (getControlValue("ddlGradeSelect") != "" && getControlValue("ddlGradeSelect") != "0") {
+            getSalryDetails(getControlValue("ddlGradeSelect"));
+        }
+    }
+
+
+    function getGradebeEmployeeId(val)
+    {
+        var SchoolID = $("#ddlSchoolName").val();
+        callServiceMethodForDDl(JSON.stringify([val,SchoolID]), "/api/PayrollAPI", "getGradebeEmployeeId", "ddlGradeSelect", false, "", "", "", "");
+
+    }
+
+    function getSalryDetails(val) {
+        var salry;
+        var leaveSalary;
+
+        salry = {
+            Type: "Earning",
+            Id: val,
+             SchoolID : $("#ddlSchoolName").val()
+        }
+        callJTemplateServiceMethod(JSON.stringify(salry), "/api/PayrollAPI", "getEmployeePayrollHeadByGradId",
+                 "tbodyEmployeeEarning", "tbodyEmployeeEarningJTemplte", true, countTotalEarningSalary, "", "", "");
+
+        salry = {
+            Type: "Deduction",
+            Id: val,
+           SchoolID : $("#ddlSchoolName").val()
+        }
+        callJTemplateServiceMethod(JSON.stringify(salry), "/api/PayrollAPI", "getEmployeePayrollHeadByGradId",
+                 "tbodyEmployeeDeduction", "tbodyEmployeeDeductionJTemplte", true, getSalryDetails_scs, "", "", "");
+
+        if (getControlValue("txtNoLeave") != "" && getControlValue("txtNoLeave") != "")
+        {
+            leaveSalary = {
+                Type: "Earning",
+                Id: val,
+               SchoolID :$("#ddlSchoolName").val()
+            }
+            callJTemplateServiceMethod(JSON.stringify(leaveSalary), "/api/PayrollAPI", "getEmployeePayrollHeadByGradId",
+                     "tbodyEmployeeEarningAfterLeave", "tbodyEmployeeEarningAfterLeaveJTemplte", true, countTotalEarningSalaryAfterLeave, "", "", "");
+
+            leaveSalary = {
+                Type: "Deduction",
+                Id: val,
+                SchoolID: $("#ddlSchoolName").val()
+            }
+            callJTemplateServiceMethod(JSON.stringify(leaveSalary), "/api/PayrollAPI", "getEmployeePayrollHeadByGradId",
+                     "tbodyEmployeeDeductionAfterLeave", "tbodyEmployeeDeductionAfterLeaveJTemplte", true, countTotalDeductionSalaryAfterLeave, "", "", "");
+
+        }
+    }
+
+    function countTotalEarningSalaryAfterLeave(p1,p2,p3,datas)
+    {
+        var noOfLeave = getControlValue("txtNoLeave");
+        var totaldayinMonth = getControlValue("txtNoOfDayInMoth");
+        var totalSalarydayinMonth = getControlValue("txtSalaryInMonthDay");
+        var onDaysalary;
+        var afteleavesalry;
+        var totalEarning = 0;
+        var totlsaldaimonth = 0;
+        var notworkingdays = parseInt(totaldayinMonth) - parseInt(totalSalarydayinMonth);
+        var notworkingsalary = 0;
+        var salar = 0;
+        for (var i = 0; i < datas.length; i++)
+        {
+            onDaysalary = parseInt(datas[i].Extra10) / parseInt(totaldayinMonth)
+            totlsaldaimonth = Math.round(parseFloat(totalSalarydayinMonth) * parseFloat(onDaysalary))
+
+            afteleavesalry = Math.round(parseFloat(onDaysalary) * parseFloat(noOfLeave));
+
+            salar = parseFloat(totlsaldaimonth) - parseFloat(afteleavesalry);
+            setControlValue("tdEarningAmtAfterLeave_" + datas[i].Id, Math.round(parseInt(salar)));
+
+            totalEarning += parseInt(Math.round(parseInt(salar)));
+            //if (totaldayinMonth == totalSalarydayinMonth) {
+            //    onDaysalary = parseInt(datas[i].Extra10) / parseInt(totaldayinMonth)
+            //  //  alert(onDaysalary);
+            //    afteleavesalry = Math.round(parseFloat(onDaysalary) * parseFloat(noOfLeave));
+
+            //    setControlValue("tdEarningAmtAfterLeave_" + datas[i].Id, Math.round(parseInt(datas[i].Extra10) - afteleavesalry));
+
+            //    totalEarning += parseInt(Math.round(parseInt(datas[i].Extra10) - afteleavesalry));
+            //}
+            //else {
+
+            //    onDaysalary = parseInt(datas[i].Extra10) / parseInt(totaldayinMonth)
+            //    totlsaldaimonth = Math.round(parseFloat(totalSalarydayinMonth) * parseFloat(onDaysalary))
+
+            //    afteleavesalry = Math.round(parseFloat(onDaysalary) * parseFloat(noOfLeave));
+
+            //    salar = parseFloat(totlsaldaimonth) - parseFloat(afteleavesalry);
+            //    setControlValue("tdEarningAmtAfterLeave_" + datas[i].Id, Math.round(parseInt(salar)));
+
+            //    totalEarning += parseInt(Math.round(parseInt(salar)));
+
+            //}
+        }
+
+     
+    
+
+
+        $("#tdTotalEarningAfterLeave").html(totalEarning + " /-");
+
+
+
+    }
+
+    function countTotalDeductionSalaryAfterLeave(p1,p3,p3,datas)
+    {
+        var basicsalry = 0;
+        var percent = 0;
+        var pftotaldeduction = 0;
+        var esitotaldeduction = 0;
+        var totadedducinper = 0;
+       
+        
+       
+        setTimeout(function () {
+            var totalGross = $("#tdTotalEarningAfterLeave").html().split(' ')[0];
+            $("#tbodyEmployeeEarningAfterLeave td:first-child").each(function () {
+                if (this.id.split('_')[1] == "Basic") {
+                    basicsalry += parseInt($("#tdEarningAmtAfterLeave_" + $(this).attr("rahulbharti")).html());
+                }
+
+
+            })
+
+        for (var k = 0; k < datas.length; k++) {
+            if (datas[k].Code == "Percent") {
+                percent = datas[k].Extra10;
+                if (datas[k].Name == "PF") {
+                    pftotaldeduction = parseInt(basicsalry * percent) / 100;
+                    setControlValue("txtdeduction_" + datas[k].Id, Math.round(pftotaldeduction));
+                    setControlValue("txtAmt_" + datas[k].Id, "Amount");
+
+                }
+                if (datas[k].Name == "ESI") {
+                
+                    esitotaldeduction = parseInt(totalGross * percent) / 100;
+                    setControlValue("txtdeduction_" + datas[k].Id, Math.round(esitotaldeduction));
+                    setControlValue("txtAmt_" + datas[k].Id, "Amount");
+                }
+
+                if (datas[k].Code == "Amount") {
+                    setControlValue("tdTotalDeductionAfterLeaver", parseInt(pftotaldeduction + esitotaldeduction) + " /-");
+                }
+                else if (datas[k].Code == "Percent") {
+                    if (datas[k].Name == "ESI")
+                    {
+                        totadedducinper += esitotaldeduction;
+                        setControlValue("tdTotalDeductionAfterLeaver", parseInt(totadedducinper) + " /-");
+                    }
+                    else {
+                        totadedducinper += pftotaldeduction;
+                        setControlValue("tdTotalDeductionAfterLeaver", parseInt(totadedducinper) + " /-");
+                    }
+                 //   setControlValue("tdTotalDeductionAfterLeaver", parseInt(totadedducinper + esitotaldeduction));
+                }
+                else {
+                    setControlValue("tdTotalDeductionAfterLeaver", parseInt(totadedducinper + esitotaldeduction) + " /-");
+                }
+
+
+            }
+            else {
+                totadedducinper += parseInt(datas[k].Extra10);
+                setControlValue("tdTotalDeductionAfterLeaver", totadedducinper + " /-");
+
+            }
+
+        }
+        }, 2000)
+
+        setTimeout(function () {
+            setControlValue("spNetsalary", parseInt($("#tdTotalEarningAfterLeave").html().split(' ')[0] - getControlValue("tdTotalDeductionAfterLeaver").split(' ')[0]) + " /-");
+
+        }, 2000)
+    }
+
+   
+
+    function getSalryDetails_scs(p1, p2, p3, datas) {
+
+        $("#showUsingGrade").fadeIn(1500);
+     var   salry = {
+            Type: "Earning",
+         Id: getControlValue("ddlGradeSelect"),
+               SchoolID: $("#ddlSchoolName").val()
+        }
+        callJTemplateServiceMethod(JSON.stringify(salry), "/api/PayrollAPI", "getEmployeePayrollHeadByGradId",
+                 "tbodyEmployeeEarning", "tbodyEmployeeEarningJTemplte", true, getSalryDetails_scs_Scs, datas, "", "");
+    }
+
+    function getSalryDetails_scs_Scs(p1, p2, p3, datas)
+    {
+        var basicsalry = 0;
+        var percent = 0;
+        var pftotaldeduction=0;
+        var esitotaldeduction = 0;
+        var totadedducinper = 0;
+        var totalGross=$("#tdTotalEarning").html().split(' ')[0];
+       
+        for (var j = 0; j < datas.length; j++)
+        {
+            if (datas[j].Name == "Basic")
+            {
+                basicsalry += parseInt(datas[j].Extra10);
+            }
+        }
+
+
+
+
+
+
+
+        for (var k = 0; k < p1.length; k++)
+        {
+            if (p1[k].Code == "Percent") {
+                percent = p1[k].Extra10;
+                if (p1[k].Name == "PF") {
+                    pftotaldeduction = parseInt(basicsalry * percent) / 100;
+
+                }
+                if (p1[k].Name == "ESI") {
+
+                    esitotaldeduction = parseInt(totalGross * percent) / 100;
+                }
+
+
+
+
+
+                if (p1[k].Code == "Amount") {
+                    setControlValue("tdTotalDeduction", parseInt(pftotaldeduction + esitotaldeduction));
+                }
+                else if (p1[k].Code == "Percent") {
+                    if (p1[k].Name == "ESI") {
+                        totadedducinper += esitotaldeduction;
+                        setControlValue("tdTotalDeduction", parseInt(totadedducinper));
+                    }
+                    else {
+                        totadedducinper += pftotaldeduction;
+                        setControlValue("tdTotalDeduction", parseInt(totadedducinper));
+                    }
+                    //   setControlValue("tdTotalDeductionAfterLeaver", parseInt(totadedducinper + esitotaldeduction));
+                }
+
+
+
+
+             //   setControlValue("tdTotalDeduction", parseInt(pftotaldeduction + esitotaldeduction)+" /-");
+
+
+            }
+            else {
+                totadedducinper += parseInt(p1[k].Extra10);
+                setControlValue("tdTotalDeduction", totadedducinper + " /-");
+
+            }
+
+        }
+    }
+
+
+    function countTotalEarningSalary(p1,p2,p3,datas)
+    {
+        var totalEarning = 0;
+        for (var i = 0; i < datas.length; i++)
+        {
+            totalEarning += parseInt(datas[i].Extra10);
+        }
+        
+
+        $("#tdTotalEarning").html(totalEarning+" /-");
+    }
+
+    function saveEmployeeSalaryDetails()
+    {
+        var salary = {
+        Id : getControlValue("txtSalaryId"),
+        Designation : getControlValue("ddlDesignation"),
+        EmployeeName : getControlValue("ddelSelectEmployee"),
+        FromDate : getControlValue("txtStartDate"),
+        ToDate : getControlValue("txtEndDate"),
+        NoOfLeave : getControlValue("txtNoLeave"),
+        GradeName : getControlValue("ddlGradeSelect"),
+        Status : getControlValue("chkStatus"),
+        
+        MonthlyGross : getControlValue("tdTotalEarning").split(' ')[0],
+        MonthlyDeduction : getControlValue("tdTotalDeduction").split(' ')[0],
+        GrossEarning : getControlValue("tdTotalEarningAfterLeave").split(' ')[0],
+        GrossDeduction : getControlValue("tdTotalDeductionAfterLeaver").split(' ')[0],
+        NetSalary: getControlValue("spNetsalary").split(' ')[0],
+        TotalDayInMonth: getControlValue("txtNoOfDayInMoth"),
+        SalaryDays: getControlValue("txtSalaryInMonthDay"),
+        SchoolID: getControlValue("ddlSchoolName")
+        }
+
+        var ddl = JSON.stringify(salary)
+
+
+        callServiceMethod(ddl, "/api/PayrollAPI", "saveEmployeeSalaryDetails", false, "", "", false, "", true, saveEmployeeSalaryDetails_scs, "", "", "");
+
+    }
+
+    function saveEmployeeSalaryDetails_scs(p1, p2, p3, datas)
+    {
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+            if (datas != "") {
+                if (datas == "Salary Already Paid for this Months")
+                {
+                    alert("Salary Already Paid for this Months");
+                    $("#loader").fadeOut();
+                    return false;
+                }
+                if (datas == "Grade already Exists") {
+                    alert(datas);
+                }
+                else {
+                    var salryhead = new Array();
+                    var salry;
+                    $("#tbodyEmployeeEarningAfterLeave td:first-child").each(function () {
+
+                        salry = {
+                            Id: datas,
+                            HeadId: $(this).attr("rahulbharti"),
+                            Amount: $("#tdEarningAmtAfterLeave_" + $(this).attr("rahulbharti")).html(),
+                            Type: 'Amount',
+                            HeadType: "Earning"
+                        }
+                        salryhead.push(salry);
+
+
+                    })
+
+                    $("#tbodyEmployeeDeductionAfterLeave td:first-child").each(function () {
+
+                        salry = {
+                            Id: datas,
+                            HeadId: $(this).attr("bhharti"),
+                            Amount: $("#txtdeduction_" + $(this).attr("bhharti")).html(),
+                            Type: "Amount",
+                            HeadType: "Deduction"
+                        }
+                        salryhead.push(salry);
+
+                    })
+
+                    var ddl = JSON.stringify(salryhead)
+
+
+                    callServiceMethod(ddl, "/api/PayrollAPI", "saveEmployeeSalaryDettailsStructure", false, "", "", false, "", true, saveEmployeeSalaryDettailsStructure_scs_scs, "", "", "");
+                }
+
+            }
+        }
+    }
+
+    function saveEmployeeSalaryDettailsStructure_scs_scs(p1, p2, p3, datas)
+    {
+        $("#loader").fadeOut();
+        swal({
+            title: datas,
+            text: "",
+            icon: "success",
+            button: "Ok!",
+        });
+        setTimeout(function () {
+            location.href = "/Payroll/ViewEmployeeSalaryDetails";
+        }, 2000)
+        //alert(datas);
+    }
+
+  
+  //  tdTotalDeduction
+</script>
+<style type="text/css">
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+   .grid td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    .grid {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        .grid td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        .grid tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .grid tr:hover {
+            background-color: #ddd;
+        }
+
+        .grid th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                ddlDesignation: {
+                    selectcheck: true
+                },
+                ddelSelectEmployee: {
+                    selectcheck1: true
+                },
+                ddlGradeSelect: {
+                    selectcheck2: true
+                } 
+                
+                
+
+              
+
+
+
+            },
+            messages: {
+
+                ddlGradeSelect: "Please Select Grade",
+                ddlDesignation: "Please Select Designation",
+                ddelSelectEmployee: "Please Select Employee"
+
+
+            }
+        })
+        jQuery.validator.addMethod('selectcheck', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else if (value == null)
+            {
+                return (value != null);
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+
+        jQuery.validator.addMethod('selectcheck1', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else if (value == null) {
+                return (value != null);
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+        jQuery.validator.addMethod('selectcheck2', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else if (value == null) {
+                return (value != null);
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+
+
+    });
+</script>

@@ -1,0 +1,188 @@
+﻿
+@{
+    ViewBag.Title = "LeaveStatus";
+    // Layout = "~/Views/Shared/_LayoutEmployee.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Employee Leave Request</h3>
+                </div>
+                <div class="box-body">
+                    <div class="form-group">
+                         <div>
+
+                            <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                <thead>
+                                    <tr>
+                                        <th>Emp. Code</th>
+                                        <th>Photo</th>
+                                        <th>Name</th>
+                                        <th>Department</th>
+                                        <th>Designation</th>
+                                        <th>Leave Date</th>
+                                        <th>Leave Type</th>
+                                        <th>Leave In day</th>
+                                        <th>Status</th>
+                                     </tr>
+                                </thead>
+                                <tbody id="tbodyEmployeeLeaveRequestDetails"></tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <script type="text/html" id="tbodyEmployeeLeaveRequestDetailsJTemplte">
+                {#foreach $T as Datashort}
+                <tr>
+                    <td>
+                        { $T.Datashort.Employeecode}
+                    </td>
+                    <td>
+                        <img src="{ $T.Datashort.ImageUpload}" alt="#" />
+                    </td>
+                    <td>
+                        { $T.Datashort.FName}
+                    </td>
+                    <td>
+                        { $T.Datashort.Department}
+                    </td>
+                    <td>
+                        { $T.Datashort.Designation}
+                    </td>
+                    <td>
+                        { $T.Datashort.Extra2}
+                    </td>
+                    <td>
+                        { $T.Datashort.Extra4}
+                    </td>
+                    <td>
+                        { $T.Datashort.Extra3}
+                    </td>
+                    <td>
+                        <span class="{ $T.Datashort.Extra10}">{ $T.Datashort.Status}</span>
+                    </td>
+                  
+                </tr>
+                {#/for}
+            </script>
+
+
+        </div>
+
+</section>
+<!-- DataTables -->
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var id = sessionStorage.getItem("EmpId");
+
+        if (id != "") {
+            $("#loader").fadeIn();
+
+            var Parameters = {
+
+                
+               
+                val: sessionStorage.getItem("EmpId"),
+               val1 :sessionStorage.getItem("SchoolID")
+            }
+            var ddl = JSON.stringify(Parameters);
+
+
+            callJTemplateServiceMethod(ddl, "/api/EmployeeAPI", "getEmployeeLeaveRequestById",
+                 "tbodyEmployeeLeaveRequestDetails", "tbodyEmployeeLeaveRequestDetailsJTemplte", true, successMsg, "", "", "");
+        }
+    });
+    function successMsg(p1, p2, p3, datas)
+    {
+         setTimeout(function () {
+            $('#example1').DataTable();
+         }, 1000);
+         $("#loader").fadeOut();
+    }
+
+  
+</script>
+<style type="text/css">
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>

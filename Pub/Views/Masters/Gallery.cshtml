@@ -1,0 +1,669 @@
+﻿
+@{
+    ViewBag.Title = "Gallery";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+
+<section class="content" style="overflow-x: scroll;width:100%">
+    <div class="row">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">School Gallery</h4>
+                    </div>
+                    <form role="form" id="form1" name="form1">
+                        <div class="panel-body">
+                            <div class="col-sm-6">
+                                <div class="panel-body">
+                                    <div class="form-group">
+
+                                        <div class="row">
+                                            <label for="reg_input_name" class="req">Title <span class="requird">*</span></label>
+                                            <input maxlength="45" class="form-control" name="Imagetitle" id="Imagetitle" type="text">
+                                        </div>
+                                        <div class="row">
+
+                                           
+
+                                            <label for="reg_input_name" class="req">Description <span class="requird">*</span></label>
+                                            <textarea class="form-control" name="ImageDescription" id="ImageDescription" type="text"></textarea>
+
+
+
+                                        </div>
+                                        <div class="row">
+                                            <input type="checkbox" id="chkstatus" ng-model="chkstatus"> Active
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                @*<div class="col-sm-3">     </div>*@
+
+                                <div class="col-sm-6">
+
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">Upload Images in School Gallery</h4>
+                                        </div>
+                                        <div class="panel-body">
+                                            <div>
+                                                <div class="form-group col-lg-6">
+                                                    <label for="reg_input_logo">Upload Image</label>
+                                                    <input id="GalleryImage" type="file">
+                                                </div>
+                                                
+                                                <div>
+
+                                                </div>
+                                            </div>
+                                            <div id="divDocumentUpload"></div>
+                                            <div class="form-group col-lg-6"></div>
+                                            <div class="form-group col-lg-6">
+                                                <div class="form-group">
+                                                    <input class="btn btn-info" id="btnSave" onclick="saveimageDetails()" type="button" value="Save">  <input class="btn btn-info" id="btnSave" onclick="Clearvalues()" type="button" value="Reset">
+                                                    <input type="hidden" id="hdnID" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                            <div class="alert alert-success centerSuccess" id="divSuccessMsg" style="display:none">
+
+                            </div>
+
+                            @*<div class="form-group">*@
+
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">View Gallery Details</h3>
+                </div>
+                <div class="box-body">
+                    <div class="form-group">
+                        @*<a href="/Employee/EmpAdminAddEmployee" style="width: 150px;float: right;margin-right: 8px" class="btn btn-block btn-primary">Add New Employee</a>*@
+                        <div style="height:40px"></div>
+                        <div>
+
+                            <table id="example1" @*style="width:1200px;"*@ class="table table-bordered table-striped tbl20 htmlTempletes">
+                                <thead>
+                                    <tr>
+                                        <th>Sno</th>
+                                        <th>Title</th>
+                                        <th>Image</th>
+                                        <th>Description</th>
+                                        <th>Status</th>
+                                        <th>Download</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyEmployeeDetails"></tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <script type="text/html" id="divEmployeeDetailsJTemplte">
+                {#foreach $T as Datashort}
+                <tr>
+                    <td>
+                        { $T.Datashort.Sno}
+                    </td>
+                    <td>
+                        { $T.Datashort.ImageTitle}
+                    </td>
+                    <td>
+                        <img style="height:60px;width:70px" src="{ $T.Datashort.image}" alt="#" />
+                    </td>
+                    <td>
+                        { $T.Datashort.ImageDesc}
+                    </td>
+                    <td>
+                        { $T.Datashort.StatusShow}
+                    </td>
+                   
+                    <td>
+                        <a href="{ $T.Datashort.image}" class="{ $T.Datashort.ImageTitle}" download>Download</a>
+                    </td>
+
+                   
+                    
+
+                    <td>
+
+
+                        <i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" onclick="Edit({ $T.Datashort.ID },'{ $T.Datashort.ImageTitle}',{ $T.Datashort.status},'{ $T.Datashort.ImageDesc}')"></i>
+
+
+
+                        <i class="fa fa-fw fa-trash" style="cursor:pointer" onclick="deleteImageById({ $T.Datashort.ID})"></i>
+
+                    </td>
+                </tr>
+                {#/for}
+            </script>
+
+
+        </div>
+        <!-- /.row -->
+        <!-- Modal -->
+
+    </div>
+</section>
+
+<!-- DataTables -->
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+
+
+
+<link href="~/js/PDFExcelDatatable/buttons.dataTables.min.css" rel="stylesheet" />
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+<script src="~/js/jsExcel/tableExport.js"></script>
+<script src="~/js/jsExcel/jquery.base64.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script>
+<script src="~/js/jsExcel/html2canvas.js"></script>
+
+
+<script src="~/js/jsExcel/base64.js"></script>
+
+
+
+
+<script src="~/js/PDFExcelDatatable/dataTables.buttons.min.js"></script>
+<script src="~/js/PDFExcelDatatable/jszip.min.js"></script>
+<script src="~/js/PDFExcelDatatable/pdfmake.min.js"></script>
+<script src="~/js/PDFExcelDatatable/vfs_fonts.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.html5.min.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.print.min.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.colVis.min.js"></script>
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#hdnID").val(0);
+        $("#chkstatus").prop('checked', true)
+        $("#GalleryImage").change(function () {
+            var files = !!this.files ? this.files : [];
+
+            var iSize = (files[0].size / 1024);
+            iSize = (Math.round(iSize * 100) / 100)
+            var ext = $('#GalleryImage').val().split('.').pop().toLowerCase();
+            if ($.inArray(ext, ['png', 'jpg', 'jpeg']) == -1) {
+                $("#inputFile").val("");
+                $("#GalleryImage").val("");
+                alert('invalid extension,please upload jpg,jpeg,png');
+
+                return;
+            }
+            if (iSize > 1000) {
+                $("#inputFile").val("");
+                $("#GalleryImage").val("");
+                alert("Image size must be less than 1 Mb");
+
+                return;
+            }
+        });
+
+        $("#txtSchoolLogo").change(function () {
+
+            var files = !!this.files ? this.files : [];
+            if (!files.length || !window.FileReader) return; // Check if File is selected, or no FileReader support
+            if (/^image/.test(files[0].type)) { //  Allow only image upload
+                var ReaderObj = new FileReader(); // Create instance of the FileReader
+                ReaderObj.readAsDataURL(files[0]); // read the file uploaded
+                ReaderObj.onloadend = function () { // set uploaded image data as background of div
+                    $("#ImgSchoologo").show();
+                    $("#ImgSchoologo").css("background-image", "url(" + this.result + ")");
+                }
+            } else {
+
+                alert("Upload an image");
+            }
+        });
+
+
+
+
+        $("#loader").fadeIn();
+        var t = $('#example1').DataTable();
+        t.destroy();
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callJTemplateServiceMethod(JSON.stringify([SchoolID]), "/api/Default", "GetAllGalleryImage",
+            "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+    });
+    function successMsg(p1, p2, p3, datas)
+    {
+        setTimeout(function () {
+            $('#example1').DataTable({
+                //destroy: true,
+
+
+
+
+                //"pageLength": 10,
+                "autoWidth": false,
+                paging: true,
+                searching: true,
+                margin: screenLeft,
+                bRetrieve: true,
+                bDestroy: true,
+                'columnDefs': [{
+                    "targets": [-1,-4],
+                    "orderable": false,
+
+                },
+                    { "width": "30px", "targets": -3 },
+                    { "width": "30px", "targets": -1 },
+
+                ],
+
+
+            });
+        }, 1000);
+        $("#loader").fadeOut();
+    }
+
+
+    function deleteImageById(Id) {
+        var result = window.confirm('Are you sure to delete this record?');
+        if (result == true) {
+            var Id = Id;
+            $.ajax({
+                type: "Get",
+                url: "@Url.Content("~/api/Default/deleteGalleryImageById")",
+                contentType: "application/json; charset=utf-8",
+                data: { Id: Id },
+                dataType: "json",
+                success: function (b) {
+                    $("#loader").fadeOut();
+                    var t = $('#example1').DataTable();
+                    t.destroy();
+                    var SchoolID = sessionStorage.getItem("SchoolID");
+                    callJTemplateServiceMethod(JSON.stringify([SchoolID]), "/api/Default", "GetAllGalleryImage",
+                        "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+                    $("#divSuccessMsg").fadeIn();
+                    $("#divSuccessMsg").html("<strong>Success!</strong> " + b);
+                    setTimeout(function () {
+                        $("#divSuccessMsg").fadeOut();
+
+
+                    }, 2000)
+                },
+
+                error: function () {
+
+                }
+            });
+        }
+    }
+
+    function successMsg1(p1, p2, p3, datas) {
+        setTimeout(function () {
+
+            $('#example1').DataTable({
+
+                'columnDefs': [{
+                    "targets":[-1,-2,-7],
+                    "orderable": false
+
+                }],
+
+
+            })
+        }, 1000);
+        $("#loader").fadeOut();
+    }
+
+    function saveimageDetails ()
+    {
+        debugger;
+        var IDD = $("#hdnID").val();
+        if (IDD == 0) {
+            var image = $("#GalleryImage").val();
+            var imagetitle = $("#Imagetitle").val();
+            if (image == "") {
+
+
+                $("#divSuccessMsg").fadeIn();
+                $("#divSuccessMsg").html("<strong>Hellow!</strong> " + "please upload image first");
+                setTimeout(function () {
+                    $("#divSuccessMsg").fadeOut();
+
+
+                }, 2000)
+
+            }
+            else if (imagetitle == "") {
+
+                $("#divSuccessMsg").fadeIn();
+                $("#divSuccessMsg").html("<strong>Hellow!</strong> " + "please give Title to Image");
+                setTimeout(function () {
+                    $("#divSuccessMsg").fadeOut();
+
+
+                }, 2000)
+
+            }
+            else {
+                var imagetitle = $("#Imagetitle").val();
+                if (imagetitle == "") {
+
+                    $("#divSuccessMsg").fadeIn();
+                    $("#divSuccessMsg").html("<strong>Hellow!</strong> " + "please give Title to Image");
+                    setTimeout(function () {
+                        $("#divSuccessMsg").fadeOut();
+
+
+                    }, 2000)
+
+                }
+                else
+                {
+                    var ID = $("#hdnID").val();
+                    var ImageTitle = $("#Imagetitle").val();
+                    var imageDescription = $("#ImageDescription").val();
+                    var Status1 = $("#chkstatus").prop('checked');
+
+                    var SchoolID = sessionStorage.getItem("SchoolID");
+                    $.ajax({
+                        type: "POST",
+                        url: "/api/Default/SaveGalleyDetails",
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify([SchoolID, ImageTitle, imageDescription, Status1, ID]),
+                        success: function (datas) {
+                            if (datas == "-1") {
+                                alert("Hi");
+                            }
+                            else {
+                                $("#loader").fadeIn();
+                                SaveGalleyImage(datas)
+                            }
+
+
+                        }
+
+
+
+                    });
+
+
+                }
+
+               
+            }
+
+
+        }
+        else
+        {
+            var ID = $("#hdnID").val();
+            var ImageTitle = $("#Imagetitle").val();
+            var imageDescription = $("#ImageDescription").val();
+            var Status1 = $("#chkstatus").prop('checked');
+
+            var SchoolID = sessionStorage.getItem("SchoolID");
+            $.ajax({
+                type: "POST",
+                url: "/api/Default/SaveGalleyDetails",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify([SchoolID, ImageTitle, imageDescription, Status1, ID]),
+                success: function (datas) {
+                    if (datas == "-1") {
+
+                        alert("Soething Went wring ,try again");
+                    }
+                    else {
+                        $("#loader").fadeIn();
+                        SaveGalleyImage(datas)
+                    }
+
+
+                }
+
+
+
+            });
+
+        }
+
+
+
+    }
+
+    function Edit(id ,ImageT, statusa,ImageDess)
+    {
+       
+        $("#hdnID").val(id);
+        $("#Imagetitle").val(ImageT);
+        $("#ImageDescription").val(ImageDess);
+        //var Status1 = status
+        $("#chkstatus").prop('checked', statusa);
+        //$("#ImageTitle").val(ImageTitle);
+        //$("#status").val(ImageTitle);
+    }
+
+    function SaveGalleyImage(datas) {
+
+        var datda = datas.split('***');
+        var data = new FormData();
+
+        var files = $("#GalleryImage").get(0).files;
+        // var files2 = $("#fileUpload2").get(0).files;
+
+        // Add the uploaded image content to the form data collection
+        if (files.length > 0) {
+            data.append("UploadedImage", files[0]);
+        }
+        data.append("Id", datda[0]);
+
+
+
+
+        for (var i = 0; i < $("#divDocumentUpload input[type=file]").length; i++) {
+            files = $("#FileUpload" + i + "").get(0).files;
+            data.append("UploadedImage" + i + "", files[0]);
+            data.append("UploadedImageId" + i + "", $("#FileUpload" + i + "").attr("rahul"));
+        }
+       
+
+
+
+
+        $.ajax({
+            type: "POST",
+            url: "/api/Default/SaveGalleryImage1",
+            contentType:false,
+            processData: false,
+            data: data,
+            success: function (data) {
+                if (data == "-1") {
+                    var IDD = $("#hdnID").val();
+                    if (IDD == 0) {
+                        $("#loader").fadeOut();
+
+                        $("#divSuccessMsg").fadeIn();
+                        $("#divSuccessMsg").html("<strong>Success!</strong> " + "School gallery details added Successfully");
+                        setTimeout(function () {
+                            $("#divSuccessMsg").fadeOut();
+                            Clearvalues();
+                            $("#loader").fadeIn();
+                            var t = $('#example1').DataTable();
+                            t.destroy();
+                            var SchoolID = sessionStorage.getItem("SchoolID");
+                            callJTemplateServiceMethod(JSON.stringify([SchoolID]), "/api/Default", "GetAllGalleryImage",
+                                "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+                        }, 2000)
+                    }
+                    else
+                    {
+                        $("#loader").fadeOut();
+
+                        $("#divSuccessMsg").fadeIn();
+                        $("#divSuccessMsg").html("<strong>Success!</strong> " + "School gallery details Updated Successfully");
+                        setTimeout(function () {
+                            $("#divSuccessMsg").fadeOut();
+                            Clearvalues();
+                            $("#loader").fadeIn();
+                            var t = $('#example1').DataTable();
+                            t.destroy();
+                            var SchoolID = sessionStorage.getItem("SchoolID");
+                            callJTemplateServiceMethod(JSON.stringify([SchoolID]), "/api/Default", "GetAllGalleryImage",
+                                "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+                        }, 2000)
+
+                    }
+                  
+                }
+                else
+                {
+                    var IDD = $("#hdnID").val();
+                    if (IDD == 0) {
+                        $("#loader").fadeOut();
+                        $("#divSuccessMsg").fadeIn();
+                        $("#divSuccessMsg").html("<strong>Success!</strong> " + "Image Added To School Gallery");
+                        setTimeout(function () {
+                            $("#divSuccessMsg").fadeOut();
+                            Clearvalues();
+                            $("#loader").fadeIn();
+                            var t = $('#example1').DataTable();
+                            t.destroy();
+                            var SchoolID = sessionStorage.getItem("SchoolID");
+                            callJTemplateServiceMethod(JSON.stringify([SchoolID]), "/api/Default", "GetAllGalleryImage",
+                                "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+                        }, 2000)
+                    }
+                    else
+                    {
+                        $("#loader").fadeOut();
+                        $("#divSuccessMsg").fadeIn();
+                        $("#divSuccessMsg").html("<strong>Success!</strong> " + "School Gallery Updated Sucessfully");
+                        setTimeout(function () {
+                            $("#divSuccessMsg").fadeOut();
+                            Clearvalues();
+                            $("#loader").fadeIn();
+                            var t = $('#example1').DataTable();
+                            t.destroy();
+                            var SchoolID = sessionStorage.getItem("SchoolID");
+                            callJTemplateServiceMethod(JSON.stringify([SchoolID]), "/api/Default", "GetAllGalleryImage",
+                                "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+                        }, 2000)
+
+                    }
+                  
+                    //alert("Image Not uploaded");
+                }
+
+            }
+        });
+
+    }
+    function Clearvalues()
+    {
+        $("#GalleryImage").val("");
+        $("#Imagetitle").val("");
+        $("#ImageDescription").val("");
+       
+        $("#chkstatus").prop('checked', true)
+        $("#hdnID").val(0);
+    }
+
+
+
+</script>
+
+
+@*<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#loader").fadeOut();
+      
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                Imagetitle : "required",
+             
+               
+            },
+            messages: {
+
+                Imagetitle: "Please Image Title ",
+            
+
+            }
+        })
+
+
+    });
+</script>*@
+<style type="text/css">
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+
+

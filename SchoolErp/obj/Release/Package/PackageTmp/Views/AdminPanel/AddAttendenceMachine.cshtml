@@ -1,0 +1,471 @@
+﻿
+@{
+    ViewBag.Title = "AddAttendenceMachine";
+    Layout = "~/Views/Shared/_LayoutSuperAdmin.cshtml";
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+
+
+<style type="text/css">
+    .imgIcon {
+        width: 0.5%;
+        height: 0.5%;
+    }
+
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 8px;
+            padding-bottom: 8px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+
+<section class="content">
+    <div class="row">
+        <!-- left column -->
+        <div class="col-md-6">
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Add RealTime Machine</h3>
+                </div>
+                <!-- /.box-header -->
+                <!-- form start -->
+                <form role="form" id="form1" name="form1">
+                    <div class="alert alert-success centerSuccess" id="divsuccesmsg" style="display:none">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                        <h4>
+                            <i class="icon fa fa-check"></i>
+                            success! <span ng-bind="successMsg"></span>
+                        </h4>
+                    </div>
+                    <div class="box-body">
+                        <div class="form-group">
+
+                            <label for="exampleInputEmail1">School <span class="requird">*</span></label>
+
+
+                            <select class="form-control" id="ddlSchoolName" style="color:black;" name="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name"></select>
+
+
+                        </div>
+
+
+                        <div class="form-group">
+                            <label for="exampleInputEmail1">RealTime Machine NO <span class="requird">*</span></label>
+                            <input name="txtMachineNO" type="text" id="txtMachineNO" placeholder="Machone Number" class="form-control" />
+                        </div>
+                      
+                          
+                        <div class="form-group cntrl">
+                            <label>Type</label>
+                            <select class="form-control" id="MachineType" style="width:250px;">
+
+                                <option >Student</option>
+                                <option >Employee</option>
+                            </select>
+                        </div>
+                       
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="chkstatus" ng-model="chkstatus"> Active
+                            </label>
+                        </div>
+                    </div>
+                    <!-- /.box-body -->
+
+                    <div class="box-footer">
+                        <input type="hidden" id="Hiddenid" name="Hiddenid" />
+                        <input type="button" value="Reset" onclick="clearallFields1()" id="btnsubmit1" class="btn btn-info pull-right">
+                        <input type="button" onclick="saveMachineDetails()" id="btnsubmit" class="btn btn-info pull-right">
+                    </div>
+                    <div class="alert alert-success centerSuccess" id="divSuccessMsg" style="display:none" />
+                </form>
+            </div>
+            <!-- /.box -->
+
+
+
+        </div>
+        <!--/.col (left) -->
+
+
+
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">View Vehicle Details</h3>
+                </div>
+                <div class="box-body">
+                    <div class="form-group">
+                        <div></div>
+                        <div>
+
+                            <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                <thead>
+                                    <tr>
+                                        <th>School</th>
+                                        <th>Machine ID </th>
+                                        <th>Type</th>
+                                        <th>IsActive</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyVehicleDetails"></tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <script type="text/html" id="divVehicleDetailsJTemplte">
+                {#foreach $T as Datashort}
+                <tr>
+                    <td>
+                        {$T.Datashort.School}
+                    </td>
+                    <td>
+                        { $T.Datashort.MachineNo}
+                    </td>
+                    <td>
+                        { $T.Datashort.machinetype}
+                    </td>
+                    
+                    <td>
+                        { $T.Datashort.Status}
+                    </td>
+
+                    <td>
+                        <i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" onclick="editMachineDetails({$T.Datashort.Id})"></i>
+                        &nbsp;
+                        @*<i class="fa fa-fw fa-trash" style="cursor:pointer" onclick="deleteDeviceDetails({ $T.Datashort.ID})"></i>*@
+                    </td>
+                </tr>
+                {#/for}
+            </script>
+
+
+        </div>
+        <!-- /.row -->
+
+
+    </div>
+
+
+    <!-- /.row -->
+</section>
+
+
+
+
+
+
+
+
+
+
+<div class="alert alert-success centerSuccess" id="divSuccessMsg" style="display:none">
+
+</div>
+
+<style type="text/css">
+    .col-sm-6 {
+        margin: 4px;
+    }
+</style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+
+
+
+
+
+<!-- DataTables -->
+@*sidebar issue here*@ 
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+
+
+<script type="text/javascript">
+
+    //callServiceMethodForDDl("", "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+    $("#chkstatus").prop('checked', true);
+    $("#Hiddenid").val(0);
+    $("#btnsubmit").val("Create");
+    var loginuser = (sessionStorage.getItem("userId"));
+    var typeuser = sessionStorage.getItem("type");
+    callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+    $(document).ready(function () {
+        $('#txtInsuranceExpiry').datepicker
+            ({
+                autoclose: true
+            });
+        $('#txtPollutionExpiry').datepicker
+            ({
+                autoclose: true
+            });
+
+
+    });
+
+    $('#txtMobileNo').on("change", function () {
+
+        var lenthcheck = $('#txtMobileNo').val().length;
+        if (lenthcheck <= 9) {
+            alert("Please Enter 10 digit mobile no");
+            $("#txtMobileNo").val("");
+
+        }
+    });
+
+
+    var t = $('#example1').DataTable();
+    t.destroy();
+    //GetALLGpsDeviceDetail
+    callJTemplateServiceMethod("", "/api/EmployeeAPI", "GetALLRealtimeMachine",
+        "tbodyVehicleDetails", "divVehicleDetailsJTemplte", true, successMsg, "", "", "");
+
+
+    function successMsg(p1, p2, p3, datas) {
+        setTimeout(function () {
+            $('#example1').DataTable({
+                "ordering": true,
+                "bInfo": true,
+                paging: true,
+                searching: true,
+                bRetrieve: true,
+                bDestroy: true,
+
+                'columnDefs': [{
+                    "targets": -1,
+                    "orderable": false
+                }],
+                dom: 'lBfrtip',
+                buttons: [
+
+
+                ]
+            });
+        }, 1000);
+
+        $("#loader").fadeOut();
+    }
+
+    function saveMachineDetails() {
+        if ($("#form1").valid()) {
+            //saveGpsDeviceDetails
+            var Machine =
+            {
+                ID: $("#Hiddenid").val(),
+                SchoolID: $("#ddlSchoolName").val(),
+                MachineNO: $("#txtMachineNO").val(),
+                MachineType: $("#MachineType").val(),
+                IsActice: $("#chkstatus").prop('checked')
+            }
+            var dll = JSON.stringify(Machine)
+            $.ajax({
+
+                type: "POST",
+                url: "/api/EmployeeAPI/saveMachineDetails",
+                contentType: "application/json; charset=utf-8",
+                data: dll,
+                success: function (avi) {
+
+                    $("#divSuccessMsg").fadeIn();
+                    $("#divSuccessMsg").html("<strong>Success!</strong> " + avi);
+                    setTimeout(function () {
+                        $("#divSuccessMsg").fadeOut();
+                    }, 2000)
+
+                    var t = $('#example1').DataTable();
+                    t.destroy();
+                    callJTemplateServiceMethod("", "/api/EmployeeAPI", "GetALLRealtimeMachine",
+                        "tbodyVehicleDetails", "divVehicleDetailsJTemplte", true, successMsg, "", "", "");
+                    clearallFields1();
+
+
+                }
+            });
+        }
+
+    }
+
+
+
+
+    function editMachineDetails(id) {
+        $.ajax({
+            type: "Post",
+            url: "/api/EmployeeAPI/EditRealtimeMachine",
+            data: JSON.stringify([id]),
+            contentType: "application/json; charset=utf-8",
+            success: function (datas) {
+                $("#btnsubmit").val("Update");
+                $("#Hiddenid").val(datas.Id);
+                $("#ddlSchoolName").val(datas.SchoolID);
+                $("#txtMachineNO").val(datas.MachineNo);
+                $("#MachineType").val(datas.machinetype);
+                $("#chkstatus").prop('checked', datas.IsActice);
+
+            }
+        });
+
+    }
+
+    function clearallFields1() {
+        $("#Hiddenid").val(0);
+        $("#ddlSchoolName").val(0);
+        $("#txtMachineNO").val("");
+
+        $("#chkstatus").prop('checked', datas.IsActice);
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+
+<style type="text/css">
+
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    .dvImgPreview {
+        background-position: center center;
+        background-size: cover;
+        -webkit-box-shadow: 0 0 1px 1px rgba(0, 0, 0, .3);
+        min-height: 30px;
+        min-width: 30px;
+        height: 100px;
+        width: 100px;
+        max-height: 100px;
+        max-width: 100px;
+    }
+</style>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#loader").fadeOut();
+
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+
+
+
+            rules: {
+
+                txtDeviceNumber: "required",
+                txtMobileNo: "required",
+                ddlSchoolName: {
+
+                    selectcheck: true
+
+                },
+
+
+            },
+            messages: {
+                txtDeviceNumber: "Please Enter VehicleNo Title",
+                txtMobileNo: "Please Enter TotalSeats ",
+                ddlSchoolName: "Please Enter Insurance Expiry Date",
+
+
+
+
+            }
+        })
+        jQuery.validator.addMethod('selectcheck', function (value) {
+            return (value != "0");
+        }, "Please Select State");
+
+    });
+</script>
+
+

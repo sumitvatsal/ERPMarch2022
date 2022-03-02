@@ -1,0 +1,635 @@
+﻿
+@{
+    ViewBag.Title = "ClassTeacherMaster";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Class Teacher Allocation
+    </h1>
+</section>
+<!-- Main content -->
+
+<section class="content">
+
+    <div class="box box-solid">
+        <!-- general form elements -->
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">List</h3>
+            </div>
+            <div class="box-body table-responsive">
+                <div class="form-group">
+                    <a class="btn btn-success btn-sm" href="#" style="float: right;margin-right: 8px" onclick="openModal()"><i class="fa fa-plus-square"></i> Add</a>
+                    <div style="height:40px"></div>
+                    <div id="w2" class="grid-view">
+                        <div>
+                            <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                <thead>
+                                    <tr>
+                                        <th style="width:10%;">Sr no.</th>
+                                        <th>School</th>
+                                        <th>Class</th>
+                                        <th>Class Teacher</th>
+                                        <th>Photo</th>
+                                        <th>Employee Code</th>
+                                        <th>Status</th>
+                                        <th>Edit</th>
+                                        <th style="display:none;"></th>
+                                        <th style="display:none;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyEmployeeDetails"></tbody>
+                            </table>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+            <script type="text/html" id="divEmployeeDetailsJTemplte">
+                {#foreach $T as Datashort}
+                <tr>
+
+                    <td style="width:10%;">
+                        { $T.Datashort.countID}
+                    </td>
+                    <td>
+                        { $T.Datashort.School}
+                    </td>
+                    <td>
+                        { $T.Datashort.classNm}
+                    </td>
+                    <td>
+                        { $T.Datashort.Name}
+                    </td>
+                    <td>
+                        <img src="{ $T.Datashort.Picpath}" alt="#" />
+                    </td>
+                    <td>
+                        { $T.Datashort.EmpID}
+                    </td>
+                    <td>
+                        <span class="{ $T.Datashort.style}" onclick="EditStatus({ $T.Datashort.ID},{ $T.Datashort.Status})">{ $T.Datashort.statusNm} </span>
+                    </td>
+
+                    <td>
+                        @*<a href="javascript:void(0)" id="anchrfModelDeocument{ $T.Datashort.Id}" data-toggle="modal" data-target="#myModal" style="display:none" onclick="ViewDocumentsByEmployeeId({ $T.Datashort.Id},'{ $T.Datashort.ImageUpload}')">View Documents</a>*@
+
+                        @*<button type="button" onclick="confirmVMR('Are you sure? You want to Delete this application',employeeActivateDeactivate,'{ $T.Datashort.Status}',{ $T.Datashort.leave.ID})" class="{ $T.Datashort.Extra10}">{ $T.Datashort.Status}</button>*@
+                        <i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" onclick="Edit({ $T.Datashort.ID }, { $T.Datashort.ClassID }, { $T.Datashort.SectionID }, { $T.Datashort.intEmpID }, { $T.Datashort.Status }, { $T.Datashort.SchoolID })"></i>
+                    </td>
+                    <td style="display:none;">
+                        { $T.Datashort.ID}
+                    </td>
+                    <td style="display:none;">
+                        { $T.Datashort.ClassID}
+                    </td>
+                    <td style="display:none;">
+                        { $T.Datashort.SectionID}
+                    </td>
+                </tr>
+                {#/for}
+            </script>
+
+
+        </div>
+        <!-- /.row -->
+        <!-- Modal -->
+        <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" onclick="refreshControls()">&times;</button>
+                        <h4 class="modal-title">Allocate</h4>
+                    </div>
+                    <div class="modal-body">
+                        @*<div class="col-md-12">
+                                <div class="col-md-4"></div>
+                                <div class="col-md-4">
+                                    <img id="ImgEmployeeImg" style="height: 183px;width: 218px;" alt="" />
+
+
+                                </div>
+                                <div class="col-md-4"></div>
+                                <div style="clear:both"></div>
+                            </div>*@
+                        <form id="form1" name="form1">
+                            <div class="col-md-12">
+                                <div class="box-body">
+                                    <!-- Date -->
+                                    @*<div class="form-group">
+                                            <label>Name:</label>
+                                            <input type="text" class="form-control" id="txtName" placeholder="Enter ...">
+                                        </div>*@
+                                    <!-- Date range -->
+                                    <div class="form-group">
+                                        <label for="Country" class="req">School<span class="requird">*</span></label>
+                                        <select class="form-control" id="ddlSchoolName" name="ddlSchoolName" style="color:black" ng-model="ddlSchoolName" valuefield="Id" textfield="Name"></select>
+
+
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Class:</label>
+                                        <select class="form-control" id="ddlCourse" name="ddlCourse" style="color:black" valuefield="Id" textfield="CourseName" blankRowValue="-1" blankRowText="----Select----"></select>
+                                        <!-- /.input group -->
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Section:</label>
+                                        <select class="form-control" id="ddlSection" name="ddlSection" style="color:black" valuefield="Id" textfield="SectionName" blankRowValue="-1" blankRowText="----Select----"></select>
+                                        <!-- /.input group -->
+                                    </div>
+                                    <!-- /.form group -->
+                                    <div class="form-group">
+                                        <label>Class Teacher:</label>
+                                        <select class="form-control" id="ddlCT" name="ddlCT" style="color:black" valuefield="ID" textfield="Name" blankRowValue="-1" blankRowText="----Select----"></select>
+                                        @*<select class="form-control select2" id="ddlCT" valuefield="EmpID" textfield="Name" blankRowValue="-1" blankRowText="----Select----" style="width:100%;"></select>*@
+                                        <!-- /.input group -->
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="checkbox" id="cbActive" />&nbsp;Active
+                                        <!-- /.input group -->
+                                    </div>
+                                    <div class="box-footer">
+                                        <input type="button" class="btn btn-primary" value="Save Changes" id="Apply" name="Save" />
+                                        <input type="hidden" id="hdnID" />
+                                    </div>
+                                    <!-- /.form group -->
+                                </div>
+                                <!-- /.box-body -->
+
+                            </div>
+                        </form>
+
+
+
+                    </div>
+                    <div class="modal-footer">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+<div class="alert alert-success centerSuccess" id="divSuccessMsg" style="display:none">
+
+</div>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+
+
+
+<link href="~/js/PDFExcelDatatable/buttons.dataTables.min.css" rel="stylesheet" />
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+<script src="~/js/jsExcel/tableExport.js"></script>
+<script src="~/js/jsExcel/jquery.base64.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script>
+<script src="~/js/jsExcel/html2canvas.js"></script>
+
+
+<script src="~/js/jsExcel/base64.js"></script>
+
+
+
+
+<script src="~/js/PDFExcelDatatable/dataTables.buttons.min.js"></script>
+<script src="~/js/PDFExcelDatatable/jszip.min.js"></script>
+<script src="~/js/PDFExcelDatatable/pdfmake.min.js"></script>
+<script src="~/js/PDFExcelDatatable/vfs_fonts.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.html5.min.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.print.min.js"></script>
+<script src="~/js/PDFExcelDatatable/buttons.colVis.min.js"></script>
+
+@*<link rel="stylesheet" href="~/css/bower_components/select2/dist/css/select2.min.css">
+    <script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>*@
+<script type="text/javascript">
+    $(document).ready(function () {
+        document.getElementById("cbActive").checked = true;
+        //callServiceMethodForDDl("", "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        var ddlSchoolName = getControlValue("ddlSchoolName");
+        if (ddlSchoolName != null && (ddlSchoolName != -1) && (ddlSchoolName != undefined)) {
+            callServiceMethodForDDl(JSON.stringify([ddlSchoolName]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+        }
+
+        $("#ddlSchoolName").change(function () {
+            var ddlSchoolName = getControlValue("ddlSchoolName");
+            if (ddlSchoolName != null && (ddlSchoolName != -1) && (ddlSchoolName != undefined)) {
+                callServiceMethodForDDl(JSON.stringify([ddlSchoolName]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+            }
+        });
+
+        //$("#getAllSchoolName").change(function () {
+        //    var getAllSchoolName = getControlValue("getAllSchoolName");
+        //    if (getAllSchoolName != null && (getAllSchoolName != -1) && (getAllSchoolName != undefined)) {
+        //        callServiceMethodForDDl(JSON.stringify([getAllSchoolName]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+        //    }
+        //});
+
+
+        $("#loader").fadeIn();
+        //$("#ddlCT").select2({});
+        //setControlValue("hdnID", 0);
+        //callJTemplateServiceMethod("", "/api/MasterAPI", "getClassTeachers",
+        //    "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+        setControlValue("hdnID", 0);
+        var t = $('#example1').DataTable();
+        t.destroy();
+        var SchoolID = getControlValue("ddlSchoolName");
+        callJTemplateServiceMethod(JSON.stringify([SchoolID]), "/api/MasterAPI", "getClassTeachersBySchool",
+            "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+
+
+        //callServiceMethodForDDl("", "/api/StudentApi", "GetClasses", "ddlCourse", false, "", "", "", "");
+        //callServiceMethodForDDl("", "/api/MasterAPI", "GetCT", "ddlCT", false, "", "", "", "");
+        var SchoolID = getControlValue("ddlSchoolName");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/MasterAPI", "GetCTbySchool", "ddlCT", false, "", "", "", "");
+
+        $("#ddlCourse").change(function () {
+            //var ddlCourse = getControlValue("ddlCourse");
+
+            //if (ddlCourse != null && (ddlCourse != -1) && (ddlCourse != undefined))
+            //{
+            //    callServiceMethodForDDl(JSON.stringify([ddlCourse]), "/api/StudentApi", "GetSections", "ddlSection", false, "", "", "", "");
+            //}
+            var ddlCourse = getControlValue("ddlCourse");
+            var SchoolID = getControlValue("ddlSchoolName");
+            if (ddlCourse != null && (ddlCourse != -1) && (ddlCourse != undefined)) {
+                callServiceMethodForDDl(JSON.stringify([ddlCourse, SchoolID]), "/api/StudentApi", "GetSectionsbyschool", "ddlSection", false, "", "", "", "");
+            }
+        });
+
+
+        //DisableDeleteBtn();
+    });
+
+    $("#Apply").click(function () {
+        if ($("#form1").valid()) {
+            Allocate();
+        }
+
+
+    });
+
+    function openModal() {
+        $('#myModal').modal('show');
+    }
+
+    function Allocate() {
+
+        var status = 0;
+        var ddlCourse = getControlValue("ddlCourse");
+        var ddlSection = getControlValue("ddlSection");
+        var ddlCT = getControlValue("ddlCT");
+        var SchoolID = getControlValue("ddlSchoolName");
+        var x = getControlValue("hdnID");
+        if ($("#cbActive").is(':checked')) {
+            status = 1;
+        }
+        //var id = getControlValue("hdnID");
+        if (ddlCourse != -1 && ddlSection != -1 && ddlCT != -1) {
+
+            var Items = new Array();
+            var ClassTeacher = {
+                ID: x,
+                ClassID: ddlCourse,
+                SectionID: ddlSection,
+                intEmpID: ddlCT,
+                Status: status,
+                SchoolID: SchoolID
+            }
+            Items.push(ClassTeacher);
+
+            $.ajax({
+                url: "/api/MasterAPI/AllocateClassTeacher",// "~/Masters/GetDeptMethod",
+                type: "Post",
+                data: JSON.stringify(Items), //{ Name: name,ddlAcademicYr
+                //// Address: address, DOB: dob },
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+
+                    $("#divSuccessMsg").fadeIn();
+                    //$("#divSuccessMsg").html("<strong>Success!</strong> " + data.statusNm);
+                    alert(data.statusNm);
+                    setTimeout(function () {
+                        $("#divSuccessMsg").fadeOut();
+                    }, 2000)
+
+                    if (data.ID != -1) {
+                        $('#myModal').modal('hide');
+
+                    }
+                    refreshControls();
+
+                   filldata();
+                   
+
+                }
+              
+            });
+
+        }
+
+    }
+    function filldata() {
+        location.reload();
+        var t = $('#example1').datatable();
+        t.destroy();
+        var SchoolID = getControlValue("ddlSchoolName");
+        callJTemplateServiceMethod(JSON.stringify([SchoolID]), "/api/MasterAPI", "getClassTeachersBySchool",
+            "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+    }
+    function refreshControls() {
+        setControlValue("hdnID", 0);
+        setControlValue("ddlCourse", -1);
+        setControlValue("ddlSection", -1);
+        setControlValue("ddlCT", -1);
+        $('#cbActive').prop('checked', false);
+        $("#ddlCourse").removeAttr("disabled");
+        $("#ddlSection").removeAttr("disabled");
+    }
+
+    function Edit(id, classID, sectionID, empID, status, SchoolID) {
+        //alert(p1+" "+p2+" "+p3+" "+p4+" "+p5);
+        setControlValue("hdnID", id);
+
+        setControlValue("ddlCourse", classID);
+        var SchoolID = getControlValue("ddlSchoolName");
+        callServiceMethodForDDl(JSON.stringify([classID, SchoolID]), "/api/StudentApi", "GetSectionsbyschool", "ddlSection", false, "", "", "", "");
+        setTimeout(function () {
+            setControlValue("ddlSection", sectionID);
+            setControlValue("ddlCT", empID);
+            //var eID= $.trim(empID);
+            //var ct=[eID];
+            //$("#ddlCT").val(s).trigger("change");
+        }, 1000);
+        $("#ddlCourse").attr("disabled", true);
+        $("#ddlSection").attr("disabled", true);
+        status == 1 ? $('#cbActive').prop('checked', true) : $('#cbActive').prop('checked', false);
+        setControlValue("ddlSchoolName", SchoolID);
+        openModal();
+        //$("#Apply").hide();
+        //$("#Apply1").show();
+
+    }
+
+    function EditStatus(id, status) {
+        //    $.ajax({
+        //        url: "/api/MasterAPI/AllocateClassTeacher",
+        //        type: "Post",
+        //        data: JSON.stringify(Items),
+        //        contentType: 'application/json; charset=utf-8',
+        //        success: function (data) {
+        //            alert(data.statusNm);
+        //            if (data.ID != -1) {
+        //                $('#myModal').modal('hide');
+
+        //            }
+        //            refreshControls();
+
+        //            callJTemplateServiceMethod("", "/api/MasterAPI", "getClassTeachers",
+        //"tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+        //        }
+        //    });
+    }
+
+    //function successMsg1(p1, p2, p3, datas) {
+
+    //    $("#loader").fadeOut();
+
+    //    setTimeout(function () {
+
+    //        $('#example1').DataTable({
+    //            bRetrieve: true,
+    //            bDestroy: true,
+    //            'columnDefs': [{
+    //                "targets": [-1],
+    //                "orderable": false
+
+    //            }],
+
+
+    //        })
+    //    }, 1000);
+    //}
+
+    function successMsg(p1, p2, p3, datas) {
+
+        setTimeout(function () {
+
+            $('#example1').DataTable({
+                "ordering": true,
+                "bInfo": true,
+                paging: true,
+                searching: true,
+                bRetrieve: true,
+                bDestroy: true,
+                'columnDefs': [{
+                    "targets": -1,
+                    "orderable": false
+
+                }],
+
+
+            })
+        }, 1000);
+        $("#loader").fadeOut();
+    }
+    $("#ddlCT").change(function () {
+        var ct = getControlValue("ddlCT");
+        var x = getControlValue("hdnID");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+
+        if (ct != null && (ct != -1) && (ct != undefined)) {
+            $.ajax({
+                url: "/api/MasterAPI/CheckCTavailability",
+                type: "Post",
+                data: JSON.stringify([ct, x, SchoolID]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    if (data == true) {
+                        alert("Selected Teacher is already allocated.");
+                        setControlValue("ddlCT", -1);
+                    }
+                    else { }
+                }
+            });
+        }
+    });
+
+</script>
+@*<style type="text/css">
+        .oddTr {
+            background-color: #dddddd;
+        }
+
+        /*.htmlTempletes tbody tr:nth-child(2n+1) {
+            background-color: #e1e4e8;
+        }*/
+        #example1 td img {
+            width: 35px;
+            height: 35px;
+            border-radius: 100%;
+        }
+
+
+        #example1 {
+            font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+            #example1 td, #customers th {
+                border: 1px solid #ddd;
+                /*padding: 8px;*/
+            }
+
+            #example1 tr:nth-child(even) {
+                background-color: #f2f2f2;
+            }
+
+            #example1 tr:hover {
+                background-color: #ddd;
+            }
+
+            #example1 th {
+                padding-top: 12px;
+                padding-bottom: 12px;
+                text-align: left;
+                background-color: #367fa9;
+                color: white;
+            }
+    </style>*@
+
+@*ddlSchoolName,ddlCourse,ddlSection,ddlCT*@
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+
+                ddlSchoolName: {
+                    selectcheck: true
+                },
+                ddlCourse: {
+                    selectcheck1: true
+                },
+                ddlSection: {
+                    selectcheck2: true
+                },
+                ddlCT: {
+                    selectcheck3: true
+                },
+            },
+            messages: {
+                ddlSchoolName: "Please Select SchoolName",
+                ddlCourse: "Please Select Course",
+                ddlSection: "Please Select Section",
+                ddlCT: "Please Select ClassTeacher"
+            }
+        })
+        //jQuery.validator.addMethod('selectcheck', function (value) {
+        //    return (parseInt(value) == "");
+        //}, "Please Select SchoolName");
+        jQuery.validator.addMethod('selectcheck', function (value) {
+            if (value == " ") {
+                return (value != ' ');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Course");
+        jQuery.validator.addMethod('selectcheck1', function (value) {
+            if (value == "-1") {
+                return (value != '-1');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Course");
+
+        jQuery.validator.addMethod('selectcheck2', function (value) {
+            if (value == "-1") {
+                return (value != '-1');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Section");
+        jQuery.validator.addMethod('selectcheck3', function (value) {
+            if (value == "-1") {
+                return (value != '-1');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select ClassTeacher");
+
+
+
+    });
+</script>
+
+
+

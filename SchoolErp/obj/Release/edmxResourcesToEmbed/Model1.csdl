@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="smartvidhyaCom1Model" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+  <EntityType Name="Account">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="HeadCode" Type="Int64" Nullable="false" />
+    <Property Name="HeadName" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+    <Property Name="ParentHead" Type="Int64" />
+    <Property Name="PHeadName" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+    <Property Name="HeadLevel" Type="Int32" Nullable="false" />
+    <Property Name="HeadType" Type="String" MaxLength="1" FixedLength="false" Unicode="true" Nullable="false" />
+    <Property Name="IsTransaction" Type="Boolean" Nullable="false" />
+    <Property Name="IsGL" Type="Boolean" Nullable="false" />
+    <Property Name="IsBudget" Type="Boolean" Nullable="false" />
+    <Property Name="IsDepreciation" Type="Boolean" Nullable="false" />
+    <Property Name="CustomerId" Type="Int64" />
+    <Property Name="SupplierId" Type="Int64" />
+    <Property Name="DepreciationRate" Type="Double" Nullable="false" />
+    <Property Name="InsertDate" Type="DateTime" Nullable="false" Precision="3" />
+    <Property Name="InsertUserId" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+    <Property Name="UpdateDate" Type="DateTime" Precision="3" />
+    <Property Name="UpdateUserId" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+    <Property Name="DeleteDate" Type="DateTime" Precision="3" />
+    <Property Name="DeleteUserId" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+    <Property Name="IsActive" Type="Int32" Nullable="false" />
+    <Property Name="EmployeeId" Type="Int64" />
+    <Property Name="ExpenseTypeId" Type="Int64" />
+    <Property Name="BankId" Type="Int64" />
+    <NavigationProperty Name="Accounts1" Relationship="Self.FK_Accounts_Accounts" FromRole="Accounts" ToRole="Accounts1" />
+    <NavigationProperty Name="Account1" Relationship="Self.FK_Accounts_Accounts" FromRole="Accounts1" ToRole="Accounts" />
+  </EntityType>
+  <EntityType Name="SaleDetail">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="ProductId" Type="Int64" Nullable="false" />
+    <Property Name="ProductName" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+    <Property Name="Description" Type="String" MaxLength="500" FixedLength="false" Unicode="true" />
+    <Property Name="UnitId" Type="Int64" Nullable="false" />
+    <Property Name="UnitName" Type="String" MaxLength="250" FixedLength="false" Unicode="true" />
+    <Property Name="Quantity" Type="Double" Nullable="false" />
+    <Property Name="PurchasePrice" Type="Double" Nullable="false" />
+    <Property Name="UnitPrice" Type="Double" Nullable="false" />
+    <Property Name="Discount" Type="Double" Nullable="false" />
+    <Property Name="Total" Type="Double" Nullable="false" />
+    <Property Name="SaleId" Type="Int64" Nullable="false" />
+    <NavigationProperty Name="Sale" Relationship="Self.FK_SaleDetails_Sales" FromRole="SaleDetails" ToRole="Sales" />
+  </EntityType>
+  <EntityType Name="Sale">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="CustomerId" Type="Int64" Nullable="false" />
+    <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
+    <Property Name="Discount" Type="Double" Nullable="false" />
+    <Property Name="TotalDiscount" Type="Double" Nullable="false" />
+    <Property Name="Vat" Type="Double" Nullable="false" />
+    <Property Name="TotalTax" Type="Double" Nullable="false" />
+    <Property Name="ShippingCost" Type="Double" Nullable="false" />
+    <Property Name="GrandTotal" Type="Double" Nullable="false" />
+    <Property Name="NetTotal" Type="Double" Nullable="false" />
+    <Property Name="PaidAmount" Type="Double" Nullable="false" />
+    <Property Name="Due" Type="Double" Nullable="false" />
+    <Property Name="Change" Type="Double" Nullable="false" />
+    <Property Name="Details" Type="String" MaxLength="4000" FixedLength="false" Unicode="true" />
+    <Property Name="PaymentAccount" Type="Int64" />
+    <Property Name="VNo" Type="Int64" Nullable="false" />
+    <NavigationProperty Name="SaleDetails" Relationship="Self.FK_SaleDetails_Sales" FromRole="Sales" ToRole="SaleDetails" />
+  </EntityType>
+  <Association Name="FK_Accounts_Accounts">
+    <End Role="Accounts" Type="Self.Account" Multiplicity="0..1" />
+    <End Role="Accounts1" Type="Self.Account" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Accounts">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Accounts1">
+        <PropertyRef Name="ParentHead" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK_SaleDetails_Sales">
+    <End Role="Sales" Type="Self.Sale" Multiplicity="1" />
+    <End Role="SaleDetails" Type="Self.SaleDetail" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Sales">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="SaleDetails">
+        <PropertyRef Name="SaleId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <EntityContainer Name="smartvidhyaCom1Entities" annotation:LazyLoadingEnabled="true">
+    <EntitySet Name="Accounts" EntityType="Self.Account" />
+    <EntitySet Name="SaleDetails" EntityType="Self.SaleDetail" />
+    <EntitySet Name="Sales" EntityType="Self.Sale" />
+    <AssociationSet Name="FK_Accounts_Accounts" Association="Self.FK_Accounts_Accounts">
+      <End Role="Accounts" EntitySet="Accounts" />
+      <End Role="Accounts1" EntitySet="Accounts" />
+    </AssociationSet>
+    <AssociationSet Name="FK_SaleDetails_Sales" Association="Self.FK_SaleDetails_Sales">
+      <End Role="Sales" EntitySet="Sales" />
+      <End Role="SaleDetails" EntitySet="SaleDetails" />
+    </AssociationSet>
+  </EntityContainer>
+</Schema>

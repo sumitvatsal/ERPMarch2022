@@ -1,0 +1,576 @@
+﻿
+@{
+    ViewBag.Title = "LeaveRequest";
+    // Layout = "~/Views/Shared/_LayoutEmployee.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+   
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+ <div class="content">
+ 
+    <div class="content">
+     
+            <div class="row">
+                <form role="form" id="form1" name="form1">
+                    <div class="col-sm-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4 class="panel-title"> Leave Request <span id="spMsg" style="color:red;font-weight:bold"></span></h4>
+                            </div>
+                            <div class="panel-body">
+                                <div class="col-sm-6">
+                                    <div class="form-group error">
+                                        <label for="reg_input_name" class="req">Employee Name </label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group error">
+                                        <label id="lblEmployeeName" class="req"></label>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-6">
+
+
+                                    <div class="form-group error">
+                                        <label for="reg_input_name" class="req">Employee Department </label>
+                                    </div>
+
+                                </div>
+                                <div class="col-sm-6">
+
+
+                                    <div class="form-group error">
+                                        <label id="lblEmployeeDepartment" class="req">dfgdf </label>
+                                    </div>
+
+                                </div>
+                                <div class="clearfix"></div>
+                                <div class="col-sm-6">
+
+
+                                    <div class="form-group error">
+                                        <label for="reg_input_name" class="req">Employee Designation </label>
+                                    </div>
+
+                                </div>
+                                <div class="col-sm-6">
+
+
+                                    <div class="form-group error">
+                                        <label id="lblEmployeeDesignation" class="req"> </label>
+                                    </div>
+
+                                </div>
+                                <div class="clearfix"></div>
+                                <div class="col-sm-12">
+
+
+                                    <div class="form-group error">
+                                        <label for="reg_input_name" class="req">Leave Type <span class="requird">*</span> <span id="spremaingMsgleave" class="msgdisplay" style="color:red"></span></label>
+                                        <select id="ddlLeaveType" name="ddlLeaveType" valuefield="Id" textfield="Name" onchange="fetchEmployeeTakeAssgnLeave(this.value)" blankRowValue="0" blankRowText="--Select--" class="form-control"></select>
+                                    </div>
+
+                                </div>
+                                <div class="clearfix"></div>
+                                <div class="col-sm-12" style="display:none" id="divShowLeaves">
+                                    <table id="grid" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                        <thead>
+                                            Leave Type
+                                            <tr>
+                                                <th>Leaves Name</th>
+                                                <th>Assign Leave</th>
+                                                <th>Take Leave</th>
+                                                <th>Remaining Leave</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbodytakeassEmployeeLeaves"></tbody>
+
+                                    </table>
+                                    <script type="text/html" id="tbodytakeassEmployeeLeavesJTemplte">
+                                        {#foreach $T as Datashort}
+                                        <tr>
+                                            <td id="tdLeavetype">
+                                                { $T.Datashort.Extra1}
+                                            </td>
+                                            <td id="tdAssignLeave">
+                                                { $T.Datashort.Extra2}
+                                            </td>
+                                            <td>
+                                                { $T.Datashort.Extra3}
+                                            </td>
+                                            <td id="tdRemainingLeave">
+                                                { $T.Datashort.Extra4}
+                                            </td>
+
+                                        </tr>
+                                        {#/for}
+                                    </script>
+                                </div>
+                                <div class="clearfix"></div>
+                                <div class="col-sm-12">
+
+
+                                    <div class="form-group">
+                                        <label>Start Date</label>
+
+                                        <div class="input-group">
+                                            <div class="input-group-addon">
+                                                <i class="fa fa-calendar"></i>
+                                            </div>
+                                            <input type="text" class="form-control pull-right" id="txtDtRange" readonly>
+                                        </div>
+
+                                        <!-- /.input group -->
+                                    </div>
+
+                                </div>
+                                @*<div class="col-sm-6">
+
+
+                            <div class="form-group">
+                                <label>End Date</label>
+                                <div class="input-group date">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" class="form-control pull-right" id="txtEndDate" ng-model="txtEndDate" />
+                                </div>
+
+                            </div>
+
+                        </div>*@
+
+                                <div class="clearfix"></div>
+
+
+
+                                <div class="col-sm-6">
+
+
+                                    <div class="form-group error">
+                                        <label for="reg_input_name" class="req">Assign Leave Count</label>
+                                        <input type="text" id="txtCountLeave" readonly="readonly" class="form-control" />
+                                    </div>
+
+                                </div>
+                                <div class="col-sm-6">
+                                </div>
+                                <div class="clearfix"></div>
+                                <div class="col-sm-12">
+
+
+                                    <div class="form-group error">
+                                        <label for="reg_input_name" class="req">Leave Reason</label>
+                                        <textarea id="txtReason" class="form-control" rows="4" cols="12"></textarea>
+                                    </div>
+
+                                </div>
+
+
+                                <div class="row">
+                                    <div class="col-sm-5">
+                                        <div class="form_sep">
+                                            <input class="btn btn-info" name="std_reg_submit" onclick="saveLeaveRequestByEmployyee()" id="btnsave" type="button" value="Save">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    </form>
+                    <div class="col-sm-6">
+                        <!-- general form elements -->
+                        <div class="box box-primary">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">View Leave</h3>
+                            </div>
+                            <div class="box-body">
+                                <div class="form-group">
+                                    <div>
+
+                                        <table id="grid" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                            <thead>
+                                                <tr>
+                                                    <th>Leaves Name</th>
+                                                    <th>Assign Leave</th>
+                                                    <th>Start Date</th>
+                                                    <th>End Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tbodyEmployeeLeaves"></tbody>
+
+                                        </table>
+                                        <script type="text/html" id="tbodyEmployeeLeavesJTemplte">
+                                            {#foreach $T as Datashort}
+                                            <tr>
+                                                <td>
+                                                    { $T.Datashort.leaveCategory}
+                                                </td>
+                                                <td>
+                                                    { $T.Datashort.leaveAssign}
+                                                </td>
+                                                <td>
+                                                    { $T.Datashort.StartDate}
+                                                </td>
+                                                <td>
+                                                    { $T.Datashort.EndDate}
+                                                </td>
+
+                                            </tr>
+                                            {#/for}
+                                        </script>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+</div>
+       
+    </div>
+ </div>
+     <!-- Daterange picker -->
+<link rel="stylesheet" href="~/css/bower_components/bootstrap-daterangepicker/daterangepicker.css">
+<script src="~/css/bower_components/moment/min/moment.min.js"></script>
+<script src="~/css/bower_components/bootstrap-daterangepicker/daterangepicker.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+     
+
+
+        if (sessionStorage.getItem("DesignationId") != "") {
+           
+            getAllLeave(sessionStorage.getItem("DesignationId"));
+         //   var loginuser = (sessionStorage.getItem("userId"));
+          //  var typeuser = sessionStorage.getItem("type");
+            var SchoolID =sessionStorage.getItem("SchoolID");
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/LeaveAPI", "getAllActiveLeaveTypebySchool", "ddlLeaveType", false, "", "", "", "");
+
+            setControlValue("lblEmployeeDesignation", sessionStorage.getItem("Designation"));
+            setControlValue("lblEmployeeName", sessionStorage.getItem("fname") + " " + sessionStorage.getItem("lname"));
+            setControlValue("lblEmployeeDepartment", sessionStorage.getItem("Department"));
+        }
+    })
+
+    
+
+    function getAllLeave(val) {
+        $("#loader").fadeIn();
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callJTemplateServiceMethod(JSON.stringify([val, loginuser, typeuser]), "/api/EmployeeAPI", "getEmployeeLeavesById",
+                     "tbodyEmployeeLeaves", "tbodyEmployeeLeavesJTemplte", false, "", "", "", "");
+        $("#loader").fadeOut();
+    }
+
+    function fetchEmployeeTakeAssgnLeave(val)
+    {
+        var employee = {
+            Id: sessionStorage.getItem("EmpId"),
+            Designation: sessionStorage.getItem("DesignationId"),
+            Extra4: val,
+            Extra5: sessionStorage.getItem("userId"),
+            SchoolID: sessionStorage.getItem("SchoolID")
+        }
+        var ddl = JSON.stringify(employee)
+        $("#loader").fadeIn();
+
+        callJTemplateServiceMethod(ddl, "/api/LeaveAPI", "fetchEmployeeTakeAssgnLeave",
+                 "tbodytakeassEmployeeLeaves", "tbodytakeassEmployeeLeavesJTemplte", true, fetchEmployeeTakeAssgnLeave_scs, "", "", "");
+
+
+       // callServiceMethod(ddl, "/api/LeaveAPI", "fetchEmployeeTakeAssgnLeave", false, "", "", false, "", true, fetchEmployeeTakeAssgnLeave_scs, "", "", "");
+
+    }
+
+    function fetchEmployeeTakeAssgnLeave_scs(p1, p2, p3, data)
+    {
+        $("#loader").fadeOut();
+        if (data[0].Extra1 != "") {
+            $("#divShowLeaves").fadeIn(1000);
+        }
+        else {
+            $("#divShowLeaves").fadeOut(1000);
+        }
+
+        if (data[0].Extra4 == "0") {
+            $("#spremaingMsgleave").html("you can not take " + data[0].Extra1 + " Thank u!")
+            $("#btnsave").fadeOut(1000);
+            setTimeout(function () {
+
+                $("#spremaingMsgleave").fadeOut(1000);
+            }, 3000)
+
+        }
+        if (data[0].Extra4 =="") {
+            $("#spremaingMsgleave").html("you can not take " + data[0].Extra1 + " Thank u!")
+            $("#btnsave").fadeOut(1000);
+            setTimeout(function () {
+
+                $("#spremaingMsgleave").fadeOut(1000);
+            }, 3000)
+            alert("Selected leave not assigned yet");
+        }
+        else {
+
+            $("#btnsave").fadeIn(1000);
+
+            if (parseInt($("#txtCountLeave").val()) > parseInt($("#tdRemainingLeave").html()))
+            {
+                $("#spremaingMsgleave").fadeIn();
+                $("#spremaingMsgleave").html("you can not take maximum leave from Assign Thank u!")
+             
+                setTimeout(function () {
+
+                    $("#spremaingMsgleave").fadeOut(1000);
+                }, 3000)
+                $("#btnsave").fadeOut(1000);
+            }
+        }
+    }
+
+
+    var startDt;
+    var endDt;
+    $('#txtDtRange').daterangepicker();
+
+    $('#txtDtRange').on('change', function () {
+        startDt = $('#txtDtRange').data('daterangepicker').startDate._d;
+        endDt = $('#txtDtRange').data('daterangepicker').endDate._d;
+
+     
+        var millisecondsPerDay = 1000 * 60 * 60 * 24;
+        var millisBetween = endDt.getTime() - startDt.getTime();
+        var days = (millisBetween / millisecondsPerDay) + 1;
+        $('#txtCountLeave').val(Math.floor(days));
+
+
+        checkDateAvalabiltyInLeave(startDt, endDt);
+
+
+        //if (Math.floor(days) > $("#tdRemainingLeave").html()) {
+        //    $("#spremaingMsgleave").html("you can not take " + $("#tdLeavetype").html() + " Thank u!");
+        //    $("#spremaingMsgleave").removeAttr("style");
+        //    $("#btnsave").fadeOut(1000);
+        //    setTimeout(function () {
+
+        //        $("#spremaingMsgleave").attr("style","display:none");
+        //    }, 3000)
+        //}
+        //else {
+        //    $("#btnsave").fadeIn();
+        //}
+            
+
+
+        // Round down.
+        //alert(Math.floor(days));
+    });
+
+
+    function checkDateAvalabiltyInLeave(startDate, endDate)
+    {
+        var emp = {
+            Extra5: startDate,
+            Extra6: endDate,
+            Extra7: getControlValue("ddlLeaveType"),
+            Extra8: sessionStorage.getItem("DesignationId"),
+            Extra9: sessionStorage.getItem("SchoolID")
+        }
+        var ddl = JSON.stringify(emp)
+        callServiceMethod(ddl, "/api/LeaveAPI", "checkDateAvalabiltyInLeave", false, "", "", false, "", true, checkDateAvalabiltyInLeave_scs, "", "", "");
+    }
+
+    function checkDateAvalabiltyInLeave_scs(p1, p2, p3, datas)
+    {
+        if (datas == "1") {
+          //  $("#btnsave").fadeIn();
+
+            if ($("#tdAssignLeave").html().trim() == "")
+            { }
+            else
+            {
+                var countleave = $("#txtCountLeave").val();
+                var remainingleave = $("#tdRemainingLeave").html().trim();
+
+                if (parseInt(countleave) > parseInt( remainingleave)) {
+                    $("#spremaingMsgleave").html("you can not take " + $("#tdLeavetype").html() + " Thank u!");
+                    $("#spremaingMsgleave").removeAttr("style");
+                    $("#btnsave").fadeOut(1000);
+                    setTimeout(function () {
+
+                        $("#spremaingMsgleave").attr("style", "display:none");
+                    }, 3000)
+                }
+                else {
+                    $("#btnsave").fadeIn();
+                }
+            }
+
+
+        }
+        else {
+            $("#spremaingMsgleave").html("Leave Not Issued for Date Please Contact From Admin");
+            $("#spremaingMsgleave").removeAttr("style");
+            $("#btnsave").fadeOut(1000);
+            setTimeout(function () {
+
+                $("#spremaingMsgleave").attr("style", "display:none");
+            }, 3000)
+        }
+    }
+
+    function saveLeaveRequestByEmployyee()
+    {
+       // alert($('input[name=daterangepicker_start]').val());
+         
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+            var emp = {
+                Id: sessionStorage.getItem("EmpId"),
+                Designation: sessionStorage.getItem("DesignationId"),
+                Extra4: getControlValue("ddlLeaveType"),
+                Extra5: $('input[name=daterangepicker_start]').val(),
+                Extra6: endDt,
+                Extra7: getControlValue("txtCountLeave"),
+                Extra8: getControlValue("txtReason"),
+                Department: sessionStorage.getItem("deptId"),
+                Extra9: sessionStorage.getItem("userId"),
+                Extra10: sessionStorage.getItem("type")
+                
+
+            }
+            var ddl = JSON.stringify(emp)
+            callServiceMethod(ddl, "/api/LeaveAPI", "saveLeaveRequestByEmployyee", false, "", "", false, "", true, saveLeaveRequestByEmployyee_scs, "", "", "");
+        }
+
+    }
+
+    function saveLeaveRequestByEmployyee_scs(p1, p2, p3, datas)
+    {
+        setControlValue("spMsg", "[" + datas + "]");
+        setTimeout(function () {
+            $("#spMsg").fadeOut(1000);
+        }, 1000)
+        
+            $("#loader").fadeOut();
+        clearallTextbox();
+    }
+
+    function clearallTextbox()
+    {
+        setControlValue("txtCountLeave", "");
+        setControlValue("txtReason", "");
+        $("#txtReason").val("");
+        //var loginuser = (sessionStorage.getItem("userId"));
+        //var typeuser = sessionStorage.getItem("type");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/LeaveAPI", "getAllActiveLeaveTypebySchool", "ddlLeaveType", false, "", "", "", "");
+        fetchEmployeeTakeAssgnLeave(0);
+    }
+
+    
+   
+</script>
+<style type="text/css">
+    #grid {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #grid td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #grid tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #grid tr:hover {
+            background-color: #ddd;
+        }
+
+        #grid th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+    .msgdisplay {
+        color:red;
+        font-weight:bold;
+    }
+</style>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                ddlLeaveType: {
+                    selectcheck: true
+                },
+                 
+            },
+            messages: {
+
+              
+                ddlLeaveTypes: "Please Select Leave Type"
+
+
+            }
+        })
+        jQuery.validator.addMethod('selectcheck', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+
+
+    });
+</script>

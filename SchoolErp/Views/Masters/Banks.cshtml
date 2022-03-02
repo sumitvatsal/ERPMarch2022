@@ -1,0 +1,304 @@
+﻿
+@{
+    ViewBag.Title = "Banks";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<link href="~/css/bower_components/select2/dist/css/select2.min.css" rel="stylesheet" />
+
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.select2').select2();
+    })
+
+</script>
+<section class="content">
+    <div class="box box-solid">
+        <div class="et">
+            <div class="box-header with-border">
+                <h3 class="box-title">Bank</h3>
+
+            </div>
+        </div>
+        <div class="alert alert-success alert-dismissible centerSuccess" id="divsuccesmsg" style="display:none">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <h4>
+                <i class="icon fa fa-check"></i>
+                success! <span Id="spsuccessMsg"></span>
+            </h4>
+
+        </div>
+
+        <div class="box-body">
+            <div class="row">
+
+                <div class="content">
+
+
+
+                    <div class="row">
+                        <form role="form" id="form1" name="form1">
+                            <div class="col-sm-12">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title"> New Bank</h4>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="panel-body">
+
+                                            <div class="row">
+                                                <div class="form-group col-sm-6 col-md-6 col-lg-6">
+                                                    <label class="req" for="Salarydetails_unit">Bank Name <span class="requird">*</span> </label>
+                                                    <input class="form-control" id="txtBank" name="txtBank" type="text" ng-model="txtBank" required />
+                                                </div>
+                                                <div class="form-group col-sm-6 col-md-6 col-lg-6">
+                                                    <label class="req" for="Salarydetails_unit">Ac Name <span class="requird">*</span> </label>
+                                                    <input class="form-control" id="txtAc" name="txtAc" type="text" ng-model="txtAc" required/>
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-sm-6 col-md-6 col-lg-6">
+                                                    <label class="req" for="Salarydetails_unit">Ac Number <span class="requird">*</span> </label>
+                                                    <input class="form-control" id="txtNumber" name="txtNumber" type="text" ng-model="txtNumber" required />
+                                                </div>
+                                                <div class="form-group col-sm-6 col-md-6 col-lg-6">
+                                                    <label class="req" for="Salarydetails_unit">Branch  <span class="requird">*</span></label>
+                                                    <input class="form-control" id="txtBranch" name="txtBranch" type="text" ng-model="txtBranch" required />
+                                                </div>
+
+                                            </div>
+                                            <div class="col-sm-12">
+
+                                                <div class="panel panel-default">
+                                                    <div class="panel-heading">
+                                                        <h4 class="panel-title">Upload Images in Product Details</h4>
+                                                    </div>
+                                                    <div class="panel-body">
+                                                        <div>
+                                                            <div class="form-group col-lg-6">
+                                                                <label for="reg_input_logo">Upload Image</label>
+                                                                <input id="GalleryImage" type="file">
+                                                            </div>
+
+                                                            <div>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-5">
+                                                    <div class="form_sep">
+                                                        <input class="btn btn-info" id="btnSumit" type="button" value="Save">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="hdnID" />
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        setControlValue("hdnID", 0);
+
+
+        var ID = getQuerystring("id");
+        if (typeof (ID) != "undefined") {
+            setControlValue("hdn", ID);//
+
+            GetValues(ID);
+
+        }
+
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                txtName: "required",
+            },
+            messages: {
+                txtName: "Please Enter WareHouse Name",
+            }
+        })
+        //callServiceMethodForDDl("", "/api/StudentApi", "GetLeaveStatus", "ddlReqStatus", false, "", "", "", "");
+    });
+    function successMsg(p1, p2, p3, datas) {
+
+        $("#loader").fadeOut();
+
+        setTimeout(function () {
+            $('#example1').DataTable({
+
+                dom: 'lBfrtip',
+                bRetrieve: true,
+                bDestroy: true,
+                'columnDefs': [{
+                    "targets": -1,
+                    "orderable": false
+                }],
+            });
+        }, 1000);
+    }
+
+
+    $("#btnSumit").click(function () {
+        var ID = getControlValue("hdnID");
+        var Bank = getControlValue("txtBank");
+        var Ac = getControlValue("txtAc")
+        var Number = getControlValue("txtNumber")
+        var Branch = getControlValue("txtBranch")
+        var image = $("#GalleryImage").val();
+        var loginuser = (sessionStorage.getItem("userId"));
+        var active = 1;
+
+        Save(ID, Bank, Ac, Number, Branch, image, loginuser, active);
+    });
+
+    function Save(ID, Bank, Ac, Number, Branch, image, loginuser, active) {
+
+        if ($("#form1").valid()) {
+            $("#loader").fadeIn();
+            $.ajax({
+                url: "/api/AccountsAPI/SaveRecord",
+                type: "Post",
+                data: JSON.stringify(["Banks", ID, Bank, Ac, Number, Branch, image, loginuser, active]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    $("#loader").fadeOut();
+                    if (data == 1) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Product Added Successfully ");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+
+                    }
+                    else if (data == 2) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Product Updated Successfully ");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+
+                    }
+                    else if (data == -1) {
+                        $("#divsuccesmsg").fadeIn();
+
+                        $("#spsuccessMsg").html("Product name already Exist");
+                        setTimeout(function () {
+                            $("#divsuccesmsg").fadeOut();
+                            $("#spsuccessMsg").html("");
+                        }, 2000)
+                    }
+                    else {
+                        alert("Some Error!!");
+                    }
+                    ResetModal();
+                    fillDataTable();
+                    //$('#myModal').modal('hide');
+
+                }
+            });
+
+        }
+    }
+
+
+    function ResetAll() {
+        setControlValue("txtBarcode", "");
+        setControlValue("txtSn", "");
+        setControlValue("txtProduct", "");
+        setControlValue("txtModel", "");
+        setControlValue("txtunitorder", "");
+        setControlValue("txtStocke", "");
+        setControlValue("txtUnits", "");
+        setControlValue("txtReorder", "");
+        setControlValue("ddlCategory", "");
+        setControlValue("ddlUnit", "");
+        setControlValue("ddlBrand", "");
+        setControlValue("GalleryImage", "");
+        setControlValue("txtProductDetails", "");
+        fillDataTable();
+    }
+
+    function ResetModal() {
+        setControlValue("txtBarcode", "");
+        setControlValue("txtSn", "");
+        setControlValue("txtProduct", "");
+        setControlValue("txtModel", "");
+        setControlValue("txtunitorder", "");
+        setControlValue("txtStocke", "");
+        setControlValue("txtUnits", "");
+        setControlValue("txtReorder", "");
+        setControlValue("ddlCategory", "");
+        setControlValue("ddlUnit", "");
+        setControlValue("ddlBrand", "");
+        setControlValue("GalleryImage", "");
+        setControlValue("txtProductDetails", "");
+        setControlValue("hdnID", 0);
+    }
+
+</script>
+
+
+

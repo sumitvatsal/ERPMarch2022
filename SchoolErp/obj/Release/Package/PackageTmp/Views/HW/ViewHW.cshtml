@@ -1,0 +1,545 @@
+﻿
+@{
+    ViewBag.Title = "ViewHW";
+    Layout = "~/Views/Shared/_LayoutStudent.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<style type="text/css">
+    .imgIcon {
+        width: 0.5%;
+        height: 0.5%;
+    }
+
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 8px;
+            padding-bottom: 8px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+<link href="~/css/bootstrap-timepicker.css" rel="stylesheet" />
+
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+<section class="content-header">
+    <h1>
+        <i class="glyphicon glyphicon-eye-open"></i> View Assignment
+    </h1>
+    @*<ul class="breadcrumb">
+        <li><a href="/"><i class="fa fa-home"></i>Home</a></li>
+        <li><a href="/academics/default/index">Academics</a></li>
+        <li><a href="/academics/assignment/index">Assignment</a></li>
+        <li class="active">View Assignment</li>
+    </ul>*@
+</section>
+<section class="content">
+    <div class="box box-solid">
+        <div class="extra-div">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-search"></i> Search</h3>
+               
+            </div>
+        </div>
+
+
+        @*<form id="w1">
+            <div class="box-body">
+                <div class="row">
+
+
+
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="control-label">Academic Year</label>
+                            <select id="tc_academic_year" class="form-control" aria-required="true" valuefield="ID" textfield="StartYear" blankRowValue="-1" blankRowText="----Select----"></select>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="control-label">Class</label>
+                            <select class="form-control" id="ddlCourse" valuefield="Id" textfield="CourseName" blankRowValue="-1" blankRowText="----Select----" aria-required="true"></select>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="control-label">Section</label>
+                            <select class="form-control" id="ddlSection" valuefield="Id" textfield="SectionName" blankRowValue="-1" blankRowText="----Select----"></select>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="control-label">Subject</label>
+                            <select id="ddl_subject" class="form-control" aria-required="true" valuefield="ID" textfield="Subject" blankRowValue="-1" blankRowText="----Select----"></select>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="control-label">Name</label>
+                            <input type="text" id="assignment_name" class="form-control" placeholder="Name">
+
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="control-label">Assignment Date</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" id="assignment_Dt" class="form-control datepicker" readonly="" size="10">
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group">
+                            <label class="control-label">Submission Date</label>
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" id="assignment_submit_date" class="form-control dtpicker" readonly="" size="10">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="box-footer">
+                <button type="button" id="btnSearch" class="btn btn-info">Search</button>    <a class="btn btn-default" href="#" onclick="ResetAll()">Reset</a>
+            </div>
+
+        </form>*@
+    </div>
+    <div class="box box-solid">
+        <div>
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    <i class="fa fa-search"></i> View Assignment List
+                </h3>
+                @*<div class="box-tools">
+                        <a class="btn btn-info btn-sm" href="/academics/assignment/create"><i class="fa fa-plus-square"></i> <span class="hidden-xs">Add Assignment</span></a>
+                    </div>*@
+            </div>
+        </div>
+
+        <div class="box-body table-responsive">
+            <div id="p0" data-pjax-container="" data-pjax-push-state="" data-pjax-timeout="10000">
+                <div id="w1" class="grid-view">
+                    <table id="example1" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Class-Section</th>
+                                 <th>Subject</th>
+                                <th>Assignment Date</th>
+                                <th>Submission Date</th>
+                                <th class="action-column">Download</th>
+                                <th>View</th>
+                                <th>Upload</th>
+                            </tr>
+
+                        </thead>
+                        <tbody id="tBodyHW">
+                            @*<tr data-key="2"><td>1</td><td><a href="/academics/assignment/view?id=2">Test Assignment</a></td><td>2016-17</td><td>Kindergarten1</td><td>KG1-Section1</td><td>Arts</td><td>31/12/2016</td><td>31/01/2017</td><td><span class="not-set">(not set)</span></td><td class="text-center"><a href="/academics/assignment/assignment-file-download?id=2" title="Download" data-method="post"><span class="fa fa-download fa-lg text-green"></span></a></td><td></td></tr>
+                                <tr data-key="1"><td>2</td><td><a href="/academics/assignment/view?id=1">Computer Network</a></td><td>2016-17</td><td>Kindergarten1</td><td>KG1-Section1</td><td>English</td><td>01/09/2016</td><td>30/09/2016</td><td><span class="not-set">(not set)</span></td><td class="text-center"><a href="/academics/assignment/assignment-file-download?id=1" title="Download" data-method="post"><span class="fa fa-download fa-lg text-green"></span></a></td><td></td></tr>*@
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <script type="text/html" id="divEmployeeDetailsJTemplte">
+            {#foreach $T as Datashort}
+            <tr>
+                <td>
+                    { $T.Datashort.ID}
+                </td>
+                <td>
+                    { $T.Datashort.hw.AssignmentNm}
+                </td>
+                <td>
+                    { $T.Datashort.course}
+                </td>
+
+                <td>
+                    { $T.Datashort.subject}
+                </td>
+                <td>
+                    { $T.Datashort.hwDt}
+                </td>
+                <td>
+                    { $T.Datashort.subDt}
+                </td>
+                <td>
+                    <a href="{ $T.Datashort.hw.FilePath}" title="Download" target="_blank" data-method="post"><span class="{ $T.Datashort.style}"></span></a>
+                </td>
+                <td>
+                    <i class="fa fa-fw fa-eye" style="cursor:pointer" onclick="ViewDetails({ $T.Datashort.hw.ID},'{ $T.Datashort.hw.AssignmentNm}','{ $T.Datashort.subject}','{ $T.Datashort.hwDt}','{ $T.Datashort.subDt}','{ $T.Datashort.hw.FilePath}','{ $T.Datashort.course}','{ $T.Datashort.year}','{ $T.Datashort.hw.Marks}','{ $T.Datashort.hw.AssignmentDesc}','{ $T.Datashort.hw.HW_givenBy}','{ $T.Datashort.teacher}')" title="View"></i>
+                </td>
+                <td>
+                    <input id="hdnFile" type="hidden" name="Assignment[file]" value=""><input type="file" id="inputFile" name="Assignment[file]" aria-required="true">
+                </td>
+            </tr>
+            {#/for}
+        </script>
+    </div>
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">
+                        <i class="fa fa-object-group"></i> <span id="spTitle"></span>( <span id="spSubject1"></span> | <span id="spYear"></span> | <span id="spCourse"></span>)
+                        <button type="button" class="close" data-dismiss="modal" onclick="ResetModal()">
+                            <span aria-hidden="true">×</span><span class="sr-only">Close</span>
+                        </button>
+                    </h3>
+                </div> <!-- /.modal-header -->
+                <div class="modal-body">
+                    <div class="box-body table-responsive">
+                        <table id="w1" class="table table-striped table-bordered detail-view">
+                            <tbody>
+                                <tr class="odd">
+                                    <th class="col-sm-3">Assignment Date</th>
+                                    <td class="col-sm-3"><span id="spHWDt"></span></td>
+                                    <th class="col-sm-3">Submission Date</th>
+                                    <td class="col-sm-3"><span id="spSubmitDt"></span></td>
+                                </tr>
+                                <tr class="even">
+                                    <th class="col-sm-3">Assignment File</th>
+                                    <td class="col-sm-3"><a id="dwlod_link" download><span class="label label-success"> Download </span></a></td>
+                                    <th class="col-sm-3">Assignment Mark</th>
+                                    <td class="col-sm-3"><span id="spMarks"></span></td>
+                                </tr>
+                                @*<tr class="odd">
+                        <th class="col-sm-3">Created At</th>
+                        <td class="col-sm-3">31/12/2016 01:29 PM</td>
+                        <th class="col-sm-3">Created By</th>
+                        <td class="col-sm-3">Kyle Baker</td>
+                    </tr>*@
+                                <tr class="odd">
+                                    <th class="col-sm-3">Subject</th>
+                                    <td class="col-sm-3"><span id="spSubject"></span></td>
+                                    <th class="col-sm-3">Created By</th>
+                                    <td class="col-sm-3"><span id="spCreatedBy"></span></td>
+                                </tr>
+                                <tr class="even"><th>Description</th><td colspan="3"><span id="spDesc"></span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*<div class="box box-solid">
+        <div>
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    <i class="fa fa-object-group"></i> <span id="spTitle"></span>
+                </h3>
+                <div class="box-tools">
+                    <a class="btn btn-default btn-view btn-flat" href="/academics/assignment/index"><i class="fa fa-chevron-circle-left"></i> Back</a>
+                    <a class="btn btn-info btn-flat btn-view" href="/academics/assignment/update?id=2"><i class="fa fa-pencil"></i> Update</a>
+                    <a class="btn btn-danger btn-flat btn-view" href="/academics/assignment/delete?id=2" data-confirm="Are you sure you want to delete this item?" data-method="post"><i class="fa fa-trash-o"></i> Delete</a>
+                </div>
+            </div>
+        </div>
+       
+    </div>*@
+
+</section>
+<script src="~/js/bootstrap-timepicker.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('.dtpicker').datepicker({
+            //dateFormat: 'dd/mm/yy' ,
+            autoclose: true,
+            format:'dd/mm/yyyy'
+        });
+
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TimeTableApi", "GetAcademicYearBySchool", "tc_academic_year", false, "", "", "", "");
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+        var SchoolID = (sessionStorage.getItem("SchoolID"));
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TimeTableApi", "GetSubjectsbySCHOOLid", "ddl_subject", false, "", "", "", "");
+
+
+
+        //callServiceMethodForDDl("", "/api/TimeTableApi", "GetAcademicYear", "tc_academic_year", false, "", "", "", "");
+        //callServiceMethodForDDl("", "/api/StudentApi", "GetClasses", "ddlCourse", false, "", "", "", "");
+        //callServiceMethodForDDl("", "/api/TimeTableApi", "GetSubjects", "ddl_subject", false, "", "", "", "");
+
+        $("#ddlCourse").change(function () {
+            var ddlCourse = getControlValue("ddlCourse");
+            var SchoolID = (sessionStorage.getItem("SchoolID"));
+            if (ddlCourse != null && (ddlCourse != -1) && (ddlCourse != undefined)) {
+                callServiceMethodForDDl(JSON.stringify([ddlCourse, SchoolID]), "/api/StudentApi", "GetSectionsbyschool", "ddlSection", false, "", "", "", "");
+            }
+        });
+
+        fillDataTable();
+
+
+
+        var ID=getQuerystring("id");
+        if (typeof (ID) != "undefined") {
+            setControlValue("hdn", ID);//
+            setControlValue("hdnID", 0);
+            GetValues(ID);
+
+        }
+        //
+        //callServiceMethodForDDl("", "/api/StudentApi", "GetLeaveStatus", "ddlReqStatus", false, "", "", "", "");
+    });
+    function openModal()
+    {
+        $('#myModal').modal('show');
+    }
+
+    function GetValues(ID)
+    {
+        $.ajax({
+            url: "/api/TimeTableApi/GetClassTiming",// "~/Masters/GetDeptMethod",
+            type: "Post",
+            data: JSON.stringify([ID]), //{ Name: name,ddlAcademicYr
+            //// Address: address, DOB: dob },
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                if(data.ID!=-1)
+                {
+                    setControlValue("hdn", data.ID);
+                    setControlValue("CTName", data.ct.Name);
+                    setControlValue("CTName1", data.ct.Name);
+                    setControlValue("Desc", data.ct.Description);
+
+                    fillDataTable(data.ID);
+                }
+            }
+        });
+    }
+
+    function fillDataTable() {
+
+        debugger;
+        var Parameters = {
+
+            //val8: sessionStorage.getItem("stdID"),
+            //val1 : getControlValue("tc_academic_year"),
+            //val2:  getControlValue("ddlCourse"),
+            //val3: getControlValue("ddlSection"),
+            //val4: getControlValue("assignment_name"),
+            //val5: getControlValue("assignment_submit_date"),
+            //val6:getControlValue("ddl_subject"),
+            //val7: getControlValue("assignment_Dt"),
+            //val9: sessionStorage.getItem("SchoolID"),
+            //val: "Student"
+
+            val8: sessionStorage.getItem("stdID"),
+            val1: sessionStorage.getItem("AcademicYear"),
+            val2: sessionStorage.getItem("ClassId"),
+            val3: sessionStorage.getItem("SectionId"),
+            val4: getControlValue("assignment_name"),
+            val5: getControlValue("assignment_submit_date"),
+            val6: getControlValue("ddl_subject"),
+            val7: getControlValue("assignment_Dt"),
+            val9: sessionStorage.getItem("SchoolID"),
+            val: "Student"
+        }
+        var ddl = JSON.stringify(Parameters);
+
+        callJTemplateServiceMethod(ddl, "/api/HWapi", "getAssignmentList",
+           "tBodyHW", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+    }
+
+    function successMsg(p1, p2, p3, datas) {
+        setTimeout(function () {
+            $('#example1').DataTable(
+                {
+
+                     'columnDefs': [{
+                    "targets": [-1,-2],
+                    "orderable": false
+
+                }],
+                }
+
+            );
+        }, 1000);
+    }
+
+    //
+    $("#btnSearch").click(function () {
+        fillDataTable();
+    });
+
+    function search()
+    {
+        var year=getControlValue("tc_academic_year");
+        var course = getControlValue("ddlCourse");
+        var section = getControlValue("ddlSection");
+        var ttname = getControlValue("tc_name");
+        var timing = getControlValue("tc_classtiming");
+        var fromDt = getControlValue("tc_from_date");
+        var toDt = getControlValue("tc_To_date");
+        var status = getControlValue("ddl_status");
+
+        callJTemplateServiceMethod(JSON.stringify([year,course,section,ttname,timing,fromDt,toDt,status]), "/api/TimeTableApi", "SearchTimeTableConfig",
+           "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+    }
+
+    function ViewDetails(id,name,sub,hwdt,subdt,path,course,year,marks,desc,givenBy,teachernm)
+    {
+        setControlValue("spTitle", name);
+        setControlValue("spSubmitDt", subdt);
+        setControlValue("spHWDt", hwdt);
+        $("#dwlod_link").attr("href", path);
+        //setControlValue("dwlod_link", path);
+        setControlValue("spMarks", marks);
+        setControlValue("spSubject", sub);
+        setControlValue("spSubject1", sub);
+        setControlValue("spCreatedBy",teachernm+" ("+ givenBy+")");
+        setControlValue("spDesc", desc);
+        setControlValue("spYear", year);
+        setControlValue("spCourse", course);
+
+        //if(status==1)
+        //{
+        //    $("#spActive").show();
+        //    $("#spInactive").hide();
+        //    setControlValue("spActive", statusNm);
+        //}input.removeAttr( "title" )
+        //else
+        //{
+        //    $("#spActive").hide();
+        //    $("#spInactive").show();
+        //    setControlValue("spInactive", statusNm);
+        //}
+        openModal();
+    }
+
+    function ResetAll()
+    {
+        setControlValue("tc_academic_year", -1);
+        setControlValue("ddlCourse",-1);
+        setControlValue("ddlSection",-1);
+        setControlValue("assignment_name", "");
+        setControlValue("assignment_submit_date", "");
+        setControlValue("assignment_Dt", "");
+        setControlValue("ddl_subject", -1);
+
+        fillDataTable();
+    }
+
+    function ResetModal()
+    {
+
+    }
+
+    function Edit(id)
+    {
+        window.location.href = "/HW/CreateHW?id=" + id;
+    }
+
+    function Delete(id)
+    {
+        var result = window.confirm('Are you sure to delete this record?');
+        if (result == true) {
+            $.ajax({
+                url: "/api/TimeTableApi/DeleteRecord",
+                type: "Post",
+                data: JSON.stringify([id,"TimeTableConfig"]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    alert(data.Msg);
+                    search();
+                }
+            });
+        }
+    }
+
+    $('#assignment_Dt').datepicker(
+    );
+    $('#assignment_submit_date').datepicker(
+    );
+
+    function GoToCreateTimeTable(x)
+    {
+        window.location.href = "/TimeTable/CreateTimeTable?id="+x;
+    }
+</script>
+

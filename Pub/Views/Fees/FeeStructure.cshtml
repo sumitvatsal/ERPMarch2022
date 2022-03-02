@@ -1,0 +1,462 @@
+﻿
+@{
+    ViewBag.Title = "FeeStructure";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<style type="text/css">
+    .imgIcon {
+        width: 0.5%;
+        height: 0.5%;
+    }
+
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 8px;
+            padding-bottom: 8px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<link rel="stylesheet" href="~/css/bower_components/select2/dist/css/select2.min.css">
+<script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>
+<section class="content-header">
+    <h1>
+        <i class="fa fa-th-list"></i> Manage Fee Structure
+    </h1>
+    @*<ul class="breadcrumb">
+            <li><a href="/"><i class="fa fa-home"></i>Home</a></li>
+            <li><a href="/academics/default/index">Academics</a></li>
+            <li class="active">Timetable</li>
+            <li class="active">Timetable Configuration</li>
+        </ul>*@
+</section>
+<section class="content">
+    <div class="alert alert-success alert-dismissible centerSuccess" id="divsuccesmsg" style="display:none">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h4>
+            <i class="icon fa fa-check"></i>
+            success! <span Id="spsuccessMsg"></span>
+        </h4>
+
+    </div>
+    <div class="box box-solid">
+
+
+        <div class="box-body">
+            <div class="row">
+
+                <div class="col-md-3">
+
+                    <div class="form-group">
+                        <label for="Country" class="req">School<span class="requird">*</span></label>
+                        <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name"></select>
+
+                    </div>
+                </div>
+
+                <div class="col-sm-3">
+
+                    <div class="form-group">
+                        <label>Category <span class="requird">*</span></label>
+                        <select class="form-control" id="ddlCategory" name="ddlCategory" valuefield="CatID" textfield="Category" blankRowValue="-1" blankRowText="----Select----" style="width:250px;color:black;"></select>
+                    </div>
+                </div>
+
+
+
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label class="control-label">Academic Year</label>
+                        <select id="tc_academic_year" class="form-control" valuefield="ID" textfield="StartYear" blankRowValue="-1" blankRowText="----Select----" onchange="" aria-required="true"></select>
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group field-assignment-assignment_course_id required">
+                        <label class="control-label" for="assignment-assignment_course_id">Class <span class="requird">*</span></label>
+                        <select class="form-control" id="ddlCourse" name="ddlCourse" valuefield="Id" textfield="CourseName" blankRowValue="-1" blankRowText="----Select----" aria-required="true"></select>
+                        <div class="help-block"></div>
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group field-assignment-assignment_course_id required">
+                        <label class="control-label" for="assignment-assignment_course_id">Section <span class="requird">*</span></label>
+                        <select class="form-control" id="ddlSection" name="ddlSection" valuefield="Id" textfield="SectionName" blankRowValue="-1" blankRowText="----Select----" aria-required="true"></select>
+                        <div class="help-block"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <input id="hdn" type="hidden" />
+        <input id="hdnFSID" type="hidden" />
+    </div>
+
+    <div class="box box-solid" style="border:1px solid #eee">
+        <div class="extra-div">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-table"></i> Fee Structure Details</h3>
+                @*<div class="box-tools">
+                        <a class="btn btn-success btn-sm" href="#" onclick="openModal()"><i class="fa fa-plus-square"></i> Add</a>
+                    </div>*@
+            </div>
+        </div>
+        <div class="box-body table-responsive">
+            <div id="w1" class="grid-view">
+                <table id="example1" class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th class="text-center">Head Name</th>
+                            <th class="text-center">Amount (in Rs.)</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td class="text-center">
+                                <div class="form-group">
+                                    <select id="ddlFeeCategories" class="form-control" valuefield="Cat_ID" textfield="feeCategory" blankRowValue="-1" blankRowText="----Select----" onchange="" aria-required="true"></select>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="form-group">
+                                    @*<input type="text" property="numericOnly" class="form-control"  id="txtFeeValue">*@
+                                    <input type="number" id="txtFeeValue" class="form-control" name="quantity" min="1" max="5000">
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <a class="btn btn-success btn-sm" href="#" id="AddRow" title="Add"><i class="fa fa-plus-square"></i></a>
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyEmployeeDetails"></tbody>
+                </table>
+            </div>
+        </div>
+        <script type="text/html" id="tbodyEmployeeEarningJTemplte">
+            {#foreach $T as Datashort}
+            <tr>
+                <td>
+                    { $T.Datashort.count}
+                </td>
+                <td>
+                    { $T.Datashort.ct.FeeCategory}
+                </td>
+                <td class="text-right">
+                    { $T.Datashort.fsc.Amount}
+
+                </td>
+                <td class="text-center">
+
+                    <i class="fa fa-fw fa-trash" style="cursor:pointer" onclick="Delete({ $T.Datashort.fsc.ID})" title="Delete"></i>
+                </td>
+            </tr>
+            {#/for}
+        </script>
+    </div>
+
+
+
+</section>
+
+<script>
+    $(document).ready(function () {
+        setControlValue("hdnID", 0);
+        setControlValue("hdnStatus", 1);
+        $("#ddlClasses").select2();
+
+        setTimeout(function () {
+            var arr = {};
+            $("#ddlClasses").val(arr).trigger("change");
+        }, 500);
+
+
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+
+        //$("#ddlSchoolName").change(function () {
+        //var ddlSchoolName = $("#ddlSchoolName").val();
+        var ddlSchoolName = getControlValue("ddlSchoolName");
+        if (ddlSchoolName != null && (ddlSchoolName != -1) && (ddlSchoolName != undefined)) {
+            callServiceMethodForDDl(JSON.stringify([ddlSchoolName]), "/api/StudentApi", "GetStructure", "dllStructure", false, "", "", "", "");
+        }
+
+        $("#ddlSchoolName").change(function () {
+            var ddlSchoolName = getControlValue("ddlSchoolName");
+
+
+            callServiceMethodForDDl(JSON.stringify([ddlSchoolName]), "/api/StudentApi", "GetStructure", "dllStructure", false, "", "", "", "");
+
+        });
+
+
+
+        var SchoolID = getControlValue("ddlSchoolName");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+        $("#ddlSchoolName").change(function () {
+            var SchoolID = getControlValue("ddlSchoolName");
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+        });
+        //  callServiceMethodForDDl("", "/api/StudentApi", "GetClasses", "ddlCourse", false, "", "", "", "");
+        $("#ddlCourse").change(function () {
+            var ddlCourse = getControlValue("ddlCourse");
+            var SchoolID = getControlValue("ddlSchoolName");
+            if (ddlCourse != null && (ddlCourse != -1) && (ddlCourse != undefined)) {
+                callServiceMethodForDDl(JSON.stringify([ddlCourse, SchoolID]), "/api/StudentApi", "GetSectionsbyschool", "ddlSection", false, "", "", "", "");
+            }
+        });
+
+        var SchoolID = getControlValue("ddlSchoolName");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TimeTableApi", "GetAcademicYearBySchool", "tc_academic_year", false, "", "", "", "");
+        $("#ddlSchoolName").change(function () {
+            var SchoolID = getControlValue("ddlSchoolName");
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TimeTableApi", "GetAcademicYearBySchool", "tc_academic_year", false, "", "", "", "");
+
+            // callServiceMethodForDDl(JSON.stringify(["ConcessionAllow", "", "", 1, "", loginuser, typeuser]), "/api/FeesApi", "getList", "ddlFeeConcession", false, "", "", "", "");
+        });
+
+        //});
+
+
+
+        fillDataTable();
+    });
+
+    $(".numericOnly").bind('keypress', function (e) {
+        if (e.keyCode == '9' || e.keyCode == '16') {
+            return;
+        }
+        var code;
+        if (e.keyCode) code = e.keyCode;
+        else if (e.which) code = e.which;
+        if (e.which == 46)
+            return false;
+        if (code == 8 || code == 46)
+            return true;
+        if (code < 48 || code > 57)
+            return false;
+    });
+
+    //Disable paste
+    $(".numericOnly").bind("paste", function (e) {
+        e.preventDefault();
+    });
+
+    $(".numericOnly").bind('mouseenter', function (e) {
+        var val = $(this).val();
+        if (val != '0') {
+            val = val.replace(/[^0-9]+/g, "")
+            $(this).val(val);
+        }
+    });
+
+
+    $("#btnSearch").click(function () {
+        fillDataTable();
+    });
+
+    //hdnID
+
+
+    //avi
+
+</script>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        setControlValue("hdn", 0);
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+
+                ddlSection: "required",
+
+
+
+            },
+            messages: {
+
+                ddlSection: "Please Enter Class Timing Name"
+
+
+
+            }
+        })
+        var ID = getQuerystring("id");
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        if (typeof (ID) != "undefined") {
+            setControlValue("hdnFSID", ID);//
+            GetValues(ID);
+            //fillDataTable();
+
+        }
+        callServiceMethodForDDl("", "/api/StudentApi", "GetCategories", "ddlCategory", false, "", "", "", "");
+
+        callServiceMethodForDDl(JSON.stringify(["FeeCategory", "", "", 1, "", loginuser, typeuser]), "/api/FeesApi", "getList", "ddlFeeCategories", false, "", "", "", "");
+    });
+
+
+    function fillDataTable() {
+        var id = getControlValue("hdnFSID");
+        var CT_id = getControlValue("txtSearchName");
+        var ClassId = getControlValue("ddlCourse");
+        var SectionId = getControlValue("ddlSection");
+        var Yearid = getControlValue("tc_academic_year");
+        var Cat = getControlValue("ddlCategory");
+        //var SchoolID = getControlValue("ddlSchoolName");
+        callJTemplateServiceMethod(JSON.stringify(["FeeStructureConfig", id, CT_id, ClassId, SectionId, Yearid, Cat,]), "/api/FeesApi", "getList",
+            "tbodyEmployeeDetails", "tbodyEmployeeEarningJTemplte", true, successMsg, "", "", "");
+    }
+
+    function successMsg(p1, p2, p3, datas) {
+
+    }
+
+    //
+    $("#AddRow").click(function () {
+        debugger;
+        //var fsID = getControlValue("hdnFSID");
+        var id = getControlValue("hdn");
+        var _cat = getControlValue("ddlFeeCategories");
+        var _amnt = getControlValue("txtFeeValue");
+        var ClassId = $("#ddlCourse").val()
+        var SectionId = $("#ddlSection").val()
+        var Yearid = $("#tc_academic_year").val()
+        var Cat = $("#ddlCategory").val()
+
+
+
+
+        if (id != undefined && name != undefined) {
+            SaveDetails(id, _cat, _amnt, ClassId, SectionId, Yearid, Cat);
+
+
+        }
+
+        //if (_cat != undefined && _ClassId != undefined && _SectionId != unde && _amnt != undefined && _cat != -1 && _ClassId != -1 && _SectionID != -1 && _amnt != "" && _amnt != null) {
+        //    SaveDetails(id, _cat, _ClassId, _SectionId, _amnt, fsID);
+        //}
+    });
+
+    function SaveDetails(id, CT_id, ClassId, SectionId, Yearid, Cat, amnt) {
+        $.ajax({
+            url: "/api/FeesApi/SaveRecord",
+            type: "Post",
+            data: JSON.stringify(["FeeStructureConfig", id, CT_id, ClassId, SectionId, Yearid, Cat, amnt]),
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                if (data != -1) {
+                    if (data == 0) {
+                        alert("Record already exists!!");
+                    }
+                    else {
+                        alert("Details saved");
+                    }
+
+                    setControlValue("ddlFeeCategories", -1);
+                    setControlValue("txtFeeValue", "");
+                    setControlValue("ddlCourse", -1);
+                    setControlValue("ddlSection", -1);
+                    setControlValue("tc_academic_year", -1);
+                    setControlValue("ddlCategory", -1);
+                    setControlValue("hdn", 0);
+                }
+                else {
+                    alert("Some Error!!");
+                }
+                fillDataTable();
+            }
+        });
+    }
+
+    function Delete(id) {
+        var result = window.confirm('Are you sure to delete this record?');
+        if (result == true) {
+            $.ajax({
+                url: "/api/FeesApi/DeleteRecord",
+                type: "Post",
+                data: JSON.stringify([id, "FeeStructureConfig"]),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    if (data == 1) {
+                        alert("Record successfully deleted");
+                        fillDataTable()
+                    }
+                }
+            });
+        }
+    }
+</script>
+

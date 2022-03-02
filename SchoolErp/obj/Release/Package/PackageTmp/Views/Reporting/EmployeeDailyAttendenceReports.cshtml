@@ -1,0 +1,533 @@
+﻿@{
+    /**/
+
+    ViewBag.Title = "EmployeeDailyAttendenceReports";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section class="content">
+    <div class="box box-solid">
+        <div class="employee-attendance-search">
+            <form id="w1" action="index" method="get">
+                <div class="box-header with-border">
+                    <h3 class="box-title"><i class="fa fa-list"></i> Employees Daily Attendence Report </h3>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-sm-4" id="divschool">
+                            <div class="form-group field-empinfosearch-emp_designation_id">
+                                <label for="Country" class="req">School<span class="requird">*</span></label>
+                                <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name"></select>
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group field-empinfosearch-emp_department_id">
+                                <label class="control-label" for="empinfosearch-emp_department_id">Department</label>
+                                <select class="form-control" id="txtDepartment" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" ng-model="txtDepartment"></select>
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group field-empinfosearch-emp_designation_id">
+                                <label class="control-label" for="empinfosearch-emp_designation_id">Designation</label>
+                                <select class="form-control" id="ddlDesgination" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" ng-model="ddlDesgination"></select>
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="row">
+
+                        <div class="col-sm-4">
+                            <div class="form-group field-empinfosearch-emp_category_id">
+                                <label class="control-label" for="empinfosearch-emp_category_id">Category</label>
+                                <select class="form-control" data-required="true" valuefield="Id" textfield="Name" id="ddlStaffType" blankRowValue="0" blankRowText="--Select--"></select>
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-4" style="margin-top: 25px;">
+                            <div class="form-group field-empinfosearch-searchinput">
+
+                                <input type="text" id="txtEmployeeName" class="form-control" placeholder="Enter Employee First/Last Name.">
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4" style="margin-top: 25px;">
+                            <div class="form-group field-empinfosearch-emp_info_id">
+
+                                <input type="text" id="txtEmployeeId" class="form-control" placeholder="Enter Employee Id" />
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+
+
+
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group field-employeeattendance-ea_date required">
+                                <label class="control-label" for="employeeattendance-ea_date">Attendence Date</label>
+                                @*<div class="input-group">
+                                        <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+
+                                        <input type="text" id="txtCurrentDate" class="form-control hasDatepicker" readonly="readonly" />
+                                    </div>*@
+
+                                <div class="input-group date">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" class="form-control dtpicker" name="txtCurrentDate" id="txtCurrentDate" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+                        <input type="button" value="Search" onclick="searchMonthlyReports()" class="btn btn-primary" />
+                        <a class="btn btn-default" href="javascript:void(0)" onclick="clearResetData()">Reset</a>
+                        <input type="button" id="create_pdf" value="Export Pdf" onclick="pdfExport()" class="btn btn-primary" />
+
+                        <a href="#" class="btn btn-primary" id="create_Excel" onClick="$('#example1').tableExport({ type: 'excel', escape: 'false' });"> Export Excel</a>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+
+    <div class="row" id="divattendence">
+        <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-body">
+                    <div class="form-group">
+                        <div style="height:20px"></div>
+                        <div>
+                            <div id="divmonthlyAttendenceReport" style="overflow-x: auto;">
+                                <table id="example1" style="width:1200px" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                    <thead id="mothsHead" align="center">
+                                    </thead>
+                                    <tbody id="tbodyEmployeeDetails"></tbody>
+                                </table>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<style type="text/css">
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+                                    background-color: #e1e4e8;
+                                }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+            width: 35px;
+        }
+</style>
+
+<!-- DataTables -->
+
+
+
+
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+
+<script src="~/js/jsExcel/tableExport.js"></script>
+<script src="~/js/jsExcel/jquery.base64.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script>
+<script src="~/js/jsExcel/html2canvas.js"></script>
+
+
+<link href="~/js/PDFExcelDatatable/buttons.dataTables.min.css" rel="stylesheet" />
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#create_Excel").hide();
+        $("#create_pdf").hide();
+        $('#divattendence').hide();
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        if (typeuser == "2") {
+            $('#divschool').show();
+        }
+        else {
+            $('#divschool').hide();
+        }
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+
+        $("#loader").fadeIn();
+        var SchoolID = $("#ddlSchoolName").val();
+        if (SchoolID != null && SchoolID != -1 && SchoolID != undefined) {
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllDepartmentsBySchoolID", "txtDepartment", false, "", "", "", "");
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllDesignationBySchoolID", "ddlDesgination", false, "", "", "", "");
+        }
+
+
+        //callServiceMethodForDDl("", "/api/EmployeeAPI", "getAllDesignation", "ddlDesgination", false, "", "", "", "");
+        callServiceMethodForDDl("", "/api/EmployeeAPI", "getAllStaff", "ddlStaffType", false, "", "", "", "");
+
+        $("#ddlSchoolName").change(function () {
+            var School = getControlValue("ddlSchoolName");
+            if (School != null && (School != -1) && (School != undefined)) {
+                callServiceMethodForDDl(JSON.stringify([School]), "/api/EmployeeAPI", "getAllDepartmentsNew", "txtDepartment", false, "", "", "", "");
+            }
+        });
+
+        $("#ddlSchoolName").change(function () {
+            var School = getControlValue("ddlSchoolName");
+            if (School != null && (School != -1) && (School != undefined)) {
+                callServiceMethodForDDl(JSON.stringify([School]), "/api/EmployeeAPI", "getAllDesignationNew", "ddlDesgination", false, "", "", "", "");
+            }
+        });
+        $("#loader").fadeOut();
+        //callServiceMethod(ddl, "/api/EmployeeAPI", "getAllEmployeeForAttendenceReport", false, "", "", false, "", true, successMsg_scs, totalDayInMonth, "0", "");
+    })
+
+
+
+
+
+</script>
+<script type="text/javascript">
+    var table;
+    $(document).ready(function () {
+        $('#txtCurrentDate').datepicker({
+            autoclose: true,
+            format: 'dd/mm/yyyy',
+            endDate: "today"
+        });
+
+    });
+
+    function daysInMonth(month, year) {
+        return new Date(year, month, 0).getDate();
+    }
+
+    function checkValueByLoop(value, arr) {
+        var status = '0';
+
+        for (var i = 0; i < arr.length; i++) {
+            var name = arr[i];
+            if (name == value) {
+                status = '1';
+                break;
+            }
+        }
+
+        return status;
+    }
+
+    function searchMonthlyReports() {
+        var schid = $('#ddlSchoolName').val();
+        var seldate = $('#txtCurrentDate').val();
+        if (schid == "" || schid == null || schid == "0") {
+            alert("Please select School!!");
+            $('#ddlSchoolName').focus();
+            return false;
+        }
+        if (seldate == "" || seldate == null) {
+            alert("Please select Date!!");
+            $('#txtCurrentDate').focus();
+            return false;
+        }
+        $("#loader").fadeIn();
+        // alert();
+        $("#tbodyEmployeeDetails").html(" ");
+        var totalDayInMonth = daysInMonth(getControlValue("txtCurrentDate").split('/')[0], getControlValue("txtCurrentDate").split('/')[1]);
+        var employye = {
+            Employeecode: getControlValue("txtEmployeeId"),
+            Department: getControlValue("txtDepartment"),
+            Designation: getControlValue("ddlDesgination"),
+            UserType: getControlValue("ddlStaffType"),
+            FName: getControlValue("txtEmployeeName"),
+            Month: getControlValue("txtCurrentDate"),
+            School: getControlValue("ddlSchoolName")
+
+        }
+
+        var ddl = JSON.stringify(employye)
+        callServiceMethod(ddl, "/api/EmployeeAPI", "SearchDailyEmployeeAttendenceByfilter", false, "", "", false, "", true, successMsg_scs, totalDayInMonth, "", "");
+    }
+    var aa = 0;
+    function successMsg_scs(p1, p2, p3, datas) {
+        var avi = 0;
+        if (datas.length != 0) {
+            var seldate = $('#txtCurrentDate').val();
+
+            var limit = datas[0].Total;
+            var hdspan = limit * 2 + 3;
+            var th;
+            var thead1 =  $('#txtCurrentDate').val() ;
+            var thead = "<tr>";
+
+            th += "<th align='center'> Employee&nbsp;Code </th><th align='center'> Employee&nbsp;Name </th><th align='center'> Status </th>";
+            for (var day = 1; day < limit + 1; day++) {
+                th += "<th align='center'>In-" + day + "</th><th align='center'>Out-" + day + "</th>";
+            }
+            cthead = thead1 + thead + th;
+            $("#mothsHead").html(cthead);
+
+            var tbody = "<tr>";
+            var tbodtr = "</tr>";
+            var tbodtdr = '';
+            var tbodytd = '';
+            var totalTbody = '';
+            for (var student = 0; student < datas.length; student++) {
+                if (student == 0) {
+                    tbodytd = '<tr>';
+                }
+                else {
+                    tbodytd = tbodytd + '<tr>';
+                }
+                tbodytd += "<td align='left'>" + datas[student].RegNo + "</td>";
+                tbodytd += "<td align='left'>" + datas[student].FirstName + "</td>";
+                tbodytd += "<td align='left' id='" + datas[student].ID + "'><span class='badge bg-red'>ABSENT</span></td>";
+                for (var day1 = 1; day1 <= limit * 2; day1++) {
+                    tbodytd += "<td align='center' id='" + datas[student].ID + "_" + day1 + "'>-</td>";
+                }
+            }
+
+            tbodytd += "</tr>";
+            $("#tbodyEmployeeDetails").append(tbodytd);
+            //inout time configuration not set
+            for (var student = 0; student < datas.length; student++) {
+                avi++;
+                var m = 0;
+                for (var i = 0; i < datas[student].attendenceList.length; i++) {
+                    var j = m + 1;
+                    var k = j + 1;
+                    var inid = datas[student].ID + "_" + j;
+                    var outid = datas[student].ID + "_" + k;
+                    var intime = datas[student].attendenceList[i].InTime;
+                    var outtime = datas[student].attendenceList[i].OutTime;
+                    setControlValue(inid, "<span class='badge bg-green'>" + intime + "</span>");
+                    if (outtime == "" || outtime == null) {
+                        setControlValue(outid, "-");
+                    }
+                    else {
+                        setControlValue(outid, "<span class='badge bg-blue'>" + outtime + "</span>");
+                    }
+                    if (datas[student].attendenceList[i].AttendenceType == "Absent") {
+                       
+                        setControlValue(datas[student].ID, "<span class='badge bg-red'>Absent</span>");
+                    }
+                    else if (datas[student].attendenceList[i].AttendenceType == "Present")
+                    {
+                        setControlValue(datas[student].ID, "<span class='badge bg-green'>Present</span>");
+                    }
+                    else if (datas[student].attendenceList[i].AttendenceType == "Leave") {
+                        setControlValue(datas[student].ID, "<span class='badge bg-yellow'>Leave</span>");
+                    }
+                    else if (datas[student].attendenceList[i].AttendenceType == "Holiday") {
+                        setControlValue(datas[student].ID, "<span class='badge bg-'>Holiday</span>");
+                    }
+
+                    m = k;
+                }
+                if (m == 0) {
+                    chkleavedet(datas[student].ID, seldate);
+                }
+            }
+
+            setTimeout(function () {
+
+
+                $('#example1').DataTable({
+                    dom: 'lBfrtip',
+                    "ordering": false,
+                    "bInfo": false,
+                    paging: false,
+                    searching: false,
+                    bRetrieve: true,
+                    bDestroy: true,
+
+                });
+
+
+            }, 1000);
+            if (avi > 0) {
+
+                $("#create_Excel").show();
+                $("#create_pdf").show();
+            }
+            else {
+                $("#create_Excel").hide();
+                $("#create_pdf").hide();
+
+            }
+        }
+        if (avi == 0) {
+
+            $("#create_Excel").hide();
+            $("#create_pdf").hide();
+        }
+        $('[data-toggle="tooltip"]').tooltip();
+        $("#loader").fadeOut();
+        $('#divattendence').show();
+
+    }
+
+     function chkleavedet(id1, seldate) {
+
+         $.ajax({
+                            type: "Get",
+                            url: "@Url.Content("~/api/EmployeeAPI/CheckLeave")",
+                            data: { id: id1, date: seldate },
+                            contentType: 'application/json; charset=utf-8',
+                            dataType: "json",
+                             asyc: false,
+             success: function (data) {
+                                 if (data == "1") {
+                                     setControlValue(id1, "<span class='badge bg-yellow'>LEAVE</span>");
+                                }
+
+                        }
+        })
+
+  }
+
+    function clearResetData() {
+        location.reload();
+    }
+</script>
+
+<script type="text/javascript">
+
+
+
+    function pdfExport() {
+        //$("#loader").fadeIn();
+        var pdf = new jsPDF('p', 'pt', 'a2');
+        source = $('#divmonthlyAttendenceReport')[0];
+        pdf.text("Employee Attendence Report", 5 + 360, 20);
+        specialElementHandlers = {
+            '#bypassme': function (element, renderer) {
+                return true
+            }
+        };
+        margins = {
+            top: 60,
+            bottom: 100,
+            left: 10,
+            width: 1000
+        };
+
+        pdf.fromHTML(
+            source, // HTML string or DOM elem ref.
+            margins.left, // x coord
+            margins.top, { // y coord
+                'width': "1800", // max width of content on PDF
+                'elementHandlers': specialElementHandlers
+            },
+
+            function (dispose) {
+                pdf.save('AttendenceReports.pdf');
+            }, margins);
+        //$("#loader").fadeOut();
+
+    }
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+    .170width {
+        width: 170px !important;
+    }
+</style>
+

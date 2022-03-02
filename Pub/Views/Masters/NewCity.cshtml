@@ -1,0 +1,232 @@
+﻿
+@{
+    ViewBag.Title = "NewCity";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutSuperAdmin.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section class="content" ng-app="myApp" ng-controller="cityController">
+    <div class="row">
+        <!-- left column -->
+        <div class="col-md-6">
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">New City</h3>
+                </div>
+                <!-- /.box-header -->
+                <!-- form start -->
+                <form role="form" id="form1" name="form1">
+                    <div class="alert alert-success centerSuccess" id="divsuccesmsg" style="display:none">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                        <h4>
+                            <i class="icon fa fa-check"></i>
+                            success! <span ng-bind="successMsg"></span>
+                        </h4>
+
+                    </div>
+                    <div class="box-body">
+                        <div class="form-group">
+                            <input type="text" style="display:none" ng-model="txtCityId" />
+                            <label for="exampleInputEmail1">Country <span class="requird">*</span></label>
+                            @*<select class="form-control" name="ddlCountry" ng-model="ddlCountry" ng-change="getstatebyCountryId()" valuefield="Id"  >
+            <option value="0" id="0" selected>Please Select</option>
+            <option ng-repeat="count in country" value={{count.Id}}>{{count.Name}}</option>
+        </select>*@
+                            <select class="form-control" style="color:black;" name="ddlCountry" ng-model="ddlCountry" id="ddlCountry" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--"></select>
+
+
+                        </div>
+
+                        <div class="form-group">
+                            <label for="exampleInputEmail1">State <span class="requird">*</span></label>
+                            @*<select class="form-control" name="ddlState" ng-model="ddlState">
+            <option value="0" label="Please Select" selected></option>
+            <option ng-repeat="st in state" value={{st.Id}}>{{st.Name}}</option>
+        </select>*@
+                            <select class="form-control" style="color:black;" name="ddlState" ng-model="ddlState" id="ddlState" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--"></select>
+
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputEmail1">City Name <span class="requird">*</span></label>
+                            <input type="text" class="form-control" name="txtCityName" ng-model="txtCityName" id="txtCityName" placeholder="Enter City Name">
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="chkstatus" ng-model="chkstatus"> Active
+                            </label>
+                        </div>
+                    </div>
+                    <!-- /.box-body -->
+
+                    <div class="box-footer">
+                        <input type="button" ng-click="saveCity()" class="btn btn-primary" value="Save" />
+                        <input type="button" ng-click="clearAllTexbox()" class="btn btn-primary" value="Reset" />
+
+                    </div>
+                </form>
+            </div>
+            <!-- /.box -->
+
+
+
+        </div>
+        <!--/.col (left) -->
+
+
+        <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">View Cities</h3>
+                </div>
+                <div class="box-body">
+                    <div class="form-group">
+
+
+                        <table id="example1" class="table table-bordered table-striped" style="width:100%">
+                            <thead style=" background-color:steelblue;color:white;width:100%;">
+                                <tr>
+                                    <th>City Name</th>
+                                    <th>State Name</th>
+                                    <th>Country Name</th>
+                                    <th>Status</th>
+                                    <th class="no-sort">Action</th>
+
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="employee in employees" ng-class-odd="'oddTr'">
+                                    <td>
+                                        {{employee.Name}}
+
+                                    </td>
+                                    <td>
+                                        {{employee.StateId}}
+
+                                    </td>
+                                    <td>
+                                        {{employee.CountryId}}
+
+                                    </td>
+                                    <td>
+                                        {{employee.Statuss}}
+                                    </td>
+
+                                    <td>
+                                        <i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" ng-click="editCityById(employee)"></i>
+                                        &nbsp;
+                                        <i class="fa fa-fw fa-trash" style="cursor:pointer" ng-click="deleteCityById(employee)"></i>
+
+                                    </td>
+
+
+
+                                </tr>
+
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+    <!-- /.row -->
+</section>
+
+<script src="~/js/angular.min.js"></script>
+
+
+
+<script src="~/js/Angular/Module.js"></script>
+<script src="~/js/Angular/Service.js"></script>
+<script src="~/js/Angular/controller.js"></script>
+<!-- DataTables -->
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+<style type="text/css">
+    .oddTr {
+        background-color: #dddddd;
+    }
+</style>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        callServiceMethodForDDl("", "/api/MasterAPI", "getAllCountryforState", "ddlCountry", false, "", "", "", "");
+        $("#ddlCountry").on("change", function () {
+            var countryID = getControlValue("ddlCountry"); 
+            callServiceMethodForDDl(JSON.stringify([countryID]), "/api/StudentApi", "getAllstatebyCountryId", "ddlState", false, "", "", "", "");
+
+        });
+
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                txtCityName: "required",
+                ddlCountry: {
+                    required: true,
+                },
+                ddlCountry: {
+                    selectcheck: true
+                },
+                ddlState: {
+                    selectcheck2: true
+                },
+            },
+            messages: {
+                txtCityName: "Please Enter City Name",
+                ddlCountry: "Please Select Country"
+
+            }
+        })
+        jQuery.validator.addMethod('selectcheck', function (value) {
+            return (parseInt(value)>0);
+        }, "Please Select Country");
+        jQuery.validator.addMethod('selectcheck2', function (value) {
+            return (parseInt(value) > 0);
+        }, "Please Select State");
+
+
+    });
+</script>

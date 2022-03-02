@@ -1,0 +1,391 @@
+﻿
+@{
+    ViewBag.Title = "ViewTransportAllocationDetails";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">View Transport Allocation Details</h3>
+                </div>
+                <div class="box-body">
+                    <div class="form-group">
+                        <div>
+
+                            <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                <thead>
+                                    <tr>
+                                        <th>Vehicle Register no</th>  
+                                        <th>UserType</th>
+                                        <th>Name</th>
+                                        <th>User ID</th>
+                                        <th>Hub Name</th>
+                                        <th>Hub Address</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyEmployeeLeaveRequestDetails"></tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <script type="text/html" id="tbodyEmployeeLeaveRequestDetailsJTemplte">
+                {#foreach $T as Datashort}
+                <tr>
+                    Status,Hubaddress,Hubname,UserName,
+                    <td>
+                        { $T.Datashort.VehicleID}
+                    </td>
+                    <td>
+                        { $T.Datashort.UserType}
+                    </td>
+                    <td>
+                        { $T.Datashort.UserName}
+                    </td>
+                    <td>
+                        { $T.Datashort.UserID}
+                    </td>
+                    
+                    <td>
+                        { $T.Datashort.Hubname}
+                    </td>
+                    <td>
+                        { $T.Datashort.Hubaddress}
+                    </td>
+                    <td>
+                        { $T.Datashort.Status}
+                    </td>
+                    <td>
+                        @*<i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" onclick="editAllocationById({ $T.Datashort.Id})"></i>*@ @*almost complete*@
+                        &nbsp;
+                        <i class="fa fa-fw fa-trash" style="cursor:pointer" onclick="deleteAllocationById({ $T.Datashort.Id})"></i>
+                    </td>
+                    @*<td>
+
+            <a class="glyphicon glyphicon-eye-open" title="" onclick="viewAllocationDetailsById({ $T.Datashort.Id},'{ $T.Datashort.UserType}')"></a>
+            &nbsp;
+            <a class="glyphicon glyphicon-remove" title="" href="/index.php/transport/transportallocation/delete/id/9"><img src="" alt=""></a>
+
+        </td>*@
+                </tr>
+                {#/for}
+            </script>
+
+
+        </div>
+    </div>
+</section>
+<div class="alert alert-success centerSuccess" id="divSuccessMsg" style="display:none"></div>
+    <!-- Trigger the modal with a button -->
+    <button type="button" class="btn btn-info btn-lg" id="btnEmployeeShowTasks" style="display:none" data-toggle="modal" data-target="#myModal2">Open Modal</button>
+
+    <!-- Modal -->
+
+
+
+
+    <div id="myModal2" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Allocation Details</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="content">
+                        <div class="panel panel-white">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-12">
+
+                                        <div class="col-sm-6">
+
+                                            <label class="control-label">Studnet  Name</label>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <p class="form-control-static" id="spEmployeeName"></p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="col-sm-6">
+                                            <label class="control-label">Class & Section</label>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <p class="form-control-static" id="spClassAndSection"></p>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-12">
+
+                                        <label class="col-sm-6 control-label">Route Code</label>
+                                        <div class="col-sm-6">
+                                            <p class="form-control-static" id="spRoutecode"></p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="col-sm-6">
+                                            <label class=" control-label">User Type</label>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <p class="form-control-static" id="slUserType"> </p>
+                                        </div>
+                                    </div>
+                                    <div id="header"></div>
+
+                                    <div class="col-md-12">
+                                        <div class="col-sm-6">
+                                            <label class="control-label">Registeration No</label>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <p class="form-control-static" id="spRegistrationNumber"></p>
+                                        </div>
+                                    </div>
+                                    <div class=" col-md-12">
+                                        <div class="col-sm-6">
+                                            <label class=" control-label">Destination</label>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <p class="form-control-static" id="spDestination"></p>
+                                        </div>
+                                    </div>
+                                    <div id="header"></div>
+                                    <div class="col-md-12">
+                                        <div class="form-group col-md-6">
+                                            <label class=" control-label">Destination Stop time</label>
+                                        </div>
+
+                                        <div class="col-sm-6">
+                                            <p class="form-control-static" id="spStoptime"></p>
+                                        </div>
+
+                                    </div>
+                                    <div class="form-group col-md-12">
+                                        <div class="col-sm-6">
+                                            <label class="control-label">Trasport Allocation Status</label>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <p class="form-control-static" id="spAllocationStatus"></p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- DataTables -->
+    <link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+    <script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            //  var id = sessionStorage.getItem("EmpId");
+
+            //  if (id != "") {
+            //$("#loader").fadeIn();
+            loadallocateuser();
+            //var Parameters = {
+
+
+
+            //    val: sessionStorage.getItem("EmpId")
+            //}
+            //var ddl = JSON.stringify(Parameters);
+
+           
+            //}
+        });
+        function loadallocateuser()
+        {
+            var SchoolID = sessionStorage.getItem("SchoolID");
+            var t = $('#example1').DataTable();
+            t.destroy();
+            callJTemplateServiceMethod(JSON.stringify([SchoolID]), "/api/TransportApi", "getAllAllocationDetailsBySchool",
+                "tbodyEmployeeLeaveRequestDetails", "tbodyEmployeeLeaveRequestDetailsJTemplte", true, successMsg, "", "", "");
+        }
+        function successMsg(p1, p2, p3, datas) {
+            setTimeout(function () {
+                $('#example1').DataTable({
+                    bRetrieve: true,
+                    bDestroy: true,
+                    'columnDefs': [{
+                        "targets": -1,
+                        "orderable": false
+
+                    }],
+                });
+            }, 1000);
+            $("#loader").fadeOut();
+        }
+
+        function deleteAllocationById(id) {
+            var result = window.confirm("Are you sure You want to Delete ?")
+            if (result == true) {
+                var idd = id;
+                $.ajax({
+                    type: "POST",
+                    url: "/api/TransportApi/deleteAllocationById",
+                    data: JSON.stringify([idd]),
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (datas) {
+
+                        $("#divSuccessMsg").fadeIn();
+                        $("#divSuccessMsg").html("<strong>Success!</strong> " + datas);
+                        setTimeout(function () {
+
+                            $("#divSuccessMsg").fadeOut();
+
+                        }, 2000);
+
+                        loadallocateuser();
+
+
+
+                    }
+
+
+                });
+
+
+            }
+
+
+        }
+
+
+
+
+
+
+        //function editAllocationById(id)
+        //{
+
+        //    window.location.href = "/Transport/TransportAllocation?id=" + id;
+
+        //}
+
+        //function viewAllocationDetailsById(Id,userType) {
+        //    if (Id != "") {
+
+
+        //        var emp = {
+        //            val: Id,
+        //            val1: userType
+
+        //        }
+        //        var ddl = JSON.stringify(emp);
+
+        //        callServiceMethod(ddl, "/api/TransportApi", "editAllocationDetailsById", false, "", "", false, "", true, editAllocationDetailsById_scs, "", "", "");
+        //    }
+        //}
+
+        //function editAllocationDetailsById_scs(p1, p2, p3, datas) {
+        //    document.getElementById("btnEmployeeShowTasks").click();
+        //    setControlValue("spRoutecode", datas.route);
+        //    setControlValue("spDestination", datas.Pickdrop);
+        //    setControlValue("spStoptime", datas.StopTime);
+        //    setControlValue("spClassAndSection", datas.Class);
+        //    setControlValue("slUserType", datas.UserType);
+        //    setControlValue("spEmployeeName", datas.StudentName);
+        //    setControlValue("spRegistrationNumber", datas.EmployeeName);
+        //    setControlValue("spAllocationStatus", datas.Status);
+        //    $("#spAllocationStatus").addClass(datas.Extra10);
+
+        //    //setControlValue("", datas.route);
+        //    //setControlValue("", datas.route);
+        //    //setControlValue("", datas.route);
+        //    //setControlValue("", datas.route);
+        //    //setControlValue("", datas.route);
+        //    //setControlValue("", datas.route);
+        //}
+    </script>
+    <style type="text/css">
+            .oddTr {
+                background-color: #dddddd;
+            }
+
+            /*.htmlTempletes tbody tr:nth-child(2n+1) {
+            background-color: #e1e4e8;
+        }*/
+            #example1 td img {
+                width: 35px;
+                height: 35px;
+                border-radius: 100%;
+            }
+
+
+            #example1 {
+                font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+                border-collapse: collapse;
+                width: 100%;
+            }
+
+                #example1 td, #customers th {
+                    border: 1px solid #ddd;
+                    /*padding: 8px;*/
+                }
+
+                #example1 tr:nth-child(even) {
+                    background-color: #f2f2f2;
+                }
+
+                #example1 tr:hover {
+                    background-color: #ddd;
+                }
+
+                #example1 th {
+                    padding-top: 12px;
+                    padding-bottom: 12px;
+                    text-align: left;
+                    background-color: #367fa9;
+                    color: white;
+                }
+    </style>

@@ -1,0 +1,611 @@
+﻿
+@{
+    ViewBag.Title = "SendSMStoParent";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    //Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+<section class="content">
+    <div class="row" style="overflow:auto">
+        <div class="col-md-12">
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Send SMS to Student</h3>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+
+                        <div class="col-sm-4">
+                            <div class="form-group field-empinfosearch-emp_designation_id">
+                                <label for="Country" class="req">School<span class="requird">*</span></label>
+                                <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name" ></select>
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <div class="form-group">
+                                   
+                                    <label class="control-label" for="empinfosearch-emp_department_id">Class : <span class="requird">*</span></label>
+                                    <select class="form-control select2" id="ddlCourse" valuefield="Id" textfield="CourseName" blankRowValue="-1" blankRowText="----Select----" style="width: 100%;"></select>
+                                    <!-- /.input group -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Section:</label>
+                                <select class="form-control select2" id="ddlSection" valuefield="Id" textfield="SectionName" blankRowValue="-1" blankRowText="----Select----" style="width: 100%;"></select>
+                                <!-- /.input group -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <div class="form-group">
+                                    <label>Name:</label>
+                                    <input type="text" class="form-control" id="txtName" placeholder="Name ...">
+                                    <!-- /.input group -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4" id="hiddenRollno">
+                            <div class="form-group">
+                                <label>Roll No:</label>
+                                <input type="text" class="form-control" id="txtRollno" placeholder="Roll No ...">
+                                <!-- /.input group -->
+                            </div>
+                        </div>
+                    </div>
+                                @*<div class="form-group">
+                <input type="button" class="btn btn-primary" value="Search"/>
+            </div>*@
+                                <div>
+
+                                    <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                                        <thead>
+                                            <tr>
+                                                <th><input type="checkbox"  id="CheckAll" /></th>
+                                                <th>Reg No</th>
+                                                <th>Photo</th>
+                                                <th>School</th>
+                                                <th>Name</th>
+                                                <th>Class</th>
+                                                <th>Section</th>
+                                                @*<th>Roll No</th>*@
+                                                <th>SMS Mobile No.</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbodyEmployeeDetails"></tbody>
+                                    </table>
+                                </div>
+                    <form role="form" id="form1" name="form1">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Message: <span class="requird">*</span></label>
+                                    <textarea class="form-control" name="txtMessage" rows="3" placeholder="Enter ..." id="txtMessage" ng-model="txtMessage"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <input type="button" class="btn btn-primary" value="Send SMS" id="Send" name="Send" />
+                                </div>
+                            </div>
+
+                        </div>
+                        </form>
+</div>
+                        </div>
+                    </div>
+                    <script type="text/html" id="divEmployeeDetailsJTemplte">
+                        {#foreach $T as Datashort}
+                        <tr>
+                            <td>
+                                <input type="checkbox" stdID="{ $T.Datashort.ID}">
+                                <input type="hidden" name="id" value="{ $T.Datashort.ID}">
+                            </td>
+                            <td>
+                                { $T.Datashort.RegNo}
+                            </td>
+                            <td>
+                                <img src="{ $T.Datashort.PicPath}" alt="#" />
+                            </td>
+                            <td> { $T.Datashort.School}
+                            </td>
+                            <td>
+                                { $T.Datashort.FirstName}
+                            </td>
+                            <td>
+                                { $T.Datashort.Class}
+                            </td>
+                            <td>
+                                { $T.Datashort.Section}
+                            </td>
+                            @*<td>
+                                { $T.Datashort.RollNo}
+                            </td>*@
+                            <td>
+                                { $T.Datashort.SMSmobileNo}
+                            </td>
+                        </tr>
+                        {#/for}
+                    </script>
+
+
+                </div>
+    <div class="alert alert-success centerSuccess" id="divSucesEmail" style="display:none">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h4>
+            <i class="icon fa fa-check"></i>
+            <span Id="sentEmailMsg"></span>
+        </h4>
+
+    </div>
+</section>
+
+
+
+
+
+
+<!-- DataTables -->
+
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+
+
+
+<script type="text/javascript">
+   
+    
+       
+
+
+    $(document).ready(function () {
+        $("#hiddenRollno").hide();
+       var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+       
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+        Getstudentsmsdetail();
+        
+    });
+
+    $("#ddlSchoolName").change(function ()
+    {
+        Getstudentsmsdetail();
+        var School = getControlValue("ddlSchoolName");
+        if (School != null && (School != -1) && (School != undefined)) {
+            callServiceMethodForDDl(JSON.stringify([School]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+        }
+    });
+
+    $("#ddlCourse").change(function () {
+        var ddlCourse = getControlValue("ddlCourse");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        if (ddlCourse != null && (ddlCourse != -1) && (ddlCourse != undefined)) {
+            callServiceMethodForDDl(JSON.stringify([ddlCourse, SchoolID]), "/api/StudentApi", "GetSectionsbyschool", "ddlSection", false, "", "", "", "");
+        }
+        Getstudentsmsdetail();
+    });
+
+
+    function Getstudentsmsdetail() {
+        if ($("#form1").valid())
+        {
+            var payee = {
+                School: getControlValue("ddlSchoolName"),
+                Class: getControlValue("ddlCourse"),
+                Section: getControlValue("ddlSection"),
+               
+            }
+            var t = $('#example1').DataTable();
+            t.destroy();
+            var ddl = JSON.stringify(payee)
+
+            callJTemplateServiceMethod(ddl, "/api/StudentApi", "getAllStudentsDetailsNew",
+                "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+
+            
+        }
+    }
+
+    $("#ddlSection").change(function () {
+        Getstudentsmsdetail();
+        ddlCourse = getControlValue("ddlCourse");
+        var ddlSection = getControlValue("ddlSection");
+        var name = getControlValue("txtName");
+        var rollno = getControlValue("txtRollno");
+        ddlSchool = getControlValue("ddlSchoolName");
+        if (ddlCourse != null && (ddlCourse != -1) && (ddlCourse != undefined)) {
+            searchStudents(ddlCourse, ddlSection, name, rollno, ddlSchool);
+        }
+    });
+
+    $('#txtName').on('keyup', function () {
+      
+        var School= getControlValue("ddlSchoolName");
+        var ddlCourse = getControlValue("ddlCourse");
+        var ddlSection = getControlValue("ddlSection");
+        var name = getControlValue("txtName");
+        var rollno = getControlValue("txtRollno");
+        searchStudents(ddlCourse, ddlSection, name, rollno, School);
+
+       
+    });
+
+ //roll no removed 
+    //$('#txtRollno').on('keyup', function ()
+    //{
+
+       
+    //    var School = getControlValue("ddlSchoolName");
+    //    var ddlCourse = getControlValue("ddlCourse");
+    //    var ddlSection = getControlValue("ddlSection");
+    //    var name = getControlValue("txtName");
+    //    var rollno = getControlValue("txtRollno");
+    //    searchStudents(ddlCourse, ddlSection, name, rollno,School);
+    //});
+
+    $("#CheckAll").click(function () {
+        $('#example1 tbody input[type="checkbox"]').prop('checked', this.checked);
+    });
+    var checkcount = 0;
+    $("#Send").click(function () {
+
+        //
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        $.ajax({
+           
+            url: "/api/StudentApi/checksmsService",
+            type: "POST" ,
+            data: JSON.stringify([ SchoolID]),
+            contentType: 'application/json; charset=utf-8',
+            success: function (data)
+            {
+                if (data == "0") {
+                    alert("Sms Service is not Activated");
+                }
+                else
+                {
+                    //alert("empliment here ");
+                  
+                    var a = $("#txtMessage").val();
+                    if (a != "") {
+                        $("#loader").fadeIn();
+                        var Items = new Array();
+
+                       
+                        $('#example1 tbody input[type=checkbox]').each(function () {
+                            if ($(this).is(':checked'))
+                            {
+                                checkcount++;
+                            }
+                           
+                        });
+                        if (checkcount == 0)
+                        {
+                            $("#divSucesEmail").fadeIn();
+                            $("#sentEmailMsg").html("Please Select Student");
+                            setTimeout(function () {
+                                $("#divSucesEmail").fadeOut();
+                                $("#sentEmailMsg").html("");
+                            }, 2000)
+                            $("#loader").fadeOut();
+                            return true;
+                        }
+                        $('#example1 tbody input[type=checkbox]').each(function () {
+                            if ($(this).is(':checked')) {
+
+                                var Student = {
+
+
+                                    ID: $(this).attr("stdID"),
+                                    Awards: getControlValue("txtMessage"),
+                                    SchoolID: getControlValue("ddlSchoolName"),
+                                    StudentCount: checkcount,
+
+
+                                }
+
+                                Items.push(Student);
+
+                                var ddl = JSON.stringify(Items);
+
+
+
+                                callServiceMethod(ddl, "/api/StudentApi", "sendSmstoParent", false, "", "", false, "", true, SMSSuccess, "", "", "");
+                            }
+                            //else {
+                            //    $("#divSucesEmail").fadeIn();
+                            //    $("#sentEmailMsg").html("Please Select Student");
+                            //    setTimeout(function () {
+                            //        $("#divSucesEmail").fadeOut();
+                            //        $("#sentEmailMsg").html("");
+                            //    }, 2000)
+                            //    $("#loader").fadeOut();
+                            //}
+                        });
+
+                    }
+                    else {
+                        $("#divSucesEmail").fadeIn();
+                        $("#sentEmailMsg").html("Please Enter Message ");
+                        setTimeout(function () {
+                            $("#divSucesEmail").fadeOut();
+                            $("#sentEmailMsg").html("");
+                        }, 2000)
+
+                    }
+            //alert(Items);
+            //var values = $("#example1 tbody input[name=name]:checked").map(function () {
+            //    row = $(this).closest("tr");
+            //    return {
+            //        checkbox_id: $(this).val(),
+            //        hidden_id: $(row).find("input[name=id]").val(),
+            //        address: $(row).find("input[name=address]").val(),
+            //        radio: $(row).find('input[type=radio]:checked').val() || "not selected"
+            //    }
+            //}).get();
+            //alert(values);
+
+
+        //}
+
+
+                }
+
+            }
+
+
+
+        });
+        //if ($("#form1").valid()) {
+       
+        
+    });
+    var schoolcount = 0;
+    function SMSSuccess(p1,p2,p3,datas)
+    {
+        schoolcount++;
+      
+
+        if (checkcount == schoolcount) {
+            $("#divSucesEmail").fadeIn();
+            $("#sentEmailMsg").html(datas);
+            setTimeout(function () {
+                $("#divSucesEmail").fadeOut();
+                $("#sentEmailMsg").html("");
+            }, 2000)
+            $("#txtMessage").val("");
+            $("#stdID").val("");
+
+            $('#example1 tbody input[type="checkbox"]').prop('checked', false);
+            checkcount = 0;
+            schoolcount = 0;
+            $("#loader").fadeOut();
+        }
+       
+
+    }
+
+    function searchStudents(cls,sec,name,rollno,School)
+    {
+        $("#loader").fadeIn();
+        var t = $('#example1').DataTable();
+        t.destroy();
+        callJTemplateServiceMethod(JSON.stringify([cls, sec, name, rollno,School]), "/api/StudentApi", "getAllStudentsforSMS",
+        "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+    }
+
+    function successMsg(p1, p2, p3, datas)
+    {
+        setTimeout(function () {
+            $('#example1').DataTable({
+                bRetrieve: true,
+                bDestroy: true,
+                lengthMenu : [50,100, 500,1000,2000,3000,4000,5000,6000,7000,8000,9000,10000],
+                'columnDefs': [{
+                    "targets":[ -7,-6],
+                    "orderable": false
+
+                }],
+               
+            });
+        }, 1000);
+        $("#loader").fadeOut();
+    }
+
+   
+
+    
+
+    function performActionByEmploy(val,id)
+    {
+        if(val=="ViewDocument")
+        {
+            $("#anchrfModelDeocument"+id+"").click();
+        }
+        else if(val=="StudentEdit")
+        {
+
+            window.location.href="/Student/AddStudent?id="+id;
+        }
+        else if(val=="StudentView")
+        {
+            window.location.href = "/Student/StudentProfile?id="+id;
+        }
+
+    }
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+
+
+                txtMessage: "required",
+
+
+
+            },
+            messages: {
+
+                txtMessage: "Please Enter Message"
+
+
+
+            }
+        })
+
+
+
+    });
+</script>
+<style type="text/css">
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
+
+
+
+@*<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+                ddlCourse: {
+                    selectcheck: true
+                },
+
+
+            },
+            messages: {
+                ddlCourse: "Please Select  Class",
+                //   ddlSection: "Please Select Section"
+            }
+        })
+        jQuery.validator.addMethod('selectcheck', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+
+        jQuery.validator.addMethod('selectcheck1', function (value) {
+            if (value == "0") {
+                return (value != '0');
+            }
+            else if (value == "? undefined:undefined ?") {
+                return (value != '? undefined:undefined ?');
+            }
+            else {
+                return true;
+            }
+
+        }, "Please Select Country");
+
+
+    });
+</script>*@
+
+@*<script type="text/javascript">
+
+    $('#textname').on('keyup', function () {
+
+        var name = getControlValue("textname");
+        var SchoolID = sessionStorage.getItem("SchoolID");
+        Searchvalue(name, SchoolID);
+    });
+
+    function Searchvalue(name, SchoolID)
+    {
+        $.ajax({
+
+        })
+    }
+</script>*@

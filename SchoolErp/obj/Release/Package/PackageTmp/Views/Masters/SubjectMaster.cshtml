@@ -1,0 +1,249 @@
+﻿
+@{
+    ViewBag.Title = "SubjectMaster";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data) {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<section class="content" ng-app="myApp" ng-controller="subjectss">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-body">
+                    <!-- left column -->
+                    <form role="form" id="form1" name="form1">
+                        <div class="col-md-6">
+                            <!-- general form elements -->
+                           
+                                <div class="box-header with-border">
+                                    <h3 class="box-title">Add Subjects</h3>
+                                </div>
+                                <!-- /.box-header -->
+                                <!-- form start -->
+
+                                <div class="alert alert-success centerSuccess" id="divsuccesmsg" style="display:none">
+                                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                    <h4>
+                                        <i class="icon fa fa-check"></i>
+                                        success! <span ng-bind="successMsg"></span>
+                                    </h4>
+
+                                </div>
+                                <div class="box-body">
+                                    <div class="form-group">
+                                        <label for="Country" class="req">School<span class="requird">*</span></label>
+                                        <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name"></select>
+
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exampleInputEmail1" >Class<span class="requird">*</span></label>
+                                        <select class="form-control" name="ddlCourse" style="color:black;" id="ddlCourse" valuefield="Id" ng-model="ddlCourse" textfield="CourseName" blankRowValue="0" blankRowText="----Select----"></select>
+                                      
+                                    </div>
+                                        <div class="form-group">
+                                            <input type="text" style="display:none" ng-model="txtSubjectId" />
+                                            <label for="exampleInputEmail1">Subject Name <span class="requird">*</span></label>
+                                            <input type="text" class="form-control" name="txtSubjectName" ng-model="txtSubjectName" id="txtSubjectName" placeholder="Enter Subject Name">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="exampleInputEmail1">Subject Code <span class="requird">*</span></label>
+                                            <input type="text" class="form-control" name="txtSubjectCode" ng-model="txtSubjectCode" id="txtSubjectCode" placeholder="Enter Subject Code">
+                                        </div>
+
+                                    </div>
+                                    <!-- /.box-body -->
+
+
+
+                                </div>
+                        <!--/.col (left) -->
+
+                        <div class="col-md-6">
+                            <!-- general form elements -->
+                             <div class="box-body">
+                                    <div class="form-group">
+                                        <label for="exampleInputEmail1">Subject Description </label>
+                                        <textarea class="form-control" id="txtSubjectDescription" ng-model="txtSubjectDescription" rows="5" cols="5"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="checkbox" id="chkstatus" ng-model="chkstatus"> Active
+                                        </label>
+                                    </div>
+                                    <div class="box-footer">
+                                        <input type="button" ng-click="saveSubjects()" class="btn btn-primary" value="Save" />
+                                        <input type="button" ng-click="clearAllTexbox()" class="btn btn-primary" value="Reset" />
+                                    </div>
+                                </div>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+            </div>
+
+                        <div class="col-md-12">
+                            <!-- general form elements -->
+                            <div class="box box-primary">
+                                <div class="box-header with-border">
+                                    <h3 class="box-title">View Subjects</h3>
+                                </div>
+                                <div class="box-body">
+                                    <div class="form-group">
+                                        <table id="example1" class="table table-striped table-bordered" cellspacing="0" style="width:100%">
+                                            <thead style="background-color:steelblue ;color :white">
+                                                <tr>
+                                                    <th>School</th>
+                                                    <th>Subject Name</th>
+                                                    <th>class Name</th>
+                                                    <th>Subject Code</th>
+                                                    <th>Desc</th>
+                                                    <th>Status</th>
+                                                    <th>Action</th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tbodycountryList">
+                                                <tr ng-repeat="employee in employees" ng-class-odd="'oddTr'">
+                                                    <td>
+                                                        {{employee.School}}
+
+                                                    </td>
+                                                    <td>
+                                                        {{employee.Name}}
+
+                                                    </td>
+                                                    <td>
+                                                        {{employee.classname}}
+
+                                                    </td>
+                                                    <td>
+                                                        {{employee.Code}}
+
+                                                    </td>
+                                                    <td>
+                                                        {{employee.Desc}}
+
+                                                    </td>
+                                                    <td>
+                                                        <a href="#" style="background-color:{{employee.Color}};color:white;padding: 4px;border-radius: 8px;">{{employee.stStatus}}</a>
+                                                    </td>
+                                                    <td>
+                                                        <i class="fa fa-fw fa-pencil-square-o" style="cursor:pointer" ng-click="editSubjectByID(employee)"></i>
+                                                        &nbsp;
+                                                        <i class="fa fa-fw fa-trash" style="cursor:pointer" ng-click="deleteSubjectById(employee)"></i>
+                                                    </td>
+
+
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
+
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <!-- /.row -->
+</section>
+
+
+<script src="~/js/angular.min.js"></script>
+
+
+
+<script src="~/js/Angular/Module.js"></script>
+<script src="~/js/Angular/Service.js"></script>
+<script src="~/js/Angular/controller.js"></script>
+
+<!-- DataTables -->
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<style type="text/css">
+    .oddTr {
+        background-color: #dddddd;
+    }
+</style>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        //callServiceMethodForDDl("", "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+
+
+        var ddlSchoolName = getControlValue("ddlSchoolName");
+        if (ddlSchoolName != null && (ddlSchoolName != -1) && (ddlSchoolName != undefined)) {
+            callServiceMethodForDDl(JSON.stringify([ddlSchoolName]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+        }
+
+        $("#ddlSchoolName").change(function () {
+            var SchoolID = getControlValue("ddlSchoolName");
+          
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+        });
+        $("#form1").validate({
+            errorClass: "my-error-class",
+            validClass: "my-valid-class",
+            rules: {
+            //      ddlCourse: {
+            //        selectcheck: true
+            //    },
+                txtSubjectName: "required",
+                txtSubjectCode: "required",
+                ddlCourse: {
+                    selectcheck: true
+                },
+                
+            },
+            messages: {
+                //ddlCourse: "Please select class",
+                txtSubjectName: "Please Enter Subject Name",
+                txtSubjectCode: "Please Enter Subjet Code",
+                ddlCourse: "Please Select Class ",
+             
+               }
+        })
+
+        jQuery.validator.addMethod('selectcheck', function (value) {
+            return (value != '0');
+        }, "Please Select Course");
+    });
+</script>
+

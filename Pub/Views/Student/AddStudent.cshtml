@@ -1,0 +1,3443 @@
+﻿    @model SchoolErp.Models.Student
+
+@{
+    ViewBag.Title = "AddStudent";
+    //Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+
+
+<script type="text/javascript">
+
+        var sessionStorage_transfer = function (event) {
+            if (!event) { event = window.event; } // ie suq
+            if (!event.newValue) return;          // do nothing if no value to work with
+            if (event.key == 'getSessionStorage') {
+                // another tab asked for the sessionStorage -> send it
+                localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+                // the other tab should now have it, so we're done with it.
+                localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+            } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+                // another tab sent data <- get it
+                var data = JSON.parse(event.newValue);
+                for (var key in data) {
+                    sessionStorage.setItem(key, data[key]);
+                }
+            }
+        };
+        if (window.addEventListener) {
+            window.addEventListener("storage", sessionStorage_transfer, false);
+        } else {
+            window.attachEvent("onstorage", sessionStorage_transfer);
+        };
+
+
+        // Ask other tabs for session storage (this is ONLY to trigger event)
+        if (!sessionStorage.length) {
+            localStorage.setItem('getSessionStorage', 'foobar');
+            localStorage.removeItem('getSessionStorage', 'foobar');
+        };
+
+</script>
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+
+    <style>
+        .cntrl {
+            width: 300px;
+        }
+
+        .Pcntrl {
+            width: 250px;
+        }
+
+        .txtArea {
+            width: 400px;
+        }
+
+        .dvImgPreview {
+            background-position: center center;
+            background-size: cover;
+            -webkit-box-shadow: 0 0 1px 1px rgba(0, 0, 0, .3);
+            min-height: 30px;
+            min-width: 30px;
+            height: 100px;
+            width: 100px;
+            max-height: 100px;
+            max-width: 100px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h1>
+            Student Admission <label id="LicenceMsg" style="color:red;" class="form-control"></label>
+        </h1>
+
+    </section>
+
+    <section class="content">
+        <div class="col-md-12">
+            <!-- left column -->
+            <!-- general form elements -->
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">School Details :-</h3>
+                </div>
+                <!-- /.box-header -->
+                <!-- form start -->
+                <form role="form" id="form1" name="form1">
+                    <div class="box-body">
+                        <div class="form-group">
+                            <table>
+                                <tr>
+
+                                    <td>
+                                        <div class="form-group cntrl">
+                                            <label for="Country" class="req">School<span class="requird">*</span></label>
+                                            <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name" style="width:250px;"></select>
+
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group cntrl">
+                                            <label>Academic Year <span class="requird">*</span></label>
+                                            <select id="ddlAcademicYr" name="ddlAcademicYr" class="form-control" valuefield="ID" textfield="StartYear" blankRowValue="-1" blankRowText="----Select----" onchange="" aria-required="true" style="width:250px;color:black;"></select>
+                                            @*<select class="form-control" name="ddlAcademicYr" id="ddlAcademicYr" style="width:250px;">
+                                                    <option value="-1">----Select----</option>
+                                                    <option>2017-2018</option>
+                                                </select>*@
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group cntrl">
+                                            <label>Registration No.<span class="requird">*</span></label>
+                                            <input type="text" class="form-control" readonly="readonly" id="txtRegNo" style="width:250px;">
+                                        </div>
+                                    </td>
+
+
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="form-group cntrl">
+                                            <label>Joining Date <span class="requird">*</span></label>
+                                            <div class="input-group date">
+                                                <div class="input-group-addon">
+                                                    <i class="fa fa-calendar"></i>
+                                                </div>
+                                                <input type="text" class="form-control dtpicker" name="txtJoinDt" id="txtJoinDt" style="width:230px;">
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group cntrl">
+                                            <label>Class <span class="requird">*</span></label>
+                                            @*<select class="form-control" id="ddlCourse" style="width:250px;">
+                                                    <option>option 1</option>
+                                                    <option>option 2</option>
+                                                    <option>option 3</option>
+                                                    <option>option 4</option>
+                                                    <option>option 5</option>
+                                                </select>*@
+                                            <select class="form-control" id="ddlCourse" name="ddlCourse" valuefield="Id" textfield="CourseName" blankRowValue="-1" blankRowText="----Select----" style="width:250px;color:black;"></select>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group cntrl">
+                                            <label>Section</label>
+                                            <select class="form-control" id="ddlSection" name="ddlSection" valuefield="Id" textfield="SectionName" blankRowValue="-1" blankRowText="----Select----" style="width:250px;color:black;"></select>
+                                        </div>
+                                    </td>
+
+
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="form-group cntrl">
+                                            <label>Stream</label>
+                                            @*<select class="form-control" id="ddlStream" style="width:250px;">
+                                                    <option>option 1</option>
+                                                    <option>option 2</option>
+                                                    <option>option 3</option>
+                                                    <option>option 4</option>
+                                                    <option>option 5</option>
+                                                </select>*@
+                                            <select class="form-control" id="ddlStream" valuefield="Id" textfield="StreamName" blankRowValue="-1" blankRowText="----Select----" style="width:250px;color:black;"></select>
+                                            @*<select class="form-control" id="ddlSection" valuefield="Id" textfield="SectionName" blankRowValue="-1" blankRowText="----Select----" style="width:250px;"></select>*@
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group cntrl">
+                                            <label>BioMatric ID</label>
+                                            <input type="text" class="form-control" id="BioMetricID" style="width:250px;">
+                                        </div>
+                                    </td>
+                                    @*<td>
+                                            <div class="form-group cntrl">
+                                                <label>Batch</label>
+                                                <select class="form-control" id="ddlBatch" valuefield="Id" textfield="BatchName" blankRowValue="-1" blankRowText="----Select----" style="width:250px;"></select>
+                                            </div>
+                                        </td>*@
+                                    <td>
+                                        @*<div class="form-group cntrl">
+                                                <label>Roll No.</label>
+                                                <input type="text" class="form-control" id="txtRollNo" style="width:250px;">
+                                            </div>*@
+                                        <input type="hidden" id="hdnStudentID">
+                                    </td>
+                                    @*<td>
+                                            <div class="form-group cntrl" id="srnoo">
+                                                <label>SR No.</label>
+                                                <input type="text" class="form-control" id="txtSRNo" style="width:250px;">
+                                            </div>
+                                        </td>*@
+                                    <td></td>
+                                </tr>
+                            </table>
+
+                        </div>
+
+                    </div>
+                    <!-- /.box-body -->
+
+                    <div id="divPersonalDet">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Personal Details :-</h3>
+                        </div>
+                        <!-- /.box-header -->
+                        <!-- form start -->
+
+                        <div class="box-body">
+                            <div class="form-group">
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <div class="form-group cntrl">
+                                                <label>First Name <span class="requird">*</span></label>
+                                                <input type="text" class="form-control" name="txtFirstName" id="txtFirstName" style="width:250px;">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group cntrl">
+                                                <label>Middle Name</label>
+                                                <input type="text" class="form-control" id="txtMiddleName" style="width:250px;">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group cntrl">
+                                                <label>Last Name <span class="requird">*</span></label>
+                                                <input type="text" class="form-control" name="txtLastName" id="txtLastName" style="width:250px;">
+                                            </div>
+                                        </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="form-group cntrl">
+                                                <label>Date of Birth <span class="requird">*</span></label>
+                                                <div class="input-group date">
+                                                    <div class="input-group-addon">
+                                                        <i class="fa fa-calendar"></i>
+                                                    </div>
+                                                    <input type="text" class="form-control dtpicker" name="txtDOB" id="txtDOB" style="width:220px;">
+                                                </div>
+
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group cntrl">
+                                                <label>Gender <span class="requird">*</span></label>
+                                                <select class="form-control" id="ddlGender" valuefield="gender_id" name="ddlGender" textfield="GenderName" blankRowValue="-1" blankRowText="----Select----" style="width:250px;color:black;"></select>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group cntrl">
+                                                <label>Blood Group</label>
+                                                <select class="form-control" id="ddlBloodGroup" style="width:250px;">
+                                                    <option>----Select----</option>
+                                                    <option>A+</option>
+                                                    <option>A-</option>
+                                                    <option>B+</option>
+                                                    <option>B-</option>
+                                                    <option>AB+</option>
+                                                    <option>AB-</option>
+                                                    <option>O+</option>
+                                                    <option>O-</option>
+                                                </select>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>
+                                            <div class="form-group cntrl">
+                                                <label>Birth Place</label>
+                                                <input type="text" class="form-control" id="txtBirthPlace" style="width:250px;">
+
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group cntrl">
+                                                <label>Nationality <span class="requird">*</span></label>
+                                                <select class="form-control" id="ddlNationality" style="width:250px;">
+                                                    <option value="-1">----Select----</option>
+                                                    <option>Indian</option>
+                                                    <option>Others</option>
+
+                                                </select>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group cntrl">
+                                                <label>Mother Tongue</label>
+                                                <input type="text" class="form-control" id="txtMotherTongue" style="width:250px;">
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>
+                                            <div class="form-group cntrl">
+                                                <label>Languages Known</label>
+                                                @*<select class="form-control select2" id="ddlLanguages" multiple="multiple" data-placeholder="Select Languages"
+                                                            style="width: 250px;">
+                                                        <option value="1">Hindi</option>
+                                                        <option value="2">English</option>
+                                                        <option value="3">Bengali</option>
+                                                        <option value="4">Marathi</option>
+                                                        <option value="5">Tamil</option>
+                                                        <option value="6">Spanish</option>
+                                                        <option value="7">German</option>
+                                                    </select>*@
+                                                <select class="form-control select2" id="ddlLanguages" valuefield="LangID" textfield="Language" multiple="multiple" style="width:250px;"></select>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group cntrl">
+                                                <label>Religion</label>
+                                                @*<select class="form-control" id="ddlReligion" style="width:250px;">
+                                                        <option>----Select----</option>
+                                                        <option>Hindu</option>
+                                                        <option>Others</option>
+
+                                                    </select>*@
+                                                <select class="form-control" id="ddlReligion" name="ddlReligion" valuefield="ReligionId" textfield="ReligionName" blankRowValue="-1" blankRowText="----Select----" style="width:250px;"></select>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group cntrl" style="display:none;">
+                                                <label>Caste</label>
+                                                <select class="form-control" id="ddlCaste" style="width:250px;">
+                                                    <option value="-1">----Select----</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group cntrl">
+                                                <label>Category <span class="requird">*</span></label>
+                                                <select class="form-control" id="ddlCategory" name="ddlCategory" valuefield="CatID" textfield="Category" blankRowValue="-1" blankRowText="----Select----" style="width:250px;color:black;"></select>
+                                            </div>
+
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>
+                                            <div class="form-group cntrl">
+                                                <label>Aadhaar No.</label>
+                                                <input type="text" class="form-control" id="txtAadhaar" style="width:250px;">
+                                            </div>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+
+                                </table>
+
+                            </div>
+
+
+                        </div>
+                        <!-- /.box-body -->
+                        @*<div class="box-footer">
+                                <input type="button" class="btn btn-primary" value="Save" id="SaveOffDet" name="Save" />
+                                <input type="button" class="btn btn-primary" value="Update" id="UpdateOffDet" name="Update" style="display:none;" />
+                                <input type="button" class="btn btn-primary" value="Cancel" id="btnCancel" name="Cancel" style="display:none;" />
+                            </div>*@
+                    </div>
+
+                    <div id="divContactDet">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Contact Details :-</h3>
+                        </div>
+                        <!-- /.box-header -->
+                        <!-- form start -->
+
+                        <div class="box-body">
+                            <div class="form-group">
+                                <table>
+                                    <tr>
+                                        <td colspan="3">
+                                            <table>
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td>
+                                                        <div class="form-group cntrl">
+                                                            <div class="checkbox">
+                                                                <label>
+                                                                    <input type="checkbox" id="cbSameAddress">
+                                                                    Same as Residential Address
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group txtArea">
+                                                            <label>Residential Address <span class="requird">*</span></label>
+                                                            <textarea class="form-control" name="txtResidenceAddrs" rows="3" placeholder="Enter ..." id="txtResidenceAddrs"></textarea>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div style="width:20px;"></div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group txtArea">
+                                                            <label>Correspondence Address</label>
+                                                            <textarea class="form-control" rows="3" placeholder="Enter ..." id="txtCorrespondAddrs"></textarea>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+
+
+
+
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group">
+                                                            <label for="Country" class="req">Country <span class="requird">*</span></label>
+                                                            <select class="form-control" ng-model="ddlCountry" name="ddlCountry" onchange="getAllStatebyId(this.value)" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" style="color:black;" id="ddlCountry"></select>
+                                                        </div>
+                                                    </td>
+                                                    <td></td>
+                                                    <td>
+                                                        <div class="form-group">
+                                                            <label for="Country" class="req">Country <span class="requird">*</span></label>
+                                                            <select class="form-control" ng-model="ddlCountry1" name="ddlCountry1" onchange="getAllStatebyId1(this.value)" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" id="ddlCountry1" style="color:black;"></select>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+
+                                                    <td>
+
+                                                        <div class="form-group">
+                                                            <label for="Country" class="req">State <span class="requird">*</span></label>
+                                                            <select class="form-control" id="ddlState" name="ddlState" onchange="getCityByStateId(this.value)" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" style="color:black;"></select>
+                                                        </div>
+                                                    </td>
+                                                    <td></td>
+                                                    <td>
+                                                        <div class="form-group">
+                                                            <label for="Country" class="req">State <span class="requird">*</span></label>
+                                                            <select class="form-control" id="ddlState1" name="ddlState1" onchange="getCityByStateId1(this.value)" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" style="color:black;"></select>
+                                                        </div>
+
+                                                        @* <div class="form-group">
+                                                                <label for="Country" class="req">State <span class="requird">*</span></label>
+                                                                <select class="form-control" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--"></select>
+                                                            </div>*@
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group">
+                                                            <label for="reg_input_currency" class="req">City <span class="requird">*</span></label>
+                                                            <select class="form-control" id="ddlCity" name="ddlCity" ng-model="ddlCity" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" style="color:black;"></select>
+                                                        </div>
+                                                    </td>
+                                                    <td></td>
+                                                    <td>
+                                                        <div class="form-group">
+                                                            <div class="form-group">
+                                                                <label for="reg_input_currency" class="req">City <span class="requird">*</span></label>
+                                                                <select class="form-control" id="ddlCity1" name="ddlCity1" ng-model="ddlCity1" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" style="color:black;"></select>
+                                                            </div>
+
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group cntrl">
+                                                            <label>Pincode <span class="requird">*</span></label>
+                                                            <input type="text" class="form-control" maxlength="6" name="txtResdPin" id="txtResdPin" style="width:250px;">
+                                                        </div>
+                                                    </td>
+                                                    <td></td>
+                                                    <td>
+                                                        <div class="form-group cntrl">
+                                                            <label>Pincode</label>
+                                                            <input type="text" class="form-control" maxlength="6" id="txtCorspPin" style="width:250px;">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="2">
+                                                        <div class="form-group cntrl">
+                                                            <label>Preferred Phone Number for school SMS <span class="requird">*</span></label>
+                                                            <input type="text" class="form-control" maxlength="12" name="txtSMSMobile" id="txtSMSMobile" style="width:250px;">
+                                                        </div>
+                                                    </td>
+                                                    <td></td>
+
+                                                </tr>
+
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                            </div>
+                            @*<table>
+                                    <tr>
+                                        <td>Active&nbsp;</td>
+                                        <td>@Html.CheckBoxFor(model => model.status, new { Class = "pull-right", id = "cbStatus" })</td>
+                                    </tr>
+
+
+
+                                </table>*@
+                            @*<div class="form-group">
+                                    <table>
+                                        <tr>
+                                            <td>Active&nbsp;</td>
+                                            <td>@Html.CheckBoxFor(model => model.status, new { Class = "pull-right", id = "cbStatus" })</td>
+                                        </tr>
+
+                                    </table>
+                                </div>*@
+
+                        </div>
+                        <!-- /.box-body -->
+                        <div class="box-footer">
+                            <input type="hidden" id="txt1" name="txt1" />
+                            <input type="hidden" id="txt2" name="txt1" />
+                            <input type="button" class="btn btn-primary" value="Save" id="SaveOffDet" name="Save" />
+                            <input type="button" class="btn btn-primary" value="Edit" id="UpdateOffDet" name="Update" style="display:none;" />
+                            <input type="button" class="btn btn-primary" value="Cancel" id="btnCancel" name="Cancel" style="display:none;" />
+                        </div>
+
+                    </div>
+                </form>
+                <form role="form" id="form2" name="form2">
+                    <div id="divParents">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Parents Details :-</h3>
+                        </div>
+                        <!-- /.box-header -->
+                        <!-- form start -->
+                        <div class="row">
+                            <!-- left column -->
+                            <div class="col-md-6">
+
+                                <div class="box">
+                                    <div class="box-header">
+                                        <h5 class="box-title">Father</h5>
+                                    </div>
+                                    <div class="box-body">
+                                        <div class="form-group">
+                                            <table>
+                                                @*<tr>
+                                                        <td>
+                                                            <div class="form-group Pcntrl">
+                                                                <div class="checkbox">
+                                                                    <label>
+                                                                        <input type="checkbox" id="cbIsFStaff">
+                                                                        Staff Member
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td></td>
+                                                    </tr>*@
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group Pcntrl">
+                                                            <label>Name <span class="requird">*</span></label>
+                                                            <input type="text" class="form-control" name="txtFaName" id="txtFaName" style="width:200px;">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group Pcntrl">
+                                                            <label>DOB</label>
+                                                            <div class="input-group date">
+                                                                <div class="input-group-addon">
+                                                                    <i class="fa fa-calendar"></i>
+                                                                </div>
+                                                                <input type="text" class="form-control dtpicker" id="txtFaDOB" style="width:150px;">
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group Pcntrl">
+                                                            <label>Nationality</label>
+                                                            <select class="form-control" id="ddlFNationality" style="width:200px;">
+                                                                <option>----Select----</option>
+                                                                <option>Indian</option>
+                                                                <option>Others</option>
+                                                            </select>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group Pcntrl">
+                                                            <label>Qualification</label>
+                                                            <select class="form-control" id="ddlFQual" valuefield="QualificationId" textfield="QualificationName" blankRowValue="-1" blankRowText="----Select----" style="width:250px;"></select>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group Pcntrl">
+                                                            <label>Occupation/Job</label>
+                                                            <input type="text" class="form-control" id="txtFaJob" style="width:200px;">
+                                                        </div>
+                                                    </td>
+                                                    <td rowspan="2">
+                                                        <div class="form-group Pcntrl">
+                                                            <label>Office Address</label>
+                                                            <textarea class="form-control" rows="4" placeholder="Enter ..." id="txtFOfficeAddrs"></textarea>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group Pcntrl">
+                                                            <label>Designation</label>
+                                                            <input type="text" class="form-control" id="txtFaDesig" style="width:200px;">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group Pcntrl">
+                                                            <label>Annual Income</label>
+                                                            <input type="text" class="form-control" id="txtFaIncome" style="width:200px;">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group Pcntrl">
+                                                            <label>Mobile  <span class="requird">*</span></label>
+                                                            <input type="text" class="form-control" name="txtFaMobile" id="txtFaMobile" style="width:200px;">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+
+                                                    <td>
+                                                        <div class="form-group Pcntrl">
+                                                            <label>Email<span class="requird">*</span></label>
+                                                            <input type="text" class="form-control" name="txtFaEmail" id="txtFaEmail" style="width:350px;">
+                                                        </div>
+                                                    </td>
+
+
+
+
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group Pcntrl">
+                                                            <label>Aadhaar No.</label>
+                                                            <input type="text" class="form-control" id="txtFAdhaar" style="width:200px;">
+                                                        </div>
+                                                    </td>
+                                                    <td></td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="col-md-6">
+
+                                <div class="box">
+                                    <div class="box-header">
+                                        <h5 class="box-title">Mother</h5>
+                                    </div>
+                                    <div class="box-body">
+
+                                        <div class="form-group">
+                                            <table>
+                                                @*<tr>
+                                                        <td>
+                                                            <div class="form-group Pcntrl">
+                                                                <div class="checkbox">
+                                                                    <label>
+                                                                        <input type="checkbox" id="cbIsMaStaff">
+                                                                        Staff Member
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td></td>
+                                                    </tr>*@
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group Pcntrl">
+                                                            <label>Name <span class="requird">*</span></label>
+                                                            <input type="text" class="form-control" name="txtMaName" id="txtMaName" style="width:200px;">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group Pcntrl">
+                                                            <label>DOB</label>
+                                                            <div class="input-group date">
+                                                                <div class="input-group-addon">
+                                                                    <i class="fa fa-calendar"></i>
+                                                                </div>
+                                                                <input type="text" class="form-control dtpicker" id="txtMaDOB" style="width:150px;">
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group Pcntrl">
+                                                            <label>Nationality</label>
+                                                            <select class="form-control" id="ddlMaNationality" style="width:200px;">
+                                                                <option>----Select----</option>
+                                                                <option>Indian</option>
+                                                                <option>Others</option>
+                                                            </select>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group Pcntrl">
+                                                            <label>Qualification</label>
+                                                            <select class="form-control" id="ddlMaQual" valuefield="QualificationId" textfield="QualificationName" blankRowValue="-1" blankRowText="----Select----" style="width:200px;"></select>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group Pcntrl">
+                                                            <label>Occupation/Job</label>
+                                                            <input type="text" class="form-control" id="txtMaJob" style="width:200px;">
+                                                        </div>
+                                                    </td>
+                                                    <td rowspan="2">
+                                                        <div class="form-group Pcntrl">
+                                                            <label>Office Address</label>
+                                                            <textarea class="form-control" rows="4" placeholder="Enter ..." id="txtMaOfficeAddrs"></textarea>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group Pcntrl">
+                                                            <label>Designation</label>
+                                                            <input type="text" class="form-control" id="txtMaDesig" style="width:200px;">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group Pcntrl">
+                                                            <label>Annual Income</label>
+                                                            <input type="text" class="form-control" id="txtMaIncome" style="width:200px;">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group Pcntrl">
+                                                            <label>Mobile <span class="requird">*</span></label>
+                                                            <input type="text" class="form-control" name="txtMaMobile" id="txtMaMobile" style="width:200px;">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group Pcntrl">
+                                                            <label>Email<span class="requird">*</span></label>
+                                                            <input type="text" class="form-control" name="txtMaEmail" id="txtMaEmail" style="width:350px;">
+                                                        </div>
+
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group Pcntrl">
+                                                            <label>Aadhaar No.</label>
+                                                            <input type="text" class="form-control" id="txtMAdhaar" style="width:200px;">
+                                                        </div>
+                                                    </td>
+                                                    <td></td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            @*<div class="box-footer">
+                                    <input type="button" class="btn btn-primary" value="Save" id="SaveParents" name="Save" />
+                                    <input type="button" class="btn btn-primary" value="Update" id="UpdateParents" name="Update" style="display:none;" />
+                                </div>*@
+                        </div>
+                    </div>
+
+                    <div id="divGuardian">
+                        <div class="row">
+                            <!-- left column -->
+                            <div class="col-md-12">
+
+                                <div class="box">
+                                    <div class="box-header">
+                                        <h5 class="box-title">Guardian Details</h5>
+                                    </div>
+                                    <div class="box-body">
+                                        <div class="form-group">
+                                            <table>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group cntrl">
+                                                            <label>Name</label>
+                                                            <input type="text" class="form-control" id="txtGName" style="width:250px;">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group cntrl">
+                                                            <label>Relation</label>
+                                                            <input type="text" class="form-control" id="txtGRelation" style="width:250px;">
+
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group cntrl">
+                                                            <label>Nationality</label>
+                                                            <select class="form-control" id="ddlGNationality" style="width:250px;">
+                                                                <option>----Select----</option>
+                                                                <option>Indian</option>
+                                                                <option>Others</option>
+                                                            </select>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group cntrl">
+                                                            <label>Qualification</label>
+                                                            <select class="form-control" id="ddlGQual" valuefield="QualificationId" textfield="QualificationName" blankRowValue="-1" blankRowText="----Select----" style="width:250px;"></select>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group cntrl">
+                                                            <label>Occupation/Job</label>
+                                                            <input type="text" class="form-control" id="txtGJob" style="width:250px;">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group cntrl">
+                                                            <label>Designation</label>
+                                                            <input type="text" class="form-control" id="txtGDesig" style="width:250px;">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group cntrl">
+                                                            <label>Annual Income</label>
+                                                            <input type="text" class="form-control" id="txtGIncome" style="width:250px;">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group cntrl">
+                                                            <label>Mobile</label>
+                                                            <input type="text" class="form-control" id="txtGMobile" style="width:250px;">
+                                                        </div>
+                                                    </td>
+                                                    <td rowspan="2">
+                                                        <div class="form-group cntrl">
+                                                            <label>Address</label>
+                                                            <textarea class="form-control" rows="4" placeholder="Enter ..." id="txtGOfficeAddrs"></textarea>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group cntrl">
+                                                            <label>Aadhaar No.</label>
+                                                            <input type="text" class="form-control" id="txtGadhaar" style="width:250px;">
+                                                        </div>
+                                                    </td>
+                                                    <td rowspan="2">
+                                                        <div class="form-group cntrl">
+                                                            <label>Email</label>
+                                                            <input type="text" class="form-control" id="txtGEmail" style="width:250px;">
+                                                        </div>
+                                                    </td>
+
+                                                </tr>
+
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<div class="box-footer">
+                                        <input type="button" class="btn btn-primary" value="Save" id="SaveGuardian" name="Save" />
+                                        <input type="button" class="btn btn-primary" value="Update" id="UpdateGuardian" name="Update" style="display:none;" />
+                                    </div>*@
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="divEmergency">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="box">
+                                    <div class="box-header">
+                                        <h3 class="box-title">Emergency Contact Details :-</h3>
+                                    </div>
+                                    <!-- /.box-header -->
+                                    <!-- form start -->
+
+                                    <div class="box-body">
+                                        <div class="form-group">
+                                            <table>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group cntrl">
+                                                            <label>Emergency Contact No. <span class="requird">*</span></label>
+                                                            <input type="text" class="form-control" name="txtEmergNo" maxlength="12" id="txtEmergNo" style="width:250px;">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group cntrl">
+                                                            <label>Name of the Contact Person. <span class="requird">*</span></label>
+                                                            <input type="text" class="form-control" id="txtEmergPer" name="txtEmergPer" style="width:250px;">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group cntrl">
+                                                            <label>Relationship <span class="requird">*</span></label>
+                                                            <input type="text" class="form-control" name="txtEmergRel" id="txtEmergRel" style="width:250px;">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+
+                                        </div>
+
+
+                                    </div>
+                                    <!-- /.box-body -->
+                                    <div class="box-footer">
+                                        <input type="button" class="btn btn-primary" value="Save" id="SaveParents" name="Save" />
+                                        <input type="button" class="btn btn-primary" value="Edit" id="UpdateParents" name="Update" style="display:none;" />
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div id="divPrevSchool">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="box">
+                                <div class="box-header">
+                                    <h3 class="box-title">Details of Previous Study :-</h3>
+                                </div>
+                                <!-- /.box-header -->
+                                <!-- form start -->
+                                @*issue*@
+                                <div class="box-body">
+                                    <div class="form-group">
+                                        <table>
+                                            <tr>
+                                                <td>
+                                                    <div class="form-group " style="width:130px;">
+                                                        <label>Year</label>
+                                                        <select class="form-control" id="ddlPSYear1" valuefield="Idd" textfield="year" blankRowValue="-1" blankRowText="--Select--" style="width:100px;"></select>
+
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group " style="width:280px;">
+                                                        <label>School</label>
+                                                        <input type="text" class="form-control" id="txtPSName1" style="width:250px;">
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group " style="width:180px;">
+                                                        <label>Board</label>
+                                                        <input type="text" class="form-control" id="txtPSBrd1" style="width:150px;">
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group " style="width:130px;">
+                                                        <label>Standard</label>
+                                                        <select class="form-control" id="ddlPSClass1" valuefield="Id" textfield="CourseName" blankRowValue="-1" blankRowText="--Select--" style="width:100px;"></select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group " style="width:280px;">
+                                                        <label>Grades/Marks obtained in Final Exams</label>
+                                                        <input type="text" class="form-control" id="txtPSMarks1" style="width:250px;">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div class="form-group ">
+                                                        <select class="form-control" id="ddlPSYear2" valuefield="Idd" textfield="year" blankRowValue="-1" blankRowText="--Select--" style="width:100px;"></select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group ">
+                                                        <input type="text" class="form-control" id="txtPSName2" style="width:250px;">
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group ">
+                                                        <input type="text" class="form-control" id="txtPSBrd2" style="width:150px;">
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group ">
+                                                        <select class="form-control" id="ddlPSClass2" valuefield="Id" textfield="CourseName" blankRowValue="-1" blankRowText="--Select--" style="width:100px;"></select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group ">
+                                                        <input type="text" class="form-control" id="txtPSMarks2" style="width:250px;">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div class="form-group ">
+                                                        <select class="form-control" id="ddlPSYear3" valuefield="Idd" textfield="year" blankRowValue="-1" blankRowText="--Select--" style="width:100px;"></select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group ">
+                                                        <input type="text" class="form-control" id="txtPSName3" style="width:250px;">
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group ">
+                                                        <input type="text" class="form-control" id="txtPSBrd3" style="width:150px;">
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group ">
+                                                        <select class="form-control" id="ddlPSClass3" valuefield="Id" textfield="CourseName" blankRowValue="-1" blankRowText="--Select--" style="width:100px;"></select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group ">
+                                                        <input type="text" class="form-control" id="txtPSMarks3" style="width:250px;">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="4">
+                                                    <div class="form-group">
+                                                        <label>Awards won so far in sports, arts or academics</label>
+                                                        <textarea class="form-control" rows="3" placeholder="Enter ..." id="txtPSAwards" style="width:500px;"></textarea>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group ">
+                                                        <label>Previous School TC No</label>
+                                                        <input type="text" class="form-control" id="txtTCNo" style="width:250px;">
+                                                        <input type="hidden" id="hdnprev1" />
+                                                        <input type="hidden" id="hdnprev2" />
+                                                        <input type="hidden" id="hdnprev3" />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                    </div>
+
+
+                                </div>
+
+                                <!-- /.box-body -->
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="divHealthDet">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="box">
+                                <div class="box-header">
+                                    <h3 class="box-title">Health Details:-</h3>
+                                </div>
+                                <!-- /.box-header -->
+                                <!-- form start -->
+
+                                <div class="box-body">
+                                    <div class="form-group">
+                                        <table>
+                                            <tr>
+                                                <td>
+                                                    <div class="form-group cntrl">
+                                                        <label>Height (in cm)</label>
+                                                        <input type="text" class="form-control" id="txtHeight" style="width:250px;">
+                                                        <input type="hidden" id="hdnHT" />
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group cntrl">
+                                                        <label>Weight (in Kg)</label>
+                                                        <input type="text" class="form-control" id="txtWeight" style="width:250px;">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div class="form-group cntrl">
+                                                        <label>Vision Left</label>
+                                                        <input type="text" class="form-control" id="txtLVision" style="width:250px;">
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="form-group cntrl">
+                                                        <label>Vision Right</label>
+                                                        <input type="text" class="form-control" id="txtRVision" style="width:250px;">
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2">
+                                                    <div class="form-group txtArea">
+                                                        <label>Any medication taken for any medical conditions or well being</label>
+                                                        <textarea class="form-control" rows="4" placeholder="Enter ..." id="txtMedication"></textarea>
+                                                    </div>
+                                                </td>
+
+                                            </tr>
+                                        </table>
+
+                                    </div>
+
+
+                                </div>
+                                <!-- /.box-body -->
+
+                                <div class="box-footer">
+                                    <input type="button" class="btn btn-primary" value="Save" id="SaveHTdet" name="Save" />
+                                    <input type="button" class="btn btn-primary" value="Edit" id="UpdateHTdet" name="Update" style="display:none;" />
+                                    <input type="hidden" id="hiddentvaluetext" />
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @*issue*@
+                    <div id="divPhotoUploads">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="box">
+                                    <div class="box-header">
+                                        <h3 class="box-title">Upload Photographs:-</h3>
+                                    </div>
+                                    <!-- /.box-header -->
+                                    <!-- form start -->
+
+                                    <div class="box-body">
+                                        <div class="form-group">
+                                            <table>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group cntrl">
+                                                            <label for="exampleInputFile">Student Image</label>
+                                                            <input type="file" id="InputChildPic">
+                                                            <input type="hidden" id="hdnInputC" />
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group cntrl">
+                                                            <label for="exampleInputFile">Father Image</label>
+                                                            <input type="file" id="InputFPic">
+                                                            <input type="hidden" id="hdnInputF" />
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group cntrl">
+                                                            <label for="exampleInputFile">Mother Image</label>
+                                                            <input type="file" id="InputMPic">
+                                                            <input type="hidden" id="hdnInputM" />
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+
+                                                        <div id="dvPreview" class="dvImgPreview" style="display:none;">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div id="dvPreviewF" class="dvImgPreview" style="display:none;">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div id="dvPreviewM" class="dvImgPreview" style="display:none;">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+
+                                        </div>
+
+
+                                    </div>
+                                    <!-- /.box-body -->
+
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="divDocsUpload">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="box">
+                                    <div class="box-header">
+                                        <h3 class="box-title">Documents Upload:-</h3>
+                                    </div>
+                                    <!-- /.box-header -->
+                                    <!-- form start -->
+
+                                    <div class="box-body">
+                                        <div class="form-group">
+                                            <div id="divDocuments">
+
+                                            </div>
+
+                                        </div>
+
+
+                                    </div>
+                                    <!-- /.box-body -->
+
+
+                                </div>
+                            </div>
+                        </div>
+                        <form role="form" id="form3" name="form3">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="box">
+                                        <div class="box-header">
+                                            <h3 class="box-title">Assign Usernames/Passwords</h3>
+                                        </div>
+                                        <!-- /.box-header -->
+                                        <!-- form start -->
+
+                                        <div class="box-body">
+                                            <div class="col-md-6">
+                                                <div class="box">
+                                                    <div class="box-header">
+                                                        <h5 class="box-title">Student</h5>
+                                                    </div>
+                                                    <div class="box-body">
+                                                        <div class="form-group">
+                                                            <table>
+                                                                <tr>
+                                                                    <td>
+
+                                                                        <div class="form-group Pcntrl">
+                                                                            <label>Username <span class="requird">*</span></label>
+                                                                            <input type="text" class="form-control" name="txtStUsername" id="txtStUsername" readonly="readonly" style="width:200px;">
+                                                                        </div>
+                                                                    </td>
+
+                                                                </tr>
+
+                                                                <tr>
+                                                                    <td>
+                                                                        <div class="form-group Pcntrl">
+                                                                            <label id="Studentpasswordlabel">Password <span class="requird">*</span></label>
+                                                                            <input type="text" class="form-control" name="txtStPassword" id="txtStPassword" readonly="readonly" style="width:200px;">
+                                                                        </div>
+                                                                    </td>
+
+                                                                </tr>
+
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="box">
+                                                    <div class="box-header">
+                                                        <h5 class="box-title">Parent</h5>
+                                                    </div>
+                                                    <div class="box-body">
+                                                        <div class="form-group">
+                                                            <table>
+                                                                <tr>
+                                                                    <td>
+
+                                                                        <div class="form-group Pcntrl">
+                                                                            <label>Username <span class="requird">*</span></label>
+                                                                            <input type="text" class="form-control" name="txtPUsername" id="txtPUsername" readonly="readonly" style="width:200px;">
+                                                                        </div>
+                                                                    </td>
+
+                                                                </tr>
+
+                                                                <tr>
+                                                                    <td>
+                                                                        <div class="form-group Pcntrl">
+                                                                            <label id="Parentspasswordlabel">Password <span class="requird">*</span></label>
+                                                                            <input type="text" class="form-control" name="txtPPassword" id="txtPPassword" readonly="readonly" style="width:200px;">
+                                                                        </div>
+                                                                    </td>
+
+                                                                </tr>
+
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- /.box-body -->
+                                        <div class="box-footer">
+                                            <table>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group cntrl">
+                                                            <label>Edit Status  <span class="requird">*</span></label>
+                                                            <select class="form-control" id="ddlStatus" valuefield="StatusID" name="ddlStatus" textfield="Status" blankRowValue="-1" blankRowText="----Select----" style="width:200px;"></select>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+
+                                                        <input type="button" class="btn btn-primary" value="Save" id="SaveDocs" name="Save" />
+                                                        <input type="button" class="btn btn-primary" value="Edit" id="UpdateDocs" name="Update" style="display:none;" />
+
+                                                        <input type="hidden" id="editStupass" />
+                                                        <input type="hidden" id="editParpass" />
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- /.box -->
+                <!--/.col (left) -->
+
+            </div>
+            <div class="box-footer">
+                <button type="button" class="btn btn-primary" id="btnSubmit" style="display:none;">Final Submit</button>
+
+            </div>
+            <div class="box-footer">
+                <button type="button" class="btn btn-primary" id="Sendmail" onclick="EmailStudentLogin()" style="display:none;">Send Mail</button>
+            </div>
+            <!-- /.row -->
+
+            <div class="alert alert-success centerSuccess" id="divSucesEmail" style="display:none">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h4>
+                    <i class="icon fa fa-check"></i>
+                    <span Id="sentEmailMsg"></span>
+                </h4>
+
+            </div>
+    </section>
+    <link href="@Url.Content("~/Content/themes/base/jquery-ui.css")" rel="stylesheet" />
+    @*<script src="~/js/jquery2.2.min.js"></script>*@
+    @*<script src="~/Scripts/jquery.validate.min.js"></script>
+        <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>*@
+    <script src="~/js/custom.js"></script>
+    <link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+    <script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+    <link rel="stylesheet" href="~/css/bower_components/select2/dist/css/select2.min.css">
+    <script src="~/css/bower_components/select2/dist/js/select2.full.min.js"></script>
+    <script type="text/javascript">
+
+        callServiceMethodForDDl("", "/api/StudentApi", "GetYears", "ddlPSYear1", false, "", "", "", "");
+        callServiceMethodForDDl("", "/api/StudentApi", "GetYears", "ddlPSYear2", false, "", "", "", "");
+        callServiceMethodForDDl("", "/api/StudentApi", "GetYears", "ddlPSYear3", false, "", "", "", "");
+        callServiceMethodForDDl("", "/api/StudentApi", "GetGenders", "ddlGender", false, "", "", "", "");
+        callServiceMethodForDDl("", "/api/StudentApi", "GetCategories", "ddlCategory", false, "", "", "", "");
+        callServiceMethodForDDl("", "/api/StudentApi", "GetStatus", "ddlStatus", false, "", "", "", "");
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            //$("#SaveOffDet").show();
+            //$("#UpdateOffDet").show();
+
+            $("editStupass").val("");
+            $("editParpass").val("");
+
+            $("#hiddentvaluetext").val("10");
+           
+          
+        });
+
+
+
+    </script>
+
+
+    @*<script src="~/Scripts/jquery-1.10.2.min.js"></script>*@
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $("#srnoo").hide();
+
+            $('#txtJoinDt').datepicker({
+                autoclose: true,
+                orientation: 'bottom'
+            });
+
+
+
+            var docLength = 0;
+
+            var Id = getQuerystring("id");
+            if (typeof (Id) != "undefined") {
+
+            }
+            else {
+                //callServiceMethod("", "/api/StudentApi", "getRegCode", false, "", "", false, "", true, getEmployeeUniquCode, "", "", "");
+                callServiceMethodForDDl("", "/api/StudentApi", "getAllCountry", "ddlCountry1", false, "", "", "", "");
+
+                callServiceMethodForDDl("", "/api/StudentApi", "getAllCountry", "ddlCountry", false, "", "", "", "");
+            }
+
+
+            //$("#divPersonalDet").hide();
+            //$("#divContactDet").hide();
+            $("#divParents").hide();
+            $("#divGuardian").hide();
+            $("#divEmergency").hide();
+            $("#divPrevSchool").hide();
+            $("#divHealthDet").hide();
+            $("#divPhotoUploads").hide();
+            $("#divDocsUpload").hide();
+
+            $('#cbSameAddress').change(function () {
+                if ($(this).is(":checked")) {
+                    $("#txtCorrespondAddrs").val(getControlValue("txtResidenceAddrs"));
+                    $("#txtCorspCity").val(getControlValue("txtResdCity"));
+                    $("#txtCorspPin").val(getControlValue("txtResdPin"));
+                    setControlValue("ddlCorspState", getControlValue("ddlResdState"));
+                }
+                else {
+                    $("#txtCorrespondAddrs").val("");
+                    $("#txtCorspCity").val("");
+                    $("#txtCorspPin").val("");
+                    setControlValue("ddlCorspState", -1);
+                }
+
+            });
+
+            $('#txtFaMobile').keyup(function () {
+                var content = $('#txtFaMobile').val();
+                //setControlValue("txtPUsername", content);
+            });
+
+            $('#txtRegNo').keyup(function () {
+                var content = $('#txtRegNo').val();
+                setControlValue("txtStUsername", content);
+                setControlValue("txtPUsername", "GR"+ content);
+            });
+
+            //callServiceMethodForDDl("", "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+            var loginuser = (sessionStorage.getItem("userId"));
+            var typeuser = sessionStorage.getItem("type");
+            callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+
+            callServiceMethodForDDl("", "/api/StudentApi", "GetReligions", "ddlReligion", false, "", "", "", "");
+
+
+
+            callServiceMethodForDDl("", "/api/StudentApi", "GetLanguages", "ddlLanguages", false, "", "", "", "");
+          
+            var SchoolID = getControlValue("ddlSchoolName");
+
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TimeTableApi", "GetAcademicYearBySchool", "ddlAcademicYr", false, "", "", "", "");
+
+
+            var SchoolID = getControlValue("ddlSchoolName");
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+
+            var SchoolID = getControlValue("ddlSchoolName");
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetQualificationBySchool", "ddlFQual", false, "", "", "", "");
+
+            var SchoolID = getControlValue("ddlSchoolName");
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetQualificationBySchool", "ddlMaQual", false, "", "", "", "");
+
+            var SchoolID = getControlValue("ddlSchoolName");
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetQualificationBySchool", "ddlGQual", false, "", "", "", "");
+
+
+            $("#ddlSchoolName").change(function () {
+                var SchoolID = getControlValue("ddlSchoolName");
+                callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TimeTableApi", "GetAcademicYearBySchool", "ddlAcademicYr", false, "", "", "", "");
+                var SchoolID = getControlValue("ddlSchoolName");
+                callServiceMethod(JSON.stringify([SchoolID]), "/api/StudentApi", "getRegCode", false, "", "", false, "", true, getEmployeeUniquCode, "", "", "");
+            });
+
+
+            var SchoolID = getControlValue("ddlSchoolName");
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlPSClass1", false, "", "", "", "");
+            var SchoolID = getControlValue("ddlSchoolName");
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlPSClass2", false, "", "", "", "");
+            var SchoolID = getControlValue("ddlSchoolName");
+            callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlPSClass3", false, "", "", "", "");
+
+            $("#ddlSchoolName").change(function () {
+                var SchoolID = getControlValue("ddlSchoolName");
+                callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlPSClass1", false, "", "", "", "");
+            });
+            $("#ddlSchoolName").change(function () {
+                var SchoolID = getControlValue("ddlSchoolName");
+                callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlPSClass2", false, "", "", "", "");
+            });
+            $("#ddlSchoolName").change(function () {
+                var SchoolID = getControlValue("ddlSchoolName");
+                callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlPSClass3", false, "", "", "", "");
+            });
+
+
+
+
+
+
+
+            $("#ddlSchoolName").change(function () {
+                var SchoolID = getControlValue("ddlSchoolName");
+                callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+            });
+
+
+            $("#ddlSchoolName").change(function () {
+                var SchoolID = getControlValue("ddlSchoolName");
+                callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetQualificationBySchool", "ddlFQual", false, "", "", "", "");
+            });
+            $("#ddlSchoolName").change(function () {
+                var SchoolID = getControlValue("ddlSchoolName");
+                callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetQualificationBySchool", "ddlMaQual", false, "", "", "", "");
+            });
+            $("#ddlSchoolName").change(function () {
+                var SchoolID = getControlValue("ddlSchoolName");
+                callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetQualificationBySchool", "ddlGQual", false, "", "", "", "");
+            });
+            $("#ddlCourse").change(function () {
+                var ddlCourse = getControlValue("ddlCourse");
+                if (ddlCourse != null && (ddlCourse != -1) && (ddlCourse != undefined)) {
+                    var SchoolID = getControlValue("ddlSchoolName");
+                    callServiceMethodForDDl(JSON.stringify([ddlCourse, SchoolID]), "/api/StudentApi", "GetStreamsbySchool", "ddlStream", false, "", "", "", "");
+                    callServiceMethodForDDl(JSON.stringify([ddlCourse, SchoolID]), "/api/StudentApi", "GetSectionsbyschool", "ddlSection", false, "", "", "", "");
+                    //callServiceMethodForDDl(JSON.stringify([ddlCourse]), "/api/StudentApi", "GetBatches", "ddlBatch", false, "", "", "", "");
+                }
+            });
+
+
+
+            $.ajax({
+                url: "@Url.Content("~/api/StudentApi/GetEnclosures")",// "~/Masters/GetDeptMethod",
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                data: { 'name': sessionStorage.getItem("userId"), 'utype': sessionStorage.getItem("type") },
+                dataType: "json",
+                success: function (data) {
+                    var row = "<table>";
+                    var i = 0;
+                    $.each(data, function (index, item) {
+                        i = i + 1;
+                        row += "<tr><td><label id='lbl" + i + "'>" + item.Text + " </label></td><td><input type='file'id='input" + i + "' />" +
+                            "<input type='hidden' id='hdn" + i + "' value='" + item.Value + "'></td></tr>";
+
+                    });
+                    row = row + "</table>";
+                    $("#divDocuments").html(row);
+                    docLength = i;
+                },
+                error: function (result) {
+                    //alert("Error");
+                }
+            });
+            $.ajax({
+                url: "@Url.Content("~/api/StudentApi/GetCastes")",// "~/Masters/GetDeptMethod",
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                //data: "{}",
+                dataType: "json",
+                success: function (data) {
+                    $.each(data, function (index, item) {
+                        $("#ddlCaste").append($("<option></option>").val(item.Value).html(item.Text));
+                    });
+
+                },
+                error: function (result) {
+                    //alert("Error");
+                }
+            });
+
+            //$('.select2').select2();
+
+            $("#ddlLanguages").select2({
+                //placeholder: "Select languages",
+                //initSelection: function (element, callback) {
+                //}
+            });
+
+            $('.dtpicker').datepicker({
+                autoclose: true
+                //,
+                //dateFormat: 'dd/mm/yy'
+            });
+            $("#InputChildPic").change(function () {
+                //    $("#dvPreview").html("");
+                //    var regex = /^([a-zA-Z0-9\s_\\.\-:])+(.jpg|.jpeg|.gif|.png|.bmp)$/;
+                //    if (regex.test($(this).val().toLowerCase())) {
+                //        if ($.browser.msie && parseFloat(jQuery.browser.version) <= 9.0) {
+                //            $("#dvPreview").show();
+                //            $("#dvPreview")[0].filters.item("DXImageTransform.Microsoft.AlphaImageLoader").src = $(this).val();
+                //        }
+                //        else {
+                //            if (typeof (FileReader) != "undefined") {
+                //                $("#dvPreview").show();
+                //                $("#dvPreview").append("<img />");
+                //                var reader = new FileReader();
+                //                reader.onload = function (e) {
+                //                    $("#dvPreview img").attr("src", e.target.result);
+                //                }
+                //                reader.readAsDataURL($(this)[0].files[0]);
+                //            } else {
+                //                alert("This browser does not support FileReader.");
+                //            }
+                //        }
+                //    } else {
+                //        alert("Please upload a valid image file.");
+                //    }
+
+                var files = !!this.files ? this.files : [];
+
+                var iSize = (files[0].size / 1024);
+                iSize = (Math.round(iSize * 100) / 100)
+
+                if (iSize > 100) {
+                    $("#inputFile").val("");
+                    $("#InputChildPic").val("");
+                    $("#dvPreview").css("background-image", "url('')");
+                    $("#dvPreview").hide();
+                    alert("Image size exceeds 100Kb");
+                    return;
+                }
+                var ext = $('#InputChildPic').val().split('.').pop().toLowerCase();
+                if ($.inArray(ext, ['png', 'jpg', 'jpeg']) == -1) {
+                    $("#inputFile").val("");
+                    $("#InputChildPic").val("");
+                    $("#dvPreview").hide();
+                    $("#dvPreview").css("background-image", "url('')");
+                    alert('invalid extension,please upload jpg, jpeg,png ');
+
+                    return;
+                }
+
+
+
+                if (!files.length || !window.FileReader) return; // Check if File is selected, or no FileReader support
+                if (/^image/.test(files[0].type)) { //  Allow only image upload
+                    var ReaderObj = new FileReader(); // Create instance of the FileReader
+                    ReaderObj.readAsDataURL(files[0]); // read the file uploaded
+                    ReaderObj.onloadend = function () { // set uploaded image data as background of div
+                        $("#dvPreview").show();
+                        $("#dvPreview").css("background-image", "url(" + this.result + ")");
+                    }
+                } else {
+                    alert("Upload an image");
+                }
+            });
+            $("#InputFPic").change(function () {
+                var files = !!this.files ? this.files : [];
+
+                var iSize = (files[0].size / 1024);
+                iSize = (Math.round(iSize * 100) / 100)
+
+                if (iSize > 100) {
+                    $("#inputFile").val("");
+                    $("#InputFPic").val("");
+                    $("#dvPreviewF").css("background-image", "url('')");
+                    $("#dvPreviewF").hide();
+                    alert("Image size exceeds 100Kb");
+                    return;
+                }
+                var ext = $('#InputFPic').val().split('.').pop().toLowerCase();
+                if ($.inArray(ext, ['png', 'jpg', 'jpeg']) == -1) {
+                    $("#inputFile").val("");
+                    $("#InputFPic").val("");
+                    $("#dvPreviewF").css("background-image", "url('')");
+                    $("#dvPreviewF").hide();
+                    alert('invalid extension,please upload jpg, jpeg,png!');
+
+                    return;
+                }
+
+                if (!files.length || !window.FileReader) return; // Check if File is selected, or no FileReader support
+                if (/^image/.test(files[0].type)) { //  Allow only image upload
+                    var ReaderObj = new FileReader(); // Create instance of the FileReader
+                    ReaderObj.readAsDataURL(files[0]); // read the file uploaded
+                    ReaderObj.onloadend = function () { // set uploaded image data as background of div
+                        $("#dvPreviewF").show();
+                        $("#dvPreviewF").css("background-image", "url(" + this.result + ")");
+                    }
+                } else {
+                    alert("Upload an image");
+                }
+            });
+
+            $("#InputMPic").change(function () {
+                var files = !!this.files ? this.files : [];
+
+                var iSize = (files[0].size / 1024);
+                iSize = (Math.round(iSize * 100) / 100)
+
+                if (iSize > 100) {
+                    $("#inputFile").val("");
+                    $("#InputMPic").val("");
+                    $("#dvPreviewM").css("background-image", "url('')");
+                    $("#dvPreviewM").hide();
+                    alert("Image size exceeds 100Kb");
+                    return;
+                }
+                var ext = $('#InputMPic').val().split('.').pop().toLowerCase();
+                if ($.inArray(ext, ['png', 'jpg', 'jpeg']) == -1) {
+                    $("#inputFile").val("");
+                    $("#InputMPic").val("");
+                    $("#dvPreviewM").css("background-image", "url('')");
+                    $("#dvPreviewM").hide();
+                    alert('invalid extension,please upload jpg, jpeg,png!');
+
+                    return;
+                }
+                if (!files.length || !window.FileReader) return; // Check if File is selected, or no FileReader support
+                if (/^image/.test(files[0].type)) { //  Allow only image upload
+                    var ReaderObj = new FileReader(); // Create instance of the FileReader
+                    ReaderObj.readAsDataURL(files[0]); // read the file uploaded
+                    ReaderObj.onloadend = function () { // set uploaded image data as background of div
+                        $("#dvPreviewM").show();
+                        $("#dvPreviewM").css("background-image", "url(" + this.result + ")");
+                    }
+                } else {
+                    alert("Upload an image");
+                }
+            });
+
+            $("#SaveOffDet").click(function () {
+                if ($("#form1").valid()) {
+                    $("#loader").fadeIn();
+
+                    var ddlCourse = getControlValue("ddlCourse");
+                    var txtRegNo = $("#txtRegNo").val();
+                    //var ddlAcademicYr = $('#ddlAcademicYr').find(":selected").text();
+                    var ddlAcademicYr = getControlValue("ddlAcademicYr");
+                    //var ddlCourse = $('#ddlCourse').find(":selected").text();
+                    var ddlStream = $('#ddlStream').find(":selected").text();
+                    var ddlSection = $('#ddlSection').find(":selected").text();
+                    //var ddlBatch = $('#ddlBatch').find(":selected").text();
+                    var txtRollNo = $("#txtRollNo").val();
+                    var lang = $("#ddlLanguages").val();
+                    var languages = "";
+                    if (lang != null && lang != undefined && lang != "") {
+                        var lang_lenth = lang.length;
+
+                        var i = 0;
+                        for (i; i < lang_lenth; i++) {
+                            if (i == 0) {
+                                languages = lang[i];
+                            }
+                            else {
+                                languages = languages + "," + lang[i];
+                            }
+                        }
+                    }
+
+                    var Student = {
+                        AcademicYear: ddlAcademicYr,
+                        RegNo: $("#txtRegNo").val(),
+                        JoiningDate: $("#txtJoinDt").val(),
+                        ClassID: getControlValue("ddlCourse"),
+                        SectionID: getControlValue("ddlSection"),
+                        //BatchID: getControlValue("ddlBatch"),
+                        StreamID: getControlValue("ddlStream"),
+                        //SRNo: getControlValue("txtSRNo"),
+                        RollNo: "",/*removing Roll no*/
+                        FirstName: $("#txtFirstName").val(),
+                        MiddleName: $("#txtMiddleName").val(),
+                        LastName: $("#txtLastName").val(),
+                        DOB: $("#txtDOB").val(),
+                        GenderID: getControlValue("ddlGender"),
+                        BloodGroup: getControlValue("ddlBloodGroup") ,
+
+                        BirthPlace: $("#txtBirthPlace").val(),
+                        Nationality: getControlValue("ddlNationality"),
+                        MotherTongue: $("#txtMotherTongue").val(),
+                        Religion: getControlValue("ddlReligion"),
+                        //CasteID: getControlValue("ddlCaste"),
+                        CategoryID: getControlValue("ddlCategory"),
+                        Languages: languages,
+                        AadharNo: $("#txtAadhaar").val(),
+                        PermanentAddress: $("#txtResidenceAddrs").val(),
+                        CorrespondAddress: $("#txtCorrespondAddrs").val(),
+                        PermCountry: getControlValue("ddlCountry"),
+                        CorsCountry: getControlValue("ddlCountry1"),
+                        PermState: getControlValue("ddlState"),
+                        CorsState: getControlValue("ddlState1"),
+                        PermCity: getControlValue("ddlCity"),
+                        CorsCity: getControlValue("ddlCity1"),
+                       // PermCity: $("#txtResdCity").val(),
+                       // CorsCity: $("#txtCorspCity").val(),
+                       // PermState: getControlValue("ddlResdState"),
+                       // CorsState: getControlValue("ddlCorspState"),
+                        PermPincode: $("#txtResdPin").val(),
+                        CorsPincode: $("#txtCorspPin").val(),
+                        SMSmobileNo: $("#txtSMSMobile").val(),
+                        SchoolID: $('#ddlSchoolName').val(),
+                        BiometricID: $("#BioMetricID").val()
+
+
+                    };
+
+                    if (Student.RegNo == null || Student.RegNo == "") {
+                        alert("Student Reg No field is empty!!");
+                        return;
+                    }
+
+                    var DTO = JSON.stringify(Student);
+
+                    $.ajax({
+                        url: "@Url.Content("~/api/StudentApi/SaveOfficialDet")",
+                        type: "Post",
+                        data: DTO,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            $("#loader").fadeOut();
+                            if (data == "-1") {
+                                $("#divSucesEmail").fadeIn();
+                                $("#sentEmailMsg").html("BioMetric already Exist !!");
+                                setTimeout(function () {
+                                    $("#divSucesEmail").fadeOut();
+                                    $("#sentEmailMsg").html("");
+                                }, 2000)
+                            }
+                            else if (data != '0' && data != undefined) {
+
+                                $("#divSucesEmail").fadeIn();
+                                $("#sentEmailMsg").html("Details saved successfully");
+                                setTimeout(function () {
+                                    $("#divSucesEmail").fadeOut();
+                                    $("#sentEmailMsg").html("");
+                                }, 2000)
+                                $("#hdnStudentID").val(data);
+                                //alert(data);
+                                //$("#divContactDet").fadeIn();
+                                $("#divParents").fadeIn();
+                                $("#divGuardian").fadeIn();
+                                $("#divEmergency").fadeIn();
+                                //$("#UpdateOffDet").fadeIn();
+                                $("#SaveOffDet").fadeOut();
+                            }
+                        },
+                        error: function () {
+                        }
+                    });
+                }
+            });
+
+            $("#SaveParents").click(function () {
+                if ($("#form2").valid()) {
+                    $("#loader").fadeIn();
+                    var id = $("#hdnStudentID").val();
+                    var lang = $("#ddlLanguages").val();
+                    var lang_lenth = lang.length;
+                    var languages = "";
+                    var status;
+                    var butnVal = $("#SaveParents").val();
+                    if (butnVal == "Edit")
+                    {
+                        status = 3;
+                        var txtStUsername = $("#txtStUsername").val();
+                        var txtStPassword = $("#editStupass").val();
+                        //var txtPUsername = $("#txtPUsername").val();
+                        //var txtPPassword = $("#txtPPassword").val();
+                        var txtPUsername = $("#txtPUsername").val();
+                        var txtPPassword = $("#editParpass").val();
+
+                    }
+                    else
+                    {
+                        status = 9;
+                        var txtStUsername = $("#txtStUsername").val();
+                        var txtStPassword = $("#txtStPassword").val();
+                        var txtPUsername = $("#txtPUsername").val();
+                        var txtPPassword = $("#txtPPassword").val();
+                    }
+                    var i = 0;
+                    if (lang != null && lang != undefined && lang != "") {
+                        for (i; i < lang_lenth; i++) {
+                            if (i == 0) {
+                                languages = lang[i];
+                            }
+                            else {
+                                languages = languages + "," + lang[i];
+                            }
+                        }
+                    }
+
+
+
+                    var Student = {
+                        ID: id,
+                        AcademicYear: getControlValue("ddlAcademicYr"),
+                        RegNo: $("#txtRegNo").val(),
+                        //SRNo: getControlValue("txtSRNo"),
+                        JoiningDate: $("#txtJoinDt").val(),
+                        ClassID: getControlValue("ddlCourse"),
+                        SectionID: getControlValue("ddlSection"),
+                        //BatchID: getControlValue("ddlBatch"),
+                        StreamID: getControlValue("ddlStream"),
+                        RollNo: "",/*removing Roll no */
+                        FirstName: $("#txtFirstName").val(),
+                        MiddleName: $("#txtMiddleName").val(),
+                        LastName: $("#txtLastName").val(),
+                        DOB: $("#txtDOB").val(),
+                        GenderID: getControlValue("ddlGender"),
+                        BloodGroup: getControlValue("ddlBloodGroup"),
+                        BirthPlace: $("#txtBirthPlace").val(),
+                        Nationality: getControlValue("ddlNationality"),
+                        MotherTongue: $("#txtMotherTongue").val(),
+                        Religion: getControlValue("ddlReligion"),
+                        //CasteID: getControlValue("ddlCaste"),
+                        CategoryID: getControlValue("ddlCategory"),
+                        Languages: languages,
+                        AadharNo: $("#txtAadhaar").val(),
+                        PermanentAddress: $("#txtResidenceAddrs").val(),
+                        CorrespondAddress: $("#txtCorrespondAddrs").val(),
+                        PermCountry: getControlValue("ddlCountry"),
+                        CorsCountry: getControlValue("ddlCountry1"),
+                        PermState: getControlValue("ddlState"),
+                        CorsState: getControlValue("ddlState1"),
+                        PermCity: getControlValue("ddlCity"),
+                        CorsCity: getControlValue("ddlCity1"),
+                        PermPincode: $("#txtResdPin").val(),
+                        CorsPincode: $("#txtCorspPin").val(),
+                        SMSmobileNo: $("#txtSMSMobile").val(),
+
+                        FNationality: $('#ddlFNationality').find(":selected").val(),
+                        FatherName: $("#txtFaName").val(),
+                        FDOB: $("#txtFaDOB").val(),
+                        FQualification: getControlValue("ddlFQual"),
+                        FJob: getControlValue("txtFaJob"),
+                        FOfficeAddress: getControlValue("txtFOfficeAddrs"),
+                        FDesig: getControlValue("txtFaDesig"),
+                        FIncome: $("#txtFaIncome").val(),
+                        FMobile: $("#txtFaMobile").val(),
+                        Fmail: $("#txtFaEmail").val(),
+                        FAdharNo: $("#txtFAdhaar").val(),
+                        MotherName: $("#txtMaName").val(),
+                        MDOB: getControlValue("txtMaDOB"),
+                        MNationality: getControlValue("ddlMaNationality"),
+                        MJob: $("#txtMaJob").val(),
+                        MOfficeAddress: getControlValue("txtMaOfficeAddrs"),
+                        MQualification: getControlValue("ddlMaQual"),
+                        MDesig: $("#txtMaDesig").val(),
+                        MIncome: getControlValue("txtMaIncome"),
+                        Mmobile: getControlValue("txtMaMobile"),
+                        Mmail: getControlValue("txtMaEmail"),
+                        MAdharNo: $("#txtMAdhaar").val(),
+
+                        GNationality: $('#ddlGNationality').find(":selected").val(),
+                        GuardianName: $("#txtGName").val(),
+                        Relation: $("#txtGRelation").val(),
+                        GQualification: getControlValue("ddlGQual"),
+                        GJob: getControlValue("txtGJob"),
+                        GDesig: getControlValue("txtGDesig"),
+                        GIncome: getControlValue("txtGIncome"),
+                        Gmobile: $("#txtGMobile").val(),
+                        GOfficeAddress: $("#txtGOfficeAddrs").val(),
+                        GAdharNo: $("#txtGadhaar").val(),
+                        Gmail: $("#txtGEmail").val(),
+                        EmergencyNo: $("#txtEmergNo").val(),
+                        EmerContPerson: getControlValue("txtEmergPer"),
+                        ContPersRelation: getControlValue("txtEmergRel"),
+                        Status: status,
+                        SUserID: txtStUsername,
+                        SPwd: txtStPassword,
+                        PUserID: txtPUsername,
+                        PPwd: txtPPassword,
+                        PicPath: getControlValue("hdnInputC"),
+                        FPicPath: getControlValue("hdnInputF"),
+                        MPicPath: getControlValue("hdnInputM"),
+                        SchoolID: $("#ddlSchoolName").val(),
+                        BiometricID: $("#BioMetricID").val()
+                    };
+
+                    if (Student.FMobile == null && Student.Mmobile == null) {
+                        alert("Father and mother mobile no are required");
+                        return;
+                    }
+
+
+                    var DTO = JSON.stringify(Student);
+
+                    $.ajax({
+                        url: "@Url.Content("~/api/StudentApi/EditStudentDet")",
+                        type: "Post",
+                        //data: JSON.stringify([ddlCourse, txtRegNo, ddlAcademicYr, ddlStream, ddlStream, ddlSection, ddlBatch, txtRollNo]), //{ Name: name,
+                        // Address: address, DOB: dob },
+                        data: DTO,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            // $("#hdnStudentID").val(data);
+                            //alert(data);
+                            $("#loader").fadeOut();
+                            if (data == '00')
+                            {
+                                $("#divSucesEmail").fadeIn();
+                                $("#sentEmailMsg").html("Entered roll no. is already exist for Same Class and Section!!");
+                                setTimeout(function () {
+                                    $("#divSucesEmail").fadeOut();
+                                    $("#sentEmailMsg").html("");
+                                }, 2000)
+
+                            }
+                          else  if(data != '0' && data != '00' && data != undefined) {
+
+
+                                $("#divSucesEmail").fadeIn();
+                                $("#sentEmailMsg").html("Details saved successfully");
+                                setTimeout(function () {
+                                    $("#divSucesEmail").fadeOut();
+                                    $("#sentEmailMsg").html("");
+                                }, 2000)
+
+                            }
+
+                            $("#divPrevSchool").fadeIn();
+                            $("#divHealthDet").fadeIn();
+                            //$("#UpdateParents").fadeIn();
+                            $("#SaveParents").fadeOut();
+                        },
+                        error: function () {
+
+                        }
+                    });
+
+                }
+
+            });
+
+            $("#SaveHTdet").click(function () {
+                var id = $("#hdnStudentID").val();
+
+                var Student = {
+                    ID: id,
+
+                    //RollNo: $("#txtRollNo").val(),Removing roll no
+                    PSClass: getControlValue("ddlPSClass1"),
+                    PSClass2: getControlValue("ddlPSClass2"),
+                    PSClass3: getControlValue("ddlPSClass3"),
+                    School: $("#txtPSName1").val(),
+                    PSYear: $('#ddlPSYear1').find(":selected").val(),
+                    Board: $("#txtPSBrd1").val(),
+                    Marks: $("#txtPSMarks1").val(),
+                    School2: $("#txtPSName2").val(),
+                    PSYear2: $('#ddlPSYear2').find(":selected").val(),
+                    Board2: $("#txtPSBrd2").val(),
+                    Marks2: $("#txtPSMarks2").val(),
+                    School3: $("#txtPSName3").val(),
+                    PSYear3: $('#ddlPSYear3').find(":selected").val(),
+                    Board3: $("#txtPSBrd3").val(),
+                    Marks3: $("#txtPSMarks3").val(),
+                    Awards: getControlValue("txtPSAwards"),
+                    TCNo: getControlValue("txtTCNo"),
+
+                    Height: getControlValue("txtHeight"),
+                    Weight: getControlValue("txtWeight"),
+                    VisionLeft: getControlValue("txtLVision"),
+                    VisionRight: $("#txtRVision").val(),
+                    MedicationDetails: $("#txtMedication").val()
+                };
+
+                if (Student.ID != "" && Student.ID != undefined && Student.ID != null) {
+                    var DTO = JSON.stringify(Student);
+
+                    $.ajax({
+                        url: "@Url.Content("~/api/StudentApi/SaveOtherDetails")",
+                        type: "Post",
+                        data: DTO,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            //$("#hdnStudentID").val(data);
+                            $("#divSucesEmail").fadeIn();
+                            $("#sentEmailMsg").html("Record Saved Successfully");
+                            setTimeout(function () {
+                                $("#divSucesEmail").fadeOut();
+                                $("#sentEmailMsg").html("");
+                            }, 2000)
+
+                            //alert(data);
+                            $("#divPhotoUploads").fadeIn();
+                            $("#divDocsUpload").fadeIn();
+                            //$("#UpdateHTdet").fadeIn();
+                            $("#SaveHTdet").fadeOut();
+                        },
+                        error: function () {
+
+                        }
+                    });
+                }
+                else { alert("Incomplete Feilds !!"); }
+
+            });
+
+            $("#SaveDocs").click(function () {
+                debugger;
+                if ($("#form3").valid()) {
+                    $("#loader").fadeIn();
+
+                    var id = $("#hdnStudentID").val();
+                    //var roll = $("#txtRollNo").val();Removing roll no
+                    var roll = $("#txtFirstName").val()
+                    var FMobile = $("#txtFaName").val();
+                    var MMobile = $("#txtMaName").val();
+                    var txtStUsername = $("#txtStUsername").val();
+                    var txtStPassword = $("#txtStPassword").val();
+                    var txtPUsername = $("#txtPUsername").val();
+                    var txtPPassword = $("#txtPPassword").val();
+                    var stats = getControlValue("ddlStatus");
+                    //var data = new FormData($('form')[0]);
+                    var formData = new FormData();
+                    var file = $('#InputChildPic')[0];
+                    var file1 = $('#InputFPic')[0];
+                    var file2 = $('#InputMPic')[0];
+                    formData.append('file', file.files[0]);
+                    formData.append('ID', id);
+                    //formData.append('RollNo', roll);
+                    formData.append('RollNo', roll );
+                    formData.append('type', "Student");
+
+                    var fd = new FormData();
+                    var docIDs = "";
+                    var docTexts = "";
+                    for (var x = 1; x <= docLength; x++) {
+                        var doc = $('#input' + x)[0];
+                        var docID = $('#hdn' + x).val();
+                        var dox = $('#lbl' + x).text();
+                        fd.append('file', doc.files[0]);
+                        if (x == 1) {
+                            docIDs = docID;
+                            docTexts = dox;
+                        }
+                        else {
+                            docIDs = docIDs + "," + docID;
+                            docTexts = docTexts + "," + dox;
+                        }
+
+                    }
+                    //stupicname
+
+                    //fathpicname
+                    //fd.append('FatherPic', txtFirstName)
+                    fd.append('DocIDs', docIDs);
+                    fd.append('docTexts', docTexts);
+                    fd.append('ID', id);
+                    fd.append('Susername', txtStUsername);
+                    fd.append('Spwd', txtStPassword);
+                    fd.append('PuserName', txtPUsername);
+                    fd.append('Ppwd', txtPPassword);
+                    fd.append('DocLength', docLength);//
+                    fd.append('status', stats);
+                    fd.append('type', "Docs");
+
+                    $.ajax({
+                        url: "@Url.Content("~/api/StudentApi/UploadDocs")",
+                        type: "Post",
+                        data: formData,
+                        enctype: 'multipart/form-data',
+                        contentType: false,
+                        processData: false,         // PREVENT AUTOMATIC DATA PROCESSING.
+                        cache: false,
+                        success: function (data) {
+
+                            $("#loader").fadeOut();
+                            var formData1 = new FormData();
+                            formData1.append('file', file1.files[0]);
+                            formData1.append('ID', id);
+                         // formData1.append('FMobile', FMobile);
+                            formData1.append('FMobile', FMobile)
+                            formData1.append('type', "FParent");
+
+                            $.ajax({
+                                url: "@Url.Content("~/api/StudentApi/UploadDocs")",
+                                type: "Post",
+                                data: formData1,
+                                enctype: 'multipart/form-data',
+                                contentType: false,
+                                processData: false,         // PREVENT AUTOMATIC DATA PROCESSING.
+                                cache: false,
+                                success: function (data) {
+
+                                    var formData2 = new FormData();
+                                    formData2.append('file', file1.files[0]);
+                                    formData2.append('ID', id);
+                                    //formData2.append('Mmobile', MMobile);
+                                    //motherpicname
+                                    formData2.append('Mmobile', MMobile);
+
+                                    formData2.append('type', "MParent");
+
+                                    $.ajax({
+                                        url: "@Url.Content("~/api/StudentApi/UploadDocs")",
+                                        type: "Post",
+                                        data: formData2,
+                                        enctype: 'multipart/form-data',
+                                        contentType: false,
+                                        processData: false,         // PREVENT AUTOMATIC DATA PROCESSING.
+                                        cache: false,
+                                        success: function (data) {
+
+                                            $.ajax({
+                                                url: "@Url.Content("~/api/StudentApi/UploadDocs")",
+                                                type: "Post",
+                                                data: fd,
+                                                enctype: 'multipart/form-data',
+                                                contentType: false,
+                                                processData: false,         // PREVENT AUTOMATIC DATA PROCESSING.
+                                                cache: false,
+                                                success: function (data) {
+                                                    if (data != '0' && data != undefined) {
+                                                        $("#divSucesEmail").fadeIn();
+                                                        $("#sentEmailMsg").html("Images and documents uploaded successfully");
+                                                        setTimeout(function () {
+                                                            $("#divSucesEmail").fadeOut();
+                                                            $("#sentEmailMsg").html("");
+                                                        }, 2000)
+
+                                                        $("#SaveDocs").fadeOut();
+                                                        if ($("#SaveDocs").val() != "Edit")
+                                                        { $("#btnSubmit").fadeIn(); }
+
+                                                    }
+                                                },
+                                                error: function () {
+
+                                                }
+                                            });
+                                        },
+                                        error: function () {
+
+                                        }
+                                    });
+
+                                },
+                                error: function () {
+
+                                }
+                            });
+
+
+                        },
+                        error: function () {
+
+                        }
+                    });
+                }
+
+
+            });
+
+            $("#btnSubmit").click(function () {
+                var id = $("#hdnStudentID").val();
+                var status = getControlValue("ddlStatus");
+                $.ajax({
+                    type: "Post",
+                    url: "@Url.Content("~/api/StudentApi/FinalSubmit")",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify([id, status]),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data != '0' && data != undefined) {
+
+
+                            $("#divSucesEmail").fadeIn();
+                            $("#sentEmailMsg").html("Student record finally saved");
+                            setTimeout(function () {
+                                $("#divSucesEmail").fadeOut();
+                                $("#sentEmailMsg").html("");
+                                //EmailStudentLogin();
+                            }, 2000)
+
+
+                            $("#btnSubmit").fadeOut();
+                            $("#Sendmail").fadeIn();
+                        }
+                    },
+                    error: function () {
+
+                    }
+                });
+            });
+        });
+
+        var queryString = new Array();
+        $(function () {
+            if (queryString.length == 0)
+            {
+                if (window.location.search.split('?').length > 1) {
+                    var params = window.location.search.split('?')[1].split('&');
+                    for (var i = 0; i < params.length; i++) {
+                        var key = params[i].split('=')[0];
+                        var value = decodeURIComponent(params[i].split('=')[1]);
+                        queryString[key] = value;
+                    }
+                }
+            }
+            if (queryString["id"] != null) {
+
+                //var data = "<u>Values from QueryString</u><br /><br />";
+                //data += "<b>Name:</b> " + queryString["name"] + " <b>Technology:</b> " + queryString["technology"];
+                //$("#lblData").html(data);
+                $("#hdnStudentID").val(queryString["id"]);
+                var id = queryString["id"];
+                //alert($("#hdnStudentID").val());
+                var par = {
+
+                    val: id
+                }
+                $.ajax({
+                    url: "@Url.Content("~/api/StudentApi/FindStudentByID")",// "~/Masters/GetDeptMethod",
+                    type: "Post",
+                    data: JSON.stringify(par), //{ Name: name,ddlAcademicYr
+                    //// Address: address, DOB: dob },
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (data) {
+
+                        $("#SaveOffDet").hide();
+                        $("#SaveContacts").hide();
+                        //$("#SaveParents").hide();
+                        $("#SaveHTdet").hide();
+                        $("#SavePics").hide();
+                        //$("#SaveDocs").hide();
+                        $("#btnSubmit").hide();
+
+
+                        //$("#UpdateParents").show();
+                        $("#UpdateHTdet").show();
+                        //$("#UpdateDocs").show();
+                        setControlValue("ddlSchoolName", data.SchoolID)
+                        var SchoolID = getControlValue("ddlSchoolName");
+                        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/StudentApi", "GetClassesbySchoolID", "ddlCourse", false, "", "", "", "");
+                        var SchoolID = getControlValue("ddlSchoolName");
+                        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/TimeTableApi", "GetAcademicYearBySchool", "ddlAcademicYr", false, "", "", "", "");
+                        setControlValue("ddlAcademicYr", data.AcademicYear);
+                        $('#txtRegNo').val(data.RegNo);
+                        $('#txtJoinDt').val(ChangeDateformat(data.JoiningDate));
+                        setControlValue("ddlCourse", data.ClassID);
+                        //$("#hiddentvaluetext").val("1234");
+                        var ddlclass = getControlValue("ddlCourse");
+                        if (ddlclass != -1)
+                        {
+                            debugger;
+
+                            var SchoolID = getControlValue("ddlSchoolName");
+                            callServiceMethodForDDl(JSON.stringify([ddlclass, SchoolID]), "/api/StudentApi", "GetStreamsbySchool", "ddlStream", false, "", "", "", "");
+                            callServiceMethodForDDl(JSON.stringify([ddlclass, SchoolID]), "/api/StudentApi", "GetSectionsbyschool", "ddlSection", false, "", "", "", "");
+
+
+
+                            //callServiceMethodForDDl(JSON.stringify([ddlclass]), "/api/StudentApi", "GetStreams", "ddlStream", false, "", "", "", "");
+                            //callServiceMethodForDDl(JSON.stringify([ddlclass]), "/api/StudentApi", "GetSections", "ddlSection", false, "", "", "", "");
+                            //callServiceMethodForDDl(JSON.stringify([ddlclass]), "/api/StudentApi", "GetBatches", "ddlBatch", false, "", "", "", "");
+                        }
+
+
+
+                        debugger;
+                        var i = 1;
+                        $.each(data.prevlist, function (index, item) {
+                            //psidforedit
+                            $("#hdnprev" + i).val(item.ID);
+                            //setControlValue("ddlPSYear" + i, item.PSYear) update
+                            //$("#ddlPSYear" + i).val(item.PSYear);
+                            var yearupdate = parseInt(item.PSYear);
+                            //callServiceMethodForDDl(JSON.stringify([item.PSYear]), "/api/StudentApi", "GetYearsforedit", "ddlPSYear"+i, false, "", "", "", "");
+
+                            //$("#ddlPSYear"+i).find("option[text=" + item.PSYear + "]").attr("selected", true
+
+                            //$("#ddlPSYear" + i).val(item.PSYear);
+                            $("#txtPSName" + i).val(item.School);
+                            $("#txtPSBrd" + i).val(item.Board);
+                            $("#ddlPSClass" + i).val(item.Class);
+                            $("#ddlPSYear" + i).val(yearupdate);
+                            $("#txtPSMarks" + i).val(item.Marks);
+                            $("#txtPSAwards").val(item.Awards);//hdnprev1
+                            $("#hdnprev" + i).val(item.ID);
+                            if (i == 1)
+                            {
+                                $("#txtTCNo").val(item.TCNo);
+                            }
+                            i = i + 1;
+                        });
+
+                        setTimeout(function () {
+                            setControlValue("ddlSection", data.SectionID);
+                            //setControlValue("ddlStream", data.StreamID);
+                            //setControlValue("ddlBatch", -1);
+                            //setControlValue("txtRollNo", data.RollNo);Removing Roll no
+                            setControlValue("ddlReligion", data.ReligionID);
+                            setControlValue("ddlCategory", data.CategoryID);
+                            setControlValue("ddlGender", data.GenderID);
+                        }, 2000);
+                        //MAIN STATUS FATCH EFFCTING PASSWORD CHANGE STUDENT
+                        $("#ddlStatus").val(data.Status);
+                        //setControlValue("ddlStatus", data.Status);
+
+
+
+                        setControlValue("ddlStream", data.streamID);
+                        setControlValue("txtFirstName", data.FirstName);
+                        setControlValue("txtMiddleName", data.MiddleName);
+                        setControlValue("txtLastName", data.LastName);
+                        setControlValue("txtDOB", ChangeDateformat(data.DOB));
+
+                        setControlValue("ddlBloodGroup", data.BloodGroup);
+                        setControlValue("txtBirthPlace", data.BirthPlace);
+                        setControlValue("ddlNationality", data.Nationality);
+                        setControlValue("txtMotherTongue", data.MotherTongue);
+                        //setControlValue("txtSRNo", data.SRNo);
+                        setControlValue("txtBirthPlace", data.BirthPlace);
+
+                        if (data.Languages != null && data.Languages != "") {
+                            var selectedValues = new Array();
+                            var s = data.Languages.split(',');
+                            //for (var k = 0; k < s.length; k++)
+                            //{
+                            //    selectedValues[k] = s[k];
+                            //}
+                            //setControlValue("ddlLanguages", selectedValues);
+                            $("#ddlLanguages").val(s).trigger("change");
+                            //$("#ddlLanguages").select2('val', selectedValues);
+                        }
+
+                        //setControlValue("ddlLanguages", data.AcademicYear);
+
+                        setControlValue("txtAadhaar", data.AadharNo);
+                        setControlValue("txtResidenceAddrs", data.PermanentAddress);
+                        setControlValue("txtCorrespondAddrs", data.CorrespondAddress);
+                        //setControlValue("txtResdCity", data.PermCity);
+                        //setControlValue("txtCorspCity", data.CorsCity);
+
+                        //setControlValue("ddlResdState", data.PermState);
+                        //setControlValue("ddlCorspState", data.CorsState);
+                        setControlValue("txtResdPin", data.PermPincode);
+                        setControlValue("txtCorspPin", data.CorsPincode);
+                        setControlValue("txtSMSMobile", data.SMSmobileNo);
+
+                        setControlValue("txtFaName", data.FatherName);
+                        setControlValue("txtFaDOB", ChangeDateformat(data.FDOB));
+                        setControlValue("ddlFNationality", data.FNationality);
+                        setControlValue("ddlFQual", data.FQualificationID);
+                        setControlValue("txtFaJob", data.FJob);
+                        setControlValue("txtFOfficeAddrs", data.FOfficeAddress);
+                        setControlValue("txtFaDesig", data.FDesig);
+                        setControlValue("txtFaIncome", data.FIncome);
+                        setControlValue("txtFaMobile", data.FMobile);
+                        setControlValue("txtFaEmail", data.Fmail);
+                        setControlValue("txtFAdhaar", data.FAdharNo);
+
+                        setControlValue("txtMaName", data.MotherName);
+                        setControlValue("txtMaDOB", ChangeDateformat(data.MDOB));
+                        setControlValue("ddlMaNationality", data.MNationality);
+                        setControlValue("ddlMaQual", data.MQualificationID);
+                        setControlValue("txtMaJob", data.MJob);
+                        setControlValue("txtMaOfficeAddrs", data.MOfficeAddress);
+                        setControlValue("txtMaDesig", data.MDesig);
+                        setControlValue("txtMaIncome", data.MIncome);
+                        setControlValue("txtMaMobile", data.Mmobile);
+                        setControlValue("txtMaEmail", data.Mmail);
+                        setControlValue("txtMAdhaar", data.MAdharNo);
+
+                        setControlValue("txtGName", data.GuardianName);
+                        setControlValue("txtGRelation", data.Relation);
+                        setControlValue("ddlGNationality", data.GNationality);
+                        setControlValue("ddlGQual", data.GQualificationID);
+                        setControlValue("txtGJob", data.GJob);
+                        setControlValue("txtGDesig", data.GDesig);
+                        setControlValue("txtGIncome", data.GIncome);
+                        setControlValue("txtGMobile", data.Gmobile);
+                        setControlValue("txtGOfficeAddrs", data.GOfficeAddress);
+                        setControlValue("txtGadhaar", data.GAdharNo);
+                        setControlValue("txtGEmail", data.Gmail);
+                        setControlValue("txtEmergNo", data.EmergencyNo);
+                        setControlValue("txtEmergPer", data.EmerContPerson);
+                        setControlValue("txtEmergRel", data.ContPersRelation);
+                        $("#BioMetricID").val(data.BiometricID);
+                        setControlValue("txtStUsername", data.SUserID);
+                        $("#editStupass").val(data.SPwd);
+                        $("#editParpass").val(data.PPwd);
+                        //setControlValue("txtStPassword", data.SPwd);
+                        $("#txtStPassword").val(data.SPwd);
+                        if (data.SPwd != null) {
+                            $("#txtStPassword").hide();
+                            $("#Studentpasswordlabel").hide();
+
+                        }
+
+                        setControlValue("txtPUsername", data.PUserID);
+                        //setControlValue("txtPPassword", data.PPwd);
+                        $("#txtPPassword").val(data.PPwd);
+                        if (data.PPwd != null) {
+                            $("#Parentspasswordlabel").hide();
+                            $("#txtPPassword").hide();
+                        }
+                        //if (data.ht.Height != null) {
+                        //    setControlValue("txtHeight", data.ht.Height);
+                        //}
+                        //if (data.ht.Weight != null) {
+                        //    setControlValue("txtWeight", data.ht.Weight);
+                        //}
+                        //if (data.ht.VisionLeft != null) {
+                        //    setControlValue("txtLVision", data.ht.VisionLeft);
+                        //}
+                        //if (data.ht.VisionRight != null) {
+                        //    setControlValue("txtRVision", data.ht.VisionRight);
+                        //}
+                        //if (data.ht.MedicationDetails != null) {
+                        //    setControlValue("txtMedication", data.ht.MedicationDetails);
+                        //}
+                        //if (data.ht.ID != null) {
+                        //    setControlValue("hdnHT", data.ht.ID);
+                        //}
+
+                        setControlValue("txtHeight", data.ht.Height);
+                        setControlValue("txtWeight", data.ht.Weight);
+                        setControlValue("txtLVision", data.ht.VisionLeft);
+                        setControlValue("txtRVision", data.ht.VisionRight);
+                        setControlValue("txtMedication", data.ht.MedicationDetails);
+                        setControlValue("hdnHT", data.ht.ID);
+                        setControlValue("hdnInputC", data.PicPath);
+                        setControlValue("hdnInputF", data.FPicPath);
+                        setControlValue("hdnInputM", data.MPicPath);
+
+                        //setControlValue("ddlCountry", data.PermcountrynameNm1);
+                        var val1 = data.PermcountrynameNm1;
+                        if (val1 != -1) {
+                            callServiceMethodForDDl(JSON.stringify([val1]), "/api/StudentApi", "getAllCountrybyID", "ddlCountry", false, "", "", "", "");
+                        }
+                        setControlValue("ddlCountry", data.PermcountrynameNm1);
+                        //var val1 = getControlValue("ddlCountry");
+                        var val1 = data.PermcountrynameNm1;
+                        if (val1 != -1) {
+                            debugger;
+                            callServiceMethodForDDl(JSON.stringify([val1]), "/api/StudentApi", "getAllstatebyCountryId", "ddlState", false, "", "", "", "");
+
+                            //callServiceMethodForDDl(JSON.stringify([ddlclass]), "/api/StudentApi", "GetBatches", "ddlBatch", false, "", "", "", "");
+                        }
+
+                        //setControlValue("ddlCountry1", data.croscountrynameNm1);
+
+                        var val2 = data.croscountrynameNm1;
+                        if (val2 != -1) {
+                            callServiceMethodForDDl(JSON.stringify([val2]), "/api/StudentApi", "getAllCountrybyID", "ddlCountry1", false, "", "", "", "");
+                        }
+                        setControlValue("ddlCountry1", data.croscountrynameNm1);
+                        //val2 = getControlValue("ddlCountry1");
+                        val2 = data.croscountrynameNm1;
+                        if (val2 != -1) {
+                            debugger;
+                            callServiceMethodForDDl(JSON.stringify([val2]), "/api/StudentApi", "getAllstatebyCountryId", "ddlState1", false, "", "", "", "");
+                        }
+
+                        setControlValue("ddlState", data.PermState1);
+                        //val3 = getControlValue("ddlState");
+                        val3 = data.PermState1;
+                        if (val3 != -1) {
+                            callServiceMethodForDDl(JSON.stringify([val3]), "/api/StudentApi", "getCityByStateId", "ddlCity", false, "", "", "", "");
+                        }
+                        setControlValue("ddlState1", data.CorsState1);
+                        //val4 = getControlValue("ddlState1");
+                        val4 = data.CorsState1;
+                        if (val4 != -1) {
+                            callServiceMethodForDDl(JSON.stringify([val4]), "/api/StudentApi", "getCityByStateId", "ddlCity1", false, "", "", "", "");
+                        }
+                        setControlValue("ddlCity", data.PermCity1);
+                        setControlValue("ddlCity1", data.CorsCity1);
+
+                        //st.PermcountrynameNm1 = s.PermCountry;
+                        //st.croscountrynameNm1 = s.CorsCountry;
+                        //st.PermState1 = s.PermState;
+                        //st.CorsState1 = s.CorsState;
+                        //st.PermCity1 = s.PermCity;
+                        //st.CorsCity1 = s.CorsCity;
+
+
+
+                        if (data.PicPath != null) {
+                            $("#dvPreview").show();
+                            var path1 = data.PicPath.replace(/\\/g, "/");
+                            $("#dvPreview").css("background-image", "url(" + path1 + ")");
+                        }
+
+                        if (data.FPicPath != null) {
+                            $("#dvPreviewF").show();
+                            var path2 = data.FPicPath.replace(/\\/g, "/");
+                            $("#dvPreviewF").css("background-image", "url(" + path2 + ")");
+                        }
+
+                        if (data.MPicPath != null) {
+                            $("#dvPreviewM").show();
+                            var path3 = data.MPicPath.replace(/\\/g, "/");
+                            $("#dvPreviewM").css("background-image", "url(" + path3 + ")");
+                        }
+                        $("#SaveOffDet").hide();
+                        $("#UpdateOffDet").show();
+                        //data.Status == 1 ? $('#cbStatus').prop('checked', true) : $('#cbStatus').prop('checked', false)
+                        //$('#hdnDeptID').val(id);$.datepicker.parseDate("mm/dd/yy", minValue);
+                        //$("#submit").hide();
+                        //$("#btnUpdate").show();
+                        //$("#btnCancel").show();
+                    },
+                    error: function (result) {
+                        //alert("Error");
+                    }
+
+                });
+                //setControlValue();
+            }
+            else
+            {
+                checkLicence();
+                var SchoolID = getControlValue("ddlSchoolName");
+                callServiceMethod(JSON.stringify([SchoolID]), "/api/StudentApi", "getRegCode", false, "", "", false, "", true,getEmployeeUniquCode, "", "", "");
+            }
+
+            $("#UpdateOffDet").click(function () {
+                if ($("#form1").valid()) {
+                    $("#loader").fadeIn();
+                    var Id = getControlValue("hdnStudentID");
+                    var ddlCourse = getControlValue("ddlCourse");
+                    var txtRegNo = $("#txtRegNo").val();
+                    var ddlAcademicYr = getControlValue("ddlAcademicYr");
+                    //var ddlCourse = $('#ddlCourse').find(":selected").text();
+                    var ddlStream = $('#ddlStream').find(":selected").text();
+                    var ddlSection = $('#ddlSection').find(":selected").text();
+                    //var ddlBatch = $('#ddlBatch').find(":selected").text();
+                    var txtRollNo = "";/*Remocing Roll no*/
+                    var lang = $("#ddlLanguages").val();
+                    var languages = "";
+                    if (lang != null && lang != undefined && lang != "") {
+                        var lang_lenth = lang.length;
+
+                        var i = 0;
+                        for (i; i < lang_lenth; i++) {
+                            if (i == 0) {
+                                languages = lang[i];
+                            }
+                            else {
+                                languages = languages + "," + lang[i];
+                            }
+                        }
+                      }
+
+
+                    var Student = {
+                        ID: id,
+                        AcademicYear: getControlValue("ddlAcademicYr"),
+                        RegNo: $("#txtRegNo").val(),
+                        JoiningDate: $("#txtJoinDt").val(),
+                        ClassID: getControlValue("ddlCourse"),
+                        SectionID: getControlValue("ddlSection"),
+                        //BatchID: getControlValue("ddlBatch"),
+                        StreamID: getControlValue("ddlStream"),
+                        RollNo: "",/*Removing Roll no */
+                        FirstName: $("#txtFirstName").val(),
+                        MiddleName: $("#txtMiddleName").val(),
+                        LastName: $("#txtLastName").val(),
+                        DOB: $("#txtDOB").val(),
+                        GenderID: getControlValue("ddlGender"),
+                        BloodGroup: getControlValue("ddlBloodGroup"),
+                        BirthPlace: $("#txtBirthPlace").val(),
+                        Nationality: getControlValue("ddlNationality"),
+                        MotherTongue: $("#txtMotherTongue").val(),
+                        Religion: getControlValue("ddlReligion"),
+                        //CasteID: getControlValue("ddlCaste"),
+                        CategoryID: getControlValue("ddlCategory"),
+                        Languages: languages,
+                        AadharNo: $("#txtAadhaar").val(),
+                        PermanentAddress: $("#txtResidenceAddrs").val(),
+                        CorrespondAddress: $("#txtCorrespondAddrs").val(),
+                        //PermCity: $("#txtResdCity").val(),
+                        //CorsCity: $("#txtCorspCity").val(),
+                        //PermState: getControlValue("ddlResdState"),
+                        //CorsState: getControlValue("ddlCorspState"),
+                        PermCountry: getControlValue("ddlCountry"),
+                        CorsCountry: getControlValue("ddlCountry1"),
+                        PermState: getControlValue("ddlState"),
+                        CorsState: getControlValue("ddlState1"),
+                        PermCity: getControlValue("ddlCity"),
+                        CorsCity: getControlValue("ddlCity1"),
+                        PermPincode: $("#txtResdPin").val(),
+                        CorsPincode: $("#txtCorspPin").val(),
+                        SMSmobileNo: $("#txtSMSMobile").val(),
+                        BiometricID: $("#BioMetricID").val(),
+                        FNationality: $('#ddlFNationality').find(":selected").val(),
+                        FatherName: $("#txtFaName").val(),
+                        FDOB: $("#txtFaDOB").val(),
+                        FQualification: getControlValue("ddlFQual"),
+                        FJob: getControlValue("txtFaJob"),
+                        FOfficeAddress: getControlValue("txtFOfficeAddrs"),
+                        FDesig: getControlValue("txtFaDesig"),
+                        FIncome: $("#txtFaIncome").val(),
+                        FMobile: $("#txtFaMobile").val(),
+                        Fmail: $("#txtFaEmail").val(),
+                        FAdharNo: $("#txtFAdhaar").val(),
+                        MotherName: $("#txtMaName").val(),
+                        MDOB: getControlValue("txtMaDOB"),
+                        MNationality: getControlValue("ddlMaNationality"),
+                        MJob: $("#txtMaJob").val(),
+                        MOfficeAddress: getControlValue("txtMaOfficeAddrs"),
+                        MDesig: $("#txtMaDesig").val(),
+                        MIncome: getControlValue("txtMaIncome"),
+                        Mmobile: getControlValue("txtMaMobile"),
+                        Mmail: getControlValue("txtMaEmail"),
+                        MAdharNo: $("#txtMAdhaar").val(),
+
+                        GNationality: $('#ddlGNationality').find(":selected").val(),
+                        GuardianName: $("#txtGName").val(),
+                        Relation: $("#txtGRelation").val(),
+                        GQualification: getControlValue("ddlGQual"),
+                        GJob: getControlValue("txtGJob"),
+                        GDesig: getControlValue("txtGDesig"),
+                        GIncome: getControlValue("txtGIncome"),
+                        Gmobile: $("#txtGMobile").val(),
+                        GOfficeAddress: $("#txtGOfficeAddrs").val(),
+                        GAdharNo: $("#txtGadhaar").val(),
+                        Gmail: $("#txtGEmail").val(),
+                        EmergencyNo: $("#txtEmergNo").val(),
+                        EmerContPerson: getControlValue("txtEmergPer"),
+                        ContPersRelation: getControlValue("txtEmergRel"),
+                        SUserID: getControlValue("txtStUsername"),
+                        //SPwd: getControlValue("txtStPassword"),
+                        PUserID: getControlValue("txtPUsername"),
+                        //PPwd: getControlValue("txtPPassword"),
+                        SPwd: getControlValue("editStupass"),
+                        PPwd: getControlValue("editParpass"),
+                        SchoolID: getControlValue("ddlSchoolName")
+                    };
+
+                    if (Student.RegNo == null || Student.RegNo == "") {
+                        alert("Student Reg No field is empty!!");
+                        return;
+                    }
+
+
+                    var DTO = JSON.stringify(Student);
+
+                    $.ajax({
+                        url: "@Url.Content("~/api/StudentApi/EditStudentDet")",
+                        type: "Post",
+                        //data: JSON.stringify([ddlCourse, txtRegNo, ddlAcademicYr, ddlStream, ddlStream, ddlSection, ddlBatch, txtRollNo]), //{ Name: name,
+                        // Address: address, DOB: dob },
+                        data: DTO,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            $("#loader").fadeOut();
+                            if (data == '00') {
+                                $("#divSucesEmail").fadeIn();
+                                $("#sentEmailMsg").html("BioMetric ID already Exist!!");
+                                setTimeout(function () {
+                                    $("#divSucesEmail").fadeOut();
+                                    $("#sentEmailMsg").html("");
+                                }, 2000)
+
+                            }
+                            else if (data != '0' && data != '00' && data != undefined) {
+
+
+                                $("#divSucesEmail").fadeIn();
+                                $("#sentEmailMsg").html("Details saved successfully");
+                                setTimeout(function () {
+                                    $("#divSucesEmail").fadeOut();
+                                    $("#sentEmailMsg").html("");
+                                }, 2000)
+                                $("#hdnStudentID").val(data);
+                                //alert(data);
+                                //$("#divContactDet").fadeIn();
+                                $("#divParents").fadeIn();
+                                $("#divGuardian").fadeIn();
+                                $("#divEmergency").fadeIn();
+                                $("#SaveParents").val("Edit");
+                                //$("#UpdateOffDet").fadeIn();
+                                $("#UpdateOffDet").fadeOut();
+
+                            }
+
+
+                        },
+                        error: function () {
+
+                        }
+                    });
+
+                }
+
+
+            });
+
+            $("#UpdateHTdet").click(function () {
+                var id = $("#hdnStudentID").val();
+
+                var Student = {
+                    ID: id,
+
+                    //RollNo: $("#txtRollNo").val(),Removing roll no
+                    PSID: $("#hdnprev1").val(),
+                    PSID2: $("#hdnprev2").val(),
+                    PSID3: $("#hdnprev3").val(),
+                    PSClass: $("#ddlPSClass1").val(),
+                    PSClass2: $("#ddlPSClass2").val(),
+                    PSClass3: $("#ddlPSClass3").val(),
+                    School: $("#txtPSName1").val(),
+                    PSYear: $('#ddlPSYear1').find(":selected").val(),
+                    Board: $("#txtPSBrd1").val(),
+                    Marks: $("#txtPSMarks1").val(),
+                    School2: $("#txtPSName2").val(),
+                    PSYear2: $('#ddlPSYear2').find(":selected").val(),
+                    Board2: $("#txtPSBrd2").val(),
+                    Marks2: $("#txtPSMarks2").val(),
+                    School3: $("#txtPSName3").val(),
+                    PSYear3: $('#ddlPSYear3').find(":selected").val(),
+                    Board3: $("#txtPSBrd3").val(),
+                    Marks3: $("#txtPSMarks3").val(),
+                    Awards: getControlValue("txtPSAwards"),
+                    HID: $("#hdnHT").val(),
+                    Height: getControlValue("txtHeight"),
+                    Weight: getControlValue("txtWeight"),
+                    VisionLeft: getControlValue("txtLVision"),
+                    VisionRight: $("#txtRVision").val(),
+                    MedicationDetails: $("#txtMedication").val(),
+                    TCNo: getControlValue("txtTCNo")
+                };
+
+                if (Student.ID != "" && Student.ID != undefined && Student.ID != null) {
+                    var DTO = JSON.stringify(Student);
+
+                    $.ajax({
+                        url: "@Url.Content("~/api/StudentApi/EditOtherDetails1")",
+                        type: "Post",
+                        data: DTO,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            //$("#hdnStudentID").val(data);
+                            //alert(data);
+                            $("#divSucesEmail").fadeIn();
+                            $("#sentEmailMsg").html("Record Edited Successfully");
+                            setTimeout(function () {
+                                $("#divSucesEmail").fadeOut();
+                                $("#sentEmailMsg").html("");
+                            }, 2000)
+
+                            $("#divPhotoUploads").fadeIn();
+                            $("#divDocsUpload").fadeIn();
+                            $("#SaveDocs").val("Edit");
+                            $("#SaveDocs").fadeIn();
+                            //$("#UpdateHTdet").fadeIn();
+                            $("#UpdateHTdet").fadeOut();
+                        },
+                        error: function () {
+
+                        }
+                    });
+                }
+                else { alert("Incomplete Feilds !!"); }
+
+            });
+
+
+
+
+
+            function ChangeDateformat(dt) {
+                var date = "";
+                if (dt != null) {
+                    var formattedDate = new Date(dt);
+                    var d = formattedDate.getDate();
+                    var m = formattedDate.getMonth();
+                    m += 1;  // JavaScript months are 0-11
+                    var y = formattedDate.getFullYear();
+
+                    date = m + "/" + d + "/" + y;
+                }
+
+                return date;
+            }
+        });
+
+        function getEmployeeUniquCode(p1, p2, p3, datas) {
+            setControlValue("txtRegNo", "");
+            var perfix = datas.Prefix;
+            var suffix = datas.Suffix;
+            var last = datas.LastSeries;
+            var first = datas.StartSeries;
+            var sep = datas.Seprator;
+            var incrmentNo = datas.DocNo;
+            var empCode;
+            var incseries;
+
+            var str;
+            var len;
+            var newcode;
+
+
+
+            if (last == "") {
+
+                empCode = perfix + sep + suffix + sep + first;
+            }
+            else {
+                str = first;
+                len = str.length;
+                newcode = parseInt(last) + parseInt(incrmentNo);
+                // alert(pad(newcode, len));
+                //    incseries = parseInt(pad(newcode, len)) + parseInt(incrmentNo);
+                empCode = perfix + sep + suffix + sep + pad(newcode, len);
+
+            }
+            setControlValue("txtRegNo", empCode);
+            var content = empCode.replace("/", "").replace("/", "").replace("/", "");
+            var Gur = "";
+            var code = "";
+            Gur = "GR";
+            code = Gur + content;
+            setControlValue("txtPUsername", code);
+            setControlValue("txtPPassword", code);
+            setControlValue("txtStUsername", content);
+            setControlValue("txtStPassword", content);
+
+
+        }
+
+        function pad(n, width, z) {
+            z = z || '0';
+            n = n + '';
+            return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+        }
+
+
+        function EmailStudentLogin()
+        {
+            var id = GetParameterValues('Id');
+            //alert("Hello " + name + " your ID is " + id);
+            function GetParameterValues(param) {
+                var url = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+                for (var i = 0; i < url.length; i++) {
+                    var urlparam = url[i].split('=');
+                    if (urlparam[0] == param) {
+                        return urlparam[1];
+                    }
+                }
+            }
+            if (typeof (id) != "undefined") {
+
+            }
+            else
+            {
+                var emailDetails =
+                {
+                    //ddlSchoolName, txtFaEmail, txtMaEmail, txtStUsername, txtStPassword, txtPUsername, txtPPassword
+                    School: getControlValue("ddlSchoolName"),
+                    FemailId: getControlValue("txtFaEmail"),
+                    MemailId: getControlValue("txtMaEmail"),
+                    SUserid: getControlValue("txtStUsername"),
+                    SPassword: getControlValue("txtStPassword"),
+                    PUserid: getControlValue("txtPUsername"),
+                    PPassword: getControlValue("txtPPassword"),
+                    URL: window.location.hostname
+
+
+                }
+                var dll = JSON.stringify(emailDetails)
+                $.ajax({
+                    type: "POST",
+                    url: "/api/Default/SendEmailStuLogin",
+                    contentType: "application/json;charset=utf-8",
+                    data: dll,
+                    //async: false,
+                    success: function (data) {
+                        var a = data;
+                        if (a == "-1") {
+                            alert("Details saved & Login details send to Parents Successfully ")
+                            $("#Sendmail").fadeIn();
+                            location.reload();
+                        }
+                        else if (a == "1") {
+                            alert("Details saved but Email not send ")
+                        }
+
+
+                    }
+                });
+            }
+
+
+
+        }
+
+        //check  Licence
+          function checkLicence() {
+
+                var UserID = sessionStorage.getItem("SchoolID");
+
+                $.ajax({
+                    type: "get",
+                    url: "@Url.Content("~/api/Licence/matchcountofstudents")",
+                    contentType: 'application/json; charset=utf-8',
+                    data: { usrname: UserID },
+                    dataType: "json",
+                    success: function (b) {
+                        var val1 = b;
+                        $('#txt1').val(val1.alertmsg);
+                        $('#txt2').val(val1.alertmsg);
+                        if (val1.alertmsg == 1) {
+                            $('#SaveOffDet').show();
+                            $('#LicenceMsg').hide();
+
+                        }
+                        else if (val1.alertmsg == 2) {
+                            $('#SaveOffDet').hide();
+                            //alert("Your Licence Limit Finished");
+                            $('#LicenceMsg').html("Your Licence Limit Excceeded");
+                        }
+                    }
+                })
+            }
+
+
+    </script>
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+
+
+            $("#form1").validate({
+                errorClass: "my-error-class",
+                validClass: "my-valid-class",
+                rules: {
+                    ddlAcademicYr: {
+                        selectcheck: true
+                    },
+
+                    ddlCourse: {
+                        selectcheck1: true
+                    },
+
+                    ddlGender: {
+                        selectcheck2: true
+                    },
+                    ddlCategory: {
+                        selectcheck3: true
+                    },
+                    ddlResdState: {
+                        selectcheck4: true
+                    },
+                    ddlCountry: {
+                        selectcheck5: true
+                    },
+                    ddlCountry1: {
+                        selectcheck6: true
+                    },
+                    ddlState: {
+                        selectcheck7: true
+                    },
+                    ddlState1: {
+                        selectcheck8: true
+                    },
+                    ddlCity: {
+                        selectcheck9: true
+                    },
+                    ddlCity1: {
+                        selectcheck10: true
+                    },
+                    ddlSection:
+                    {
+                        selectcheck11: true
+                    },
+                    //txtRollNo :"required",
+                    txtJoinDt: "required",
+                    txtRegNo: "required",
+                    txtTotalExperience: "required",
+                    txtFirstName: "required",
+                    txtLastName: "required",
+
+                    txtDOB: "required",
+                    txtResidenceAddrs: "required",
+                    txtResdCity: "required",
+
+                    txtResdPin: {
+                        required: true,
+                        number: true,
+
+                    },
+
+                    txtSMSMobile: {
+                        required: true,
+                        number: true
+
+                    }
+
+
+                },
+                messages: {
+
+                    ddlCountry: "Please Select Country",
+                    ddlCountry1: "Please Select Country",
+                    ddlState: "Please Select State",
+                    ddlState1: "Please Select State",
+                    ddlCity: "Please Select City",
+                    ddlCity1: "Please Select City",
+                    txtJoinDt: "Please Select Joining Date",
+                    txtRegNo: "Please Enter Registration No. ",
+                    txtFirstName: "Please Enter First Name",
+                    txtLastName: "Please Enter Last Name",
+                    txtDOB: "Please Select DOB",
+                    txtSMSMobile: "Please Enter Mobile Number",
+                    txtResidenceAddrs: "Please Enter Address",
+                    txtResdPin: "Please Enter Pincode",
+                    ddlGender: "Please Select Gender",
+                    ddlAcademicYr: "Please Select Academic Year",
+                    ddlCourse: "Please Select Class",
+                    ddlCategory: "Please Select Category",
+                    ddlResdState: "Please Select State",
+                    txtResdCity: "Please Select City",
+                    ddlSection: "please Select Section"
+                    //txtRollNo :"Please Enter RollNo",
+                }
+            })
+            jQuery.validator.addMethod('selectcheck', function (value) {
+                if (value == "-1") {
+                    return (value != '-1');
+                }
+                else if (value == "? undefined:undefined ?") {
+                    return (value != '? undefined:undefined ?');
+                }
+                else {
+                    return true;
+                }
+
+            }, "Please Select Country");
+
+            jQuery.validator.addMethod('selectcheck1', function (value) {
+                if (value == "-1") {
+                    return (value != '-1');
+                }
+                else if (value == "? undefined:undefined ?") {
+                    return (value != '? undefined:undefined ?');
+                }
+                else {
+                    return true;
+                }
+
+            }, "Please Select Country");
+            jQuery.validator.addMethod('selectcheck2', function (value) {
+                if (value == "-1") {
+                    return (value != '-1');
+                }
+                else if (value == "? undefined:undefined ?") {
+                    return (value != '? undefined:undefined ?');
+                }
+                else {
+                    return true;
+                }
+
+            }, "Please Select Country");
+            jQuery.validator.addMethod('selectcheck3', function (value) {
+                if (value == "-1") {
+                    return (value != '-1');
+                }
+                else if (value == "? undefined:undefined ?") {
+                    return (value != '? undefined:undefined ?');
+                }
+                else {
+                    return true;
+                }
+
+            }, "Please Select Country");
+            jQuery.validator.addMethod('selectcheck4', function (value) {
+                if (value == "-1") {
+                    return (value != '-1');
+                }
+                else if (value == "? undefined:undefined ?") {
+                    return (value != '? undefined:undefined ?');
+                }
+                else {
+                    return true;
+                }
+
+            }, "Please Select Country");
+
+            jQuery.validator.addMethod('selectcheck5', function (value) {
+                if (value == "0") {
+                    return (value != '0');
+                }
+                else if (value == "? undefined:undefined ?") {
+                    return (value != '? undefined:undefined ?');
+                }
+                else {
+                    return true;
+                }
+
+            }, "Please Select Country");
+
+            jQuery.validator.addMethod('selectcheck6', function (value) {
+                if (value == "0") {
+                    return (value != '0');
+                }
+                else if (value == "? undefined:undefined ?") {
+                    return (value != '? undefined:undefined ?');
+                }
+                else {
+                    return true;
+                }
+
+            }, "Please Select Country");
+            jQuery.validator.addMethod('selectcheck7', function (value) {
+                if (value == "0") {
+                    return (value != '0');
+                }
+                else if (value == "? undefined:undefined ?") {
+                    return (value != '? undefined:undefined ?');
+                }
+                else {
+                    return true;
+                }
+
+            }, "Please Select Country");
+            jQuery.validator.addMethod('selectcheck8', function (value) {
+                if (value == "0") {
+                    return (value != '0');
+                }
+                else if (value == "? undefined:undefined ?") {
+                    return (value != '? undefined:undefined ?');
+                }
+                else {
+                    return true;
+                }
+
+            }, "Please Select Country");
+            jQuery.validator.addMethod('selectcheck9', function (value) {
+                if (value == "0") {
+                    return (value != '0');
+                }
+                else if (value == "? undefined:undefined ?") {
+                    return (value != '? undefined:undefined ?');
+                }
+                else {
+                    return true;
+                }
+
+            }, "Please Select Country");
+            jQuery.validator.addMethod('selectcheck10', function (value) {
+                if (value == "0") {
+                    return (value != '0');
+                }
+                else if (value == "? undefined:undefined ?") {
+                    return (value != '? undefined:undefined ?');
+                }
+                else {
+                    return true;
+                }
+
+            }, "Please Select Country");
+            jQuery.validator.addMethod('selectcheck11', function (value) {
+                if (value == "-1") {
+                    return (value != '-1');
+                }
+                else if (value == "? undefined:undefined ?") {
+                    return (value != '? undefined:undefined ?');
+                }
+                else {
+                    return true;
+                }
+
+            }, "Please Select Country");
+
+
+
+
+            $("#form2").validate({
+                errorClass: "my-error-class",
+                validClass: "my-valid-class",
+                rules: {
+
+                    txtEmergRel: "required",
+
+                    txtEmergPer: "required",
+                    txtFaName: "required",
+                    txtMaName: "required",
+
+
+                    txtFaMobile: {
+                        required: true,
+                        number: true
+                    },
+
+                    txtMaMobile: {
+                        required: true,
+                        number: true
+                    },
+                    txtEmergNo: {
+                        required: true,
+                        number: true
+                    },
+
+                    txtFaEmail:
+                    {
+                        required: true,
+                        email: true
+                    },
+                    txtMaEmail: {
+                        required: true,
+                        email: true
+                    }
+
+                },
+                messages: {
+                    txtFaEmail: "Please Enter Email Address",
+                    txtMaEmail: "Please Enter Email Address",
+                    txtEmergRel: "Please Enter Relationship",
+                    txtEmergPer: "Please Enter Person Name",
+                    txtFaName: "Please Enter Father Name",
+                    txtMaName: "Please Enter Mother Name",
+
+
+                    txtFaMobile: "Please Enter  Mobile Number",
+                    txtMaMobile: "Please Enter  Mobile Number",
+
+                    txtEmergNo: "Please Enter  Mobile Number",
+
+
+                }
+            })
+
+
+
+
+
+
+
+            $("#form3").validate({
+                errorClass: "my-error-class",
+                validClass: "my-valid-class",
+                rules: {
+
+                    txtStUsername: "required",
+
+                    txtStPassword: "required",
+                    txtPPassword: "required",
+                    txtPUsername: "required",
+
+                    ddlStatus: {
+                        selectcheck: true
+                    },
+
+
+
+                },
+                messages: {
+                    txtStUsername: "Please Enter User Name",
+                    txtStPassword: "Please Enter Password",
+                    txtPPassword: "Please Enter Password",
+                    txtPUsername: "Please Enter User Name",
+
+
+                }
+            })
+            jQuery.validator.addMethod('selectcheck', function (value) {
+                if (value == "-1") {
+                    return (value != '-1');
+                }
+                else if (value == "? undefined:undefined ?") {
+                    return (value != '? undefined:undefined ?');
+                }
+                else {
+                    return true;
+                }
+
+            }, "Please Select Status");
+
+        });
+    </script>
+
+    <script type="text/javascript">
+
+
+        function getAllStatebyId(val) {
+
+
+            callServiceMethodForDDl(JSON.stringify([val]), "/api/StudentApi", "getAllstatebyCountryId", "ddlState", false, "", "", "", "");
+
+        }
+
+        function getCityByStateId(val) {
+            callServiceMethodForDDl(JSON.stringify([val]), "/api/StudentApi", "getCityByStateId", "ddlCity", false, "", "", "", "");
+
+        }
+
+        function getAllStatebyId1(val) {
+
+
+            callServiceMethodForDDl(JSON.stringify([val]), "/api/StudentApi", "getAllstatebyCountryId", "ddlState1", false, "", "", "", "");
+
+        }
+
+        function getCityByStateId1(val) {
+            callServiceMethodForDDl(JSON.stringify([val]), "/api/StudentApi", "getCityByStateId", "ddlCity1", false, "", "", "", "");
+
+        }
+
+    </script>
+
+
+
+</body>
+</html>

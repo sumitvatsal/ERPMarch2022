@@ -1,0 +1,826 @@
+﻿
+@{
+    ViewBag.Title = "LoadEmployeeAttendence";
+    //  Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+<script type="text/javascript">
+    var sessionStorage_transfer = function (event) {
+        if (!event) { event = window.event; } // ie suq
+        if (!event.newValue) return;          // do nothing if no value to work with
+        if (event.key == 'getSessionStorage') {
+            // another tab asked for the sessionStorage -> send it
+            localStorage.setItem('sessionStorage', JSON.stringify(sessionStorage));
+            // the other tab should now have it, so we're done with it.
+            localStorage.removeItem('sessionStorage'); // <- could do short timeout as well.
+        } else if (event.key == 'sessionStorage' && !sessionStorage.length) {
+            // another tab sent data <- get it
+            var data = JSON.parse(event.newValue);
+            for (var key in data)
+            {
+                sessionStorage.setItem(key, data[key]);
+            }
+        }
+    };
+    if (window.addEventListener) {
+        window.addEventListener("storage", sessionStorage_transfer, false);
+    } else {
+        window.attachEvent("onstorage", sessionStorage_transfer);
+    };
+
+
+    // Ask other tabs for session storage (this is ONLY to trigger event)
+    if (!sessionStorage.length) {
+        localStorage.setItem('getSessionStorage', 'foobar');
+        localStorage.removeItem('getSessionStorage', 'foobar');
+    };
+</script>
+
+<section class="content">
+
+
+    <div class="box box-solid">
+
+        <div class="employee-attendance-search">
+
+            <form id="w1" action="index" method="get">
+
+                <div class="box-header with-border">
+                    <h3 class="box-title"><i class="fa fa-search"></i>Load punches  :  </h3>
+                </div>
+                <div id="EmployeeAttendenceSearch1" class="box-body">
+                    @*<canvas id="canvas" width="120" height="120"
+            style="background-color:#333"></canvas>*@
+                    <div class="col-sm-4">
+                        <div class="form-group field-employeeattendance-ea_date required">
+                            <label class="control-label" for="employeeattendance-ea_date">Start Date</label><div class="input-group">
+                                <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+
+                                <input type="text" id="txtLoadStartDate" class="form-control hasDatepicker" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group field-employeeattendance-ea_date required">
+                            <label class="control-label" for="employeeattendance-ea_date">End Date</label><div class="input-group">
+                                <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+
+                                <input type="text" id="txtLoadEnddate" class="form-control hasDatepicker" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="control-label" for="employeeattendance-ea_date"></label>
+                        <div class="input-group">
+                            <input type="button" value="Load " style="width:110px;" onclick="LoadAllAttendence()" class="btn btn-primary" /><h3 style="color:green;" id="Loadsmessage"></h3>
+
+                        </div>
+                    </div>
+                </div>
+                @*//for Load & send sms one day attendence*@
+                @*<div class="box-header with-border">
+                    <h3 class="box-title"><i class="fa fa-search"></i>Load punches and Send Sms To Parents :  </h3>
+                </div>*@
+                @*<div id="EmployeeAttendenceSearch2" class="box-body">
+                    <div class="col-sm-4">
+                        <div class="form-group field-employeeattendance-ea_date required">
+                            <label class="control-label" for="employeeattendance-ea_date">Attendence Date</label><div class="input-group">
+                                <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+
+                                <input type="text" id="txtLoadAttendenceDate" class="form-control hasDatepicker" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <label class="control-label" for="employeeattendance-ea_date"></label>
+                        <div class="input-group">
+                           
+                            <input type="button" value="Send Sms To Employee" style="width:165px;" onclick="SendSmstoEmployee()" class="btn btn-primary" /><h3 style="color:green;" id="Loadsmessage1"></h3>
+
+                        </div>
+                    </div>
+
+                </div>*@
+
+
+                <div class="box-header with-border">
+                    <h3 class="box-title"><i class="fa fa-search"></i>Regularization of Attendence</h3>
+                </div>
+                <div id="EmployeeAttendenceSearch" class="box-body">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group field-empinfosearch-emp_designation_id">
+                                <label for="Country" class="req">School<span class="requird">*</span></label>
+                                <select class="form-control" id="ddlSchoolName" ng-model="ddlSchoolName" valuefield="Id" textfield="Name"></select>
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-sm-4">
+                            <div class="form-group field-empinfosearch-emp_department_id">
+                                <label class="control-label" for="empinfosearch-emp_department_id">Department</label>
+                                <select class="form-control" id="txtDepartment" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" ng-model="txtDepartment"></select>
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group field-empinfosearch-emp_designation_id">
+                                <label class="control-label" for="empinfosearch-emp_designation_id">Designation</label>
+                                <select class="form-control" id="ddlDesgination" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" ng-model="ddlDesgination"></select>
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+
+
+                        <div class="col-sm-4">
+                            <div class="form-group field-empinfosearch-emp_category_id">
+                                <label class="control-label" for="empinfosearch-emp_category_id">Category</label>
+                                <select class="form-control" data-required="true" valuefield="Id" textfield="Name" blankRowValue="0" blankRowText="--Select--" id="ddlStaffType"></select>
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4" @*style="margin-top: 25px;"*@>
+                            <div class="form-group field-empinfosearch-searchinput">
+                                <label class="control-label">Employee Name</label>
+                                <input type="text" id="txtEmployeeName" class="form-control" placeholder="Enter Employee First/Last Name.">
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4" @*style="margin-top: 25px;"*@>
+                            <div class="form-group field-empinfosearch-emp_info_id">
+                                <label class="control-label">Employee ID</label>
+                                <input type="text" id="txtEmployeeId" class="form-control" placeholder="Enter Employee Id" />
+
+                                <div class="help-block"></div>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group field-employeeattendance-ea_date required">
+                                <label class="control-label" for="employeeattendance-ea_date">Date</label><div class="input-group">
+                                    <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+
+                                    <input type="text" id="txtCurrentDate" class="form-control hasDatepicker" readonly="readonly" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="box-footer">
+
+                    <input type="button" value="Search" onclick="searchEmployee()" class="btn btn-primary" />
+                    <a class="btn btn-default" href="#">Reset</a>
+
+
+                </div>
+
+
+
+            </form>
+        </div>
+    </div>
+
+    <form id="take-attendance" action="/hr/employee-attendance/create" method="post">
+        <div class="box-header with-border">
+            <h3 class="box-title"><i class="fa fa-search"></i> Employee Attendance</h3>
+        </div>
+        <div class="box-body table-responsive">
+            <div class="form-group field-employeeattendance-ea_date required">
+                <div class="help-block"></div>
+            </div>            <div class="col-sm-12">
+
+                <div id="attend-grid" class="grid-view">
+                    <table id="example1" class="table table-bordered table-striped tbl20 htmlTempletes">
+                        <thead>
+                            <tr>
+
+                                <th>Employee Code</th>
+                                <th>Name</th>
+                                <th>School</th>
+                                <th>Department</th>
+                                <th>Designation</th>
+                                <th>Attendence</th>
+                                <th>Is Leave</th>
+
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyEmployeeDetails"></tbody>
+                    </table>
+                    <script type="text/html" id="divEmployeeDetailsJTemplte">
+                        {#foreach $T as Datashort}
+                        <tr>
+
+                            <td>
+                                { $T.Datashort.Employeecode}
+                            </td>
+                            <td>
+                                { $T.Datashort.FName}
+                            </td>
+
+                            <td>
+                                { $T.Datashort.School}
+                            </td>
+                            <td>
+                                { $T.Datashort.Department}
+                            </td>
+                            <td>
+                                { $T.Datashort.Designation}
+                            </td>
+                            <td>
+
+                                <select class="form-control dropdown-toggle" desig="{ $T.Datashort.DesigId}" onchange="getAttendenceStatus(this.value,{ $T.Datashort.Id})" empId="{ $T.Datashort.Id}" demp="{ $T.Datashort.departmentID}" code="{ $T.Datashort.Employeecode}" id="ddlAttendence_{ $T.Datashort.Id}">
+                                    <option value="Present">Present</option>
+                                    <option value="Absent">Absent</option>
+                                    @*<option value="Leave">Leave</option>*@
+                                </select>
+
+
+                            </td>
+                            <td class="rahul" id="tdIsLeave_{ $T.Datashort.Id}"></td>
+
+                        </tr>
+                        {#/for}
+                    </script>
+                </div>
+                <p class="text-red" id="spAllAfterAttendence">
+    
+                </p>
+            </div>
+        </div>
+        <div class="box-footer">
+            <input type="button" value="Take Attendence" id="TakeAttendence" onclick="TakeEmployeeAttendence()" class="btn btn-primary btn-create" />
+            <input type="button" value="Change Attendence" id="updateAtttendence" onclick="changeAttendence()" class="btn btn-primary btn-create" />
+            @*<button type="submit" id="save" class="btn btn-primary btn-create">Save</button>*@
+        </div>
+
+    </form>
+
+</section>
+@*for Sucess msg*@
+<div class="alert alert-success centerSuccess" id="divSuccessMsg" style="display:none">
+
+</div>
+
+<!-- DataTables -->
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+<link href="~/css/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet" />
+
+<script src="~/css/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/css/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<link href="~/css/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css" rel="stylesheet" />
+<script src="~/css/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script>
+    $("#loader").fadeIn();
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+    var radius = canvas.height / 2;
+    ctx.translate(radius, radius);
+    radius = radius * 0.90
+    setInterval(drawClock, 1000);
+
+    function drawClock() {
+        drawFace(ctx, radius);
+        drawNumbers(ctx, radius);
+        drawTime(ctx, radius);
+    }
+
+    function drawFace(ctx, radius) {
+        var grad;
+        ctx.beginPath();
+        ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        grad = ctx.createRadialGradient(0, 0, radius * 0.95, 0, 0, radius * 1.05);
+        grad.addColorStop(0, '#3c8dbc');
+        grad.addColorStop(0.5, 'white');
+        grad.addColorStop(1, '#3c8dbc');
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = radius * 0.1;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, 0, radius * 0.1, 0, 2 * Math.PI);
+        ctx.fillStyle = '#3c8dbc';
+        ctx.fill();
+    }
+
+    function drawNumbers(ctx, radius) {
+        var ang;
+        var num;
+        ctx.font = radius * 0.15 + "px arial";
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "center";
+        for (num = 1; num < 13; num++) {
+            ang = num * Math.PI / 6;
+            ctx.rotate(ang);
+            ctx.translate(0, -radius * 0.85);
+            ctx.rotate(-ang);
+            ctx.fillText(num.toString(), 0, 0);
+            ctx.rotate(ang);
+            ctx.translate(0, radius * 0.85);
+            ctx.rotate(-ang);
+        }
+    }
+
+    function drawTime(ctx, radius) {
+        var now = new Date();
+        var hour = now.getHours();
+        var minute = now.getMinutes();
+        var second = now.getSeconds();
+        //hour
+        hour = hour % 12;
+        hour = (hour * Math.PI / 6) +
+            (minute * Math.PI / (6 * 60)) +
+            (second * Math.PI / (360 * 60));
+        drawHand(ctx, hour, radius * 0.5, radius * 0.07);
+        //minute
+        minute = (minute * Math.PI / 30) + (second * Math.PI / (30 * 60));
+        drawHand(ctx, minute, radius * 0.8, radius * 0.07);
+        // second
+        second = (second * Math.PI / 30);
+        drawHand(ctx, second, radius * 0.9, radius * 0.02);
+    }
+
+    function drawHand(ctx, pos, length, width) {
+        ctx.beginPath();
+        ctx.lineWidth = width;
+        ctx.lineCap = "round";
+        ctx.moveTo(0, 0);
+        ctx.rotate(pos);
+        ctx.lineTo(0, -length);
+        ctx.stroke();
+        ctx.rotate(-pos);
+    }
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+//  LOAD 7 DAYS ATTENDENCE AT PAGE LOAD //
+//WHEN PAGE LOAD     
+     
+        var date = new Date();
+        var last = new Date(date.getTime() - (6 * 24 * 60 * 60 * 1000));
+        var day = last.getDate();
+        var month = last.getMonth() + 1;
+        var year = last.getFullYear();
+        date.setUTCDate(last);
+
+
+        var today = new Date();
+        var dd = String(today.getDate()).padStart(2, '0');
+        var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+        var yyyy = today.getFullYear();
+
+        today = mm + '/' + dd + '/' + yyyy;
+
+        //$("#loader").fadeIn();
+
+        //var StartDate1 = today;
+        //var EndDate1 = last; /*new Date(curr.setDate(curr.getDate() - 6));*/
+        //var SchoolID1 = sessionStorage.getItem("SchoolID");
+        //var LoadAttendence =
+        //{
+        //    StartDate: StartDate1,
+        //    EndDate: EndDate1,
+        //    SchoolID: SchoolID1
+        //    //machineNOO: machineNOO
+
+        //}
+
+
+        //var dll = JSON.stringify(LoadAttendence);
+        //$.ajax({
+        //    type: "POST",
+        //    url: "/api/EmployeeAPI/LoadAttendenceEmployee1",
+        //    data: dll,
+        //    contentType: "application/json; charset=utf-8",
+        //    success: function (succ) {
+        //        //var now = moment().format("dddd, MMMM Do, YYYY, h:mm:ss A");
+        //        // Saturday, June 9th, 2007, 5:46:21 PM
+
+        //        $("#divSuccessMsg").fadeIn();
+        //        $("#divSuccessMsg").html("<strong>Success!</strong> " + succ);
+        //        $("#Loadsmessage").html(succ + ": between : " + $("#txtLoadStartDate").val() + " " + " To " + " " + $("#txtLoadEnddate").val());
+        //        setTimeout(function () {
+        //            $("#divSuccessMsg").fadeOut();
+        //            $("#loader").fadeOut();
+        //        }, 2000)
+
+        //    }
+        //});
+
+//WHEN PAGE LOAD ATTENDENCE REMOVED END
+//LOAD END
+
+
+
+
+        //var now = moment().format("dddd, MMMM Do, YYYY, h:mm:ss A");
+        //// Saturday, June 9th, 2007, 5:46:21 PM
+        //$('#AttenencedateTime').append(now);
+       
+    
+        $('#txtLoadEnddate').datepicker('setDate', 'today');
+        $('#txtLoadStartDate').datepicker('setDate', last);
+        $('#txtLoadAttendenceDate').datepicker('setDate', 'today');
+        $('#txtCurrentDate').datepicker('setDate', 'today');
+       // callServiceMethodForDDl("", "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        var loginuser = (sessionStorage.getItem("userId"));
+        var typeuser = sessionStorage.getItem("type");
+        callServiceMethodForDDl(JSON.stringify([loginuser, typeuser]), "/api/Default", "getAllSchoolName", "ddlSchoolName", false, "", "", "", "");
+        //callServiceMethodForDDl("", "/api/EmployeeAPI", "getAllDepartments", "txtDepartment", false, "", "", "", "");
+        //callServiceMethodForDDl("", "/api/EmployeeAPI", "getAllDesignation", "ddlDesgination", false, "", "", "", "");
+        SchoolID = getControlValue("ddlSchoolName");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllDepartmentsBySchoolID", "txtDepartment", false, "", "", "", "");
+        SchoolID = getControlValue("ddlSchoolName");
+        callServiceMethodForDDl(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllDesignationBySchoolID", "ddlDesgination", false, "", "", "", "");
+
+        callServiceMethodForDDl("", "/api/EmployeeAPI", "getAllStaff", "ddlStaffType", false, "", "", "", "");
+        $("#loader").fadeIn();
+        SchoolID = getControlValue("ddlSchoolName");
+
+        callJTemplateServiceMethod(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllEmployeeDetaulsforAttendence",
+            "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+
+        $("#ddlSchoolName").change(function () {
+            var School = getControlValue("ddlSchoolName");
+            if (School != null && (School != -1) && (School != undefined)) {
+                callServiceMethodForDDl(JSON.stringify([School]), "/api/EmployeeAPI", "getAllDepartmentsBySchoolID", "txtDepartment", false, "", "", "", "");
+            }
+        });
+
+
+        $("#ddlSchoolName").change(function () {
+            var School = getControlValue("ddlSchoolName");
+            if (School != null && (School != -1) && (School != undefined)) {
+                callServiceMethodForDDl(JSON.stringify([School]), "/api/EmployeeAPI", "getAllDesignationBySchoolID", "ddlDesgination", false, "", "", "", "");
+            }
+        });
+    });
+    function successMsg(p1, p2, p3, datas) {
+        setTimeout(function () {
+            $('#example1').DataTable({
+                "pageLength": 500,
+                dom: 'lBfrtip',
+                "ordering": false,
+                "bInfo": false,
+                paging: false,
+
+                bRetrieve: true,
+                bDestroy: true,
+        }
+                );
+        }, 1000);
+        $("#loader").fadeOut();
+
+        var employye = {
+
+
+           Employeecode: getControlValue("txtCurrentDate"),
+            SchoolID: getControlValue("ddlSchoolName")
+        }
+        var ddl = JSON.stringify(employye)
+        callServiceMethod(ddl, "/api/EmployeeAPI", "getEmployeeLeavesByDate", false, "", "", false, "", true, successMsg_scs_scs, datas, "", "");
+
+        //callJTemplateServiceMethod(ddl, "/api/EmployeeAPI", "getEmployeeLeavesByDate",
+        // "tbodyEmployeeDfdetails", "divEmployeeDetadfdilsJTemplte", true, successMsg_scs_scs, datas, "", "");
+    }
+
+    function successMsg_scs_scs(p1, p2, p3, datas)
+    {
+        if(datas.length>0)
+            {
+            for (var i = 0; i < p1.length; i++)
+            {
+                for (var j = 0; j < datas.length; j++)
+                {
+                    if (p1[i].Id == datas[j].Id)
+                    {
+                        setControlValue("tdIsLeave_" + datas[j].Id, "<span class='badge bg-yellow'>"+datas[j].leaveCategory+"</span>");
+                        setControlValue("ddlAttendence_" + datas[j].Id, "Leave");
+                      //  $("#ddlAttendence_" + datas[j].Id).attr("disabled", "disabled");
+                    }
+                }
+
+            }
+
+        }
+
+        var employye = {
+
+
+            Employeecode: getControlValue("txtCurrentDate"),
+            SchoolID: getControlValue("ddlSchoolName")
+        }
+        var ddl = JSON.stringify(employye)
+        callServiceMethod(ddl, "/api/EmployeeAPI", "getEmployyeAttendenceCurrentDate", false, "", "", false, "", true, successMsg_scs_scs_scs, p1, "", "");
+
+    }
+
+
+    function successMsg_scs_scs_scs(p1, p2, p3, datas)
+    {
+        if (datas.length > 0) {
+            for (var i = 0; i < p1.length; i++) {
+                for (var j = 0; j < datas.length; j++) {
+                    if (p1[i].Id == datas[j].Id) {
+                        setControlValue("tdIsLeave_" + datas[j].Id, "<span class='badge bg-yellow'>" + datas[j].LeaveType + "</span>");
+
+                        if (datas[j].AttendenceType == "Present") {
+                            setControlValue("tdIsLeave_" + datas[j].Id, "<span class='badge bg-green'>Present</span>");
+                        }
+                        if (datas[j].AttendenceType == "Absent") {
+                            setControlValue("tdIsLeave_" + datas[j].Id, "<span class='badge bg-red'>Absent</span>");
+                        }
+
+                        setControlValue("ddlAttendence_" + datas[j].Id, datas[j].AttendenceType);
+                        $("#ddlAttendence_" + datas[j].Id).attr("disabled", "disabled");
+
+
+
+
+
+                    }
+
+
+                }
+
+            }
+
+
+            if (datas.length == p1.length) {
+                $("#TakeAttendence").fadeOut();
+                $("#spAllAfterAttendence").html(" <i class='fa fa-warning'></i> <span> Today's Attendence has been taken!</span>");
+            }
+            else {
+                $("#TakeAttendence").fadeIn();
+                $("#spAllAfterAttendence").html("");
+            }
+        }
+
+
+    }
+    //load one day attendence
+
+
+
+    function LoadAllAttendence()
+    {
+        //var SchoolID = sessionStorage.getItem("SchoolID");
+        //$.ajax({
+        //    type: "POST",
+        //    url: "/api/EmployeeAPI/GetMachineAssigntoSchool",
+        //    data: JSON.stringify([SchoolID]),
+        //    contentType: "application/json; charset=utf-8",
+        //    success: function (succ) {
+        //    if (succ.machineNOO.length != null) {
+        //        var machineNOO = new Array();
+        //            for (var i = 0; i < succ.machineNOO.length; i++)
+        //            {
+
+        //                machineNOO[i] = succ.machineNOO[i];
+
+        //              }
+               
+       
+        
+               
+        /*  var curr = new Date;*/ // get current date
+        $("#loader").fadeIn();
+
+        var StartDate1 = $("#txtLoadEnddate").val(); /*new Date(curr.setDate(curr.getDate() + 1));*/
+        var EndDate1 = $("#txtLoadStartDate").val(); /*new Date(curr.setDate(curr.getDate() - 6));*/
+           var SchoolID1 = sessionStorage.getItem("SchoolID");
+           var LoadAttendence =
+        {
+            StartDate: StartDate1,
+            EndDate: EndDate1,
+            SchoolID: SchoolID1
+            //machineNOO: machineNOO
+
+        }
+
+
+        var dll = JSON.stringify(LoadAttendence);
+        $.ajax({
+            type: "POST",
+            url: "/api/EmployeeAPI/LoadAttendenceEmployee1",
+            data: dll,
+            contentType: "application/json; charset=utf-8",
+            success: function (succ)
+            {
+                 //var now = moment().format("dddd, MMMM Do, YYYY, h:mm:ss A");
+                // Saturday, June 9th, 2007, 5:46:21 PM
+                 
+                $("#divSuccessMsg").fadeIn();
+                $("#divSuccessMsg").html("<strong>Success!</strong> " + succ);
+                $("#Loadsmessage").html(succ + ": between : " + $("#txtLoadStartDate").val()+" "+ " To "+" " + $("#txtLoadEnddate").val() );
+                setTimeout(function () {
+                    $("#divSuccessMsg").fadeOut();
+                    $("#loader").fadeOut();
+                }, 2000)
+
+
+
+
+                SchoolID = getControlValue("ddlSchoolName");
+
+                callJTemplateServiceMethod(JSON.stringify([SchoolID]), "/api/EmployeeAPI", "getAllEmployeeDetaulsforAttendence",
+                    "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, successMsg, "", "", "");
+
+
+
+            }
+        });
+
+        }
+       
+
+     
+
+   
+
+    function searchEmployee()
+    {
+        var employye = {
+
+            Employeecode: getControlValue("txtEmployeeId"),
+            Department: getControlValue("txtDepartment"),
+            Designation: getControlValue("ddlDesgination"),
+            UserType: getControlValue("ddlStaffType"),
+            FName: getControlValue("txtEmployeeName"),
+            School: getControlValue("ddlSchoolName")
+
+     }
+
+        var ddl = JSON.stringify(employye)
+
+        callJTemplateServiceMethod(ddl, "/api/EmployeeAPI", "searchEmployeeForAttendence",
+              "tbodyEmployeeDetails", "divEmployeeDetailsJTemplte", true, showSearchResult, "", "", "");
+
+        // callServiceMethod(ddl, "/api/EmployeeAPI", "searchEmployeeForSms", false, "", "", false, "", false, "", "", "", "");
+    }
+
+    function showSearchResult(p1, p2, p3, datas) {
+        $("#divShowEmployees").removeAttr("style");
+        setTimeout(function () {
+            $('#example1').DataTable({
+                "pageLength": 500,
+                dom: 'lBfrtip',
+                "ordering": false,
+                "bInfo": false,
+                paging: false,
+
+                bRetrieve: true,
+                bDestroy: true,
+            });
+        }, 1000);
+
+        var employye = {
+
+
+            Employeecode: getControlValue("txtCurrentDate"),
+            SchoolID: getControlValue("ddlSchoolName")
+
+        }
+        var ddl = JSON.stringify(employye)
+        callServiceMethod(ddl, "/api/EmployeeAPI", "getEmployeeLeavesByDate", false, "", "", false, "", true, successMsg_scs_scs, datas, "", "");
+    }
+
+
+    function TakeEmployeeAttendence() {
+        $("#loader").fadeIn();
+        var attend = new Array();
+        $("#tbodyEmployeeDetails td select").each(function () {
+
+            var LeaveTypee;
+            if ($(this).val() == "Leave") {
+                LeaveTypee = $(this).closest('tr').find('.rahul').text();
+            }
+            else {
+                LeaveTypee = "";
+            }
+            var attendence = {
+                empID: $(this).attr("empid"),
+                DesigId: $(this).attr("desig"),
+                DepId: $(this).attr("demp"),
+                AttendenceType: $(this).val(),
+                DateCurrent: getControlValue("txtCurrentDate"),
+                LeaveType: LeaveTypee,
+                SchoolID: getControlValue("ddlSchoolName")
+
+            }
+            attend.push(attendence);
+
+            // alert($(this).val())
+        })
+
+        var ddl = JSON.stringify(attend)
+        callServiceMethod(ddl, "/api/EmployeeAPI", "TakeEmployeeAttendence", false, "", "", false, "", true, TakeEmployeeAttendence_scs, "", "", "");
+        //var employye = {
+    }
+
+    function TakeEmployeeAttendence_scs(p1, p2, p3, datas) {
+        $("#loader").fadeOut();
+       // alert(datas);
+
+
+        swal({
+            title: datas,
+            text: "",
+            icon: "success",
+            button: "Ok!",
+        });
+
+
+        setTimeout(function () {
+            location.reload();
+
+        }, 2000)
+    }
+
+
+    function changeAttendence()
+    {
+        $("#tbodyEmployeeDetails td select").each(function () {
+            if ($(this).val() == "Leave")
+            {
+                $(this).removeAttr("disabled");
+            }
+            else {
+
+                $(this).removeAttr("disabled");
+            }
+        });
+        $("#TakeAttendence").fadeIn();
+        $("#spAllAfterAttendence").html("");
+
+    }
+
+    function getAttendenceStatus(val,Id) {
+        if (val == "Present") {
+            $("#tdIsLeave_" + Id).find("span").attr("style","display:none");
+        }
+        if (val == "Absent") {
+            $("#tdIsLeave_" + Id).find("span").attr("style", "display:none");
+        }
+        if (val == "Leave") {
+            $("#tdIsLeave_" + Id).find("span").removeAttr("style");
+        }
+    }
+</script>
+<style type="text/css">
+    .oddTr {
+        background-color: #dddddd;
+    }
+
+    /*.htmlTempletes tbody tr:nth-child(2n+1) {
+        background-color: #e1e4e8;
+    }*/
+    #example1 td img {
+        width: 35px;
+        height: 35px;
+        border-radius: 100%;
+    }
+
+
+    #example1 {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #example1 td, #customers th {
+            border: 1px solid #ddd;
+            /*padding: 8px;*/
+        }
+
+        #example1 tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #example1 tr:hover {
+            background-color: #ddd;
+        }
+
+        #example1 th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #367fa9;
+            color: white;
+        }
+</style>
